@@ -9,7 +9,8 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 |---|---|---|
 | 0 | Dựng khung | xong |
 | 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
-| 2 | Thế giới vô hạn, biome, hang động, hầm mỏ, ánh sáng | chưa làm — đã có một phần từ "1b" cũ (xem ghi chú) |
+| 2a | Thế giới vô hạn và biome | chưa làm |
+| 2b | Hang động, hầm mỏ, ánh sáng, block mới | chưa làm — đã có một phần từ "1b" cũ (xem ghi chú) |
 | 3 | Người chơi và tương tác block | chưa làm |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
@@ -20,7 +21,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 10 | (Tùy chọn) Vực Lửa | chỉ làm khi người dùng yêu cầu |
 | 11 | (Tùy chọn) Cõi Hư Không | chỉ làm khi người dùng yêu cầu |
 
-### Ghi chú chuyển hướng: phần "1b" cũ dùng lại được gì cho Giai đoạn 2
+### Ghi chú chuyển hướng: phần "1b" cũ dùng lại được gì cho Giai đoạn 2a/2b
 
 Dùng lại gần như nguyên: simplex noise 3D; thuật toán hang sợi mì/phô mai và
 dung nham đáy; thuật toán ánh sáng (cột trời + flood fill, tính lại theo vùng,
@@ -33,7 +34,7 @@ Phải làm lại hoặc sửa:
   id lúc này không mất gì.
 - Một block đường ray duy nhất, tự chọn thẳng/cong/ngã ba/ngã tư theo ray bên cạnh.
 - Hàng rào có thanh nối, va chạm cao 1.5; mạng nhện cứng 6, rơi sợi tơ;
-  quặng sắt rơi sắt thô; quặng sắt y < 64, kim cương y < 16, đá sâu dưới y = 16.
+  quặng sắt rơi sắt thô; quặng sắt y < 64, kim cương y < 16, đá sâu dưới y = 8.
 - World theo bảng băm chunk (cx, cz) thay cho mảng 16x16 cố định; ánh sáng lưu
   theo chunk thay cho một mảng toàn bản đồ.
 - Mọi bước sinh (hang, cửa hang, cây, hầm mỏ) phải sinh được độc lập từng chunk:

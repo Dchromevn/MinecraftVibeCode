@@ -6,7 +6,7 @@ Làm lần lượt từng giai đoạn, mỗi lần một giai đoạn, dừng l
 
 > GHI CHÚ CHUYỂN HƯỚNG: phiên bản trước của file này mô tả game PvP theo trận
 > (bản đồ 256x256 cố định, vòng bo). Dự án đã chuyển sang SINH TỒN THẾ GIỚI MỞ.
-> Giai đoạn 0 và 1 đã làm xong theo bản cũ và được giữ lại; Giai đoạn 2 sẽ
+> Giai đoạn 0 và 1 đã làm xong theo bản cũ và được giữ lại; Giai đoạn 2a sẽ
 > chuyển thế giới cố định thành thế giới vô hạn. Mọi thứ về trận đấu, vòng bo,
 > sảnh chờ, phòng chơi, thùng tiếp tế đã bị BỎ.
 
@@ -55,7 +55,8 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 |---|---|---|
 | 0 | Dựng khung | đã xong |
 | 1 | Thế giới voxel cơ bản (bản cố định) | đã xong |
-| 2 | Thế giới vô hạn, biome, hang động, hầm mỏ, ánh sáng | |
+| 2a | Thế giới vô hạn và biome | |
+| 2b | Hang động, hầm mỏ, ánh sáng, block mới | |
 | 3 | Người chơi và tương tác block | |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | |
 | 5 | Mạng nhiều người và lưu thế giới | |
@@ -97,7 +98,8 @@ Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển ti
 | Đại dương | nước, đáy cát và sỏi | không |
 
 Dưới lòng đất:
-- Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá nền.
+- Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá sâu (y < 8) → đá nền.
+  Quặng chỉ thay ô đá thường, nên kim cương nằm ở y = 8–15.
 - Quặng theo cụm: than (y < 100, cụm 8), sắt (y < 64, cụm 5),
   kim cương (y < 16, cụm 3).
 - Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
@@ -146,7 +148,7 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 31 | lúa mì | 0 | – | hạt (non) / lúa + hạt (chín) | 8 giai đoạn lớn |
 | 32 | cây non | 0 | – | cây non | lớn thành cây sau 5–10 phút |
 | 33 | giường | 0.3 | – | giường | dài 2 block, xem 2.7 |
-| 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 16 |
+| 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 8 |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
@@ -439,15 +441,15 @@ Giữ nguyên. Nếu `.gitignore` chưa có `server/data/` thì thêm vào.
 ### Giai đoạn 1 — Thế giới voxel cơ bản (ĐÃ XONG, bản cố định)
 
 Đã có: chunk, bảng block id 0–15, sinh địa hình bản đồ cố định, texture atlas,
-mesh theo chunk, camera bay, nhập texture. Giai đoạn 2 sẽ thay phần bản đồ cố
+mesh theo chunk, camera bay, nhập texture. Giai đoạn 2a sẽ thay phần bản đồ cố
 định.
 
 ---
 
-### Giai đoạn 2 — Thế giới vô hạn, biome, hang động, hầm mỏ, ánh sáng
+### Giai đoạn 2a — Thế giới vô hạn và biome
 
 Chỉ ở client, chưa có mạng. Thiết kế sao cho Giai đoạn 5 chuyển việc sinh và
-lưu chunk lên server dễ dàng.
+lưu chunk lên server dễ dàng. Hang, hầm mỏ, ánh sáng để sang 2b.
 
 THẾ GIỚI VÔ HẠN
 - Bỏ giới hạn 256x256. `World` quản lý chunk theo bảng băm tọa độ (cx, cz).
@@ -457,40 +459,68 @@ THẾ GIỚI VÔ HẠN
   bán kính + 2.
 - Chunk đã bị sửa thì giữ thay đổi trong bộ nhớ khi bị gỡ (Giai đoạn 5 sẽ lưu
   xuống đĩa ở server); quay lại phải còn nguyên.
-- Sinh địa hình, tính ánh sáng và dựng mesh trong Web Worker (có thể nhiều
-  worker), không làm khựng luồng chính.
+- Sinh địa hình và dựng mesh trong Web Worker (có thể nhiều worker), không làm
+  khựng luồng chính.
+- Mọi bước sinh xác định theo seed + tọa độ, sinh được độc lập từng chunk.
+- Debug tạm (chỉ để kiểm tra, Giai đoạn 3 thay bằng tương tác thật): với camera
+  bay, chuột trái phá block đang nhắm, chuột phải đặt block.
 
-BIOME, HANG, QUẶNG
+BIOME, ĐỊA HÌNH, QUẶNG
 - Biome theo bảng 2.1, chuyển tiếp mượt về độ cao, không có vách dựng đứng
-  vô lý ở ranh giới.
+  vô lý ở ranh giới. Mực nước biển 62, đại dương và hồ.
 - Cây sinh xuyên ranh giới chunk đúng (cây ở mép chunk không bị cụt lá):
   quyết định vị trí cây theo seed + tọa độ, chunk nào chứa phần lá thì tự
   đặt phần đó.
-- Hang "sợi mì" và "phô mai", hồ dung nham đáy sâu, đá sâu dưới y = 16.
-- Nếu trước đó đã làm hang động thì giữ lại, chỉ chỉnh cho khớp đặc tả.
+- Quặng theo cụm (mục 2.1), sỏi, đá sâu dưới y = 8, đá nền y = 0.
+- Nước là block tĩnh, vẽ bán trong suốt, mặt nước thấp hơn 1/8 block, không vẽ
+  mặt tiếp giáp giữa hai block nước. Mô phỏng chảy làm ở Giai đoạn 4.
+
+BLOCK CẦN CHO ĐỊA HÌNH
+- Đánh số lại block theo bảng 2.2 (id 0–15 giữ nguyên). Thêm ở giai đoạn này:
+  sỏi (16), nước (17), sa thạch (20), tuyết phủ (21), cây non (32, chỉ hình ảnh),
+  đá sâu (34). Các block còn lại làm ở 2b.
+- Cập nhật `scripts/texture-map.json` cho các block này và chạy lại script nhập.
+
+NGHIỆM THU
+- Bay thẳng một hướng 2 phút: địa hình sinh liên tục, không khựng hình rõ rệt,
+  bộ nhớ không tăng mãi.
+- Bay xa rồi quay lại: block đã sửa vẫn còn.
+- Thấy ít nhất 4 biome khác nhau và đại dương; ranh giới biome không có vách vô lý.
+- Cây ở mép chunk không bị cụt.
+- Cùng seed cho ra cùng thế giới.
+- FPS 60 với tầm nhìn 8 chunk trên laptop thông thường.
+
+---
+
+### Giai đoạn 2b — Hang động, hầm mỏ, ánh sáng, block mới
+
+Chỉ ở client. Dùng lại thuật toán hang, hầm mỏ, ánh sáng đã làm trên bản đồ
+cố định (xem `PROGRESS.md`), chuyển sang sinh theo từng chunk.
+
+HANG ĐỘNG
+- Hang "sợi mì" và "phô mai" theo mục 2.1, hồ dung nham dưới y = 12, quặng lộ
+  trên vách hang. Không đục đá nền, không đục ngay dưới đáy biển/hồ.
+- Cửa hang lộ ra mặt đất: lập kế hoạch theo vùng (seed + tọa độ vùng), mỗi chunk
+  chỉ đục phần thuộc về nó.
 
 HẦM MỎ BỎ HOANG
-- Theo mục 2.9. Rương trong hầm mỏ tạm thời chỉ cần tồn tại (Giai đoạn 4 mới
-  có hệ thống vật phẩm để điền đồ).
-
-CHẤT LỎNG (tĩnh)
-- Đại dương, hồ, dung nham là block tĩnh ở giai đoạn này; mô phỏng chảy làm ở
-  Giai đoạn 4. Mặt nước vẽ bán trong suốt, thấp hơn 1/8 block, không vẽ mặt
-  tiếp giáp giữa hai block nước.
+- Theo mục 2.9, lập kế hoạch theo vùng, liền mạch qua nhiều chunk. Rương trong
+  hầm mỏ tạm thời chỉ cần tồn tại (Giai đoạn 4 mới điền đồ).
 
 ÁNH SÁNG
 - Hai kênh 0–15: ánh sáng trời (lan thẳng xuống, giảm 1 mỗi bước ngang) và
   ánh sáng block (đuốc 14, dung nham 15, lò đang cháy 13), lan bằng flood fill.
-- Lưu ánh sáng theo chunk; khi đặt/phá block thì cập nhật cục bộ, kể cả xuyên
-  chunk.
+- Lưu ánh sáng theo chunk, tính trong Web Worker; khi đặt/phá block thì cập
+  nhật cục bộ, kể cả xuyên chunk.
 - Mesh đọc ánh sáng để tô màu đỉnh, giữ ambient occlusion.
 - Ánh sáng trời nhân với hệ số độ sáng ban ngày (cố định 1.0 ở giai đoạn này;
-  Giai đoạn 7 mới chạy đồng hồ ngày đêm).
-- Thêm block đuốc để kiểm tra (đặt bằng phím số tạm thời).
+  Giai đoạn 7 mới chạy đồng hồ ngày đêm), đổi bằng uniform trong shader.
+- Đặt/phá đuốc bằng công cụ debug của 2a để kiểm tra.
+- Ẩn đoạn chunk bị che khuất (hang) để giữ FPS.
 
-BLOCK MỚI
-- Thêm vào `/shared/blocks.ts` toàn bộ block id 16–34 (chỉ dữ liệu và hình ảnh;
-  hành vi đặc biệt như cửa, giường, lò, cây lớn làm ở Giai đoạn 4 và 7).
+BLOCK MỚI CÒN LẠI
+- Thêm các block id còn thiếu trong 16–34 (chỉ dữ liệu và hình ảnh; hành vi
+  đặc biệt như cửa, giường, lò, cây lớn làm ở Giai đoạn 4 và 7).
 - Cập nhật `scripts/texture-map.json` theo mục 3.2 và chạy lại script nhập.
 - Hình dạng đặc biệt: hàng rào (cột + thanh nối), đường ray (tấm phẳng sát
   sàn, tự chọn thẳng/cong theo ray bên cạnh), đuốc (que nhỏ), cửa, thang (tấm
@@ -498,15 +528,13 @@ BLOCK MỚI
   (cao 9/16).
 
 NGHIỆM THU
-- Bay thẳng một hướng 2 phút: địa hình sinh liên tục, không khựng hình rõ rệt,
-  bộ nhớ không tăng mãi.
-- Bay xa rồi quay lại: block đã sửa vẫn còn.
-- Thấy ít nhất 4 biome khác nhau và đại dương.
-- Xuống lòng đất: hang nối nhau, có hồ dung nham ở đáy, tìm được hầm mỏ có
-  đường ray, khung gỗ, mạng nhện, rương.
-- Trong hang thì tối, đặt đuốc thì sáng vùng xung quanh; phá đuốc thì tối lại.
+- Xuống lòng đất: hang nối nhau, không có hang cụt vuông vức, có hồ dung nham
+  ở đáy; hang và hầm mỏ liền mạch qua ranh giới chunk.
+- Tìm được hầm mỏ có đường ray (có đoạn cong/ngã rẽ), khung gỗ, mạng nhện, rương.
+- Trong hang thì tối, đặt đuốc thì sáng vùng xung quanh; phá đuốc thì tối lại,
+  kể cả khi đuốc ở sát ranh giới chunk.
 - Cùng seed cho ra cùng thế giới.
-- FPS 60 với tầm nhìn 8 chunk trên laptop thông thường.
+- FPS không giảm quá 10% so với 2a, tầm nhìn 8 chunk.
 
 ---
 

@@ -1,6 +1,6 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
-  title: "Voxel PvP",
+  title: "Voxel Survival",
   stage: "Giai đoạn 1b — hang động, hầm mỏ, ánh sáng",
   clickToControl:
     "Bấm vào màn hình để điều khiển\nWASD di chuyển · Space lên · Shift xuống · Ctrl bay nhanh · Esc thả chuột",

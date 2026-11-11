@@ -33,7 +33,8 @@ Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển ti
 | Đại dương | nước, đáy cát và sỏi | không |
 
 Dưới lòng đất:
-- Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá nền.
+- Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá sâu (y < 8) → đá nền.
+  Quặng chỉ thay ô đá thường, nên kim cương nằm ở y = 8–15.
 - Quặng theo cụm: than (y < 100, cụm 8), sắt (y < 64, cụm 5),
   kim cương (y < 16, cụm 3).
 - Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
@@ -82,7 +83,7 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 31 | lúa mì | 0 | – | hạt (non) / lúa + hạt (chín) | 8 giai đoạn lớn |
 | 32 | cây non | 0 | – | cây non | lớn thành cây sau 5–10 phút |
 | 33 | giường | 0.3 | – | giường | dài 2 block, xem 2.7 |
-| 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 16 |
+| 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 8 |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
