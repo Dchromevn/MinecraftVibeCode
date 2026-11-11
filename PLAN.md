@@ -9,6 +9,11 @@ Làm lần lượt từng giai đoạn, mỗi lần một giai đoạn, dừng l
 > Giai đoạn 0 và 1 đã làm xong theo bản cũ và được giữ lại; Giai đoạn 2a sẽ
 > chuyển thế giới cố định thành thế giới vô hạn. Mọi thứ về trận đấu, vòng bo,
 > sảnh chờ, phòng chơi, thùng tiếp tế đã bị BỎ.
+>
+> GHI CHÚ 2026-11-12: thêm quặng vàng (có bản đá sâu) và quặng ngọc lục bảo,
+> cấp đồ vàng, giáp vàng, táo vàng; than/sắt dày gấp đôi; hầm mỏ dày hơn
+> (vùng 160x160, tối đa 70 đoạn, thử lại vị trí tâm). Phần sinh thế giới làm
+> trong 2b; vật phẩm, chế tạo, nung, ăn làm ở Giai đoạn 4 như các món khác.
 
 ---
 
@@ -116,9 +121,14 @@ Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền m�
 
 Dưới lòng đất:
 - Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá sâu (y < 8) → đá nền.
-  Quặng chỉ thay ô đá thường, nên kim cương nằm ở y = 8–15.
-- Quặng theo cụm: than (y < 100, cụm 8), sắt (y < 64, cụm 5),
-  kim cương (y < 16, cụm 3).
+  Quặng chỉ thay ô đá thường (riêng quặng vàng có thêm bản trong đá sâu), nên
+  kim cương nằm ở y = 8–15.
+- Quặng theo cụm, kèm số lần thử mỗi chunk: than (y < 100, cụm 13, 20 lần),
+  sắt (y < 64, cụm 9, 15 lần), vàng (y < 32, cụm 4–8, 2 lần),
+  kim cương (y < 16, cụm 3, 3 lần). Mục tiêu: đi trong hang, mỗi chunk thấy
+  khoảng 4–5 khối than và 4 khối sắt lộ trên vách.
+- Quặng ngọc lục bảo: chỉ trong biome núi, y < 100, từng khối lẻ (không theo
+  cụm), 3–8 lần thử mỗi chunk núi.
 - Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
 - Hang lớn dạng "phô mai": noise 3D tần số thấp, hiếm hơn.
 - Hang không đục đá nền; có cửa hang lộ ra mặt đất.
@@ -173,6 +183,9 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 32 | cây non | 0 | – | cây non | lớn thành cây sau 5–10 phút |
 | 33 | giường | 0.3 | – | giường | dài 2 block, xem 2.7 |
 | 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 8 |
+| 35 | quặng vàng | 15 | cuốc sắt+ | vàng thô | nung thành thỏi vàng |
+| 36 | quặng vàng đá sâu | 20 | cuốc sắt+ | vàng thô | bản trong đá sâu (y < 8) |
+| 37 | quặng ngọc lục bảo | 15 | cuốc sắt+ | ngọc lục bảo | chỉ ở núi, từng khối lẻ |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
@@ -185,14 +198,19 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | đá | 130 | x4 | 5 |
 | sắt | 250 | x6 | 6 |
 | kim cương | 1500 | x8 | 7 |
+| vàng | 32 | x12 | 4 |
+
+- Cấp vàng đào rất nhanh nhưng mau hỏng, và chỉ đào được những gì cuốc gỗ đào
+  được: quặng sắt, vàng, kim cương, ngọc lục bảo đào bằng cuốc vàng không rơi gì.
 
 - Loại công cụ: cuốc (đá, quặng), rìu (gỗ), xẻng (đất, cát, sỏi), kiếm,
   cuốc đất (biến đất/cỏ thành đất cày).
 - Hệ số tốc độ chỉ áp dụng khi dùng đúng loại công cụ.
 - Tay không: sát thương 1. Rìu: sát thương bằng kiếm cùng cấp trừ 1.
-- Giáp 4 món, cấp da, sắt, kim cương:
+- Giáp 4 món, cấp da, sắt, vàng, kim cương:
   da: mũ 1, áo 3, quần 2, giày 1 (tổng 7), độ bền 80;
   sắt: 2, 6, 5, 2 (tổng 15), độ bền 200;
+  vàng: 2, 5, 3, 1 (tổng 11), độ bền 110;
   kim cương: 3, 8, 6, 3 (tổng 20), độ bền 450.
   Mỗi điểm giáp giảm 4% sát thương.
 - Cung: độ bền 384. Tên xếp chồng 64.
@@ -206,16 +224,17 @@ Làm được mọi lúc (trong túi đồ):
 - 4 ván gỗ → 1 bàn chế tạo
 - 1 than + 1 que → 4 đuốc
 
-Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / kim cương):
+Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương):
 - cuốc, rìu: 3 X + 2 que · xẻng: 1 X + 2 que · kiếm: 2 X + 1 que
 - cuốc đất: 2 X + 2 que
-- mũ 5 X · áo 8 X · quần 7 X · giày 4 X (da / sắt / kim cương)
+- mũ 5 X · áo 8 X · quần 7 X · giày 4 X (da / sắt / vàng / kim cương)
 - cung: 3 que + 3 sợi tơ
 - 4 mũi tên: 1 que + 1 đá lửa + 1 lông gà
 - rương: 8 ván gỗ · lò nung: 8 đá cuội
 - 3 thang: 7 que · 3 cửa gỗ: 6 ván gỗ · 3 hàng rào: 4 que + 2 ván gỗ
 - 16 đường ray: 6 thỏi sắt + 1 que
 - bánh mì: 3 lúa mì
+- táo vàng: 1 táo + 8 thỏi vàng
 - giường: 3 len + 3 ván gỗ
 - sa thạch: 4 cát
 
@@ -226,7 +245,7 @@ liệu thì sáng, thiếu thì mờ.
 
 - 3 ô: nguyên liệu, nhiên liệu, kết quả. Mỗi món nung mất 10 giây.
 - Nhiên liệu: than nung được 8 món; thân gỗ / ván gỗ 1.5 món; que 0.5 món.
-- Công thức nung: sắt thô → thỏi sắt; cát → kính; đá cuội → đá;
+- Công thức nung: sắt thô → thỏi sắt; vàng thô → thỏi vàng; cát → kính; đá cuội → đá;
   thịt bò/lợn/gà sống → chín.
 - Lò tiếp tục chạy khi không có người mở (server xử lý).
 
@@ -245,7 +264,7 @@ liệu thì sáng, thiếu thì mờ.
 - Đói giảm theo hoạt động. Đói ≥ 18: hồi 1 máu mỗi 4 giây. Đói = 0: mất 1 máu
   mỗi 4 giây (không chết vì đói khi máu còn 1). Đói ≤ 6: không chạy nhanh được.
 - Ăn: giữ chuột phải 1.6 giây. Táo +4, bánh mì +5, thịt sống +2–3,
-  thịt chín +6–8.
+  thịt chín +6–8. Táo vàng: +4 đói và hồi 4 máu trong 5 giây.
 - Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
@@ -292,17 +311,21 @@ liệu thì sáng, thiếu thì mờ.
 
 ### 2.9 Hầm mỏ bỏ hoang
 
-- Khoảng 1 hệ thống mỗi vùng 256x256 block, ở độ sâu y = 20–50.
+- Khoảng 1 hệ thống mỗi vùng 160x160 block, ở độ sâu y = 20–50.
   Vị trí quyết định bằng seed + tọa độ vùng để sinh được theo từng chunk.
+  Nếu tâm rơi vào biển hoặc đất không đủ dày thì thử lại tối đa 4 vị trí khác
+  trong vùng rồi mới bỏ. Mục tiêu: ít nhất 3 hầm mỏ trong bán kính 300 block
+  quanh điểm xuất phát. Hệ thống của hai vùng kề nhau có thể cắt qua nhau.
 - Một phòng trung tâm bằng đất, từ đó tỏa ra hành lang 3x3 thẳng theo trục,
   dài 8–25 block, rẽ nhánh và giao nhau, có đoạn dốc lên xuống giữa các tầng.
-  Tối đa khoảng 40 đoạn mỗi hệ thống.
+  Tối đa khoảng 70 đoạn mỗi hệ thống.
 - Cứ 4–5 block một khung chống: hai cột hàng rào gỗ và một xà ván gỗ ngang.
 - Đường ray trên sàn, thiếu ngẫu nhiên khoảng 30%.
 - Mạng nhện rải rác, dày hơn ở ngã rẽ. Đuốc thỉnh thoảng trên cột.
 - Khi hành lang cắt qua hang: bắc sàn ván gỗ qua khoảng trống.
 - Rương ở cuối một số nhánh cụt với đồ: bánh mì, than, sắt thô, đường ray,
-  hạt giống, thỉnh thoảng kim cương.
+  hạt giống, vàng thô, thỏi vàng, ngọc lục bảo, thỉnh thoảng kim cương
+  (bảng tỉ lệ đặt trong `/shared`).
 - Hầm mỏ phải liền mạch khi vắt qua nhiều chunk: lập kế hoạch toàn bộ hệ thống
   theo vùng, rồi mỗi chunk chỉ đặt những block thuộc về nó.
 
@@ -326,8 +349,8 @@ liệu thì sáng, thiếu thì mờ.
   `/shared/structures`, đặt khớp độ cao mặt đất, san nền bằng đất bên dưới.
 - Dân làng: 20 máu, đi lang thang trong làng ban ngày, vào nhà ban đêm.
   Chuột phải để mở giao diện trao đổi: 2–4 giao dịch cố định theo nghề
-  (nông dân, thợ rèn, thủ thư), tiền tệ là ngọc lục bảo (vật phẩm mới,
-  không cần quặng; lấy được từ rương làng và bán đồ cho dân làng).
+  (nông dân, thợ rèn, thủ thư), tiền tệ là ngọc lục bảo (đào quặng ngọc lục
+  bảo ở núi, tìm trong rương làng và rương hầm mỏ, hoặc bán đồ cho dân làng).
 
 ### 2.12 Điều khiển
 
@@ -408,6 +431,9 @@ Nguyên tắc chung cho script nhập:
 | farmland.png / farmland_wet.png | farming_mcl_farming/farming_soil.png / farming_soil_wet.png |
 | wheat_0 … wheat_7.png | farming_mcl_farming/mcl_farming_wheat_stage_0.png … _7.png |
 | deepslate.png / deepslate_top.png | mcl_deepslate/mcl_deepslate.png / mcl_deepslate_top.png |
+| ore_gold.png | default_mcl_core/minerals_ores/default_mineral_gold.png (ghép lên đá như các quặng khác) |
+| ore_gold_deep.png | mcl_deepslate/mcl_deepslate_gold_ore.png |
+| ore_emerald.png | default_mcl_core/minerals_ores/mcl_core_emerald_ore.png |
 | obsidian.png | default_mcl_core/stone/default_obsidian.png |
 | bed_*.png | beds_mcl_beds/ — chọn bộ màu đỏ (red) cho mặt trên, bên, đầu, chân |
 | sapling.png | tìm trong default_mcl_core/trees hoặc plants |
@@ -416,17 +442,20 @@ Nguyên tắc chung cho script nhập:
 
 | Đích | Nguồn |
 |---|---|
-| {wood,stone,iron,diamond}_{pickaxe,axe,shovel,sword}.png | default_mcl_core/tools/default_tool_{wood,stone,steel,diamond}{pick,axe,shovel,sword}.png |
+| {wood,stone,iron,gold,diamond}_{pickaxe,axe,shovel,sword}.png | default_mcl_core/tools/default_tool_{wood,stone,steel,gold,diamond}{pick,axe,shovel,sword}.png |
 | {…}_hoe.png | tìm trong farming_mcl_farming (cuốc đất) |
 | stick.png | default_mcl_core/default_stick.png |
 | coal.png | default_mcl_core/minerals_ores/default_coal_lump.png |
 | raw_iron.png | default_mcl_core/minerals_ores/mcl_raw_ores_raw_iron.png |
 | iron_ingot.png | default_mcl_core/minerals_ores/default_steel_ingot.png |
 | diamond.png | default_mcl_core/minerals_ores/default_diamond.png |
+| raw_gold.png / gold_ingot.png | default_mcl_core/minerals_ores/mcl_raw_ores_raw_gold.png / default_gold_ingot.png |
+| emerald.png | default_mcl_core/minerals_ores/mcl_core_emerald.png |
+| golden_apple.png | default_mcl_core/plants/mcl_core_apple_golden.png |
 | apple.png | default_mcl_core/plants/default_apple.png |
 | bread.png / seeds.png | farming_mcl_farming/farming_bread.png / mcl_farming_wheat_seeds.png |
 | wheat.png | tìm trong farming_mcl_farming |
-| {leather,iron,diamond}_{helmet,chestplate,leggings,boots}.png | mcl_armor/mcl_armor_inv_{helmet,chestplate,leggings,boots}_{leather,iron,diamond}.png |
+| {leather,iron,gold,diamond}_{helmet,chestplate,leggings,boots}.png | mcl_armor/mcl_armor_inv_{helmet,chestplate,leggings,boots}_{leather,iron,gold,diamond}.png |
 | bow.png, bow_pull_0..2.png | mcl_bows/mcl_bows_bow.png, mcl_bows_bow_0.png, _1, _2 |
 | arrow.png | mcl_bows/mcl_bows_arrow_inv.png |
 | beef_raw / beef_cooked.png | mcl_mobitems/mcl_mobitems_beef_raw.png / _beef_cooked.png |
@@ -434,7 +463,7 @@ Nguyên tắc chung cho script nhập:
 | pork_raw / pork_cooked, rotten_flesh, string, feather, mutton… | tìm trong mcl_mobitems |
 | bone.png / leather.png | mcl_mobitems/mcl_mobitems_bone.png / mcl_mobitems_leather.png |
 | door.png | doors_mcl_doors/doors_door_wood.png |
-| flint, emerald, shears, wool | tìm trong default_mcl_core, mcl_core, wool_mcl_wool |
+| flint, shears, wool | tìm trong default_mcl_core, mcl_core, wool_mcl_wool |
 
 Chú ý tên nguồn dùng "steel" cho cấp sắt. Vật phẩm dạng block thì vẽ khối 3D
 nhỏ từ texture block.
@@ -535,6 +564,7 @@ HANG ĐỘNG
   chỉ đục phần thuộc về nó.
 - Hồ ngầm, mạch nước trong hang, mạch dung nham (dưới y = 30) theo mục 2.1.
   Không đục hang ngay dưới đáy biển, sông, hồ.
+- Quặng vàng (cả bản đá sâu) và quặng ngọc lục bảo ở núi theo mục 2.1.
 
 HẦM MỎ BỎ HOANG
 - Theo mục 2.9, lập kế hoạch theo vùng, liền mạch qua nhiều chunk. Rương trong
@@ -552,7 +582,7 @@ HẦM MỎ BỎ HOANG
 - Ẩn đoạn chunk bị che khuất (hang) để giữ FPS.
 
 BLOCK MỚI CÒN LẠI
-- Thêm các block id còn thiếu trong 16–34 (chỉ dữ liệu và hình ảnh; hành vi
+- Thêm các block id còn thiếu trong 16–37 (chỉ dữ liệu và hình ảnh; hành vi
   đặc biệt như cửa, giường, lò, cây lớn làm ở Giai đoạn 4 và 7).
 - Cập nhật `scripts/texture-map.json` theo mục 3.2 và chạy lại script nhập.
 - Hình dạng đặc biệt: hàng rào (cột + thanh nối), đường ray (tấm phẳng sát

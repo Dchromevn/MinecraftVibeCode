@@ -1,6 +1,7 @@
 # DESIGN.md — Thông số game (nguồn sự thật)
 
-Bản sao mục 2 của `PLAN.md` (bản sinh tồn thế giới mở, đồng bộ 2026-11-11).
+Bản sao mục 2 của `PLAN.md` (bản sinh tồn thế giới mở, đồng bộ 2026-11-12:
+thêm vàng, ngọc lục bảo, tăng mật độ quặng và hầm mỏ).
 Khi cần đổi thông số thì sửa ở đây và trong `/shared/src/constants.ts`.
 Khi `DESIGN.md` và `PLAN.md` khác nhau, theo `DESIGN.md`.
 
@@ -51,9 +52,14 @@ Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền m�
 
 Dưới lòng đất:
 - Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá sâu (y < 8) → đá nền.
-  Quặng chỉ thay ô đá thường, nên kim cương nằm ở y = 8–15.
-- Quặng theo cụm: than (y < 100, cụm 8), sắt (y < 64, cụm 5),
-  kim cương (y < 16, cụm 3).
+  Quặng chỉ thay ô đá thường (riêng quặng vàng có thêm bản trong đá sâu), nên
+  kim cương nằm ở y = 8–15.
+- Quặng theo cụm, kèm số lần thử mỗi chunk: than (y < 100, cụm 13, 20 lần),
+  sắt (y < 64, cụm 9, 15 lần), vàng (y < 32, cụm 4–8, 2 lần),
+  kim cương (y < 16, cụm 3, 3 lần). Mục tiêu: đi trong hang, mỗi chunk thấy
+  khoảng 4–5 khối than và 4 khối sắt lộ trên vách.
+- Quặng ngọc lục bảo: chỉ trong biome núi, y < 100, từng khối lẻ (không theo
+  cụm), 3–8 lần thử mỗi chunk núi.
 - Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
 - Hang lớn dạng "phô mai": noise 3D tần số thấp, hiếm hơn.
 - Hang không đục đá nền; có cửa hang lộ ra mặt đất.
@@ -108,6 +114,9 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 32 | cây non | 0 | – | cây non | lớn thành cây sau 5–10 phút |
 | 33 | giường | 0.3 | – | giường | dài 2 block, xem 2.7 |
 | 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 8 |
+| 35 | quặng vàng | 15 | cuốc sắt+ | vàng thô | nung thành thỏi vàng |
+| 36 | quặng vàng đá sâu | 20 | cuốc sắt+ | vàng thô | bản trong đá sâu (y < 8) |
+| 37 | quặng ngọc lục bảo | 15 | cuốc sắt+ | ngọc lục bảo | chỉ ở núi, từng khối lẻ |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
@@ -120,14 +129,19 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | đá | 130 | x4 | 5 |
 | sắt | 250 | x6 | 6 |
 | kim cương | 1500 | x8 | 7 |
+| vàng | 32 | x12 | 4 |
+
+- Cấp vàng đào rất nhanh nhưng mau hỏng, và chỉ đào được những gì cuốc gỗ đào
+  được: quặng sắt, vàng, kim cương, ngọc lục bảo đào bằng cuốc vàng không rơi gì.
 
 - Loại công cụ: cuốc (đá, quặng), rìu (gỗ), xẻng (đất, cát, sỏi), kiếm,
   cuốc đất (biến đất/cỏ thành đất cày).
 - Hệ số tốc độ chỉ áp dụng khi dùng đúng loại công cụ.
 - Tay không: sát thương 1. Rìu: sát thương bằng kiếm cùng cấp trừ 1.
-- Giáp 4 món, cấp da, sắt, kim cương:
+- Giáp 4 món, cấp da, sắt, vàng, kim cương:
   da: mũ 1, áo 3, quần 2, giày 1 (tổng 7), độ bền 80;
   sắt: 2, 6, 5, 2 (tổng 15), độ bền 200;
+  vàng: 2, 5, 3, 1 (tổng 11), độ bền 110;
   kim cương: 3, 8, 6, 3 (tổng 20), độ bền 450.
   Mỗi điểm giáp giảm 4% sát thương.
 - Cung: độ bền 384. Tên xếp chồng 64.
@@ -141,16 +155,17 @@ Làm được mọi lúc (trong túi đồ):
 - 4 ván gỗ → 1 bàn chế tạo
 - 1 than + 1 que → 4 đuốc
 
-Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / kim cương):
+Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương):
 - cuốc, rìu: 3 X + 2 que · xẻng: 1 X + 2 que · kiếm: 2 X + 1 que
 - cuốc đất: 2 X + 2 que
-- mũ 5 X · áo 8 X · quần 7 X · giày 4 X (da / sắt / kim cương)
+- mũ 5 X · áo 8 X · quần 7 X · giày 4 X (da / sắt / vàng / kim cương)
 - cung: 3 que + 3 sợi tơ
 - 4 mũi tên: 1 que + 1 đá lửa + 1 lông gà
 - rương: 8 ván gỗ · lò nung: 8 đá cuội
 - 3 thang: 7 que · 3 cửa gỗ: 6 ván gỗ · 3 hàng rào: 4 que + 2 ván gỗ
 - 16 đường ray: 6 thỏi sắt + 1 que
 - bánh mì: 3 lúa mì
+- táo vàng: 1 táo + 8 thỏi vàng
 - giường: 3 len + 3 ván gỗ
 - sa thạch: 4 cát
 
@@ -161,7 +176,7 @@ liệu thì sáng, thiếu thì mờ.
 
 - 3 ô: nguyên liệu, nhiên liệu, kết quả. Mỗi món nung mất 10 giây.
 - Nhiên liệu: than nung được 8 món; thân gỗ / ván gỗ 1.5 món; que 0.5 món.
-- Công thức nung: sắt thô → thỏi sắt; cát → kính; đá cuội → đá;
+- Công thức nung: sắt thô → thỏi sắt; vàng thô → thỏi vàng; cát → kính; đá cuội → đá;
   thịt bò/lợn/gà sống → chín.
 - Lò tiếp tục chạy khi không có người mở (server xử lý).
 
@@ -180,7 +195,7 @@ liệu thì sáng, thiếu thì mờ.
 - Đói giảm theo hoạt động. Đói ≥ 18: hồi 1 máu mỗi 4 giây. Đói = 0: mất 1 máu
   mỗi 4 giây (không chết vì đói khi máu còn 1). Đói ≤ 6: không chạy nhanh được.
 - Ăn: giữ chuột phải 1.6 giây. Táo +4, bánh mì +5, thịt sống +2–3,
-  thịt chín +6–8.
+  thịt chín +6–8. Táo vàng: +4 đói và hồi 4 máu trong 5 giây.
 - Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
@@ -227,17 +242,21 @@ liệu thì sáng, thiếu thì mờ.
 
 ### 2.9 Hầm mỏ bỏ hoang
 
-- Khoảng 1 hệ thống mỗi vùng 256x256 block, ở độ sâu y = 20–50.
+- Khoảng 1 hệ thống mỗi vùng 160x160 block, ở độ sâu y = 20–50.
   Vị trí quyết định bằng seed + tọa độ vùng để sinh được theo từng chunk.
+  Nếu tâm rơi vào biển hoặc đất không đủ dày thì thử lại tối đa 4 vị trí khác
+  trong vùng rồi mới bỏ. Mục tiêu: ít nhất 3 hầm mỏ trong bán kính 300 block
+  quanh điểm xuất phát. Hệ thống của hai vùng kề nhau có thể cắt qua nhau.
 - Một phòng trung tâm bằng đất, từ đó tỏa ra hành lang 3x3 thẳng theo trục,
   dài 8–25 block, rẽ nhánh và giao nhau, có đoạn dốc lên xuống giữa các tầng.
-  Tối đa khoảng 40 đoạn mỗi hệ thống.
+  Tối đa khoảng 70 đoạn mỗi hệ thống.
 - Cứ 4–5 block một khung chống: hai cột hàng rào gỗ và một xà ván gỗ ngang.
 - Đường ray trên sàn, thiếu ngẫu nhiên khoảng 30%.
 - Mạng nhện rải rác, dày hơn ở ngã rẽ. Đuốc thỉnh thoảng trên cột.
 - Khi hành lang cắt qua hang: bắc sàn ván gỗ qua khoảng trống.
 - Rương ở cuối một số nhánh cụt với đồ: bánh mì, than, sắt thô, đường ray,
-  hạt giống, thỉnh thoảng kim cương.
+  hạt giống, vàng thô, thỏi vàng, ngọc lục bảo, thỉnh thoảng kim cương
+  (bảng tỉ lệ đặt trong `/shared`).
 - Hầm mỏ phải liền mạch khi vắt qua nhiều chunk: lập kế hoạch toàn bộ hệ thống
   theo vùng, rồi mỗi chunk chỉ đặt những block thuộc về nó.
 
@@ -261,8 +280,8 @@ liệu thì sáng, thiếu thì mờ.
   `/shared/structures`, đặt khớp độ cao mặt đất, san nền bằng đất bên dưới.
 - Dân làng: 20 máu, đi lang thang trong làng ban ngày, vào nhà ban đêm.
   Chuột phải để mở giao diện trao đổi: 2–4 giao dịch cố định theo nghề
-  (nông dân, thợ rèn, thủ thư), tiền tệ là ngọc lục bảo (vật phẩm mới,
-  không cần quặng; lấy được từ rương làng và bán đồ cho dân làng).
+  (nông dân, thợ rèn, thủ thư), tiền tệ là ngọc lục bảo (đào quặng ngọc lục
+  bảo ở núi, tìm trong rương làng và rương hầm mỏ, hoặc bán đồ cho dân làng).
 
 ### 2.12 Điều khiển
 
@@ -304,7 +323,8 @@ liệu thì sáng, thiếu thì mờ.
   vách cao ≥ 4 block (đo được ~1 mạch / 300 chunk quanh điểm xuất phát).
 - Hiển thị nước (client): độ trong 0.8, sóng cao 0.035 block, texture trôi
   (0.04, 0.025) block/giây; mặt dưới nước nhân hệ số exp(-0.35 × độ sâu).
-- Quặng mỗi chunk: than 16 cụm, sắt 12, kim cương 3, sỏi 3 khối cầu bán kính 2.
+- Quặng mỗi chunk: than 20 cụm 13 ô, sắt 15 cụm 9 ô, vàng 2 cụm 4–8 ô, kim cương
+  3 cụm 3 ô, sỏi 3 khối cầu bán kính 2. Ngọc lục bảo: 3–8 khối lẻ mỗi chunk núi.
 
 ## Phụ lục — Thông số chi tiết của Giai đoạn 2b
 
@@ -319,10 +339,12 @@ liệu thì sáng, thiếu thì mờ.
   trồng cây trong 3 block quanh miệng hang.
 - Hồ ngầm: vùng 64x64, xác suất 0.35, mực nước y = 20–50; mọi ô hang dưới mực nước
   trong vùng đó là nước; đập đá 2 block ở biên vùng; lớp đá ở y = 12 ngăn với dung
-  nham; không có hồ ngầm trong vùng của hầm mỏ.
+  nham. Hồ ngầm không né hầm mỏ; ngược lại, trong vùng có hồ ngầm thì phòng và
+  hành lang hầm mỏ chỉ được nằm cao hơn mực nước (giữ nước tĩnh).
 - Mạch nước trần hang: 70% số chunk, mạch dung nham 25% (chỉ dưới y = 30); trần
   phải dày ≥ 2 block. Mạch nước trên núi cũng cần đá ngay phía trên.
-- Hầm mỏ: vùng 256x256, xác suất 0.9; phòng y = 24–44 dưới đất khô sâu ≥ 8 block;
+- Hầm mỏ: vùng 160x160, xác suất 0.9, thử tối đa 5 vị trí tâm (cách biên vùng
+  16 block); phòng y = 24–44 dưới đất khô sâu ≥ 8 block;
   hành lang luôn dưới đất khô ≥ 8 block (không thủng đáy nước); các thông số khác
   như phụ lục 1b bên dưới. Ray tự chọn thẳng/cong/ngã ba/ngã tư theo ray kề.
 - Ánh sáng: tính trong worker cho vùng 3x3 chunk (48 x 128 x 48) mỗi lần dựng mesh
@@ -350,7 +372,7 @@ Các giá trị dưới đây đã đo và chỉnh khi làm hang động/hầm m
   160 bước, miệng loe rộng; không trồng cây trong 3 block quanh cửa hang.
 - Hầm mỏ: phòng 7–11 x 7–11 cao 4–6, hành lang 8–25, khung chống mỗi 4–5 block,
   20% khung có đuốc, ray 70%, mạng nhện 4% (ngã rẽ 30%), rương ở 50% nhánh cụt,
-  tối đa 40 đoạn, bán kính 72 block, cầu thang 5 bậc.
+  tối đa 70 đoạn (2b), bán kính 72 block, cầu thang 5 bậc.
 - Ánh sáng: đuốc 14, dung nham 15; lá cản 1, nước 2, mạng nhện 1; đổi block thì
   tính lại vùng ±15 block. Đường cong độ sáng: (f / (3 − 2f))^1.6, tối thiểu 0.004.
 - Client vẽ theo đoạn 16x16x16 và ẩn đoạn khuất (duyệt từ đoạn chứa camera
