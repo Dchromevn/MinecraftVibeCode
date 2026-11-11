@@ -103,8 +103,14 @@ Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền m�
   cát và sỏi; không cắt qua núi cao hơn y = 85.
 - Hồ: đường kính 8–20 block ở vùng đất bằng, khoảng 1 hồ mỗi vùng 128x128;
   mặt nước bằng điểm thấp nhất của bờ, có thể cao hơn mực biển.
-- Mạch nước trên núi: thỉnh thoảng một nguồn nước gắn trên vách núi hoặc sườn
-  dốc (có đá phía trên), để chảy thành thác khi có nước chảy (Giai đoạn 4).
+- Mạch nước trên núi: thỉnh thoảng một nguồn nước gắn trên vách núi (chỉ biome
+  núi, vách cao ≥ 4 block, có đá phía trên), để chảy thành thác khi có nước chảy
+  (Giai đoạn 4). Không đặt trên đồi cỏ thường.
+- Núi phủ tuyết đều mọi mặt trên (cả đá và cỏ) từ đường tuyết y ≈ 90 trở lên;
+  đá chỉ lộ ở mặt vách dựng đứng.
+- Hiển thị nước: mặt nước bán trong suốt, có gợn sóng nhẹ và texture trôi chậm;
+  đáy và vách dưới nước tối dần, ám xanh theo độ sâu (không nhìn rõ đáy hồ sâu).
+  Dòng chảy có hướng làm ở Giai đoạn 4.
 - Nước sinh sẵn (biển, sông, hồ, hồ ngầm) phải "tĩnh": không ô nước nào có
   không khí bên cạnh hoặc bên dưới. Chỉ các mạch nước/dung nham là ô "hở".
 

@@ -34,8 +34,9 @@ const AO_LEVELS = [0.5, 0.68, 0.84, 1.0] as const;
 const WATER_TOP = 14 / 16;
 const LAYER_TOP = 2 / 16;
 // texture nước gốc ngả tím; nhuộm xanh cho giống nước hơn
-const WATER_TINT = [0.3, 0.5, 0.95] as const;
+const WATER_TINT = [0.55, 0.75, 1.0] as const;
 const NO_TINT = [1, 1, 1] as const;
+const UNDERWATER_FALLOFF = 0.35; // càng lớn đáy sâu càng tối nhanh
 
 const OPAQUE = new Uint8Array(256);
 const CUBE_SOLID = new Uint8Array(256); // khối đầy đủ, che mặt kề
@@ -60,6 +61,19 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
 export interface ChunkMesh {
   solid: MeshArrays | null; // khối + cắt alpha (lá, cỏ cao)
   water: MeshArrays | null; // bán trong suốt
+}
+
+/** Số block nước liên tiếp tính từ ô (x, y, z) trở lên. */
+function waterDepth(at: (x: number, y: number, z: number) => number, x: number, y: number, z: number): number {
+  let d = 0;
+  while (d < 32 && at(x, y + d, z) === B.WATER) d++;
+  return d;
+}
+
+/** Hệ số màu cho mặt nằm dưới nước sâu depth block (đỏ tắt nhanh nhất, xanh dương chậm nhất). */
+function underwaterTint(depth: number): readonly [number, number, number] {
+  const k = Math.exp(-UNDERWATER_FALLOFF * depth);
+  return [0.18 + 0.82 * k, 0.28 + 0.72 * k, 0.5 + 0.5 * k];
 }
 
 export function meshChunk(pad: Uint8Array, uvt: UvTable): ChunkMesh {
@@ -104,6 +118,10 @@ export function meshChunk(pad: Uint8Array, uvt: UvTable): ChunkMesh {
           if (isWater && f.n[1] === 1 && top === 1) continue;
           if (isLayer && f.n[1] === 0 && nid === id) continue;
 
+          // mặt nằm dưới nước: tối dần và ám xanh theo số block nước phía trên
+          const depth = !isWater && nid === B.WATER ? waterDepth(at, nx, ny, nz) : 0;
+          const deep = depth > 0 ? underwaterTint(depth) : NO_TINT;
+
           let uv = uvt.blocks[id]![f.slot]!;
           if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
           // khối thấp hơn (nước, tuyết): cắt texture mặt bên theo chiều cao
@@ -118,8 +136,16 @@ export function meshChunk(pad: Uint8Array, uvt: UvTable): ChunkMesh {
             pos[k * 3] = x + cx;
             pos[k * 3 + 1] = y + cy;
             pos[k * 3 + 2] = z + cz;
-            uvArr[k * 2] = us < 0 ? uv.u0 : uv.u1;
-            uvArr[k * 2 + 1] = vs < 0 ? uv.v0 : vTop;
+            if (isWater) {
+              // nước dùng texture riêng lặp lại theo tọa độ block (để trôi được)
+              const wu = f.n[0] !== 0 ? pos[k * 3 + 2]! : pos[k * 3]!;
+              const wv = f.n[1] !== 0 ? pos[k * 3 + 2]! : pos[k * 3 + 1]!;
+              uvArr[k * 2] = wu;
+              uvArr[k * 2 + 1] = wv;
+            } else {
+              uvArr[k * 2] = us < 0 ? uv.u0 : uv.u1;
+              uvArr[k * 2 + 1] = vs < 0 ? uv.v0 : vTop;
+            }
 
             let light = f.shade;
             if (!isWater) {
@@ -130,7 +156,7 @@ export function meshChunk(pad: Uint8Array, uvt: UvTable): ChunkMesh {
               const c = s1 && s2 ? 1 : OPAQUE[at(ax + f.v[0] * vs, ay + f.v[1] * vs, az + f.v[2] * vs)]!;
               light *= AO_LEVELS[s1 && s2 ? 0 : 3 - (s1 + s2 + c)]!;
             }
-            const tint = isWater ? WATER_TINT : NO_TINT;
+            const tint = isWater ? WATER_TINT : deep;
             rgb[k * 3] = light * tint[0];
             rgb[k * 3 + 1] = light * tint[1];
             rgb[k * 3 + 2] = light * tint[2];

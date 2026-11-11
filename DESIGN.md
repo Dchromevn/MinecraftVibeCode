@@ -38,8 +38,14 @@ Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền m�
   cát và sỏi; không cắt qua núi cao hơn y = 85.
 - Hồ: đường kính 8–20 block ở vùng đất bằng, khoảng 1 hồ mỗi vùng 128x128;
   mặt nước bằng điểm thấp nhất của bờ, có thể cao hơn mực biển.
-- Mạch nước trên núi: thỉnh thoảng một nguồn nước gắn trên vách núi hoặc sườn
-  dốc (có đá phía trên), để chảy thành thác khi có nước chảy (Giai đoạn 4).
+- Mạch nước trên núi: thỉnh thoảng một nguồn nước gắn trên vách núi (chỉ biome
+  núi, vách cao ≥ 4 block, có đá phía trên), để chảy thành thác khi có nước chảy
+  (Giai đoạn 4). Không đặt trên đồi cỏ thường.
+- Núi phủ tuyết đều mọi mặt trên (cả đá và cỏ) từ đường tuyết y ≈ 90 trở lên;
+  đá chỉ lộ ở mặt vách dựng đứng.
+- Hiển thị nước: mặt nước bán trong suốt, có gợn sóng nhẹ và texture trôi chậm;
+  đáy và vách dưới nước tối dần, ám xanh theo độ sâu (không nhìn rõ đáy hồ sâu).
+  Dòng chảy có hướng làm ở Giai đoạn 4.
 - Nước sinh sẵn (biển, sông, hồ, hồ ngầm) phải "tĩnh": không ô nước nào có
   không khí bên cạnh hoặc bên dưới. Chỉ các mạch nước/dung nham là ô "hở".
 
@@ -286,14 +292,18 @@ liệu thì sáng, thiếu thì mờ.
   nâng 20 + 18 theo đỉnh núi 1/90). Đáy biển 52 ± 3, đất liền 66 ± 8, tối đa 115.
 - Biome: nhiệt độ (1/800) và độ ẩm (1/700). Tuyết khi nhiệt độ < -0.3; sa mạc khi
   nhiệt độ > 0.3 và độ ẩm < 0; rừng khi độ ẩm > 0.1. Núi khi mức nâng > 0.55
-  hoặc mặt đất cao hơn y = 88; đá lộ trên y = 92, tuyết phủ trên y = 100.
+  hoặc mặt đất cao hơn y = 88; đá thay cỏ trên y = 92; tuyết phủ mọi mặt trên từ
+  đường tuyết y = 90 ± 2 (lượn theo noise). Lá cây thay được lớp tuyết.
 - Cây: lưới 5x5, mỗi ô tối đa 1 cây; xác suất mỗi ô: đồng cỏ 0.12, rừng 0.85,
   tuyết 0.15, núi 0.12 (dưới y = 88). Cỏ cao: đồng cỏ 20%, rừng 10%, núi 5%.
 - Sông: noise 1/420; lòng sông |noise| < 0.022, bờ thoải tới 0.075 (nhân 0.75–1.25
   theo noise độ rộng 1/260); tắt dần khi địa hình cao 79–85.
 - Hồ: vùng 128x128, xác suất 0.8, thử 8 chỗ, bờ chênh tối đa 5 block, bán kính 4–10,
   đáy sâu 1–4. Đo được: khoảng 50% số vùng có hồ (gần như mọi vùng đất liền).
-- Mạch nước trên núi: chunk có mặt đất ≥ y = 75, xác suất 0.3, vách cao ≥ 2 block.
+- Mạch nước trên núi: chỉ cột biome núi có mặt đất ≥ y = 85, xác suất 0.3 mỗi chunk,
+  vách cao ≥ 4 block (đo được ~1 mạch / 300 chunk quanh điểm xuất phát).
+- Hiển thị nước (client): độ trong 0.8, sóng cao 0.035 block, texture trôi
+  (0.04, 0.025) block/giây; mặt dưới nước nhân hệ số exp(-0.35 × độ sâu).
 - Quặng mỗi chunk: than 16 cụm, sắt 12, kim cương 3, sỏi 3 khối cầu bán kính 2.
 
 ## Phụ lục — Thông số chi tiết đã tinh chỉnh (từ Giai đoạn 1b cũ, dùng cho 2b)

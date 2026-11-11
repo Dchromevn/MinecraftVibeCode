@@ -54,7 +54,8 @@ export const TERRAIN = {
   HUMID_FREQ: 1 / 700,
   MOUNTAIN_FROM_Y: 88, // cao hơn: luôn coi là núi (không có sườn cát/cỏ dựng đứng)
   STONE_PEAK_Y: 92, // núi cao hơn: đá lộ ra
-  SNOW_PEAK_Y: 100, // núi cao hơn: tuyết phủ
+  SNOW_LINE_Y: 90, // núi từ đây trở lên: tuyết phủ mọi mặt trên (đá và cỏ)
+  SNOW_LINE_JITTER: 2, // đường tuyết lượn ±2 block cho tự nhiên
 } as const;
 
 // Nước tự nhiên trên mặt đất (2.1). Nước sinh sẵn phải "tĩnh": không ô nước nào
@@ -80,9 +81,9 @@ export const LAKES = {
 } as const;
 
 export const SPRINGS = {
-  MOUNTAIN_CHANCE: 0.3, // xác suất mỗi chunk vùng cao có một mạch nước trên vách
-  MIN_SURFACE_Y: 75,
-  MIN_DROP: 2, // vách/sườn dốc cao ít nhất 2 block
+  MOUNTAIN_CHANCE: 0.3, // xác suất mỗi chunk núi có một mạch nước trên vách
+  MIN_SURFACE_Y: 85, // chỉ ở biome núi, mặt đất từ y = 85
+  MIN_DROP: 4, // vách cao ít nhất 4 block
 } as const;
 
 // Biome: mật độ cây (xác suất mỗi ô lưới 5x5) và cỏ cao (xác suất mỗi ô cỏ)

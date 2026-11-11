@@ -24,7 +24,7 @@ export class ChunkGenerator {
       for (let lx = 0; lx < 16; lx++) {
         const col = this.sampler.column(cx * 16 + lx, cz * 16 + lz);
         cols.push(col);
-        this.fillColumn(data, lx, lz, col);
+        this.fillColumn(data, lx, lz, col, cx * 16 + lx, cz * 16 + lz);
       }
     this.placeOres(data, cx, cz);
     placeTrees(this, data, cx, cz);
@@ -33,7 +33,7 @@ export class ChunkGenerator {
     return data;
   }
 
-  private fillColumn(data: Uint8Array, lx: number, lz: number, col: Column): void {
+  private fillColumn(data: Uint8Array, lx: number, lz: number, col: Column, wx: number, wz: number): void {
     const h = col.height;
     const underwater = h < col.waterTop;
     const beach = !underwater && h <= col.waterTop + 1;
@@ -42,7 +42,7 @@ export class ChunkGenerator {
     if (underwater || beach) {
       surface = B.SAND;
       sub = B.SAND;
-      if (underwater && this.sampler.patch.noise(lx * 0.07 + col.height, lz * 0.07) > 0.35) surface = B.GRAVEL;
+      if (underwater && this.sampler.patch.noise(wx * 0.07, wz * 0.07) > 0.35) surface = B.GRAVEL;
     } else if (col.biome === BIOME.DESERT) {
       surface = B.SAND;
       sub = B.SAND;
@@ -63,9 +63,11 @@ export class ChunkGenerator {
     }
     for (let y = h + 1; y <= col.waterTop; y++) data[blockIndex(lx, y, lz)] = B.WATER;
 
+    // đường tuyết lượn nhẹ theo noise; trên đường tuyết, núi phủ tuyết mọi mặt trên (đá và cỏ)
+    const snowLine = TERRAIN.SNOW_LINE_Y + Math.round(this.sampler.patch.noise(wx * 0.05 + 300, wz * 0.05) * TERRAIN.SNOW_LINE_JITTER);
     const snowy =
       (col.biome === BIOME.SNOWY && hasGrassSurface(col)) ||
-      (col.biome === BIOME.MOUNTAINS && h > TERRAIN.SNOW_PEAK_Y);
+      (col.biome === BIOME.MOUNTAINS && !underwater && h >= snowLine);
     if (snowy && h + 1 < CHUNK_HEIGHT) data[blockIndex(lx, h + 1, lz)] = B.SNOW_LAYER;
   }
 

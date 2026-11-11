@@ -83,3 +83,23 @@ export async function buildAtlas(names: readonly string[], tileSize = 16): Promi
 
   return new Atlas(texture, uvs, missing);
 }
+
+/** Nạp một texture riêng (lặp lại được, ví dụ nước để trôi). Thiếu file thì vẽ tạm. */
+export async function loadTileTexture(name: string, tileSize = 16): Promise<THREE.Texture> {
+  const img = await loadImage(`/textures/${name}.png`);
+  const canvas = document.createElement("canvas");
+  canvas.width = tileSize;
+  canvas.height = tileSize;
+  const ctx = canvas.getContext("2d")!;
+  ctx.imageSmoothingEnabled = false;
+  if (img) ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, tileSize, tileSize);
+  else drawFallbackTile(ctx, name, 0, 0, tileSize);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  tex.generateMipmaps = false;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}

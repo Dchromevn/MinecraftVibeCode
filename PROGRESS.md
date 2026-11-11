@@ -204,3 +204,11 @@ Kèm theo yêu cầu bổ sung "nước tự nhiên" của người dùng: phầ
 - Đồi cát trong sa mạc có thể khá dốc (tới y = 88); cao hơn y = 88 luôn là núi.
 - Thứ tự tải chưa tính chiều cao camera; bay rất cao vẫn tải theo hình tròn trên mặt phẳng.
 - Debug: `?debug=1` mở `window.__game` (camera, chunk, world, autopilot) cho script kiểm tra; `?vd=` đặt tầm nhìn.
+
+### Sửa sau phản hồi người dùng (2026-11-11)
+
+- Nhìn rõ đáy hồ sâu: trước đây chỉ vẽ mặt trên của nước với độ trong cố định nên sâu cạn như nhau. Nay đáy/vách dưới nước tối và ám xanh theo số block nước phía trên; nước dùng texture riêng lặp lại, có gợn sóng và trôi chậm (shader, không dựng lại mesh). Dòng chảy có hướng phải chờ mô phỏng chất lỏng ở Giai đoạn 4.
+- Mảng đá trên đỉnh núi tuyết: trước đây đá lộ từ y = 92 nhưng tuyết chỉ từ y = 100. Nay tuyết phủ mọi mặt trên của núi từ đường tuyết y ≈ 90 (cả đá và cỏ); đá chỉ còn ở mặt vách đứng. Lá cây thay được lớp tuyết.
+- Block nước đơn lẻ cạnh đất: đã kiểm tra, cả 14/14 khối nước nhỏ đều là mạch nước đặt trên đồi cỏ thường (y 75–79). Nay mạch nước chỉ ở biome núi, mặt đất ≥ 85, vách ≥ 4 block (còn ~1 mạch trên 576 chunk quanh điểm xuất phát). Không có vũng nước nhỏ nào do sông/hồ.
+- Tự phát hiện thêm: vệt sỏi đáy nước tính theo tọa độ trong chunk nên lặp lại mỗi chunk và đứt ở ranh giới; đã đổi sang tọa độ thế giới.
+- Kiểm tra lại: typecheck/build qua; sinh lại vẫn giống hệt; 0 ô nước hở ngoài mạch nước; mặt nước đổi 18% điểm ảnh sau 0,7 giây (sóng chạy).

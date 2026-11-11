@@ -46,7 +46,8 @@ export function placeTrees(gen: ChunkGenerator, data: Uint8Array, cx: number, cz
   const leaf = (x: number, y: number, z: number): void => {
     if (!inside(x, z) || y >= CHUNK_HEIGHT) return;
     const i = blockIndex(x - x0, y, z - z0);
-    if (data[i] === B.AIR) data[i] = B.LEAVES;
+    // lá thay được không khí và lớp tuyết mỏng (sườn núi phủ tuyết)
+    if (data[i] === B.AIR || data[i] === B.SNOW_LAYER) data[i] = B.LEAVES;
   };
   const trees = treesNear(gen, cx, cz);
 

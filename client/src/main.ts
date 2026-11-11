@@ -4,7 +4,7 @@
 import * as THREE from "three";
 import { BLOCKS, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
-import { buildAtlas } from "./atlas.js";
+import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
 import { createFog, createSky } from "./sky.js";
 import { Hud, FpsCounter } from "./hud.js";
@@ -63,7 +63,7 @@ async function main(): Promise<void> {
   const sampler = new TerrainSampler(seed);
   const workers = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
   const pool = new WorkerPool(workers, { type: "init", seed, uvt: buildUvTable((n) => atlas.uv(n)) });
-  const meshes = new ChunkMeshes(scene, atlas.texture);
+  const meshes = new ChunkMeshes(scene, atlas.texture, await loadTileTexture("water"));
   const chunks = new ChunkManager(world, pool, meshes);
   const vd = Number(params.get("vd"));
   if (Number.isFinite(vd) && vd > 0) {
@@ -123,6 +123,7 @@ async function main(): Promise<void> {
     chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
     editor.update();
     sky.follow(camera);
+    meshes.update(now / 1000);
     renderer.render(scene, camera);
 
     if (fps.tick(now) || firstFrame) {
