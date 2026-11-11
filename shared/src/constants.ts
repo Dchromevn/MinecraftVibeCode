@@ -9,26 +9,78 @@ export const NET = {
 // 2.1 Thế giới
 export const WORLD = {
   CHUNK_SIZE: 16,
-  CHUNK_HEIGHT: 64,
+  CHUNK_HEIGHT: 128,
+  SECTION_HEIGHT: 16, // client chia chunk thành đoạn 16x16x32 để vẽ và ẩn hang khuất
   MAP_CHUNKS: 16, // 16x16 chunk
   MAP_SIZE: 256, // block
   NOISE_OCTAVES: 3,
-  GROUND_MIN_Y: 20,
-  GROUND_MAX_Y: 40,
+  GROUND_MIN_Y: 70,
+  GROUND_MAX_Y: 90,
   DIRT_LAYERS: 3,
-  SAND_BELOW_Y: 24,
+  SAND_BELOW_Y: 74,
   TREE_TRUNK_MIN: 4,
   TREE_TRUNK_MAX: 6,
   TREE_CANOPY_SIZE: 5,
   SURFACE_BLOCKS_PER_TREE: 60,
   // attempts: số cụm thử đặt mỗi chunk (chỉ đặt vào ô đá)
   ORE: {
-    coal: { maxY: 50, cluster: 8, attempts: 8 },
-    iron: { maxY: 35, cluster: 5, attempts: 6 },
-    diamond: { maxY: 12, cluster: 3, attempts: 2 },
+    coal: { maxY: 100, cluster: 8, attempts: 16 },
+    iron: { maxY: 70, cluster: 5, attempts: 12 },
+    diamond: { maxY: 24, cluster: 3, attempts: 4 },
   },
+  GRAVEL: { maxY: 100, cluster: 24, attempts: 3 },
   TALLGRASS_CHANCE: 0.12, // tỷ lệ mặt cỏ có cỏ cao
   NOISE_SCALE: 1 / 64, // tần số cơ bản của noise địa hình
+} as const;
+
+// Hang động (Giai đoạn 1b)
+export const CAVES = {
+  NOISE_GRID: 4, // lấy mẫu noise 3D mỗi 4 block rồi nội suy tuyến tính
+  NOODLE_FREQ: 1 / 56, // hang "sợi mì": giao của hai mặt noise gần 0
+  NOODLE_Y_STRETCH: 1.6, // >1: đường hầm chạy ngang nhiều hơn dọc
+  NOODLE_RADIUS: 0.085,
+  CHEESE_FREQ: 1 / 72, // hang "phô mai": hốc rộng
+  CHEESE_THRESHOLD: 0.56,
+  CHEESE_MAX_Y: 64,
+  SURFACE_MARGIN: 7, // không đục trong 7 block dưới mặt đất (trừ cửa hang)
+  FADE_BAND: 8, // hang thu hẹp dần trong dải này thay vì bị cắt phẳng
+  ENTRANCE_SPACING: 60, // khoảng 1 cửa hang mỗi 60x60 block
+  ENTRANCE_MAX_LENGTH: 160,
+  LAVA_MAX_Y: 11, // ô bị đục có y <= 11 thành dung nham
+} as const;
+
+// Hầm mỏ bỏ hoang (Giai đoạn 1b)
+export const MINESHAFT = {
+  COUNT_MIN: 2,
+  COUNT_MAX: 4,
+  MIN_SPACING: 80,
+  ROOM_Y_MIN: 24,
+  ROOM_Y_MAX: 44,
+  Y_MIN: 20, // hành lang không xuống dưới / lên trên khoảng này
+  Y_MAX: 50,
+  MAX_PIECES: 40,
+  MAX_RADIUS: 72,
+  CORRIDOR_MIN: 8,
+  CORRIDOR_MAX: 25,
+  SUPPORT_SPACING_MIN: 4,
+  SUPPORT_SPACING_MAX: 5,
+  RAIL_CHANCE: 0.7, // 30% bị thiếu
+  TORCH_CHANCE: 0.2, // mỗi khung chống
+  WEB_CHANCE: 0.04,
+  WEB_CHANCE_JUNCTION: 0.3,
+  DEAD_END_CHEST_CHANCE: 0.5,
+} as const;
+
+// Ánh sáng theo block (Giai đoạn 1b), 16 mức 0..15
+export const LIGHT = {
+  MAX: 15,
+  TORCH: 14,
+  LAVA: 15,
+} as const;
+
+// Di chuyển trong block đặc biệt (dùng từ Giai đoạn 2)
+export const MOVE = {
+  COBWEB_FACTOR: 0.25,
 } as const;
 
 // 2.3 Cấp công cụ

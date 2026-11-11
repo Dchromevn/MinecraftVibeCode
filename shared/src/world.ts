@@ -6,6 +6,13 @@ import { Chunk, CHUNK_SIZE, CHUNK_HEIGHT } from "./chunk.js";
 export const MAP_CHUNKS = WORLD.MAP_CHUNKS;
 export const MAP_SIZE = WORLD.MAP_SIZE;
 
+export interface LootChest {
+  x: number;
+  y: number;
+  z: number;
+  tier: "common" | "rare" | "epic";
+}
+
 export interface ChunkCoord {
   cx: number;
   cz: number;
@@ -15,6 +22,10 @@ export class World {
   readonly chunks: Chunk[] = [];
   /** Độ cao mặt đất (block cao nhất của địa hình gốc, chưa tính cây). */
   readonly heightmap = new Uint8Array(MAP_SIZE * MAP_SIZE);
+  /** Rương kho báu sinh cùng thế giới (hầm mỏ...), Giai đoạn 6 sẽ điền đồ. */
+  readonly lootChests: LootChest[] = [];
+  /** Tâm các hầm mỏ (để debug / kiểm tra). */
+  readonly mineshafts: { x: number; z: number; pieces: number }[] = [];
   seed = 0;
 
   constructor() {

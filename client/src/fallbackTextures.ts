@@ -25,6 +25,14 @@ const PALETTE: Record<string, Palette> = {
   chest_side: ["#a8743a", "#6b4a2a"],
   chest_front: ["#a8743a", "#333333"],
   tallgrass: ["#5fa83a", "#4d8f2f"],
+  gravel: ["#857f7a", "#5f5955"],
+  mossy_cobble: ["#7d7d7d", "#4f7a3a"],
+  water: ["#2f5fd0", "#3a6ee0"],
+  lava: ["#e05a10", "#f8b020"],
+  fence: ["#b58b4c", "#9c7640"],
+  rail: ["#6b4a2a", "#9a9a9a"],
+  cobweb: ["#dddddd", "#ffffff"],
+  torch: ["#6b4a2a", "#ffd040"],
   missing: ["#ff00ff", "#000000"],
 };
 

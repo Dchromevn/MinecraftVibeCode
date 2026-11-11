@@ -12,6 +12,12 @@ const TALLGRASS_CHANCE = WORLD.TALLGRASS_CHANCE;
 function canPlaceTree(world: World, x: number, baseY: number, z: number, trunk: number): boolean {
   if (world.getBlock(x, baseY - 1, z) !== B.GRASS) return false;
   if (baseY + trunk + 2 >= CHUNK_HEIGHT) return false;
+  // không trồng sát cửa hang (mặt đất bị đục) để cửa hang không bị tán lá che
+  for (let dx = -3; dx <= 3; dx++) {
+    for (let dz = -3; dz <= 3; dz++) {
+      if (world.getBlock(x + dx, world.heightAt(x + dx, z + dz), z + dz) === B.AIR) return false;
+    }
+  }
   // không trồng sát cây khác
   for (let dx = -2; dx <= 2; dx++) {
     for (let dz = -2; dz <= 2; dz++) {

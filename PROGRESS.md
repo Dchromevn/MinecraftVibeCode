@@ -6,6 +6,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 |---|---|---|
 | 0 | Dựng khung | xong (người dùng xác nhận 2026-11-11) |
 | 1 | Thế giới voxel (chỉ client) | chờ người dùng test |
+| 1b | Hang động, hầm mỏ, ánh sáng (chỉ client) | chờ người dùng test |
 | 2 | Người chơi và tương tác block (chỉ client) | chưa làm |
 | 3 | Vật phẩm, chế tạo, sinh tồn (chỉ client) | chưa làm |
 | 4 | Mạng nhiều người chơi | chưa làm |
@@ -82,3 +83,49 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 - Thêm thư viện dev `pngjs` (đọc/ghi PNG trong script nhập texture; MIT, không vào bản build client).
 - `client/src/net.ts` tạm không dùng (Giai đoạn 1 chỉ client); giữ lại cho Giai đoạn 4.
 - Tham số URL debug: `?seed=`, `?pos=x,y,z`, `?look=yaw,pitch`, `?cut=y`.
+
+---
+
+## Giai đoạn 1b — Hang động, hầm mỏ, ánh sáng (2026-11-11)
+
+Thêm theo yêu cầu người dùng, trước Giai đoạn 2. Đã ghi vào `PLAN.md` (mục 2.1, 2.2, 3.1 và giai đoạn 1b) và `DESIGN.md`.
+
+### File đã tạo / sửa
+
+- `shared/src/constants.ts` — thế giới cao 128, mặt đất 70–90, quặng theo tỷ lệ mới, thêm `CAVES`, `MINESHAFT`, `LIGHT`, `MOVE`.
+- `shared/src/blocks.ts` + `shared/src/blockTable.ts` (tách đôi) — 9 block mới (id 16–24), thêm hình dạng vẽ, độ phát sáng, độ cản sáng, chất lỏng, hệ số đi chậm, hộp va chạm cột rào.
+- `shared/src/noise3d.ts` — simplex noise 3D.
+- `shared/src/worldgen/caves.ts` — hang sợi mì, hang phô mai, cửa hang, dung nham.
+- `shared/src/worldgen/mineshaft.ts`, `mineshaftParts.ts` — hầm mỏ bỏ hoang.
+- `shared/src/worldgen/terrain.ts`, `decorate.ts`, `index.ts`, `shared/src/world.ts` — sỏi, không trồng cây sát cửa hang, thứ tự sinh, danh sách rương và hầm mỏ.
+- `client/src/light/lightMap.ts`, `lighting.ts` — ánh sáng 16 mức, tính toàn bản đồ và tính lại theo vùng.
+- `client/src/mesh/{mesher,shapes,shade,geomBuilder,visibility,sectionRenderer}.ts` — mesh theo đoạn 16x16x16, ánh sáng mượt, cột rào/đuốc/ray/mạng nhện, ẩn đoạn khuất. Xóa `client/src/mesher.ts`, `chunkRenderer.ts` cũ.
+- `client/src/main.ts`, `strings.ts`, `fallbackTextures.ts`, `scripts/texture-map.json` — 8 texture mới, HUD mới, phím debug.
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng.
+- Cùng seed cho thế giới giống hệt từng byte. Sinh thế giới khoảng 330 ms trong Node (trước 40 ms).
+- Hang chiếm khoảng 5,3% thể tích dưới mặt đất; hang lớn nhất chiếm 83–89% thể tích hang (hang nối nhau thành mạng).
+- 12–14 cửa hang trên mặt đất thông vào hang lớn mỗi bản đồ (mục tiêu khoảng 16–18).
+- 2–4 hầm mỏ mỗi bản đồ, 15–35 đoạn mỗi hầm, 6–8 rương, vài trăm ray và cột rào, 16–26 đuốc.
+- Ánh sáng: tính cả bản đồ khoảng 160 ms; tính lại sau khi đổi block khoảng 4 ms và trùng khớp hoàn toàn với tính lại toàn bộ (60 lần đổi ngẫu nhiên).
+- Mesh: tổng 1,27 triệu tam giác (trước 0,58 triệu). Nhờ ẩn đoạn khuất, đứng trên mặt đất chỉ vẽ khoảng 260 nghìn tam giác (Giai đoạn 1: khoảng 230 nghìn), trong hang khoảng 45 nghìn.
+- Ảnh chụp headless: hành lang hầm mỏ có ray, khung, đuốc sáng; hồ dung nham phát sáng; cửa hang lộ ra mặt đất; hốc hang tối hẳn; nhìn đêm và nhìn xuyên đá thấy mạng hang.
+
+### Cần người dùng kiểm tra
+
+- FPS trên máy thật so với Giai đoạn 1 (F4 tắt/bật ẩn hang khuất để so).
+- Bay xuống lòng đất: hang nối nhau, không có hang cụt vuông vức. Bấm N để nhìn đêm.
+- Tìm hầm mỏ (tọa độ x,z in trên HUD), xem đường ray, khung gỗ, rương, đuốc chiếu sáng.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Thời gian tải tăng: sinh thế giới ~0,3 s + ánh sáng ~0,2 s + dựng mesh ~1 s (dàn qua nhiều khung).
+- Bay xuyên vào khối đặc thì tự tắt ẩn hang khuất để nhìn xuyên thấy mạng hang (giống chế độ quan sát của game cùng thể loại).
+- Nước có trong bảng block nhưng chưa đặt vào thế giới (nước bề mặt thuộc Giai đoạn 7). Nước và dung nham chưa chảy.
+- Chưa có luật cho dung nham (sát thương, cháy) và mạng nhện mới có số liệu đi chậm; Giai đoạn 2/3 sẽ dùng — cần người dùng chốt số liệu sát thương dung nham.
+- Đuốc, đường ray, hàng rào, sỏi, đá cuội rêu chưa có vật phẩm/công thức (Giai đoạn 3 quyết định).
+- Rương hầm mỏ mới có vị trí, chưa có đồ (Giai đoạn 6).
+- Đổi chiều cao thế giới làm khác hoàn toàn địa hình của seed cũ.
+- Debug mới: `N` nhìn đêm, `F4` ẩn hang khuất, `?nv=1`, `?nocull=1`, `?nomsg=1`.

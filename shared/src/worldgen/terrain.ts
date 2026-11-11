@@ -41,7 +41,7 @@ export function fillColumns(world: World): void {
 }
 
 interface OreSpec {
-  id: typeof B.ORE_COAL | typeof B.ORE_IRON | typeof B.ORE_DIAMOND;
+  id: typeof B.ORE_COAL | typeof B.ORE_IRON | typeof B.ORE_DIAMOND | typeof B.GRAVEL;
   maxY: number;
   cluster: number;
   attemptsPerChunk: number;
@@ -51,6 +51,7 @@ const ORES: readonly OreSpec[] = [
   { id: B.ORE_COAL, maxY: WORLD.ORE.coal.maxY, cluster: WORLD.ORE.coal.cluster, attemptsPerChunk: WORLD.ORE.coal.attempts },
   { id: B.ORE_IRON, maxY: WORLD.ORE.iron.maxY, cluster: WORLD.ORE.iron.cluster, attemptsPerChunk: WORLD.ORE.iron.attempts },
   { id: B.ORE_DIAMOND, maxY: WORLD.ORE.diamond.maxY, cluster: WORLD.ORE.diamond.cluster, attemptsPerChunk: WORLD.ORE.diamond.attempts },
+  { id: B.GRAVEL, maxY: WORLD.GRAVEL.maxY, cluster: WORLD.GRAVEL.cluster, attemptsPerChunk: WORLD.GRAVEL.attempts },
 ];
 
 function placeCluster(world: World, rng: Rng, spec: OreSpec, x: number, y: number, z: number): void {

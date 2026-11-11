@@ -1,7 +1,8 @@
 # PLAN.md — Đặc tả và kế hoạch dự án Voxel PvP
 
 Tài liệu này là đặc tả đầy đủ. Quy tắc làm việc nằm trong `AGENTS.md`.
-Làm lần lượt từ Giai đoạn 0 đến Giai đoạn 7, mỗi lần một giai đoạn, dừng lại
+Làm lần lượt từ Giai đoạn 0 đến Giai đoạn 7 (có thêm Giai đoạn 1b sau Giai đoạn 1),
+mỗi lần một giai đoạn, dừng lại
 sau mỗi giai đoạn để người dùng chơi thử.
 
 ---
@@ -48,15 +49,47 @@ là nguồn sự thật.
 
 ### 2.1 Thế giới
 
-- Block 1x1x1. Chunk 16x16x64, lưu bằng `Uint8Array` (1 byte = 1 id block).
-- Bản đồ 256x256 block (16x16 chunk), cao 64.
-- Địa hình: simplex noise theo seed, 3 octave, mặt đất cao từ 20 đến 40.
+- Block 1x1x1. Chunk 16x16x128, lưu bằng `Uint8Array` (1 byte = 1 id block).
+  Client vẽ theo đoạn 16x16x16 (8 đoạn mỗi chunk).
+- Bản đồ 256x256 block (16x16 chunk), cao 128.
+- Địa hình: simplex noise theo seed, 3 octave, mặt đất cao từ 70 đến 90.
 - Lớp: cỏ trên cùng, 3 lớp đất, còn lại là đá, y=0 là đá nền.
-- Cát ở vùng thấp (dưới y=24).
+- Cát ở vùng thấp (dưới y=74).
 - Cây: thân cao 4–6, tán lá 5x5, khoảng 1 cây mỗi 60 block mặt đất.
 - Cỏ cao rải trên mặt cỏ.
-- Quặng theo cụm: than (y<50, cụm 8), sắt (y<35, cụm 5), kim cương (y<12, cụm 3).
+- Quặng theo cụm: than (y<100, cụm 8), sắt (y<70, cụm 5), kim cương (y<24, cụm 3).
+- Sỏi theo khối lớn (y<100, cụm 24).
 - Cùng seed phải sinh ra cùng thế giới, trên cả client và server.
+
+#### Hang động (Giai đoạn 1b)
+
+- Hang "sợi mì": noise 3D, đục nơi hai trường noise cùng gần 0 → đường hầm
+  ngoằn ngoèo nối nhau. Hang "phô mai": noise 3D tần số thấp → hốc rộng, chỉ
+  dưới y=64. Noise lấy mẫu mỗi 4 block rồi nội suy.
+- Không đục trong 7 block dưới mặt đất (hang thu hẹp dần, không có trần phẳng),
+  không đục đá nền. Ô bị đục có y <= 11 thành dung nham (hồ dung nham ở đáy hang).
+- Khoảng 1 cửa hang mỗi 60x60 block: đường hầm đào chéo từ mặt đất xuống tới khi
+  gặp hang có sẵn; miệng loe rộng; không trồng cây trong vòng 3 block quanh cửa.
+
+#### Hầm mỏ bỏ hoang (Giai đoạn 1b)
+
+- 2–4 hệ thống mỗi bản đồ, tâm cách nhau ít nhất 80 block, độ sâu y=20–50.
+- Mỗi hệ thống: phòng trung tâm (7–11 x 7–11, cao 4–6, sàn đất lẫn đá cuội rêu),
+  hành lang 3x3 thẳng theo trục dài 8–25, ngã ba/ngã tư, cầu thang 5 bậc lên/xuống,
+  tối đa 40 đoạn, bán kính tối đa 72 block.
+- Khung chống mỗi 4–5 block: 2 cột hàng rào + xà ván gỗ. 20% khung có đuốc trên cột.
+- Đường ray trên sàn, thiếu khoảng 30%. Mạng nhện 4% ở góc trần, 30% ở ngã rẽ.
+- Hành lang cắt qua hang: bắc cầu ván gỗ. Nhánh cụt: 50% có rương (hạng hiếm),
+  vị trí lưu trong danh sách rương của thế giới để Giai đoạn 6 điền đồ.
+
+#### Ánh sáng (Giai đoạn 1b, chỉ client)
+
+- 16 mức (0–15), hai kênh: trời (chiếu thẳng xuống theo cột rồi lan ngang) và
+  block (đuốc 14, dung nham 15), lan bằng flood fill, mỗi ô giảm 1 (+ độ cản).
+- Lá cản 1, nước 2, mạng nhện 1; block đặc chặn hẳn.
+- Đỉnh mesh lấy trung bình ánh sáng các ô quanh đỉnh (ánh sáng mượt) nhân với AO.
+- Khi đổi block: tính lại vùng ±15 block quanh đó, dựng lại các đoạn có ánh sáng đổi.
+- Ẩn đoạn khuất: mỗi đoạn biết mặt nào thông nhau; duyệt từ đoạn chứa camera.
 
 ### 2.2 Block
 
@@ -78,6 +111,15 @@ là nguồn sự thật.
 | 13 | rương | 3.75 | rìu | rương + đồ bên trong | |
 | 14 | đá nền | không phá được | – | – | lớp y=0 |
 | 15 | cỏ cao | 0 | – | 10% hạt | không va chạm, vẽ dạng chữ X |
+| 16 | sỏi | 0.9 | xẻng | sỏi | |
+| 17 | đá cuội rêu | 10 | cuốc (bắt buộc) | đá cuội rêu | |
+| 18 | nước | không phá được | – | – | không va chạm, cản sáng 2 (chưa đặt trong thế giới) |
+| 19 | dung nham | không phá được | – | – | không va chạm, phát sáng 15 |
+| 20 | hàng rào gỗ | 3 | rìu | hàng rào gỗ | cột 4x4 điểm ảnh, va chạm theo cột |
+| 21 | đường ray (dọc Z) | 0.7 | cuốc | đường ray | không va chạm, vẽ sát sàn |
+| 22 | đường ray (dọc X) | 0.7 | cuốc | đường ray | như trên |
+| 23 | mạng nhện | 4 | – | – | không va chạm, đi chậm còn 25%, vẽ chữ X |
+| 24 | đuốc | 0 | – | đuốc | không va chạm, phát sáng 14 |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
@@ -220,6 +262,14 @@ Tất cả file là PNG 16x16 RGBA; cỏ và lá đã tô màu sẵn.
 | chest_front.png | default_mcl_core/default_chest_front.png |
 | tallgrass.png | default_mcl_core/plants/default_grass_3.png |
 | crack_0.png … crack_4.png | CẮT: default_mcl_core/gui_hud/crack_anylength.png (16x80, 5 khung dọc) |
+| gravel.png | default_mcl_core/stone/default_gravel.png |
+| mossy_cobble.png | default_mcl_core/stone/default_mossycobble.png |
+| water.png | default_mcl_core/default_water.png |
+| lava.png | default_mcl_core/default_lava.png |
+| fence.png | default_mcl_core/fences/default_fence_wood.png |
+| rail.png | carts_mcl_minecarts/default_rail.png |
+| cobweb.png | default_mcl_core/mcl_core_web.png |
+| torch.png | default_mcl_core/default_torch_on_floor.png |
 
 Lưu ý: texture quặng và `default_grass_side.png` có thể là lớp phủ trong suốt.
 Script phải kiểm tra kênh alpha; nếu ảnh có điểm trong suốt thì ghép đè lên
@@ -320,6 +370,31 @@ NGHIỆM THU
 - Không có khe hở giữa các chunk, không thiếu mặt, không rỉ màu texture.
 - Cùng seed cho ra địa hình y hệt sau khi tải lại trang.
 - Có cây, cát vùng thấp, quặng lộ ra ở vách đá hoặc khi bay xuống dưới đất.
+
+---
+
+### Giai đoạn 1b — Hang động, hầm mỏ, ánh sáng (chỉ client)
+
+Thêm theo yêu cầu người dùng, làm trước Giai đoạn 2. Thông số ở mục 2.1 và 2.2.
+
+VIỆC CẦN LÀM
+- Tăng chiều cao thế giới lên 128, mặt đất y=70–90, độ sâu quặng theo tỷ lệ.
+- Hang sợi mì + hang phô mai + cửa hang + hồ dung nham. Quặng lộ trên vách hang.
+- Hầm mỏ bỏ hoang: phòng, hành lang, ngã rẽ, cầu thang, khung chống, đường ray,
+  mạng nhện, đuốc, cầu ván qua hang, rương ở nhánh cụt.
+- Block mới: sỏi, đá cuội rêu, nước, dung nham, hàng rào gỗ, đường ray (2 hướng),
+  mạng nhện, đuốc. Texture lấy từ REFI_Textures (mục 3.1).
+- Ánh sáng theo block 16 mức (trời + đuốc/dung nham), tính lại theo vùng khi đổi
+  block (Giai đoạn 2 dùng).
+- Mesh theo đoạn 16x16x16 và ẩn đoạn khuất để giữ FPS khi có hang.
+- Debug: N nhìn đêm, F4 bật/tắt ẩn hang khuất, PageUp/PageDown mặt cắt.
+
+NGHIỆM THU
+- Bay xuống lòng đất thấy hang nối nhau liên tục, không có hang cụt vuông vức.
+- Tìm được ít nhất 2 hầm mỏ có đường ray, khung gỗ, rương.
+- Trong hang tối, đuốc chiếu sáng vùng xung quanh.
+- FPS không giảm quá 10% so với trước.
+- Cùng seed vẫn ra cùng thế giới.
 
 ---
 

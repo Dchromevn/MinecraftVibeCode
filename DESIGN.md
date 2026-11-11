@@ -13,17 +13,49 @@ là nguồn sự thật.
 
 ### 2.1 Thế giới
 
-- Block 1x1x1. Chunk 16x16x64, lưu bằng `Uint8Array` (1 byte = 1 id block).
-- Bản đồ 256x256 block (16x16 chunk), cao 64.
-- Địa hình: simplex noise theo seed, 3 octave, mặt đất cao từ 20 đến 40.
+- Block 1x1x1. Chunk 16x16x128, lưu bằng `Uint8Array` (1 byte = 1 id block).
+  Client vẽ theo đoạn 16x16x16 (8 đoạn mỗi chunk).
+- Bản đồ 256x256 block (16x16 chunk), cao 128.
+- Địa hình: simplex noise theo seed, 3 octave, mặt đất cao từ 70 đến 90.
 - Lớp: cỏ trên cùng, 3 lớp đất, còn lại là đá, y=0 là đá nền.
-- Cát ở vùng thấp (dưới y=24).
+- Cát ở vùng thấp (dưới y=74).
 - Cây: thân cao 4–6, tán lá 5x5, khoảng 1 cây mỗi 60 block mặt đất.
 - Cỏ cao rải trên mặt cỏ.
-- Quặng theo cụm: than (y<50, cụm 8), sắt (y<35, cụm 5), kim cương (y<12, cụm 3).
+- Quặng theo cụm: than (y<100, cụm 8), sắt (y<70, cụm 5), kim cương (y<24, cụm 3).
+- Sỏi theo khối lớn (y<100, cụm 24).
 - Cùng seed phải sinh ra cùng thế giới, trên cả client và server.
-- Thông số chi tiết (thêm ở Giai đoạn 1, chỉnh được): tần số noise 1/64;
-  số cụm quặng thử đặt mỗi chunk: than 8, sắt 6, kim cương 2 (chỉ thay ô đá);
+
+#### Hang động (Giai đoạn 1b)
+
+- Hang "sợi mì": noise 3D, đục nơi hai trường noise cùng gần 0 → đường hầm
+  ngoằn ngoèo nối nhau. Hang "phô mai": noise 3D tần số thấp → hốc rộng, chỉ
+  dưới y=64. Noise lấy mẫu mỗi 4 block rồi nội suy.
+- Không đục trong 7 block dưới mặt đất (hang thu hẹp dần, không có trần phẳng),
+  không đục đá nền. Ô bị đục có y <= 11 thành dung nham (hồ dung nham ở đáy hang).
+- Khoảng 1 cửa hang mỗi 60x60 block: đường hầm đào chéo từ mặt đất xuống tới khi
+  gặp hang có sẵn; miệng loe rộng; không trồng cây trong vòng 3 block quanh cửa.
+
+#### Hầm mỏ bỏ hoang (Giai đoạn 1b)
+
+- 2–4 hệ thống mỗi bản đồ, tâm cách nhau ít nhất 80 block, độ sâu y=20–50.
+- Mỗi hệ thống: phòng trung tâm (7–11 x 7–11, cao 4–6, sàn đất lẫn đá cuội rêu),
+  hành lang 3x3 thẳng theo trục dài 8–25, ngã ba/ngã tư, cầu thang 5 bậc lên/xuống,
+  tối đa 40 đoạn, bán kính tối đa 72 block.
+- Khung chống mỗi 4–5 block: 2 cột hàng rào + xà ván gỗ. 20% khung có đuốc trên cột.
+- Đường ray trên sàn, thiếu khoảng 30%. Mạng nhện 4% ở góc trần, 30% ở ngã rẽ.
+- Hành lang cắt qua hang: bắc cầu ván gỗ. Nhánh cụt: 50% có rương (hạng hiếm),
+  vị trí lưu trong danh sách rương của thế giới để Giai đoạn 6 điền đồ.
+
+#### Ánh sáng (Giai đoạn 1b, chỉ client)
+
+- 16 mức (0–15), hai kênh: trời (chiếu thẳng xuống theo cột rồi lan ngang) và
+  block (đuốc 14, dung nham 15), lan bằng flood fill, mỗi ô giảm 1 (+ độ cản).
+- Lá cản 1, nước 2, mạng nhện 1; block đặc chặn hẳn.
+- Đỉnh mesh lấy trung bình ánh sáng các ô quanh đỉnh (ánh sáng mượt) nhân với AO.
+- Khi đổi block: tính lại vùng ±15 block quanh đó, dựng lại các đoạn có ánh sáng đổi.
+- Ẩn đoạn khuất: mỗi đoạn biết mặt nào thông nhau; duyệt từ đoạn chứa camera.
+- Thông số chi tiết (chỉnh được): tần số noise 1/64;
+  số cụm quặng thử đặt mỗi chunk: than 16, sắt 12, kim cương 4, sỏi 3 (chỉ thay ô đá);
   12% mặt cỏ có cỏ cao. Giá trị nằm trong `shared/src/constants.ts` (WORLD).
 
 ### 2.2 Block
@@ -46,6 +78,15 @@ là nguồn sự thật.
 | 13 | rương | 3.75 | rìu | rương + đồ bên trong | |
 | 14 | đá nền | không phá được | – | – | lớp y=0 |
 | 15 | cỏ cao | 0 | – | 10% hạt | không va chạm, vẽ dạng chữ X |
+| 16 | sỏi | 0.9 | xẻng | sỏi | |
+| 17 | đá cuội rêu | 10 | cuốc (bắt buộc) | đá cuội rêu | |
+| 18 | nước | không phá được | – | – | không va chạm, cản sáng 2 (chưa đặt trong thế giới) |
+| 19 | dung nham | không phá được | – | – | không va chạm, phát sáng 15 |
+| 20 | hàng rào gỗ | 3 | rìu | hàng rào gỗ | cột 4x4 điểm ảnh, va chạm theo cột |
+| 21 | đường ray (dọc Z) | 0.7 | cuốc | đường ray | không va chạm, vẽ sát sàn |
+| 22 | đường ray (dọc X) | 0.7 | cuốc | đường ray | như trên |
+| 23 | mạng nhện | 4 | – | – | không va chạm, đi chậm còn 25%, vẽ chữ X |
+| 24 | đuốc | 0 | – | đuốc | không va chạm, phát sáng 14 |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
