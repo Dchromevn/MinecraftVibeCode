@@ -1,18 +1,24 @@
-# PLAN.md — Đặc tả và kế hoạch dự án Voxel PvP
+# PLAN.md — Đặc tả và kế hoạch dự án Voxel Survival
 
 Tài liệu này là đặc tả đầy đủ. Quy tắc làm việc nằm trong `AGENTS.md`.
-Làm lần lượt từ Giai đoạn 0 đến Giai đoạn 7 (có thêm Giai đoạn 1b sau Giai đoạn 1),
-mỗi lần một giai đoạn, dừng lại
-sau mỗi giai đoạn để người dùng chơi thử.
+Làm lần lượt từng giai đoạn, mỗi lần một giai đoạn, dừng lại sau mỗi giai đoạn
+để người dùng chơi thử.
+
+> GHI CHÚ CHUYỂN HƯỚNG: phiên bản trước của file này mô tả game PvP theo trận
+> (bản đồ 256x256 cố định, vòng bo). Dự án đã chuyển sang SINH TỒN THẾ GIỚI MỞ.
+> Giai đoạn 0 và 1 đã làm xong theo bản cũ và được giữ lại; Giai đoạn 2 sẽ
+> chuyển thế giới cố định thành thế giới vô hạn. Mọi thứ về trận đấu, vòng bo,
+> sảnh chờ, phòng chơi, thùng tiếp tế đã bị BỎ.
 
 ---
 
 ## 1. Tổng quan
 
-Game voxel sinh tồn PvP nhiều người chơi, góc nhìn thứ nhất, chạy trên trình
-duyệt. Mỗi trận: người chơi được thả xuống một bản đồ khối vuông, khai thác tài
-nguyên, chế tạo vũ khí và giáp, rồi chiến đấu trong vòng bo thu hẹp dần. Người
-sống sót cuối cùng thắng.
+Game voxel sinh tồn thế giới mở nhiều người chơi, góc nhìn thứ nhất, chạy trên
+trình duyệt. Người chơi cùng sống trong một thế giới vô hạn được lưu lại lâu
+dài: khai thác, chế tạo, xây nhà, trồng trọt, khám phá hang động và hầm mỏ bỏ
+hoang, chống lại quái vật ban đêm, giao dịch với dân làng, và có thể đánh nhau
+(PvP bật/tắt được).
 
 Lối chơi lấy cảm hứng từ thể loại sandbox khối vuông, nhưng tên, texture, model
 và âm thanh phải là nguyên bản hoặc có giấy phép mở.
@@ -22,6 +28,7 @@ và âm thanh phải là nguyên bản hoặc có giấy phép mở.
 - Client: TypeScript + Three.js + Vite
 - Server: Node.js + WebSocket (thư viện `ws`), server-authoritative
 - Code dùng chung đặt trong `/shared`
+- Lưu thế giới: file trên đĩa của server (thư mục `/server/data`)
 - Quản lý bằng npm workspaces
 
 ### Cấu trúc thư mục
@@ -30,96 +37,116 @@ và âm thanh phải là nguyên bản hoặc có giấy phép mở.
 /client          Vite + Three.js
   /public/textures   texture block (16x16)
   /public/icons      icon vật phẩm (16x16)
+  /public/entities   skin sinh vật
   /src
 /server          Node.js + ws
   /src
-/shared          kiểu dữ liệu, hằng số, bảng dữ liệu, vật lý dùng chung
+  /data          thế giới đã lưu, KHÔNG commit
+/shared          kiểu dữ liệu, hằng số, bảng dữ liệu, sinh địa hình, vật lý
   /src
 /scripts         script tiện ích (import-textures, ...)
 /assets-src      tài nguyên gốc tải về, KHÔNG commit
 AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 ```
 
+### Danh sách giai đoạn
+
+| GĐ | Nội dung | Trạng thái |
+|---|---|---|
+| 0 | Dựng khung | đã xong |
+| 1 | Thế giới voxel cơ bản (bản cố định) | đã xong |
+| 2 | Thế giới vô hạn, biome, hang động, hầm mỏ, ánh sáng | |
+| 3 | Người chơi và tương tác block | |
+| 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | |
+| 5 | Mạng nhiều người và lưu thế giới | |
+| 6 | Chiến đấu PvP và hồi sinh | |
+| 7 | Ngày đêm, động vật, quái vật, giường | |
+| 8 | Làng và dân làng | |
+| 9 | Hoàn thiện và phát hành | |
+| 10 | (Tùy chọn) Vực Lửa — thế giới thứ hai | |
+| 11 | (Tùy chọn) Cõi Hư Không — thế giới cuối và trùm | |
+
+Giai đoạn 10 và 11 chỉ làm khi người dùng yêu cầu.
+
 ---
 
 ## 2. Thông số game
 
-Giai đoạn 0 chép các bảng này sang `DESIGN.md` và `/shared`. Sau đó `DESIGN.md`
-là nguồn sự thật.
+`DESIGN.md` là bản sao của mục này và là nguồn sự thật. Khi file này đổi,
+cập nhật `DESIGN.md` theo, giữ lại các chỉnh sửa người dùng đã làm.
 
 ### 2.1 Thế giới
 
-- Block 1x1x1. Chunk 16x16x128, lưu bằng `Uint8Array` (1 byte = 1 id block).
-  Client vẽ theo đoạn 16x16x16 (8 đoạn mỗi chunk).
-- Bản đồ 256x256 block (16x16 chunk), cao 128.
-- Địa hình: simplex noise theo seed, 3 octave, mặt đất cao từ 70 đến 90.
-- Lớp: cỏ trên cùng, 3 lớp đất, còn lại là đá, y=0 là đá nền.
-- Cát ở vùng thấp (dưới y=74).
-- Cây: thân cao 4–6, tán lá 5x5, khoảng 1 cây mỗi 60 block mặt đất.
-- Cỏ cao rải trên mặt cỏ.
-- Quặng theo cụm: than (y<100, cụm 8), sắt (y<70, cụm 5), kim cương (y<24, cụm 3).
-- Sỏi theo khối lớn (y<100, cụm 24).
+- Vô hạn theo chiều ngang (giới hạn mềm ±100.000 block để tránh sai số số thực),
+  cao 128 (y = 0 đến 127).
+- Chunk 16x16, cao 128, lưu bằng `Uint8Array` (hoặc `Uint16Array` nếu cần hơn
+  256 loại block). Chunk được nhận diện bằng tọa độ (cx, cz).
+- Mực nước biển y = 62. Mặt đất từ khoảng y = 55 (đáy biển) đến y = 110 (núi).
+- y = 0 là đá nền, không phá được.
 - Cùng seed phải sinh ra cùng thế giới, trên cả client và server.
 
-#### Hang động (Giai đoạn 1b)
+Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển tiếp mượt):
 
-- Hang "sợi mì": noise 3D, đục nơi hai trường noise cùng gần 0 → đường hầm
-  ngoằn ngoèo nối nhau. Hang "phô mai": noise 3D tần số thấp → hốc rộng, chỉ
-  dưới y=64. Noise lấy mẫu mỗi 4 block rồi nội suy.
-- Không đục trong 7 block dưới mặt đất (hang thu hẹp dần, không có trần phẳng),
-  không đục đá nền. Ô bị đục có y <= 11 thành dung nham (hồ dung nham ở đáy hang).
-- Khoảng 1 cửa hang mỗi 60x60 block: đường hầm đào chéo từ mặt đất xuống tới khi
-  gặp hang có sẵn; miệng loe rộng; không trồng cây trong vòng 3 block quanh cửa.
+| Biome | Mặt đất | Cây và trang trí |
+|---|---|---|
+| Đồng cỏ | cỏ, đất | cây thưa, cỏ cao dày |
+| Rừng | cỏ, đất | cây dày, cỏ cao |
+| Sa mạc | cát, sa thạch bên dưới | xương rồng nếu có texture, không cây |
+| Đồng tuyết | tuyết phủ trên cỏ | cây thưa |
+| Núi | đá lộ ra trên cao, tuyết trên đỉnh | cây thưa ở chân núi |
+| Đại dương | nước, đáy cát và sỏi | không |
 
-#### Hầm mỏ bỏ hoang (Giai đoạn 1b)
-
-- 2–4 hệ thống mỗi bản đồ, tâm cách nhau ít nhất 80 block, độ sâu y=20–50.
-- Mỗi hệ thống: phòng trung tâm (7–11 x 7–11, cao 4–6, sàn đất lẫn đá cuội rêu),
-  hành lang 3x3 thẳng theo trục dài 8–25, ngã ba/ngã tư, cầu thang 5 bậc lên/xuống,
-  tối đa 40 đoạn, bán kính tối đa 72 block.
-- Khung chống mỗi 4–5 block: 2 cột hàng rào + xà ván gỗ. 20% khung có đuốc trên cột.
-- Đường ray trên sàn, thiếu khoảng 30%. Mạng nhện 4% ở góc trần, 30% ở ngã rẽ.
-- Hành lang cắt qua hang: bắc cầu ván gỗ. Nhánh cụt: 50% có rương (hạng hiếm),
-  vị trí lưu trong danh sách rương của thế giới để Giai đoạn 6 điền đồ.
-
-#### Ánh sáng (Giai đoạn 1b, chỉ client)
-
-- 16 mức (0–15), hai kênh: trời (chiếu thẳng xuống theo cột rồi lan ngang) và
-  block (đuốc 14, dung nham 15), lan bằng flood fill, mỗi ô giảm 1 (+ độ cản).
-- Lá cản 1, nước 2, mạng nhện 1; block đặc chặn hẳn.
-- Đỉnh mesh lấy trung bình ánh sáng các ô quanh đỉnh (ánh sáng mượt) nhân với AO.
-- Khi đổi block: tính lại vùng ±15 block quanh đó, dựng lại các đoạn có ánh sáng đổi.
-- Ẩn đoạn khuất: mỗi đoạn biết mặt nào thông nhau; duyệt từ đoạn chứa camera.
+Dưới lòng đất:
+- Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá nền.
+- Quặng theo cụm: than (y < 100, cụm 8), sắt (y < 64, cụm 5),
+  kim cương (y < 16, cụm 3).
+- Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
+- Hang lớn dạng "phô mai": noise 3D tần số thấp, hiếm hơn.
+- Hang không đục đá nền, không đục ngay dưới đáy biển; có cửa hang lộ ra mặt đất.
+- Dưới y = 12: đáy hang là hồ dung nham.
+- Hầm mỏ bỏ hoang: xem 2.9.
 
 ### 2.2 Block
+
+Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Block mới thêm từ 16.
 
 | id | Tên | Độ cứng (giây, tay không) | Công cụ | Rơi ra | Ghi chú |
 |---|---|---|---|---|---|
 | 0 | không khí | – | – | – | |
-| 1 | cỏ | 0.9 | xẻng | đất | mặt trên/bên/dưới khác nhau |
+| 1 | cỏ | 0.9 | xẻng | đất | |
 | 2 | đất | 0.75 | xẻng | đất | |
 | 3 | đá | 7.5 | cuốc (bắt buộc) | đá cuội | |
 | 4 | đá cuội | 10 | cuốc (bắt buộc) | đá cuội | |
-| 5 | cát | 0.75 | xẻng | cát | |
-| 6 | thân gỗ | 3 | rìu | thân gỗ | mặt đầu khác mặt bên |
-| 7 | lá | 0.3 | – | 5% táo | trong suốt một phần |
+| 5 | cát | 0.75 | xẻng | cát | rơi xuống khi bên dưới trống |
+| 6 | thân gỗ | 3 | rìu | thân gỗ | |
+| 7 | lá | 0.3 | – | 5% táo, 5% cây non | |
 | 8 | ván gỗ | 3 | rìu | ván gỗ | |
 | 9 | quặng than | 15 | cuốc gỗ+ | than | |
-| 10 | quặng sắt | 15 | cuốc đá+ | thỏi sắt | rơi thẳng thỏi, không cần lò |
+| 10 | quặng sắt | 15 | cuốc đá+ | sắt thô | ĐỔI: không rơi thẳng thỏi nữa, phải nung |
 | 11 | quặng kim cương | 15 | cuốc sắt+ | kim cương | |
 | 12 | bàn chế tạo | 3.75 | rìu | bàn chế tạo | |
 | 13 | rương | 3.75 | rìu | rương + đồ bên trong | |
-| 14 | đá nền | không phá được | – | – | lớp y=0 |
-| 15 | cỏ cao | 0 | – | 10% hạt | không va chạm, vẽ dạng chữ X |
-| 16 | sỏi | 0.9 | xẻng | sỏi | |
-| 17 | đá cuội rêu | 10 | cuốc (bắt buộc) | đá cuội rêu | |
-| 18 | nước | không phá được | – | – | không va chạm, cản sáng 2 (chưa đặt trong thế giới) |
-| 19 | dung nham | không phá được | – | – | không va chạm, phát sáng 15 |
-| 20 | hàng rào gỗ | 3 | rìu | hàng rào gỗ | cột 4x4 điểm ảnh, va chạm theo cột |
-| 21 | đường ray (dọc Z) | 0.7 | cuốc | đường ray | không va chạm, vẽ sát sàn |
-| 22 | đường ray (dọc X) | 0.7 | cuốc | đường ray | như trên |
-| 23 | mạng nhện | 4 | – | – | không va chạm, đi chậm còn 25%, vẽ chữ X |
-| 24 | đuốc | 0 | – | đuốc | không va chạm, phát sáng 14 |
+| 14 | đá nền | không phá được | – | – | |
+| 15 | cỏ cao | 0 | – | 10% hạt | không va chạm |
+| 16 | sỏi | 0.9 | xẻng | sỏi (10% đá lửa) | rơi xuống khi bên dưới trống |
+| 17 | nước | – | – | – | chất lỏng, xem 2.10 |
+| 18 | dung nham | – | – | – | chất lỏng, phát sáng 15, gây cháy |
+| 19 | đá cuội rêu | 10 | cuốc (bắt buộc) | đá cuội rêu | |
+| 20 | sa thạch | 4 | cuốc (bắt buộc) | sa thạch | |
+| 21 | tuyết phủ | 0.5 | xẻng | không | lớp mỏng trên cỏ ở biome tuyết |
+| 22 | hàng rào gỗ | 3 | rìu | hàng rào | hộp va chạm cao 1.5 |
+| 23 | đường ray | 1 | cuốc | đường ray | không va chạm, nằm sát sàn |
+| 24 | mạng nhện | 6 | kiếm | sợi tơ | đi qua bị chậm 75% |
+| 25 | đuốc | 0 | – | đuốc | phát sáng 14, không va chạm |
+| 26 | lò nung | 5 | cuốc (bắt buộc) | lò nung | phát sáng 13 khi đang cháy |
+| 27 | kính | 0.45 | – | không | trong suốt |
+| 28 | thang | 0.6 | rìu | thang | gắn vào tường, leo được |
+| 29 | cửa gỗ | 4.5 | rìu | cửa | cao 2 block, mở/đóng bằng chuột phải |
+| 30 | đất cày | 0.9 | xẻng | đất | thấp hơn 1/16, ẩm khi gần nước trong 4 block |
+| 31 | lúa mì | 0 | – | hạt (non) / lúa + hạt (chín) | 8 giai đoạn lớn |
+| 32 | cây non | 0 | – | cây non | lớn thành cây sau 5–10 phút |
+| 33 | giường | 0.3 | – | giường | dài 2 block, xem 2.7 |
+| 34 | đá sâu | 12 | cuốc (bắt buộc) | đá sâu | thay đá ở y < 16 |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
@@ -133,97 +160,164 @@ là nguồn sự thật.
 | sắt | 250 | x6 | 6 |
 | kim cương | 1500 | x8 | 7 |
 
-- Loại công cụ: cuốc (đá, quặng), rìu (gỗ, bàn chế tạo, rương), xẻng (đất, cỏ, cát), kiếm.
+- Loại công cụ: cuốc (đá, quặng), rìu (gỗ), xẻng (đất, cát, sỏi), kiếm,
+  cuốc đất (biến đất/cỏ thành đất cày).
 - Hệ số tốc độ chỉ áp dụng khi dùng đúng loại công cụ.
 - Tay không: sát thương 1. Rìu: sát thương bằng kiếm cùng cấp trừ 1.
-- Giáp 4 món (mũ, áo, quần, giày), cấp sắt và kim cương.
-  Điểm giáp sắt: mũ 2, áo 6, quần 5, giày 2 (tổng 15).
-  Điểm giáp kim cương: mũ 3, áo 8, quần 6, giày 3 (tổng 20).
-  Mỗi điểm giáp giảm 4% sát thương. Độ bền giáp: sắt 200, kim cương 450.
-- Cung: độ bền 384. Tên xếp chồng 16.
-- Xếp chồng: block và nguyên liệu 64, công cụ/vũ khí/giáp 1.
+- Giáp 4 món, cấp da, sắt, kim cương:
+  da: mũ 1, áo 3, quần 2, giày 1 (tổng 7), độ bền 80;
+  sắt: 2, 6, 5, 2 (tổng 15), độ bền 200;
+  kim cương: 3, 8, 6, 3 (tổng 20), độ bền 450.
+  Mỗi điểm giáp giảm 4% sát thương.
+- Cung: độ bền 384. Tên xếp chồng 64.
+- Xếp chồng: block và nguyên liệu 64, công cụ/vũ khí/giáp/giường/cửa 1.
 
-### 2.4 Công thức chế tạo
+### 2.4 Chế tạo
 
-Làm được mọi lúc:
+Làm được mọi lúc (trong túi đồ):
 - 1 thân gỗ → 4 ván gỗ
 - 2 ván gỗ → 4 que
 - 4 ván gỗ → 1 bàn chế tạo
-- 3 hạt → 1 bánh mì
+- 1 than + 1 que → 4 đuốc
 
-Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / kim cương theo cấp):
-- cuốc: 3 X + 2 que
-- rìu: 3 X + 2 que
-- xẻng: 1 X + 2 que
-- kiếm: 2 X + 1 que
-- mũ: 5 X · áo: 8 X · quần: 7 X · giày: 4 X (chỉ sắt và kim cương)
-- cung: 3 que + 3 ván gỗ
-- 4 mũi tên: 1 que + 1 đá cuội + 1 ván gỗ
-- rương: 8 ván gỗ
+Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / kim cương):
+- cuốc, rìu: 3 X + 2 que · xẻng: 1 X + 2 que · kiếm: 2 X + 1 que
+- cuốc đất: 2 X + 2 que
+- mũ 5 X · áo 8 X · quần 7 X · giày 4 X (da / sắt / kim cương)
+- cung: 3 que + 3 sợi tơ
+- 4 mũi tên: 1 que + 1 đá lửa + 1 lông gà
+- rương: 8 ván gỗ · lò nung: 8 đá cuội
+- 3 thang: 7 que · 3 cửa gỗ: 6 ván gỗ · 3 hàng rào: 4 que + 2 ván gỗ
+- 16 đường ray: 6 thỏi sắt + 1 que
+- bánh mì: 3 lúa mì
+- giường: 3 len + 3 ván gỗ
+- sa thạch: 4 cát
 
-### 2.5 Người chơi
+Giao diện chế tạo dạng danh sách (không cần lưới kéo thả): công thức đủ nguyên
+liệu thì sáng, thiếu thì mờ.
+
+### 2.5 Lò nung
+
+- 3 ô: nguyên liệu, nhiên liệu, kết quả. Mỗi món nung mất 10 giây.
+- Nhiên liệu: than nung được 8 món; thân gỗ / ván gỗ 1.5 món; que 0.5 món.
+- Công thức nung: sắt thô → thỏi sắt; cát → kính; đá cuội → đá;
+  thịt bò/lợn/gà sống → chín.
+- Lò tiếp tục chạy khi không có người mở (server xử lý).
+
+### 2.6 Người chơi và sinh tồn
 
 - Hộp va chạm AABB rộng 0.6, cao 1.8; mắt ở độ cao 1.62.
 - Vật lý bước cố định 60 Hz.
 - Đi bộ 4.3 block/giây · chạy nhanh 5.6 · ngồi 1.3 (không rơi khỏi mép).
 - Nhảy cao 1.25 block · trọng lực 32 block/giây².
-- Tầm với 4.5 block (đào, đặt, mở rương).
-- 20 máu, 20 đói.
-- Sát thương rơi: 1 máu cho mỗi block vượt quá 3.
-- Đói giảm theo hoạt động (chạy nhanh, nhảy, đào, đánh).
-  Đói ≥ 18: hồi 1 máu mỗi 4 giây. Đói = 0: mất 1 máu mỗi 4 giây.
-  Đói ≤ 6: không chạy nhanh được.
-- Ăn: giữ chuột phải 1.6 giây. Táo +4 đói, bánh mì +5 đói.
+- Bơi: trong nước rơi chậm, giữ Space để nổi lên; dưới nước có thanh dưỡng khí
+  10 bong bóng, hết thì mất 2 máu mỗi giây.
+- Leo thang: đứng sát thang thì đi lên/xuống, không rơi.
+- Tầm với 4.5 block.
+- 20 máu, 20 đói. Sát thương rơi: 1 máu cho mỗi block vượt quá 3
+  (rơi vào nước thì không).
+- Đói giảm theo hoạt động. Đói ≥ 18: hồi 1 máu mỗi 4 giây. Đói = 0: mất 1 máu
+  mỗi 4 giây (không chết vì đói khi máu còn 1). Đói ≤ 6: không chạy nhanh được.
+- Ăn: giữ chuột phải 1.6 giây. Táo +4, bánh mì +5, thịt sống +2–3,
+  thịt chín +6–8.
+- Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
+- Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
+  nhất, nếu không có thì ở điểm hồi sinh của thế giới.
 
-### 2.6 Chiến đấu
+### 2.7 Ngày đêm, sinh vật, giường
 
-- Cận chiến: tầm 3 block, hồi đòn 0.6 giây. Đánh khi chưa hồi xong thì sát
+- Một ngày 20 phút: ngày 10 phút, đêm 7 phút, bình minh và hoàng hôn mỗi lúc
+  1.5 phút. Server giữ đồng hồ, gửi cho client.
+- Ánh sáng 16 mức (0–15): ánh sáng trời theo giờ trong ngày + ánh sáng block.
+- Quái vật sinh ở chỗ ánh sáng ≤ 7, cách người chơi 24–64 block,
+  tối đa 30 quái trong bán kính 64 block quanh mỗi người chơi. Bị gỡ khi
+  cách mọi người chơi trên 128 block.
+
+| Sinh vật | Máu | Hành vi | Rơi ra |
+|---|---|---|---|
+| Xác sống | 20 | đuổi người chơi trong 32 block, đánh 3; cháy dưới nắng | thịt thối |
+| Bộ xương | 20 | giữ khoảng cách, bắn cung 2–4; cháy dưới nắng | xương, tên |
+| Nhện | 16 | leo tường, đánh 2; ban ngày chỉ đánh khi bị đánh | sợi tơ |
+| Lợn | 10 | đi lang thang, chạy khi bị đánh | thịt lợn sống |
+| Bò | 10 | như trên | thịt bò sống, da |
+| Gà | 4 | như trên, rơi chậm | thịt gà sống, lông |
+| Cừu | 8 | như trên; tỉa lông bằng kéo hoặc giết | len |
+
+- KHÔNG làm các sinh vật mang thiết kế riêng của Minecraft (quái nổ màu xanh,
+  người cao đen dịch chuyển, rồng End...). Nếu cần quái mới thì tự thiết kế.
+- Động vật sinh trên cỏ khi tạo chunk mới, theo đàn 2–4 con; không sinh lại liên tục.
+- Giường: ngủ được khi đêm và không có quái trong 8 block. Ngủ thì đặt điểm hồi
+  sinh. Khi hơn một nửa số người chơi đang online cùng ngủ thì tua sang sáng.
+
+### 2.8 Chiến đấu
+
+- Cận chiến: tầm 3 block, hồi đòn 0.6 giây; đánh khi chưa hồi xong thì sát
   thương giảm theo tỷ lệ, tối thiểu 20%.
-- Chí mạng khi đang rơi xuống: sát thương x1.5.
-- Knockback: đẩy ngang 0.4 block/tick theo hướng đánh, hất lên 0.36; đánh khi
-  đang chạy nhanh thì đẩy ngang gấp đôi.
-- Sau khi trúng đòn: miễn sát thương 0.5 giây.
+- Chí mạng khi đang rơi xuống: x1.5.
+- Knockback: đẩy ngang 0.4 block/tick, hất lên 0.36; đang chạy nhanh thì đẩy
+  ngang gấp đôi.
+- Miễn sát thương 0.5 giây sau khi trúng đòn.
 - Cung: kéo tối đa 1 giây; sát thương 2–9 theo lực kéo; tốc độ đầu tối đa
-  60 block/giây; có trọng lực và lực cản. Đi chậm khi đang kéo.
+  60 block/giây; có trọng lực và lực cản.
 - Sát thương thực = sát thương gốc × (1 − điểm giáp × 4%).
-- Kiếm mất 1 độ bền mỗi đòn trúng; mỗi món giáp mất 1 độ bền mỗi lần chịu đòn.
-- Chết: rơi toàn bộ đồ tại chỗ, chuyển sang chế độ xem.
+- PvP: cấu hình server `PVP=on|off`, mặc định on.
+- Vùng an toàn bán kính 16 block quanh điểm hồi sinh thế giới: không PvP,
+  không phá/đặt block (trừ quản trị viên).
 
-### 2.7 Luật trận đấu
+### 2.9 Hầm mỏ bỏ hoang
 
-- Phòng 2–16 người, vào bằng mã 5 ký tự hoặc "Chơi nhanh".
-- Pha: sảnh chờ → bắt đầu → ân hạn 60 giây (không PvP) → chiến đấu → kết thúc.
-- Sảnh: đủ 2 người đếm ngược 30 giây; đủ 8 người rút xuống 10 giây.
-- Thả người chơi ở điểm ngẫu nhiên trên mặt đất, cách nhau ít nhất 30 block,
-  túi đồ trống.
-- Vòng bo hình vuông, tâm ngẫu nhiên gần giữa bản đồ. Cứ 2 phút thu một lần,
-  mỗi lần thu trong 30 giây: 256 → 180 → 120 → 70 → 30 → 10.
-  Ngoài bo mất 1 máu/giây; hai vòng cuối mất 2 máu/giây.
-- 40 rương rải ngẫu nhiên. Ba hạng đồ: thường (thức ăn, công cụ đá, tên),
-  hiếm (kiếm sắt, 1 món giáp sắt, cung), cực hiếm (đồ kim cương).
-  5 rương cực hiếm đặt gần tâm bản đồ.
-- Mỗi lần thu bo: thả 1 thùng tiếp tế trong vùng bo mới, có cột sáng đánh dấu.
-- Kết thúc: bảng kết quả 15 giây (hạng, số hạ gục, thời gian sống), rồi về
-  sảnh với thế giới mới.
+- Khoảng 1 hệ thống mỗi vùng 256x256 block, ở độ sâu y = 20–50.
+  Vị trí quyết định bằng seed + tọa độ vùng để sinh được theo từng chunk.
+- Một phòng trung tâm bằng đất, từ đó tỏa ra hành lang 3x3 thẳng theo trục,
+  dài 8–25 block, rẽ nhánh và giao nhau, có đoạn dốc lên xuống giữa các tầng.
+  Tối đa khoảng 40 đoạn mỗi hệ thống.
+- Cứ 4–5 block một khung chống: hai cột hàng rào gỗ và một xà ván gỗ ngang.
+- Đường ray trên sàn, thiếu ngẫu nhiên khoảng 30%.
+- Mạng nhện rải rác, dày hơn ở ngã rẽ. Đuốc thỉnh thoảng trên cột.
+- Khi hành lang cắt qua hang: bắc sàn ván gỗ qua khoảng trống.
+- Rương ở cuối một số nhánh cụt với đồ: bánh mì, than, sắt thô, đường ray,
+  hạt giống, thỉnh thoảng kim cương.
+- Hầm mỏ phải liền mạch khi vắt qua nhiều chunk: lập kế hoạch toàn bộ hệ thống
+  theo vùng, rồi mỗi chunk chỉ đặt những block thuộc về nó.
 
-### 2.8 Điều khiển
+### 2.10 Chất lỏng
+
+- Nước lan ngang tối đa 7 block từ nguồn, chảy xuống không giới hạn; dung nham
+  lan 3 block và chậm hơn.
+- Nước gặp dung nham: nguồn dung nham thành đá vỏ chai (nếu có texture) hoặc
+  đá cuội, dung nham chảy thành đá cuội.
+- Chỉ cập nhật chất lỏng ở chunk gần người chơi.
+
+### 2.11 Làng
+
+- Sinh trên đồng cỏ và sa mạc, khoảng 1 làng mỗi vùng 512x512 block.
+- 4–10 công trình nối nhau bằng đường sỏi: nhà nhỏ, nhà lớn, ruộng lúa có
+  mương nước, giếng, lò rèn có rương đồ.
+- Công trình được định nghĩa bằng dữ liệu (mảng block hoặc file JSON) trong
+  `/shared/structures`, đặt khớp độ cao mặt đất, san nền bằng đất bên dưới.
+- Dân làng: 20 máu, đi lang thang trong làng ban ngày, vào nhà ban đêm.
+  Chuột phải để mở giao diện trao đổi: 2–4 giao dịch cố định theo nghề
+  (nông dân, thợ rèn, thủ thư), tiền tệ là ngọc lục bảo (vật phẩm mới,
+  không cần quặng; lấy được từ rương làng và bán đồ cho dân làng).
+
+### 2.12 Điều khiển
 
 | Phím | Chức năng |
 |---|---|
 | W A S D | di chuyển |
-| Space | nhảy |
+| Space | nhảy / bơi lên |
 | Shift (giữ) | chạy nhanh |
 | Ctrl (giữ) | ngồi |
 | Chuột | nhìn (pointer lock) |
 | Chuột trái | đào (giữ) / đánh |
-| Chuột phải | đặt block / mở rương / ăn (giữ) / kéo cung (giữ) |
+| Chuột phải | đặt block / dùng (rương, lò, cửa, giường, dân làng) / ăn / kéo cung |
 | 1–9, lăn chuột | chọn ô hotbar |
 | E | túi đồ và chế tạo |
 | Q | vứt vật phẩm |
-| Tab (giữ) | bảng người chơi |
+| Tab (giữ) | danh sách người chơi |
 | T | chat |
 | F3 | thông tin debug |
-| Esc | menu / thoát pointer lock |
+| Esc | menu |
 
 ---
 
@@ -231,417 +325,477 @@ Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội 
 
 Nguồn: REFI_Textures của MysticTempest, giấy phép CC BY-SA 4.0
 (https://github.com/MysticTempest/REFI_Textures).
-Người dùng tải về và giải nén vào `/assets-src/REFI_Textures`.
-Tất cả file là PNG 16x16 RGBA; cỏ và lá đã tô màu sẵn.
-
+Người dùng giải nén vào `/assets-src/REFI_Textures`.
 Đường dẫn dưới đây tính từ `/assets-src/REFI_Textures/textures/`.
+Bảng ánh xạ thực tế nằm trong `scripts/texture-map.json`; mục này là nguồn để
+cập nhật file đó.
 
-### 3.1 Block → `/client/public/textures/`
+Nguyên tắc chung cho script nhập:
+- Texture có điểm trong suốt mà dùng cho block đặc (quặng, cỏ mặt bên) thì
+  ghép đè lên nền tương ứng.
+- Texture cao hơn 16 px (ví dụ nước, dung nham, đuốc động) là dải khung hình
+  xếp dọc: lấy khung đầu, hoặc dùng làm hoạt ảnh nếu tiện.
+- File nào không tìm thấy thì tìm file gần tên nhất trong thư mục, báo người
+  dùng; vẫn không có thì vẽ tạm.
+
+### 3.1 Block đã có từ Giai đoạn 1
 
 | Đích | Nguồn |
 |---|---|
 | grass_top.png | default_mcl_core/soil/default_grass.png |
-| grass_side.png | GHÉP: default_grass_side.png đè lên default_dirt.png |
+| grass_side.png | GHÉP: default_mcl_core/soil/default_grass_side.png đè lên default_dirt.png |
 | dirt.png | default_mcl_core/soil/default_dirt.png |
 | stone.png | default_mcl_core/stone/default_stone.png |
 | cobble.png | default_mcl_core/stone/default_cobble.png |
 | bedrock.png | default_mcl_core/stone/mcl_core_bedrock.png |
 | sand.png | default_mcl_core/sand/default_sand.png |
-| log_side.png | default_mcl_core/trees/default_tree.png |
-| log_top.png | default_mcl_core/trees/default_tree_top.png |
+| log_side.png / log_top.png | default_mcl_core/trees/default_tree.png / default_tree_top.png |
 | leaves.png | default_mcl_core/trees/default_leaves.png |
 | planks.png | default_mcl_core/trees/default_wood.png |
-| ore_coal.png | default_mcl_core/minerals_ores/default_mineral_coal.png |
-| ore_iron.png | default_mcl_core/minerals_ores/default_mineral_iron.png |
-| ore_diamond.png | default_mcl_core/minerals_ores/default_mineral_diamond.png |
-| workbench_top.png | default_mcl_core/crafting_workbench_top.png |
-| workbench_side.png | default_mcl_core/crafting_workbench_side.png |
-| workbench_front.png | default_mcl_core/crafting_workbench_front.png |
-| chest_top.png | default_mcl_core/default_chest_top.png |
-| chest_side.png | default_mcl_core/default_chest_side.png |
-| chest_front.png | default_mcl_core/default_chest_front.png |
+| ore_coal / ore_iron / ore_diamond.png | default_mcl_core/minerals_ores/default_mineral_{coal,iron,diamond}.png |
+| workbench_{top,side,front}.png | default_mcl_core/crafting_workbench_{top,side,front}.png |
+| chest_{top,side,front}.png | default_mcl_core/default_chest_{top,side,front}.png |
 | tallgrass.png | default_mcl_core/plants/default_grass_3.png |
-| crack_0.png … crack_4.png | CẮT: default_mcl_core/gui_hud/crack_anylength.png (16x80, 5 khung dọc) |
-| gravel.png | default_mcl_core/stone/default_gravel.png |
-| mossy_cobble.png | default_mcl_core/stone/default_mossycobble.png |
-| water.png | default_mcl_core/default_water.png |
-| lava.png | default_mcl_core/default_lava.png |
-| fence.png | default_mcl_core/fences/default_fence_wood.png |
-| rail.png | carts_mcl_minecarts/default_rail.png |
-| cobweb.png | default_mcl_core/mcl_core_web.png |
-| torch.png | default_mcl_core/default_torch_on_floor.png |
+| crack_0 … crack_4.png | CẮT: default_mcl_core/gui_hud/crack_anylength.png (16x80) |
 
-Lưu ý: texture quặng và `default_grass_side.png` có thể là lớp phủ trong suốt.
-Script phải kiểm tra kênh alpha; nếu ảnh có điểm trong suốt thì ghép đè lên
-nền tương ứng (quặng trên `default_stone.png`, cỏ bên trên `default_dirt.png`).
-Riêng `leaves.png` và `tallgrass.png` giữ nguyên độ trong suốt.
-
-### 3.2 Vật phẩm → `/client/public/icons/`
+### 3.2 Block mới
 
 | Đích | Nguồn |
 |---|---|
-| {wood,stone,iron,diamond}_pickaxe.png | default_mcl_core/tools/default_tool_{wood,stone,steel,diamond}pick.png |
-| {…}_axe.png | default_mcl_core/tools/default_tool_{…}axe.png |
-| {…}_shovel.png | default_mcl_core/tools/default_tool_{…}shovel.png |
-| {…}_sword.png | default_mcl_core/tools/default_tool_{…}sword.png |
+| gravel.png | default_mcl_core/stone/default_gravel.png |
+| water.png | default_mcl_core/default_water.png |
+| lava.png | default_mcl_core/default_lava.png |
+| mossy_cobble.png | default_mcl_core/stone/default_mossycobble.png |
+| sandstone.png | default_mcl_core/sand/default_sandstone.png |
+| snow.png / snow_side.png | default_mcl_core/soil/default_snow.png / default_snow_side.png |
+| fence.png | default_mcl_core/fences/default_fence_wood.png |
+| rail.png, rail_curved.png, rail_t.png, rail_cross.png | carts_mcl_minecarts/default_rail.png, default_rail_curved.png, default_rail_t_junction.png, default_rail_crossing.png |
+| cobweb.png | default_mcl_core/mcl_core_web.png |
+| torch.png | default_mcl_core/default_torch_on_floor.png |
+| furnace_front.png, furnace_front_on.png, furnace_side.png, furnace_top.png | default_mcl_core/default_furnace_front.png, default_furnace_front_active.png, default_furnace_side.png, default_furnace_top.png |
+| glass.png | default_mcl_core/glass/default_glass.png |
+| ladder.png | default_mcl_core/default_ladder_wood.png |
+| door_lower.png / door_upper.png | doors_mcl_doors/mcl_doors_door_wood_lower.png / mcl_doors_door_wood_upper.png |
+| farmland.png / farmland_wet.png | farming_mcl_farming/farming_soil.png / farming_soil_wet.png |
+| wheat_0 … wheat_7.png | farming_mcl_farming/mcl_farming_wheat_stage_0.png … _7.png |
+| deepslate.png / deepslate_top.png | mcl_deepslate/mcl_deepslate.png / mcl_deepslate_top.png |
+| obsidian.png | default_mcl_core/stone/default_obsidian.png |
+| bed_*.png | beds_mcl_beds/ — chọn bộ màu đỏ (red) cho mặt trên, bên, đầu, chân |
+| sapling.png | tìm trong default_mcl_core/trees hoặc plants |
+
+### 3.3 Vật phẩm → `/client/public/icons/`
+
+| Đích | Nguồn |
+|---|---|
+| {wood,stone,iron,diamond}_{pickaxe,axe,shovel,sword}.png | default_mcl_core/tools/default_tool_{wood,stone,steel,diamond}{pick,axe,shovel,sword}.png |
+| {…}_hoe.png | tìm trong farming_mcl_farming (cuốc đất) |
 | stick.png | default_mcl_core/default_stick.png |
 | coal.png | default_mcl_core/minerals_ores/default_coal_lump.png |
+| raw_iron.png | default_mcl_core/minerals_ores/mcl_raw_ores_raw_iron.png |
 | iron_ingot.png | default_mcl_core/minerals_ores/default_steel_ingot.png |
 | diamond.png | default_mcl_core/minerals_ores/default_diamond.png |
 | apple.png | default_mcl_core/plants/default_apple.png |
-| bread.png | farming_mcl_farming/farming_bread.png |
-| seeds.png | farming_mcl_farming/mcl_farming_wheat_seeds.png |
-| {iron,diamond}_{helmet,chestplate,leggings,boots}.png | mcl_armor/mcl_armor_inv_{helmet,chestplate,leggings,boots}_{iron,diamond}.png |
-| bow.png, bow_pull_0.png, bow_pull_1.png, bow_pull_2.png | mcl_bows/mcl_bows_bow.png, mcl_bows_bow_0.png, _1, _2 |
+| bread.png / seeds.png | farming_mcl_farming/farming_bread.png / mcl_farming_wheat_seeds.png |
+| wheat.png | tìm trong farming_mcl_farming |
+| {leather,iron,diamond}_{helmet,chestplate,leggings,boots}.png | mcl_armor/mcl_armor_inv_{helmet,chestplate,leggings,boots}_{leather,iron,diamond}.png |
+| bow.png, bow_pull_0..2.png | mcl_bows/mcl_bows_bow.png, mcl_bows_bow_0.png, _1, _2 |
 | arrow.png | mcl_bows/mcl_bows_arrow_inv.png |
+| beef_raw / beef_cooked.png | mcl_mobitems/mcl_mobitems_beef_raw.png / _beef_cooked.png |
+| chicken_raw / chicken_cooked.png | mcl_mobitems/mcl_mobitems_chicken_raw.png / _chicken_cooked.png |
+| pork_raw / pork_cooked, rotten_flesh, string, feather, mutton… | tìm trong mcl_mobitems |
+| bone.png / leather.png | mcl_mobitems/mcl_mobitems_bone.png / mcl_mobitems_leather.png |
+| door.png | doors_mcl_doors/doors_door_wood.png |
+| flint, emerald, shears, wool | tìm trong default_mcl_core, mcl_core, wool_mcl_wool |
 
-Chú ý tên nguồn dùng "steel" cho cấp sắt.
-Icon của vật phẩm dạng block (đất, đá, ván...) thì vẽ khối 3D nhỏ từ texture
-block, không cần file riêng.
+Chú ý tên nguồn dùng "steel" cho cấp sắt. Vật phẩm dạng block thì vẽ khối 3D
+nhỏ từ texture block.
 
-### 3.3 Giao diện và nhân vật
+### 3.4 Giao diện, nhân vật, sinh vật
 
 | Đích | Nguồn |
 |---|---|
-| /client/public/ui/hotbar.png | default_mcl_core/gui_hud/gui_hotbar.png |
-| /client/public/ui/hotbar_selected.png | default_mcl_core/gui_hud/gui_hotbar_selected.png |
-| /client/public/textures/player.png | HUD/character.png (64x32, bố cục skin cổ điển) |
+| /client/public/ui/hotbar.png, hotbar_selected.png | default_mcl_core/gui_hud/gui_hotbar.png, gui_hotbar_selected.png |
+| /client/public/entities/player.png | HUD/character.png (64x32) |
+| /client/public/entities/zombie.png | mobs_mc/mobs_mc_zombie.png (64x64) |
+| /client/public/entities/skeleton.png | mobs_mc/mobs_mc_skeleton.png (64x32) |
+| /client/public/entities/spider.png | mobs_mc/mobs_mc_spider.png (64x32) |
+| /client/public/entities/pig.png, cow.png, chicken.png | mobs_mc/mobs_mc_{pig,cow,chicken}.png |
+| /client/public/entities/sheep.png, sheep_fur.png | mobs_mc/mobs_mc_sheep.png, mobs_mc_sheep_fur.png |
+| /client/public/entities/villager_*.png | mobs_mc/villager/ |
 
-Trái tim, thanh đói, tâm ngắm: tự vẽ bằng canvas/CSS theo nét pixel.
+KHÔNG nhập các skin creeper, enderman, dragon, wither, ghast, blaze và các
+sinh vật mang thiết kế riêng khác trong `mobs_mc/`.
+
+Trái tim, thanh đói, bong bóng dưỡng khí, tâm ngắm: tự vẽ theo nét pixel.
 
 ---
 
 ## 4. Các giai đoạn
 
-### Giai đoạn 0 — Dựng khung
+### Giai đoạn 0 — Dựng khung (ĐÃ XONG)
 
-Việc cần làm:
-1. Tạo cấu trúc thư mục ở mục 1 bằng npm workspaces, TypeScript strict.
-2. Tạo các lệnh nêu trong `AGENTS.md` (`dev`, `typecheck`, `build`).
-3. Client: một trang hiển thị cảnh Three.js trống với một khối lập phương xoay.
-   Server: mở cổng WebSocket, ghi log khi có kết nối.
-4. Tạo `DESIGN.md` chép toàn bộ mục 2 của file này.
-5. Tạo `PROGRESS.md` liệt kê 8 giai đoạn (0–7) với trạng thái.
-6. Tạo `CREDITS.md` với dòng ghi công REFI_Textures.
-7. Tạo `.gitignore` gồm `node_modules/`, `dist/`, `assets-src/`.
-8. `git init` nếu chưa có, rồi commit.
+Giữ nguyên. Nếu `.gitignore` chưa có `server/data/` thì thêm vào.
 
-NGHIỆM THU
-- `npm install` rồi `npm run dev` chạy không lỗi; mở trình duyệt thấy khối xoay.
-- `npm run typecheck` và `npm run build` thành công.
+### Giai đoạn 1 — Thế giới voxel cơ bản (ĐÃ XONG, bản cố định)
+
+Đã có: chunk, bảng block id 0–15, sinh địa hình bản đồ cố định, texture atlas,
+mesh theo chunk, camera bay, nhập texture. Giai đoạn 2 sẽ thay phần bản đồ cố
+định.
 
 ---
 
-### Giai đoạn 1 — Thế giới voxel (chỉ client)
+### Giai đoạn 2 — Thế giới vô hạn, biome, hang động, hầm mỏ, ánh sáng
 
-DỮ LIỆU
-- `/shared/blocks.ts`: bảng block theo mục 2.2, mỗi block có id, tên, độ cứng,
-  công cụ, vật phẩm rơi, cờ trong suốt, cờ va chạm, texture mặt trên/bên/dưới.
-- Lớp `Chunk` và `World` trong `/shared` (get/set block theo tọa độ thế giới).
+Chỉ ở client, chưa có mạng. Thiết kế sao cho Giai đoạn 5 chuyển việc sinh và
+lưu chunk lên server dễ dàng.
 
-SINH ĐỊA HÌNH
-- Theo mục 2.1. Đặt trong `/shared` để server dùng lại ở Giai đoạn 4.
-- Bộ sinh số ngẫu nhiên có seed, không dùng `Math.random`.
+THẾ GIỚI VÔ HẠN
+- Bỏ giới hạn 256x256. `World` quản lý chunk theo bảng băm tọa độ (cx, cz).
+- Chiều cao 128. Chỉnh lại sinh địa hình theo mục 2.1.
+- Tải chunk theo bán kính tầm nhìn quanh camera (mặc định 8, chỉnh được),
+  ưu tiên chunk gần và chunk trước mặt. Gỡ mesh và dữ liệu chunk ra ngoài
+  bán kính + 2.
+- Chunk đã bị sửa thì giữ thay đổi trong bộ nhớ khi bị gỡ (Giai đoạn 5 sẽ lưu
+  xuống đĩa ở server); quay lại phải còn nguyên.
+- Sinh địa hình, tính ánh sáng và dựng mesh trong Web Worker (có thể nhiều
+  worker), không làm khựng luồng chính.
 
-NHẬP TEXTURE
-- Viết `scripts/import-textures.ts` và lệnh `npm run import-textures`:
-  sao chép và đổi tên theo mục 3, bảng ánh xạ đặt trong
-  `scripts/texture-map.json`; xử lý các mục GHÉP và CẮT; in danh sách file thiếu.
-- Chạy script nếu `/assets-src/REFI_Textures` đã có. Nếu chưa có, bỏ qua và
-  báo người dùng.
+BIOME, HANG, QUẶNG
+- Biome theo bảng 2.1, chuyển tiếp mượt về độ cao, không có vách dựng đứng
+  vô lý ở ranh giới.
+- Cây sinh xuyên ranh giới chunk đúng (cây ở mép chunk không bị cụt lá):
+  quyết định vị trí cây theo seed + tọa độ, chunk nào chứa phần lá thì tự
+  đặt phần đó.
+- Hang "sợi mì" và "phô mai", hồ dung nham đáy sâu, đá sâu dưới y = 16.
+- Nếu trước đó đã làm hang động thì giữ lại, chỉ chỉnh cho khớp đặc tả.
 
-HÌNH ẢNH
-- Khi tải game, gộp mọi file trong `/client/public/textures` thành một texture
-  atlas (tile 16 px, có thể cấu hình). Thiếu file nào thì vẽ tạm bằng canvas.
-- `NearestFilter`, tắt mipmap hoặc xử lý để không rỉ màu giữa các tile.
-- Mesh theo chunk, chỉ tạo mặt tiếp giáp không khí hoặc block trong suốt.
-  Khi block đổi, dựng lại chunk đó và chunk kề nếu block nằm ở biên.
-- Lá dùng alpha test. Cỏ cao vẽ 2 mặt phẳng chéo hình chữ X.
-- Ambient occlusion theo đỉnh; các mặt sáng tối khác nhau nhẹ.
-- Bầu trời gradient, sương mù ở cuối tầm nhìn, ánh sáng mặt trời cố định.
+HẦM MỎ BỎ HOANG
+- Theo mục 2.9. Rương trong hầm mỏ tạm thời chỉ cần tồn tại (Giai đoạn 4 mới
+  có hệ thống vật phẩm để điền đồ).
 
-ĐIỀU KHIỂN TẠM
-- Camera bay tự do: WASD, Space lên, Shift xuống, chuột để nhìn.
-- Góc màn hình: FPS, tọa độ, số chunk đang vẽ, seed. Seed lấy từ tham số URL
-  `?seed=`.
+CHẤT LỎNG (tĩnh)
+- Đại dương, hồ, dung nham là block tĩnh ở giai đoạn này; mô phỏng chảy làm ở
+  Giai đoạn 4. Mặt nước vẽ bán trong suốt, thấp hơn 1/8 block, không vẽ mặt
+  tiếp giáp giữa hai block nước.
+
+ÁNH SÁNG
+- Hai kênh 0–15: ánh sáng trời (lan thẳng xuống, giảm 1 mỗi bước ngang) và
+  ánh sáng block (đuốc 14, dung nham 15, lò đang cháy 13), lan bằng flood fill.
+- Lưu ánh sáng theo chunk; khi đặt/phá block thì cập nhật cục bộ, kể cả xuyên
+  chunk.
+- Mesh đọc ánh sáng để tô màu đỉnh, giữ ambient occlusion.
+- Ánh sáng trời nhân với hệ số độ sáng ban ngày (cố định 1.0 ở giai đoạn này;
+  Giai đoạn 7 mới chạy đồng hồ ngày đêm).
+- Thêm block đuốc để kiểm tra (đặt bằng phím số tạm thời).
+
+BLOCK MỚI
+- Thêm vào `/shared/blocks.ts` toàn bộ block id 16–34 (chỉ dữ liệu và hình ảnh;
+  hành vi đặc biệt như cửa, giường, lò, cây lớn làm ở Giai đoạn 4 và 7).
+- Cập nhật `scripts/texture-map.json` theo mục 3.2 và chạy lại script nhập.
+- Hình dạng đặc biệt: hàng rào (cột + thanh nối), đường ray (tấm phẳng sát
+  sàn, tự chọn thẳng/cong theo ray bên cạnh), đuốc (que nhỏ), cửa, thang (tấm
+  phẳng sát tường), mạng nhện và cây non (chữ X), lúa mì (dạng #), giường
+  (cao 9/16).
 
 NGHIỆM THU
-- 60 FPS trên laptop thông thường khi vẽ toàn bộ 256 chunk.
-- Không có khe hở giữa các chunk, không thiếu mặt, không rỉ màu texture.
-- Cùng seed cho ra địa hình y hệt sau khi tải lại trang.
-- Có cây, cát vùng thấp, quặng lộ ra ở vách đá hoặc khi bay xuống dưới đất.
+- Bay thẳng một hướng 2 phút: địa hình sinh liên tục, không khựng hình rõ rệt,
+  bộ nhớ không tăng mãi.
+- Bay xa rồi quay lại: block đã sửa vẫn còn.
+- Thấy ít nhất 4 biome khác nhau và đại dương.
+- Xuống lòng đất: hang nối nhau, có hồ dung nham ở đáy, tìm được hầm mỏ có
+  đường ray, khung gỗ, mạng nhện, rương.
+- Trong hang thì tối, đặt đuốc thì sáng vùng xung quanh; phá đuốc thì tối lại.
+- Cùng seed cho ra cùng thế giới.
+- FPS 60 với tầm nhìn 8 chunk trên laptop thông thường.
 
 ---
 
-### Giai đoạn 1b — Hang động, hầm mỏ, ánh sáng (chỉ client)
-
-Thêm theo yêu cầu người dùng, làm trước Giai đoạn 2. Thông số ở mục 2.1 và 2.2.
-
-VIỆC CẦN LÀM
-- Tăng chiều cao thế giới lên 128, mặt đất y=70–90, độ sâu quặng theo tỷ lệ.
-- Hang sợi mì + hang phô mai + cửa hang + hồ dung nham. Quặng lộ trên vách hang.
-- Hầm mỏ bỏ hoang: phòng, hành lang, ngã rẽ, cầu thang, khung chống, đường ray,
-  mạng nhện, đuốc, cầu ván qua hang, rương ở nhánh cụt.
-- Block mới: sỏi, đá cuội rêu, nước, dung nham, hàng rào gỗ, đường ray (2 hướng),
-  mạng nhện, đuốc. Texture lấy từ REFI_Textures (mục 3.1).
-- Ánh sáng theo block 16 mức (trời + đuốc/dung nham), tính lại theo vùng khi đổi
-  block (Giai đoạn 2 dùng).
-- Mesh theo đoạn 16x16x16 và ẩn đoạn khuất để giữ FPS khi có hang.
-- Debug: N nhìn đêm, F4 bật/tắt ẩn hang khuất, PageUp/PageDown mặt cắt.
-
-NGHIỆM THU
-- Bay xuống lòng đất thấy hang nối nhau liên tục, không có hang cụt vuông vức.
-- Tìm được ít nhất 2 hầm mỏ có đường ray, khung gỗ, rương.
-- Trong hang tối, đuốc chiếu sáng vùng xung quanh.
-- FPS không giảm quá 10% so với trước.
-- Cùng seed vẫn ra cùng thế giới.
-
----
-
-### Giai đoạn 2 — Người chơi và tương tác block (chỉ client)
+### Giai đoạn 3 — Người chơi và tương tác block (chỉ client)
 
 VẬT LÝ
-- Theo mục 2.5. Hàm bước vật lý đặt trong `/shared` (đầu vào: trạng thái +
-  input + world; đầu ra: trạng thái mới), thuần túy và xác định, để server
-  dùng lại.
-- Va chạm AABB xử lý từng trục riêng (X, Y, Z) để trượt dọc tường.
-- Vật lý 60 Hz bước cố định; hiển thị nội suy giữa hai bước.
-- Tính sát thương rơi (chỉ lưu số máu, chưa cần hiển thị).
+- Theo mục 2.6. Hàm bước vật lý đặt trong `/shared`, thuần túy và xác định,
+  để server dùng lại.
+- Va chạm AABB từng trục; hỗ trợ hộp va chạm không phải khối đầy (hàng rào,
+  đất cày, giường).
+- Bơi trong nước, leo thang, chậm lại trong mạng nhện, dung nham gây sát
+  thương (chỉ lưu số máu, chưa hiển thị).
+- Chunk chưa tải xong thì giữ người chơi đứng yên, không rơi xuyên đất.
 
 TƯƠNG TÁC
-- Pointer lock khi bấm vào màn hình.
-- Raycast kiểu DDA trong tầm 4.5 block; vẽ khung viền quanh block đang nhắm.
-- Giữ chuột trái để đào: thời gian = độ cứng; hiện vết nứt 5 mức (crack_0–4).
-  Thả chuột hoặc đổi block thì tiến độ về 0.
-- Chuột phải đặt block vào mặt đang nhắm; không cho đặt nếu chồng lên hộp va
-  chạm của người chơi.
-- Tạm thời: phím 1–9 chọn loại block để đặt, số lượng vô hạn.
+- Pointer lock; raycast DDA trong tầm 4.5; khung viền quanh block đang nhắm
+  (đúng hình dạng block đặc biệt).
+- Giữ chuột trái để đào, vết nứt 5 mức.
+- Chuột phải đặt block; không đặt chồng lên người chơi. Đuốc và thang chỉ đặt
+  được lên mặt block đặc; đuốc đặt lên tường thì nghiêng.
+- Block chịu trọng lực (cát, sỏi) rơi xuống khi bên dưới trống.
+- Tạm thời: phím 1–9 chọn loại block, số lượng vô hạn.
 
 HÌNH ẢNH
-- Tâm ngắm. Cánh tay góc dưới phải, vung khi đào/đặt.
-- Camera lắc nhẹ khi đi; FOV tăng nhẹ khi chạy nhanh.
-- Giữ lại chế độ bay bằng phím F để debug.
+- Tâm ngắm, cánh tay vung, camera lắc khi đi, FOV tăng khi chạy nhanh.
+- Màn hình ám xanh khi ở dưới nước.
+- Phím F bật/tắt chế độ bay để debug.
 
 NGHIỆM THU
-- Không xuyên tường, không kẹt ở góc, không rung khi đứng sát tường.
-- Nhảy lên được block cao 1, không lên được block cao 2.
-- Ngồi thì không rơi khỏi mép block.
-- Đào và đặt ở biên chunk cập nhật đúng cả hai chunk.
-- Không đặt được block vào chỗ mình đang đứng.
+- Không xuyên tường, không kẹt góc, không rung khi đứng sát tường.
+- Nhảy lên được block cao 1, không lên được block cao 2; không nhảy qua hàng rào.
+- Bơi, leo thang, đi qua mạng nhện hoạt động đúng.
+- Đào/đặt ở biên chunk cập nhật đúng cả mesh và ánh sáng.
+- Cát rơi xuống khi phá block bên dưới.
 
 ---
 
-### Giai đoạn 3 — Vật phẩm, chế tạo, sinh tồn (chỉ client)
+### Giai đoạn 4 — Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt (chỉ client)
 
-VẬT PHẨM
-- `/shared/items.ts` theo mục 2.3; `/shared/recipes.ts` theo mục 2.4.
-- Icon đọc từ `/client/public/icons`; vật phẩm dạng block thì vẽ khối 3D nhỏ.
-  Thiếu icon thì vẽ tạm.
+VẬT PHẨM VÀ TÚI ĐỒ
+- `/shared/items.ts`, `/shared/recipes.ts`, `/shared/smelting.ts` theo mục 2.3–2.5.
+- 9 ô hotbar + 27 ô túi + 4 ô giáp; logic túi đồ trong `/shared`.
+- Bấm trái nhấc/đặt chồng; bấm phải nhấc nửa/đặt 1; Shift+bấm chuyển nhanh.
+- Vật phẩm rơi: khối nhỏ xoay, có trọng lực, hút về người chơi trong 1.5 block,
+  gộp chồng khi nằm gần nhau, biến mất sau 5 phút.
+- Công cụ: hệ số tốc độ, yêu cầu cấp, độ bền, vỡ khi hết.
 
-TÚI ĐỒ
-- 9 ô hotbar + 27 ô túi + 4 ô giáp. Logic túi đồ đặt trong `/shared`.
-- Thao tác: bấm trái nhấc/đặt cả chồng; bấm phải nhấc nửa/đặt 1;
-  Shift+bấm chuyển nhanh giữa hotbar và túi (giáp thì vào ô giáp).
-- Đào xong: vật phẩm rơi ra thành khối nhỏ xoay tròn, có trọng lực, bị hút về
-  người chơi trong bán kính 1.5 block, biến mất sau 5 phút.
-- Đặt block trừ 1 trong chồng. Phím Q vứt 1 vật phẩm.
-- Công cụ: áp dụng hệ số tốc độ, yêu cầu cấp công cụ, độ bền (thanh dưới
-  icon), vỡ khi hết độ bền.
-- Hiện vật phẩm đang cầm thay cho cánh tay trống.
+BLOCK CÓ CHỨC NĂNG
+- Rương: 27 ô, chuột phải mở; điền đồ cho rương hầm mỏ khi chunk được sinh.
+- Lò nung: giao diện 3 ô, thanh lửa và thanh tiến độ, chạy cả khi đóng.
+- Cửa: chuột phải mở/đóng, đặt theo hướng người chơi.
+- Cây non lớn thành cây sau 5–10 phút.
 
-CHẾ TẠO
-- Danh sách công thức bên phải túi đồ: đủ nguyên liệu thì sáng, thiếu thì mờ;
-  di chuột xem nguyên liệu; bấm để chế; Shift+bấm chế tối đa.
-- Công thức cần bàn chế tạo chỉ hiện sáng khi đứng trong 4 block quanh bàn.
+TRỒNG TRỌT
+- Cuốc đất biến đất/cỏ thành đất cày. Gieo hạt bằng chuột phải.
+- Lúa lớn 8 giai đoạn, nhanh hơn trên đất cày ẩm. Lúa chín rơi lúa + 1–3 hạt.
+- Đứng/nhảy lên đất cày có thể làm nó thành đất.
+
+CHẤT LỎNG
+- Mô phỏng chảy theo mục 2.10, chỉ ở chunk gần người chơi.
+- Xô (tùy chọn nếu dễ): múc và đổ nước/dung nham.
 
 SINH TỒN
-- Thanh máu và đói phía trên hotbar. Luật theo mục 2.5.
-- Giữ chuột phải để ăn, có hoạt ảnh và âm thanh tạm.
-- Chết: màn hình đỏ, đồ rơi tại chỗ, nút hồi sinh ở điểm xuất phát
-  (tạm thời, Giai đoạn 5 sẽ đổi thành chế độ xem).
+- Thanh máu, đói, dưỡng khí trên hotbar. Luật theo mục 2.6.
+- Chết: màn hình chết, đồ rơi tại chỗ, nút hồi sinh ở điểm hồi sinh thế giới.
 
 NGHIỆM THU
-- Chơi được trọn vòng lặp: chặt cây → ván → bàn chế tạo → cuốc gỗ → đá cuội →
-  cuốc đá → quặng sắt → kiếm sắt và đủ bộ giáp sắt.
-- Đào quặng sắt bằng cuốc gỗ không rơi gì.
-- Không nhân đôi hay mất vật phẩm khi thao tác trong túi (kể cả Shift+bấm
-  khi túi đầy).
-- Đói về 0 thì mất máu; ăn thì hồi.
+- Chơi trọn: chặt cây → bàn chế tạo → cuốc gỗ → đá → lò nung → đào sắt thô →
+  nung thỏi sắt → đồ sắt; đặt đuốc trong hang.
+- Trồng lúa → bánh mì.
+- Lò nung tiếp tục nung khi đóng giao diện.
+- Không nhân đôi/mất đồ khi thao tác túi và rương.
+- Nước chảy và dừng đúng; nước gặp dung nham tạo đá.
 
 ---
 
-### Giai đoạn 4 — Mạng nhiều người chơi
+### Giai đoạn 5 — Mạng nhiều người và lưu thế giới
 
 Giai đoạn khó nhất. Không thêm tính năng gameplay mới.
 
-SERVER
-- Vòng lặp 20 tick/giây. Sinh thế giới từ seed bằng code trong `/shared`.
-- Giữ trạng thái thật: block, người chơi (vị trí, vận tốc, máu, đói, túi đồ),
-  vật phẩm rơi.
-- Tạm thời một phòng duy nhất; vào là chơi luôn (Giai đoạn 6 mới làm phòng).
+SERVER VÀ LƯU TRỮ
+- Một thế giới chung, vòng lặp 20 tick/giây.
+- Server sinh chunk theo yêu cầu bằng code trong `/shared` (có thể chạy trong
+  worker thread). Chỉ giữ trong bộ nhớ các chunk gần người chơi online.
+- Lưu xuống `/server/data/<tên thế giới>/`:
+  - `world.json`: seed, giờ trong ngày, điểm hồi sinh;
+  - chunk đã bị sửa: mỗi vùng 32x32 chunk một file, nén (zlib), chỉ lưu chunk
+    khác với bản sinh gốc;
+  - nội dung rương, lò nung, vật phẩm rơi;
+  - người chơi: vị trí, máu, đói, túi đồ, điểm hồi sinh, theo tên đăng nhập.
+- Tự lưu mỗi 60 giây và khi tắt server (bắt SIGINT/SIGTERM). Ghi file an toàn
+  (ghi file tạm rồi đổi tên) để mất điện không hỏng thế giới.
+- Khởi động lại server thì mọi thứ còn nguyên.
+
+ĐĂNG NHẬP
+- Màn hình vào game: nhập tên + mật khẩu đơn giản (băm bằng scrypt ở server,
+  lưu trong `/server/data`). Lần đầu nhập tên thì tạo tài khoản.
+- Một tên chỉ đăng nhập được một nơi cùng lúc.
+- Danh sách quản trị viên trong file cấu hình server.
 
 GIAO THỨC
 - Mọi gói tin định nghĩa trong `/shared/protocol.ts`, có kiểu.
-- Nhị phân cho gói thường xuyên (input, snapshot); JSON cho gói hiếm.
-- Vào game: server gửi seed + danh sách block đã đổi so với thế giới gốc;
-  client tự sinh địa hình rồi áp thay đổi. Không gửi cả chunk.
+- Nhị phân cho gói thường xuyên; JSON cho gói hiếm.
+- Server gửi chunk cho client theo bán kính tầm nhìn: chỉ gửi danh sách block
+  khác bản sinh gốc kèm seed nếu client sinh được, hoặc gửi chunk nén nếu
+  nhanh hơn. Client không tự quyết định nội dung chunk.
 
-DI CHUYỂN
-- Client gửi input (phím, hướng nhìn, số thứ tự) mỗi bước vật lý.
-- Client dự đoán ngay, lưu input chưa xác nhận. Khi server trả trạng thái +
-  số thứ tự input cuối đã xử lý: đặt lại trạng thái đó rồi chạy lại các input
-  chưa xác nhận.
-- Sai lệch nhỏ thì làm mượt; trên 2 block thì nhảy thẳng.
-- Người chơi khác hiển thị trễ 100 ms, nội suy giữa hai snapshot.
-- Server chạy cùng hàm vật lý trong `/shared` với input nhận được; không tin
-  vị trí do client gửi. Giới hạn số input xử lý mỗi tick để chống tăng tốc.
-
-HÀNH ĐỘNG
-- Đào, đặt, nhặt đồ, chế tạo, thao tác túi, ăn, vứt đồ: client gửi yêu cầu;
-  server kiểm tra (tầm với, thời gian đào tối thiểu theo công cụ, đủ vật phẩm)
-  rồi áp dụng và phát cho mọi người.
-- Client hiển thị trước kết quả đào/đặt, hoàn tác nếu server từ chối.
-- Túi đồ: server là nguồn sự thật, gửi lại khi có thay đổi.
+DI CHUYỂN VÀ HÀNH ĐỘNG
+- Client dự đoán + server hiệu chỉnh (reconciliation) như thiết kế chuẩn;
+  người chơi khác nội suy trễ 100 ms.
+- Server chạy cùng hàm vật lý với input nhận được; không tin vị trí client gửi.
+- Mọi hành động (đào, đặt, túi đồ, chế tạo, lò nung, rương, cửa, ăn, trồng
+  trọt) do server kiểm tra rồi phát cho người chơi ở gần.
+- Chất lỏng, cây lớn, lúa lớn, lò nung chạy ở server.
 
 NGƯỜI CHƠI KHÁC
-- Model khối 6 phần (đầu, thân, 2 tay, 2 chân) dùng `player.png`; tay chân
-  đung đưa khi đi; đầu quay theo hướng nhìn; hiện vật phẩm đang cầm; tên trên
-  đầu.
+- Model khối 6 phần dùng `player.png`, tay chân đung đưa, đầu quay theo hướng
+  nhìn, cầm vật phẩm, tên trên đầu.
 
 DEBUG
-- F3: ping, gói tin/giây, số lần hiệu chỉnh vị trí.
-- Biến môi trường server `FAKE_LAG_MS` và `FAKE_LOSS_PCT` để giả lập mạng xấu.
+- F3: ping, gói tin/giây, số lần hiệu chỉnh, số chunk đang giữ.
+- Biến môi trường `FAKE_LAG_MS`, `FAKE_LOSS_PCT`.
 
 NGHIỆM THU
-- 3 tab trình duyệt thấy nhau di chuyển mượt; đào/đặt đồng bộ.
-- Với `FAKE_LAG_MS=150`: nhân vật của mình vẫn mượt, không giật lùi khi đi
-  bình thường.
-- Tab vào sau thấy đúng các block đã bị đổi trước đó và vật phẩm đang rơi.
-- Sửa client để gian lận (tăng tốc, đào tức thì, tự thêm đồ) thì server chặn.
-- Tắt một tab: nhân vật đó biến mất ở các tab còn lại.
+- 3 tab thấy nhau di chuyển mượt; đào/đặt/rương/lò nung đồng bộ.
+- `FAKE_LAG_MS=150`: điều khiển vẫn mượt, không giật lùi khi đi thường.
+- Xây một ngôi nhà, tắt server, bật lại: nhà còn, túi đồ còn, vị trí còn.
+- Hai người đi xa nhau 500 block theo hai hướng: cả hai vẫn mượt, bộ nhớ
+  server không tăng mãi.
+- Sửa client để gian lận (tăng tốc, đào tức thì, tự thêm đồ): server chặn.
 
 ---
 
-### Giai đoạn 5 — Chiến đấu PvP
+### Giai đoạn 6 — Chiến đấu PvP và hồi sinh
 
-Mọi tính toán sát thương ở server. Thông số theo mục 2.6.
+Mọi tính toán sát thương ở server. Thông số theo mục 2.8.
 
 CẬN CHIẾN
-- Chuột trái khi nhắm vào người chơi trong tầm thì gửi yêu cầu đánh.
-- Thanh hồi đòn nhỏ dưới tâm ngắm.
-- Server kiểm tra: khoảng cách ≤ 3.5 block (có dung sai), hồi đòn hợp lệ,
-  không có block chắn giữa hai người, nạn nhân không trong thời gian miễn.
-- Bù trễ: server lưu lịch sử vị trí người chơi 1 giây; khi nhận đòn đánh, tua
-  vị trí nạn nhân về thời điểm người đánh nhìn thấy, tối đa 250 ms.
-- Knockback do server áp dụng; client của nạn nhân nhận qua cơ chế hiệu chỉnh.
+- Thanh hồi đòn dưới tâm ngắm; server kiểm tra tầm (≤ 3.5 có dung sai), hồi
+  đòn, tầm nhìn không bị chắn, thời gian miễn sát thương.
+- Bù trễ: lưu lịch sử vị trí 1 giây, tua lại tối đa 250 ms.
+- Knockback do server áp dụng.
 
 CUNG TÊN
-- Giữ chuột phải để kéo, thả để bắn; icon cung đổi theo 3 mức kéo.
-- Mũi tên là thực thể do server mô phỏng; kiểm tra va chạm theo đoạn thẳng
-  giữa hai tick. Cắm vào block thì nhặt lại được; trúng người thì biến mất.
-- Client vẽ mũi tên nội suy theo snapshot.
+- Kéo/thả, icon đổi theo 3 mức; mũi tên là thực thể server mô phỏng, kiểm tra
+  va chạm theo đoạn thẳng giữa hai tick; cắm vào block thì nhặt lại được.
 
-GIÁP VÀ CHẾT
-- Model người chơi hiện giáp đang mặc (tô màu đè lên từng phần cơ thể là đủ).
-- Chết: rơi toàn bộ đồ, thông báo "A hạ gục B bằng [vũ khí]" cho cả phòng,
-  chuyển sang chế độ xem (bay tự do; bấm chuột để theo dõi người còn sống).
+GIÁP, CHẾT, HỒI SINH
+- Giáp hiện trên model (tô màu đè lên từng phần cơ thể).
+- Chết: rơi toàn bộ đồ, thông báo trong chat, màn hình chết với nút hồi sinh.
+- Hồi sinh ở điểm hồi sinh thế giới (Giai đoạn 7 thêm giường).
+
+LUẬT SERVER
+- `PVP=on|off`. Vùng an toàn quanh điểm hồi sinh theo mục 2.8.
+- Lệnh chat cho quản trị viên: `/tp <tên>`, `/kick <tên>`, `/pvp on|off`,
+  `/time set day|night`, `/give <tên> <vật phẩm> <số>`.
 
 PHẢN HỒI
-- Nạn nhân nháy đỏ; người bị đánh thấy màn hình rung nhẹ và viền đỏ chỉ hướng.
-- Hoạt ảnh vung vũ khí ở góc nhìn thứ nhất và trên model người khác.
-- Âm thanh 3D theo vị trí: trúng đòn, chí mạng, bắn cung, tên cắm, chết.
-  Tạo bằng Web Audio nếu chưa có file.
-- Hạt hiệu ứng khi chí mạng.
+- Nháy đỏ, rung màn hình, viền đỏ chỉ hướng, hoạt ảnh vung vũ khí, âm thanh
+  3D (trúng, chí mạng, bắn, tên cắm, chết), hạt chí mạng.
 
 NGHIỆM THU
 - Hai tab đánh nhau: máu trừ đúng theo bảng sát thương và giáp.
-- Với `FAKE_LAG_MS=150`: đánh trúng người đang chạy ngang vẫn tính.
-- Không đánh xuyên tường; không đánh nhanh hơn thời gian hồi.
-- Tên bay có độ cong, trúng người gây sát thương theo lực kéo.
-- Người chết thấy được trận đấu ở chế độ xem; đồ rơi nhặt được.
+- `FAKE_LAG_MS=150`: đánh trúng người đang chạy ngang vẫn tính.
+- Không đánh xuyên tường, không đánh nhanh hơn hồi đòn.
+- Trong vùng an toàn và khi `PVP=off`: không gây sát thương cho nhau.
+- Chết rồi hồi sinh: đồ nằm lại chỗ chết, quay lại nhặt được.
 
 ---
 
-### Giai đoạn 6 — Luật trận đấu
+### Giai đoạn 7 — Ngày đêm, động vật, quái vật, giường
 
-Thông số theo mục 2.7.
+NGÀY ĐÊM
+- Đồng hồ server theo mục 2.7, lưu trong `world.json`.
+- Màu trời, sương mù, mặt trời/mặt trăng, độ sáng ánh sáng trời đổi theo giờ.
+  Đổi độ sáng bằng uniform trong shader, không dựng lại mesh.
 
-PHÒNG
-- Menu chính: nhập tên (lưu localStorage, bọc try/catch), "Tạo phòng",
-  ô nhập mã, "Chơi nhanh".
-- Một tiến trình server chạy nhiều phòng, mỗi phòng một thế giới và seed riêng.
-- Phòng trống quá 60 giây thì xóa.
+HỆ THỐNG THỰC THỂ
+- Thực thể chung cho sinh vật: vị trí, vận tốc, máu, hộp va chạm, dùng chung
+  vật lý với người chơi. Server mô phỏng, client nội suy.
+- Model khối theo từng loại, dùng skin ở mục 3.4, có hoạt ảnh đi.
+- Tìm đường A* trên lưới block (giới hạn số nút mỗi tick để không làm chậm
+  server), nhảy lên bậc 1 block, tránh rơi vực và dung nham.
 
-CÁC PHA
-1. Sảnh: đảo nhỏ trên trời, không sát thương, không phá block, danh sách
-   người chơi, đếm ngược.
-2. Bắt đầu: thả người chơi, túi đồ trống.
-3. Ân hạn 60 giây: không PvP, có thông báo đếm ngược.
-4. Chiến đấu: PvP bật, vòng bo bắt đầu thu.
-5. Kết thúc: bảng kết quả 15 giây, về sảnh với thế giới mới.
-- Vào giữa trận: ở chế độ xem. Thoát giữa trận: tính là chết, đồ rơi tại chỗ.
-- Nếu mọi người còn lại thoát hết thì kết thúc trận.
+SINH VẬT
+- Theo bảng mục 2.7: luật sinh, giới hạn số lượng, hành vi, vật phẩm rơi.
+- Quái cháy dưới nắng (trừ khi đứng trong bóng râm hoặc nước).
+- Bộ xương bắn tên dùng chung hệ thống mũi tên của Giai đoạn 6.
+- Động vật: chạy khi bị đánh; cầm lúa mì thì chúng đi theo; cừu tỉa lông
+  bằng kéo (2 thỏi sắt).
+- Giáp và kiếm gây sát thương lên sinh vật như lên người chơi.
 
-VÒNG BO
-- Server tính; client vẽ tường bán trong suốt màu đỏ.
-- Bản đồ nhỏ góc trên phải: vị trí mình, bo hiện tại, bo kế tiếp.
-- Đồng hồ đếm đến lần thu tiếp theo; âm thanh cảnh báo khi bo sắp thu.
+GIƯỜNG
+- Chế tạo, đặt (2 block theo hướng nhìn), ngủ, đặt điểm hồi sinh, tua đêm
+  theo mục 2.7. Giường bị phá thì điểm hồi sinh về điểm của thế giới.
 
-RƯƠNG VÀ TIẾP TẾ
-- Rương sinh cùng thế giới. Chuột phải mở, giao diện 27 ô; nhiều người mở
-  cùng lúc thấy đồng bộ. Phá rương thì đồ bên trong rơi ra.
-- Thùng tiếp tế rơi chậm từ trên trời, có cột sáng thấy từ xa.
-
-GIAO DIỆN
-- Số người còn sống, số hạ gục của mình, dòng thông báo hạ gục.
-- Tab: bảng người chơi. T: chat (giới hạn độ dài, lọc ký tự điều khiển).
+ÂM THANH
+- Tiếng từng loại sinh vật khi đứng yên, khi bị đánh, khi chết.
 
 NGHIỆM THU
-- Chạy trọn một trận với 3 tab từ sảnh đến màn hình thắng rồi quay về sảnh,
-  không cần tải lại trang; chạy được trận thứ hai ngay sau đó.
-- Trong ân hạn không gây được sát thương cho nhau.
-- Đứng ngoài bo mất máu đúng tốc độ; bản đồ nhỏ khớp với tường bo.
-- Tắt một tab giữa trận: trận tiếp tục, số người còn sống giảm.
-- Hai phòng chạy song song không ảnh hưởng nhau.
+- Ở ngoài trời một đêm: quái sinh ra quanh mình, sáng ra quái cháy.
+- Đặt đuốc kín quanh nhà: quái không sinh trong nhà.
+- Quái đuổi theo được qua địa hình gồ ghề, không đi xuyên tường, không kẹt mãi.
+- Giết bò ra da và thịt; nung thịt chín ăn được.
+- Ngủ giường: hồi sinh đúng chỗ giường; hai người cùng ngủ thì tua sáng.
+- 4 người chơi online, mỗi tick server vẫn dưới 20 ms.
 
 ---
 
-### Giai đoạn 7 — Hoàn thiện và phát hành
+### Giai đoạn 8 — Làng và dân làng
+
+- Theo mục 2.11. Công trình định nghĩa bằng dữ liệu trong `/shared/structures`;
+  viết thêm công cụ nhỏ để lưu một vùng block trong game thành file công trình
+  (lệnh quản trị viên `/structure save <tên> x1 y1 z1 x2 y2 z2`), giúp người
+  dùng tự thiết kế nhà.
+- Làng vắt qua nhiều chunk phải liền mạch (lập kế hoạch theo vùng như hầm mỏ).
+- Dân làng: thực thể dùng chung hệ thống Giai đoạn 7; giao diện trao đổi;
+  vật phẩm ngọc lục bảo.
+- Quái không tấn công dân làng ở giai đoạn này (giữ đơn giản).
+
+NGHIỆM THU
+- Đi khám phá tìm được làng trong vòng vài phút bay.
+- Nhà đặt khớp mặt đất, không lơ lửng, không bị chôn.
+- Đổi đồ với dân làng hoạt động, đồng bộ giữa nhiều người.
+- Tự lưu một ngôi nhà mình xây thành công trình, xuất hiện trong làng mới sinh.
+
+---
+
+### Giai đoạn 9 — Hoàn thiện và phát hành
 
 CẢM GIÁC GAME
-- Hạt vụn theo màu block khi đào và phá xong; bụi khi tiếp đất.
-- Âm thanh bước chân theo loại block, đào, đặt, nhặt, ăn, mở rương.
-- Chu kỳ ngày đêm 10 phút (đổi màu trời và ánh sáng). Mây trôi.
-- Nước ở vùng thấp: bơi được, đi chậm lại, không sát thương rơi.
+- Hạt vụn khi đào; bụi khi tiếp đất; bọt nước; khói đuốc.
+- Âm thanh bước chân theo loại block, đào, đặt, nhặt, ăn, mở rương, cửa,
+  tiếng nước chảy, tiếng hang; nhạc nền nhẹ thỉnh thoảng.
+- Mây trôi. Bản đồ nhỏ hoặc tọa độ trên màn hình (bật/tắt được).
 
 CÀI ĐẶT
-- Menu Esc: độ nhạy chuột, FOV, tầm nhìn, âm lượng, đổi phím.
+- Menu Esc: độ nhạy chuột, FOV, tầm nhìn, âm lượng từng loại, đổi phím.
   Lưu localStorage, bọc try/catch.
 
 TỐI ƯU
-- Dựng mesh chunk trong Web Worker.
-- Greedy meshing.
-- Chỉ vẽ chunk trong tầm nhìn và trong khối nhìn của camera.
-- Server chỉ gửi người chơi và thực thể trong bán kính 80 block.
-- Mục tiêu: 60 FPS ở client; mỗi tick server dưới 10 ms với 16 người;
-  băng thông dưới 20 KB/giây mỗi người.
+- Greedy meshing (giữ đúng ánh sáng và AO).
+- Chỉ vẽ chunk trong khối nhìn camera; bỏ chunk bị che kín nếu dễ làm.
+- Server chỉ gửi thực thể trong bán kính tầm nhìn của từng người.
+- Mục tiêu: 60 FPS client với tầm nhìn 8; mỗi tick server dưới 20 ms với
+  10 người chơi; băng thông dưới 30 KB/giây mỗi người khi đi bình thường.
 
 ĐỘ BỀN
-- Mất kết nối thì tự kết nối lại trong 10 giây và giữ nguyên nhân vật.
-- Giới hạn tần suất gói tin mỗi client; bỏ qua gói sai định dạng; giới hạn độ
-  dài tên và chat.
-- Lỗi trong một phòng không làm sập các phòng khác; ghi log lỗi.
+- Tự kết nối lại khi mất mạng.
+- Giới hạn tần suất gói tin; bỏ gói sai định dạng; giới hạn độ dài tên/chat.
+- Sao lưu thế giới tự động mỗi 6 giờ, giữ 5 bản gần nhất.
+- Ghi log lỗi; lỗi một chunk không làm sập server.
 
 PHÁT HÀNH
-- Build client thành file tĩnh. Viết Dockerfile cho server.
-- Viết `DEPLOY.md` từng bước: client lên dịch vụ host tĩnh; server lên dịch vụ
-  chạy Node có hỗ trợ WebSocket; địa chỉ server qua biến môi trường
-  `VITE_SERVER_URL`; dùng `wss://` khi client chạy https.
-- Hoàn thiện `CREDITS.md`: nguồn và giấy phép của mọi texture, icon, âm thanh.
-- Viết `README.md`: giới thiệu, cách chạy, điều khiển.
+- Build client tĩnh; Dockerfile cho server với volume cho `/server/data`.
+- `DEPLOY.md` từng bước: client lên dịch vụ host tĩnh; server lên máy chủ chạy
+  Node có hỗ trợ WebSocket và ổ đĩa lưu lâu dài; `VITE_SERVER_URL`; `wss://`
+  khi client chạy https; cách sao lưu và khôi phục thế giới.
+- Hoàn thiện `CREDITS.md` và `README.md`.
 
 NGHIỆM THU
-- Chơi được qua link công khai từ 2 máy khác mạng.
-- 8 tab chạy 10 phút không rò bộ nhớ, không tụt FPS dần.
-- Rút mạng 5 giây rồi cắm lại: tự kết nối lại, vẫn ở trong trận.
+- Chơi được qua link công khai từ 2 máy khác mạng; server khởi động lại
+  không mất thế giới.
+- 8 tab chạy 30 phút không rò bộ nhớ, không tụt FPS dần.
 - `CREDITS.md` có dòng ghi công REFI_Textures kèm giấy phép CC BY-SA 4.0.
+
+---
+
+### Giai đoạn 10 — (Tùy chọn) Vực Lửa
+
+Chỉ làm khi người dùng yêu cầu.
+
+- Thế giới thứ hai chạy song song trên server, seed riêng, lưu riêng.
+- Địa hình kiểu hang khổng lồ: trần và sàn bằng đá lửa, biển dung nham ở
+  y = 32, đá phát sáng treo trên trần, cát linh hồn làm chậm.
+- Cổng: khung đá vỏ chai do người chơi tự xây, kích hoạt bằng đá lửa và thép;
+  đứng trong cổng 4 giây thì dịch chuyển. Tỷ lệ tọa độ 1:8.
+- Không có ngày đêm, không có nước (đổ nước thì bốc hơi).
+- Quái riêng do tự thiết kế (không dùng thiết kế của Minecraft).
+- Texture tham khảo: `mcl_nether/` (đá, cát linh hồn, đá phát sáng, cổng).
+  Đặt tên block và quái theo tên riêng của game.
+
+### Giai đoạn 11 — (Tùy chọn) Cõi Hư Không
+
+Chỉ làm khi người dùng yêu cầu.
+
+- Thế giới thứ ba: các đảo lơ lửng trên khoảng không, rơi xuống là chết.
+- Cổng tìm thấy trong một công trình ngầm hiếm ở thế giới chính.
+- Một con trùm do tự thiết kế, nhiều giai đoạn, cả server cùng đánh;
+  hạ xong thì mở cổng về và rơi phần thưởng.
+- Texture tham khảo: `mcl_end/` cho đá và cổng; KHÔNG dùng skin rồng hay các
+  sinh vật End của bộ texture.

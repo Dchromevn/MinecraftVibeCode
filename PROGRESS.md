@@ -1,19 +1,46 @@
-# PROGRESS.md — Tiến độ dự án Voxel PvP
+# PROGRESS.md — Tiến độ dự án Voxel Survival
 
 Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `xong`
 
+> Kế hoạch đã chuyển hướng sang SINH TỒN THẾ GIỚI MỞ (PLAN.md cập nhật 2026-11-11).
+> Đánh số giai đoạn theo PLAN.md mới. Lịch sử bên dưới giữ nguyên số cũ.
+
 | Giai đoạn | Tên | Trạng thái |
 |---|---|---|
-| 0 | Dựng khung | xong (người dùng xác nhận 2026-11-11) |
-| 1 | Thế giới voxel (chỉ client) | chờ người dùng test |
-| 1b | Hang động, hầm mỏ, ánh sáng (chỉ client) | chờ người dùng test |
-| 2 | Người chơi và tương tác block (chỉ client) | chưa làm |
-| 3 | Vật phẩm, chế tạo, sinh tồn (chỉ client) | chưa làm |
-| 4 | Mạng nhiều người chơi | chưa làm |
-| 5 | Chiến đấu PvP | chưa làm |
-| 6 | Luật trận đấu | chưa làm |
-| 7 | Hoàn thiện và phát hành | chưa làm |
+| 0 | Dựng khung | xong |
+| 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
+| 2 | Thế giới vô hạn, biome, hang động, hầm mỏ, ánh sáng | chưa làm — đã có một phần từ "1b" cũ (xem ghi chú) |
+| 3 | Người chơi và tương tác block | chưa làm |
+| 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
+| 5 | Mạng nhiều người và lưu thế giới | chưa làm |
+| 6 | Chiến đấu PvP và hồi sinh | chưa làm |
+| 7 | Ngày đêm, động vật, quái vật, giường | chưa làm |
+| 8 | Làng và dân làng | chưa làm |
+| 9 | Hoàn thiện và phát hành | chưa làm |
+| 10 | (Tùy chọn) Vực Lửa | chỉ làm khi người dùng yêu cầu |
+| 11 | (Tùy chọn) Cõi Hư Không | chỉ làm khi người dùng yêu cầu |
 
+### Ghi chú chuyển hướng: phần "1b" cũ dùng lại được gì cho Giai đoạn 2
+
+Dùng lại gần như nguyên: simplex noise 3D; thuật toán hang sợi mì/phô mai và
+dung nham đáy; thuật toán ánh sáng (cột trời + flood fill, tính lại theo vùng,
+đã kiểm khớp 100% với tính lại toàn bộ); mesher có ánh sáng mượt + AO; hình dạng
+cột rào/đuốc/ray/chữ X; ẩn đoạn khuất; nhìn đêm debug.
+
+Phải làm lại hoặc sửa:
+- Đánh số lại block 16–24 theo bảng 2.2 mới (sỏi 16, nước 17, dung nham 18,
+  đá cuội rêu 19, ... đuốc 25) và thêm id 25–34. Chưa có dữ liệu lưu nên đổi
+  id lúc này không mất gì.
+- Một block đường ray duy nhất, tự chọn thẳng/cong/ngã ba/ngã tư theo ray bên cạnh.
+- Hàng rào có thanh nối, va chạm cao 1.5; mạng nhện cứng 6, rơi sợi tơ;
+  quặng sắt rơi sắt thô; quặng sắt y < 64, kim cương y < 16, đá sâu dưới y = 16.
+- World theo bảng băm chunk (cx, cz) thay cho mảng 16x16 cố định; ánh sáng lưu
+  theo chunk thay cho một mảng toàn bản đồ.
+- Mọi bước sinh (hang, cửa hang, cây, hầm mỏ) phải sinh được độc lập từng chunk:
+  cửa hang và hầm mỏ lập kế hoạch theo vùng (hầm mỏ ~1 mỗi 256x256), mỗi chunk
+  chỉ đặt phần thuộc về nó.
+- Thêm biome, mực nước biển 62, đại dương, nước bán trong suốt.
+- Sinh/ánh sáng/mesh chạy trong Web Worker; tải/gỡ chunk theo tầm nhìn 8.
 ---
 
 ## Giai đoạn 0 — Dựng khung (2026-11-11)

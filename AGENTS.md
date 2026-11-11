@@ -1,8 +1,8 @@
-# AGENTS.md — Hướng dẫn cho agent trong dự án Voxel PvP
+# AGENTS.md — Hướng dẫn cho agent trong dự án Voxel Survival
 
-Dự án: game voxel sinh tồn PvP nhiều người chơi, góc nhìn thứ nhất, chạy trên
-trình duyệt. Toàn bộ đặc tả và kế hoạch nằm trong `PLAN.md`. File này chỉ chứa
-quy tắc làm việc.
+Dự án: game voxel sinh tồn thế giới mở nhiều người chơi, góc nhìn thứ nhất,
+chạy trên trình duyệt. Toàn bộ đặc tả và kế hoạch nằm trong `PLAN.md`. File này
+chỉ chứa quy tắc làm việc.
 
 ## Đầu mỗi phiên làm việc
 
@@ -21,6 +21,10 @@ quy tắc làm việc.
 - KHÔNG tự chuyển sang giai đoạn sau, kể cả khi còn thời gian. Người dùng phải
   tự chơi thử và xác nhận trước.
 - Không thêm tính năng nằm ngoài giai đoạn đang làm.
+- Giai đoạn 10 và 11 là tùy chọn: chỉ làm khi người dùng yêu cầu rõ.
+- Nếu `PLAN.md` có thay đổi so với lần trước (ví dụ có ghi chú chuyển hướng),
+  cập nhật `DESIGN.md` và `PROGRESS.md` cho khớp trước khi làm tiếp, giữ lại
+  các chỉnh sửa người dùng đã làm trong `DESIGN.md`.
 
 ## Khi làm xong một giai đoạn
 
@@ -49,8 +53,12 @@ quy tắc làm việc.
 - Mỗi file dưới 300 dòng; tách module theo chức năng.
 - Mọi con số gameplay (máu, sát thương, tốc độ, thời gian) đặt trong `/shared`,
   không viết cứng rải rác.
-- Từ Giai đoạn 4 trở đi: server là nguồn sự thật. Client không bao giờ tự
-  quyết định sát thương, túi đồ hay thay đổi block.
+- Từ Giai đoạn 5 trở đi: server là nguồn sự thật. Client không bao giờ tự
+  quyết định sát thương, túi đồ, thay đổi block hay nội dung chunk.
+- Sinh địa hình, công trình (hầm mỏ, làng) phải xác định theo seed + tọa độ,
+  sinh được độc lập từng chunk mà vẫn liền mạch qua ranh giới chunk.
+- Không bao giờ xóa hay ghi đè `/server/data` (thế giới đã lưu) khi sửa code.
+  Đổi định dạng lưu thì phải viết bước chuyển đổi dữ liệu cũ.
 - Không thêm thư viện mới nếu chưa nêu lý do với người dùng.
 - Chú thích trong code viết bằng tiếng Việt hoặc tiếng Anh đều được, ngắn gọn.
 
@@ -72,8 +80,11 @@ Giai đoạn 0 phải tạo đủ các lệnh này.
 - Nếu thư mục nguồn chưa có hoặc thiếu file: tự vẽ texture tạm bằng canvas để
   game vẫn chạy, và báo người dùng file nào thiếu.
 - TUYỆT ĐỐI không tải, sao chép hay dùng texture, model, âm thanh, tên riêng
-  hoặc logo của Minecraft/Mojang. Không đặt tên game hay tên vật phẩm trùng
-  thương hiệu của họ.
+  hoặc logo của Minecraft/Mojang. Không đặt tên game, tên vật phẩm, tên thế
+  giới hay tên sinh vật trùng thương hiệu của họ (Nether, End, Ender, Creeper...).
+- Không nhập các skin sinh vật mang thiết kế riêng của Minecraft có trong bộ
+  REFI (creeper, enderman, dragon, wither, ghast, blaze...). Danh sách skin
+  được dùng nằm trong `PLAN.md` mục 3.4.
 - Mọi tài nguyên bên ngoài phải được ghi vào `CREDITS.md` kèm giấy phép.
 
 ## Ngôn ngữ
