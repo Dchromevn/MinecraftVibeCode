@@ -1,5 +1,5 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–34 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
+// Đủ id 0–37 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
 import { LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
@@ -131,6 +131,9 @@ const TABLE: BlockDef[] = [
     bottom: "deepslate_top",
     side: "deepslate",
   }, PICK_ONLY),
+  def(35, "ore_gold", 15, "pickaxe", [drop("raw_gold")], same("ore_gold"), { ...PICK_ONLY, minTier: "iron" }),
+  def(36, "ore_gold_deep", 20, "pickaxe", [drop("raw_gold")], same("ore_gold_deep"), { ...PICK_ONLY, minTier: "iron" }),
+  def(37, "ore_emerald", 15, "pickaxe", [drop("emerald")], same("ore_emerald"), { ...PICK_ONLY, minTier: "iron" }),
 ];
 
 TABLE.forEach((b, i) => {

@@ -23,12 +23,16 @@ export const WORLD = {
   TREE_TRUNK_MAX: 6,
   TREE_CANOPY_SIZE: 5,
   TREE_CELL: 5, // mỗi ô lưới 5x5 có tối đa 1 cây
-  // attempts: số cụm thử đặt mỗi chunk (chỉ thay ô đá thường)
+  // attempts: số cụm thử đặt mỗi chunk; cluster: [ít nhất, nhiều nhất] ô mỗi cụm.
+  // Quặng chỉ thay ô đá thường (vàng thay cả đá sâu bằng bản đá sâu).
   ORE: {
-    coal: { maxY: 100, cluster: 8, attempts: 16 },
-    iron: { maxY: 64, cluster: 5, attempts: 12 },
-    diamond: { maxY: 16, cluster: 3, attempts: 3 },
+    coal: { maxY: 100, cluster: [13, 13], attempts: 20 },
+    iron: { maxY: 64, cluster: [9, 9], attempts: 15 },
+    gold: { maxY: 32, cluster: [4, 8], attempts: 2 },
+    diamond: { maxY: 16, cluster: [3, 3], attempts: 3 },
   },
+  // ngọc lục bảo: từng khối lẻ, chỉ ở cột biome núi
+  EMERALD: { maxY: 100, attemptsMin: 3, attemptsMax: 8 },
   GRAVEL: { maxY: 100, radius: 2, attempts: 3 },
 } as const;
 
@@ -134,14 +138,16 @@ export const CAVES = {
 
 // Hầm mỏ bỏ hoang (2.9). Lập kế hoạch theo vùng, mỗi chunk đặt phần thuộc về nó.
 export const MINESHAFT = {
-  REGION: 256, // khoảng 1 hệ thống mỗi vùng 256x256
+  REGION: 160, // khoảng 1 hệ thống mỗi vùng 160x160
   CHANCE: 0.9,
+  CENTER_TRIES: 5, // tâm rơi vào biển / đất mỏng thì thử lại tối đa 4 chỗ khác
+  CENTER_MARGIN: 16, // tâm cách biên vùng ít nhất 16 block
   ROOM_Y_MIN: 24,
   ROOM_Y_MAX: 44,
   Y_MIN: 20, // hành lang không xuống dưới / lên trên khoảng này
   Y_MAX: 50,
   MIN_COVER: 8, // luôn nằm dưới mặt đất khô ít nhất 8 block (không thủng đáy nước)
-  MAX_PIECES: 40,
+  MAX_PIECES: 70,
   MAX_RADIUS: 72,
   CORRIDOR_MIN: 8,
   CORRIDOR_MAX: 25,

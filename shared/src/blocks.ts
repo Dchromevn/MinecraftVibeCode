@@ -39,6 +39,9 @@ export const B = {
   SAPLING: 32,
   BED: 33,
   DEEPSLATE: 34,
+  ORE_GOLD: 35,
+  ORE_GOLD_DEEP: 36,
+  ORE_EMERALD: 37,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 

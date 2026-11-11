@@ -1,17 +1,21 @@
 // Thông số lối chơi (DESIGN.md mục 2.3–2.10). Xuất lại qua constants.ts.
 
 // 2.3 Công cụ, vũ khí, giáp
+// level: cấp đào. Đào được block có minTier khi level của công cụ >= level của minTier.
+// Vàng đào rất nhanh, mau hỏng, nhưng chỉ đào được như gỗ (level 0).
 export const TOOL_TIERS = {
-  wood: { durability: 60, speed: 2, swordDamage: 4 },
-  stone: { durability: 130, speed: 4, swordDamage: 5 },
-  iron: { durability: 250, speed: 6, swordDamage: 6 },
-  diamond: { durability: 1500, speed: 8, swordDamage: 7 },
+  wood: { durability: 60, speed: 2, swordDamage: 4, level: 0 },
+  stone: { durability: 130, speed: 4, swordDamage: 5, level: 1 },
+  iron: { durability: 250, speed: 6, swordDamage: 6, level: 2 },
+  gold: { durability: 32, speed: 12, swordDamage: 4, level: 0 },
+  diamond: { durability: 1500, speed: 8, swordDamage: 7, level: 3 },
 } as const;
 export type ToolTier = keyof typeof TOOL_TIERS;
 
 export const ARMOR = {
   leather: { helmet: 1, chestplate: 3, leggings: 2, boots: 1, durability: 80 },
   iron: { helmet: 2, chestplate: 6, leggings: 5, boots: 2, durability: 200 },
+  gold: { helmet: 2, chestplate: 5, leggings: 3, boots: 1, durability: 110 },
   diamond: { helmet: 3, chestplate: 8, leggings: 6, boots: 3, durability: 450 },
 } as const;
 export type ArmorTier = keyof typeof ARMOR;
@@ -71,6 +75,14 @@ export const FOOD = {
   RAW_MEAT_MAX: 3,
   COOKED_MEAT_MIN: 6,
   COOKED_MEAT_MAX: 8,
+} as const;
+
+/** Táo vàng (1 táo + 8 thỏi vàng): +4 đói, hồi 4 máu rải đều trong 5 giây. */
+export const GOLDEN_APPLE = {
+  HUNGER: 4,
+  HEAL: 4,
+  HEAL_TIME_S: 5,
+  GOLD_INGOTS: 8,
 } as const;
 
 export const ITEMS = {
@@ -133,6 +145,24 @@ export const COMBAT = {
   LAG_COMP_MAX_MS: 250,
   PVP_DEFAULT: true, // cấu hình server PVP=on|off
   SAFE_ZONE_RADIUS: 16, // quanh điểm hồi sinh thế giới: không PvP, không phá/đặt
+} as const;
+
+// 2.9 Rương hầm mỏ (Giai đoạn 4 điền khi chunk được sinh).
+// Mỗi rương rút ROLLS lượt; mỗi lượt chọn một món theo weight, số lượng min–max.
+export const MINESHAFT_LOOT = {
+  ROLLS_MIN: 3,
+  ROLLS_MAX: 6,
+  ENTRIES: [
+    { item: "bread", weight: 15, min: 1, max: 3 },
+    { item: "coal", weight: 10, min: 3, max: 8 },
+    { item: "raw_iron", weight: 10, min: 1, max: 5 },
+    { item: "rail", weight: 10, min: 4, max: 8 },
+    { item: "seeds", weight: 10, min: 2, max: 4 },
+    { item: "raw_gold", weight: 6, min: 1, max: 3 },
+    { item: "gold_ingot", weight: 4, min: 1, max: 3 },
+    { item: "emerald", weight: 4, min: 1, max: 2 },
+    { item: "diamond", weight: 2, min: 1, max: 2 },
+  ],
 } as const;
 
 // 2.10 Chất lỏng

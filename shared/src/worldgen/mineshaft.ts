@@ -1,4 +1,4 @@
-// Hầm mỏ bỏ hoang (2.9): lập kế hoạch cả hệ thống theo vùng 256x256 (seed + tọa độ
+// Hầm mỏ bỏ hoang (2.9): lập kế hoạch cả hệ thống theo vùng MINESHAFT.REGION (seed + tọa độ
 // vùng), ghi thay đổi vào lớp phủ, rồi chia theo chunk; mỗi chunk chỉ đặt phần của nó.
 import { MINESHAFT as M } from "../constants.js";
 import { B } from "../blocks.js";
@@ -140,7 +140,7 @@ export class MineshaftPlanner {
 
   private build(rx: number, rz: number): Plan {
     const plan: Plan = new Map();
-    const c = mineshaftCenter(this.gen.sampler, rx, rz);
+    const c = mineshaftCenter(this.gen.sampler, this.gen.rules, rx, rz);
     if (!c) return plan;
     const overlay = new Map<string, number>();
     const gen = this.gen;
@@ -155,6 +155,8 @@ export class MineshaftPlanner {
       inRange: (x, y, z) => {
         if (y < M.Y_MIN || y + 2 > M.Y_MAX) return false;
         if ((x - c.x) ** 2 + (z - c.z) ** 2 > M.MAX_RADIUS ** 2) return false;
+        const lake = gen.rules.lakeLevel(x, z);
+        if (lake > 0 && y <= lake) return false; // không đục cạnh / dưới mặt hồ ngầm
         const col = gen.sampler.column(x, z);
         return col.height > col.waterTop && y + 3 + M.MIN_COVER <= col.height; // dưới đất khô, đủ sâu
       },

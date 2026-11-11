@@ -255,3 +255,36 @@ Giai đoạn 2a được coi là đạt khi người dùng bảo "tiếp" sau l�
 - Mạch nước/dung nham vẫn chỉ là một block cho tới Giai đoạn 4.
 - Mỗi hầm mỏ hiện chỉ có 1–2 rương (50% nhánh cụt có đáy đặc).
 - Debug: `?nv=1`, `?nocull=1`, phím N, F4.
+
+### Bổ sung trong 2b: quặng vàng, ngọc lục bảo, tăng mật độ (2026-11-12)
+
+Theo yêu cầu người dùng (PLAN.md/DESIGN.md đã cập nhật trước, ghi chú 2026-11-12).
+2b vẫn ở trạng thái chờ người dùng test.
+
+File đã sửa / tạo:
+- `PLAN.md`, `DESIGN.md` — quặng vàng (y < 32, có bản đá sâu) và ngọc lục bảo (núi), cấp đồ vàng (bền 32, x12, đào như gỗ, kiếm 4), giáp vàng 2/5/3/1 bền 110, táo vàng, vàng thô → thỏi vàng, than/sắt dày gấp đôi, hầm mỏ vùng 160 tối đa 70 đoạn, thử lại tâm, đồ rương hầm mỏ, texture/icon mới.
+- `shared/src/constants.ts` — ORE (cluster [min, max]), EMERALD, MINESHAFT (REGION 160, CENTER_TRIES 5, CENTER_MARGIN 16, MAX_PIECES 70).
+- `shared/src/gameplay.ts` — TOOL_TIERS thêm vàng và `level`, ARMOR vàng, GOLDEN_APPLE, MINESHAFT_LOOT (Giai đoạn 4 dùng).
+- `shared/src/blocks.ts`, `blockTable.ts` — block 35 quặng vàng, 36 quặng vàng đá sâu, 37 quặng ngọc lục bảo (cần cuốc sắt).
+- `shared/src/worldgen/ores.ts` (mới, tách từ chunkGen.ts) — quặng theo cụm có bản đá sâu, ngọc lục bảo khối lẻ ở cột núi.
+- `shared/src/worldgen/mineshaftCenter.ts` — thử tối đa 5 vị trí tâm; phòng phải cao hơn mực nước hồ ngầm.
+- `shared/src/worldgen/mineshaft.ts`, `caveRules.ts` — đổi chiều quy tắc: hồ ngầm không còn né cả vùng quanh hầm mỏ (với vùng 160 thì hồ ngầm gần như biến mất); thay vào đó hành lang trong vùng có hồ chỉ được nằm cao hơn mực nước.
+- `scripts/texture-map.json` (ore_gold, ore_gold_deep, ore_emerald), `client/src/strings.ts`, `client/src/fallbackTextures.ts`.
+
+Số đo (seed voxel / abc, cùng script trước và sau):
+
+| | Trước | Sau |
+|---|---|---|
+| Hầm mỏ trong bán kính 300 block quanh gốc | 2 / 2 | 8 / 9 |
+| Hầm mỏ gần nhất | 164 / 188 block | 128 / 103 block |
+| Số vùng 64x64 có hồ ngầm | 21% / 25% | 35% / 37% |
+| Than mỗi chunk (lộ ra hang) | 51 (2,3) / 53 (2,4) | 102 (4,8) / 105 (4,9) |
+| Sắt mỗi chunk (lộ ra hang) | 39 (2,1) / 39 (1,8) | 81 (3,9) / 83 (3,9) |
+| Kim cương mỗi chunk | 4,3 / 4,2 | 4,1 / 4,1 |
+| Vàng (thường + đá sâu) mỗi chunk | – | 9,4 / 9,7 |
+| Ngọc lục bảo mỗi chunk núi | – | 4,4 / 4,3 |
+
+- Kiểm tra lại 2b ở 4 vùng 24x24 chunk (2 seed): sinh xác định, 0 ô nước/dung nham hở ngoài mạch, 0 chỗ thủng nước bề mặt.
+- Ảnh chụp: quặng vàng trong hang ở `?seed=voxel&pos=23.5,22.6,6.5&look=-3.14,-0.29&nv=1`, ngọc lục bảo ở `?seed=voxel&pos=35.5,31.6,53.5&look=-1.57,0.24&nv=1`.
+- Vấn đề: không hầm mỏ nào chạm giới hạn 70 đoạn (trung bình ~19, lớn nhất 47) vì nhánh tự tắt (giới hạn độ sâu 10, nhánh cụt, ngã rẽ bỏ nhánh 35%), nên mỗi hầm mỏ chỉ ~15 chunk, không lớn hơn trước. Muốn hầm mỏ to hơn thì phải chỉnh xác suất rẽ nhánh.
+- Thế giới cũ của cùng seed đổi theo (quặng, hầm mỏ, hồ ngầm). Chưa có dữ liệu lưu trên server nên không cần chuyển đổi.

@@ -1,11 +1,10 @@
 // Quy tắc chung cho mọi thứ đục hang (hang noise, cửa hang): ô bị đục thành gì.
 // Bảo đảm nước sinh sẵn luôn "tĩnh": không đục cạnh / ngay dưới nước bề mặt, hồ
 // ngầm có đập giữ ở biên vùng, có lớp đá ngăn hồ ngầm với dung nham bên dưới.
-import { CAVES, MINESHAFT } from "../constants.js";
+import { CAVES } from "../constants.js";
 import { B } from "../blocks.js";
 import { hashInts, mulberry32 } from "../rng.js";
 import type { TerrainSampler } from "./terrainSampler.js";
-import { mineshaftCenter } from "./mineshaftCenter.js";
 
 const LR = CAVES.LAKE_REGION;
 
@@ -30,17 +29,8 @@ export class CaveRules {
   private planLake(rx: number, rz: number): number {
     const rng = mulberry32(hashInts(this.sampler.seed, rx, rz, 36));
     if (rng() >= CAVES.LAKE_CHANCE) return 0;
-    const level = CAVES.LAKE_MIN_Y + Math.floor(rng() * (CAVES.LAKE_MAX_Y - CAVES.LAKE_MIN_Y + 1));
-    // không có hồ ngầm trong vùng của hầm mỏ (hành lang khô sẽ làm nước tràn)
-    const x0 = rx * LR, z0 = rz * LR, reach = MINESHAFT.MAX_RADIUS + 8;
-    const mr = MINESHAFT.REGION;
-    for (let mz = Math.floor((z0 - reach) / mr); mz <= Math.floor((z0 + LR + reach) / mr); mz++)
-      for (let mx = Math.floor((x0 - reach) / mr); mx <= Math.floor((x0 + LR + reach) / mr); mx++) {
-        const c = mineshaftCenter(this.sampler, mx, mz);
-        if (!c) continue;
-        if (c.x + reach > x0 && c.x - reach < x0 + LR && c.z + reach > z0 && c.z - reach < z0 + LR) return 0;
-      }
-    return level;
+    // hầm mỏ tự né phần dưới mực nước (xem mineshaft.ts), nên hồ không cần né hầm mỏ
+    return CAVES.LAKE_MIN_Y + Math.floor(rng() * (CAVES.LAKE_MAX_Y - CAVES.LAKE_MIN_Y + 1));
   }
 
   /**

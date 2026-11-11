@@ -37,6 +37,13 @@
       "src": "default_mcl_core/minerals_ores/default_mineral_diamond.png",
       "base": "default_mcl_core/stone/default_stone.png"
     },
+    {
+      "dest": "textures/ore_gold.png",
+      "src": "default_mcl_core/minerals_ores/default_mineral_gold.png",
+      "base": "default_mcl_core/stone/default_stone.png"
+    },
+    { "dest": "textures/ore_gold_deep.png", "src": "mcl_deepslate/mcl_deepslate_gold_ore.png" },
+    { "dest": "textures/ore_emerald.png", "src": "default_mcl_core/minerals_ores/mcl_core_emerald_ore.png" },
     { "dest": "textures/workbench_top.png", "src": "default_mcl_core/crafting_workbench_top.png" },
     { "dest": "textures/workbench_side.png", "src": "default_mcl_core/crafting_workbench_side.png" },
     { "dest": "textures/workbench_front.png", "src": "default_mcl_core/crafting_workbench_front.png" },

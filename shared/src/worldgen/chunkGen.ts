@@ -3,7 +3,6 @@
 import { TERRAIN, WORLD } from "../constants.js";
 import { B, type BlockId } from "../blocks.js";
 import { CHUNK_HEIGHT, CHUNK_VOLUME, blockIndex } from "../chunk.js";
-import { hashInts, mulberry32, randInt } from "../rng.js";
 import { BIOME, TerrainSampler, hasGrassSurface, type Column } from "./terrainSampler.js";
 import { placeTallGrass, placeTrees } from "./trees.js";
 import { placeSprings } from "./springs.js";
@@ -13,6 +12,7 @@ import { EntrancePlanner } from "./entrances.js";
 import { carveChunk } from "./caves.js";
 import { MineshaftPlanner } from "./mineshaft.js";
 import { placeCaveSprings } from "./caveSprings.js";
+import { placeEmeralds, placeOres } from "./ores.js";
 
 export class ChunkGenerator {
   readonly sampler: TerrainSampler;
@@ -38,7 +38,8 @@ export class ChunkGenerator {
         cols.push(col);
         this.fillColumn(data, lx, lz, col, cx * 16 + lx, cz * 16 + lz);
       }
-    this.placeOres(data, cx, cz); // trước khi đục hang để quặng lộ ra trên vách
+    placeOres(this.seed, data, cx, cz); // trước khi đục hang để quặng lộ ra trên vách
+    placeEmeralds(this.sampler, data, cx, cz);
     carveChunk(this, data, cx, cz, cols);
     this.mineshafts.apply(data, cx, cz);
     placeTrees(this, data, cx, cz);
@@ -84,52 +85,5 @@ export class ChunkGenerator {
       (col.biome === BIOME.SNOWY && hasGrassSurface(col)) ||
       (col.biome === BIOME.MOUNTAINS && !underwater && h >= snowLine);
     if (snowy && h + 1 < CHUNK_HEIGHT) data[blockIndex(lx, h + 1, lz)] = B.SNOW_LAYER;
-  }
-
-  /** Quặng và sỏi theo cụm; cụm của chunk kề cũng được xét để liền mạch qua ranh giới. */
-  private placeOres(data: Uint8Array, cx: number, cz: number): void {
-    const specs = [
-      { id: B.ORE_COAL, ...WORLD.ORE.coal },
-      { id: B.ORE_IRON, ...WORLD.ORE.iron },
-      { id: B.ORE_DIAMOND, ...WORLD.ORE.diamond },
-    ];
-    const x0 = cx * 16, z0 = cz * 16;
-    const put = (x: number, y: number, z: number, id: BlockId): void => {
-      const lx = x - x0, lz = z - z0;
-      if (lx < 0 || lz < 0 || lx > 15 || lz > 15 || y < 1 || y >= CHUNK_HEIGHT) return;
-      const i = blockIndex(lx, y, lz);
-      if (data[i] === B.STONE) data[i] = id;
-    };
-    for (let ncz = cz - 1; ncz <= cz + 1; ncz++) {
-      for (let ncx = cx - 1; ncx <= cx + 1; ncx++) {
-        const rng = mulberry32(hashInts(this.seed, ncx, ncz, 7));
-        for (const s of specs) {
-          for (let a = 0; a < s.attempts; a++) {
-            let x = ncx * 16 + randInt(rng, 0, 15);
-            let z = ncz * 16 + randInt(rng, 0, 15);
-            let y = randInt(rng, 1, s.maxY - 1);
-            for (let i = 0; i < s.cluster; i++) {
-              put(x, y, z, s.id);
-              const axis = randInt(rng, 0, 2);
-              const dir = rng() < 0.5 ? -1 : 1;
-              if (axis === 0) x += dir;
-              else if (axis === 1) y = Math.max(1, Math.min(s.maxY - 1, y + dir));
-              else z += dir;
-            }
-          }
-        }
-        const g = WORLD.GRAVEL;
-        for (let a = 0; a < g.attempts; a++) {
-          const x = ncx * 16 + randInt(rng, 0, 15);
-          const z = ncz * 16 + randInt(rng, 0, 15);
-          const y = randInt(rng, 1, g.maxY - 1);
-          const r = g.radius;
-          for (let dx = -r; dx <= r; dx++)
-            for (let dy = -r; dy <= r; dy++)
-              for (let dz = -r; dz <= r; dz++)
-                if (dx * dx + dy * dy + dz * dz <= r * r + 0.5) put(x + dx, y + dy, z + dz, B.GRAVEL);
-        }
-      }
-    }
   }
 }
