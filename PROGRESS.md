@@ -4,8 +4,8 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 
 | Giai đoạn | Tên | Trạng thái |
 |---|---|---|
-| 0 | Dựng khung | chờ người dùng test |
-| 1 | Thế giới voxel (chỉ client) | chưa làm |
+| 0 | Dựng khung | xong (người dùng xác nhận 2026-11-11) |
+| 1 | Thế giới voxel (chỉ client) | đang làm |
 | 2 | Người chơi và tương tác block (chỉ client) | chưa làm |
 | 3 | Vật phẩm, chế tạo, sinh tồn (chỉ client) | chưa làm |
 | 4 | Mạng nhiều người chơi | chưa làm |
