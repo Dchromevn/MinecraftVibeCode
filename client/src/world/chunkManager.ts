@@ -1,9 +1,11 @@
 // Tải / gỡ chunk theo bán kính tầm nhìn quanh camera. Sinh và dựng mesh trong
 // worker; ưu tiên chunk gần và chunk trước mặt. Chunk đã sửa được giữ lại khi gỡ.
-import { Chunk, World, WORLD, chunkKey, CHUNK_HEIGHT } from "../../../shared/src/index.js";
-import { PAD, padIndex } from "../mesh/mesher.js";
+import { Chunk, WORLD, chunkKey, type World } from "../../../shared/src/index.js";
 import type { WorkerPool } from "../workers/workerPool.js";
 import type { ChunkMeshes } from "./chunkMeshes.js";
+
+/** Ánh sáng lan tối đa 14 ô; sửa block thì dựng lại các chunk trong bán kính này. */
+const RELIGHT_RADIUS = 15;
 
 interface Job {
   kind: "gen" | "mesh";
@@ -20,7 +22,7 @@ export class ChunkManager {
   private readonly meshing = new Map<number, number>(); // key -> phiên bản đang dựng
   private readonly version = new Map<number, number>(); // tăng khi block đổi
   private readonly dirty = new Set<number>(); // cần dựng lại mesh
-  private readonly urgent = new Set<number>(); // dựng lại ngay (do sửa block)
+  private readonly urgent = new Map<number, number>(); // dựng lại ngay (do sửa block) -> độ ưu tiên
 
   constructor(
     readonly world: World,
@@ -36,14 +38,20 @@ export class ChunkManager {
     return this.meshing.size;
   }
 
-  /** Gọi sau khi world.setBlock thành công. */
+  /**
+   * Gọi sau khi world.setBlock thành công. Ánh sáng có thể đổi tới 15 block quanh
+   * đó (kể cả xuyên chunk), nên dựng lại mọi chunk trong phạm vi này; chunk chứa
+   * block được dựng trước.
+   */
   onBlockChanged(x: number, z: number): void {
-    for (const c of World.affectedChunks(x, z)) {
-      const k = chunkKey(c.cx, c.cz);
-      this.version.set(k, (this.version.get(k) ?? 0) + 1);
-      this.dirty.add(k);
-      this.urgent.add(k);
-    }
+    const r = RELIGHT_RADIUS;
+    for (let cz = Math.floor((z - r) / 16); cz <= Math.floor((z + r) / 16); cz++)
+      for (let cx = Math.floor((x - r) / 16); cx <= Math.floor((x + r) / 16); cx++) {
+        const k = chunkKey(cx, cz);
+        this.version.set(k, (this.version.get(k) ?? 0) + 1);
+        this.dirty.add(k);
+        this.urgent.set(k, cx === x >> 4 && cz === z >> 4 ? -2 : -1);
+      }
   }
 
   update(camX: number, camZ: number, dirX: number, dirZ: number): void {
@@ -56,12 +64,14 @@ export class ChunkManager {
       if (Math.hypot(chunk.cx - ccx, chunk.cz - ccz) <= unloadR + 0.5) continue;
       if (chunk.modified) this.saved.set(key, chunk.data);
       this.world.removeChunk(chunk.cx, chunk.cz);
-      this.meshes.remove(key);
+      this.meshes.remove(chunk.cx, chunk.cz);
       this.dirty.delete(key);
       this.urgent.delete(key);
     }
-    for (const key of [...this.meshes.keys()]) {
-      if (!this.world.chunks.has(key)) this.meshes.remove(key);
+    for (const key of this.meshes.chunkKeys()) {
+      if (this.world.chunks.has(key)) continue;
+      const cx = Math.floor(key / 0x10000) - 0x8000, cz = (key % 0x10000) - 0x8000;
+      this.meshes.remove(cx, cz);
     }
 
     // 2. lập danh sách việc
@@ -92,7 +102,7 @@ export class ChunkManager {
         if (dist > R + 0.5 || this.meshing.has(key)) continue;
         if (this.meshes.has(key) && !this.dirty.has(key)) continue;
         if (!this.neighborsLoaded(cx, cz)) continue;
-        jobs.push({ kind: "mesh", cx, cz, priority: this.urgent.has(key) ? -1 : priority });
+        jobs.push({ kind: "mesh", cx, cz, priority: this.urgent.get(key) ?? priority });
       }
     }
 
@@ -129,33 +139,22 @@ export class ChunkManager {
     this.meshing.set(key, ver);
     this.dirty.delete(key);
     this.urgent.delete(key);
-    const pad = this.buildPadded(cx, cz);
+    // bản sao 3x3 chunk (worker tính ánh sáng cả vùng rồi dựng chunk giữa)
+    const chunks: (Uint8Array | null)[] = [];
+    for (let dz = -1; dz <= 1; dz++)
+      for (let dx = -1; dx <= 1; dx++) chunks.push(this.world.getChunk(cx + dx, cz + dz)?.data.slice() ?? null);
+    const transfer = chunks.filter((c): c is Uint8Array => c !== null).map((c) => c.buffer as ArrayBuffer);
     this.pool.run(
-      { type: "mesh", cx, cz, pad },
+      { type: "mesh", cx, cz, chunks },
       (msg) => {
         this.meshing.delete(key);
         if (msg.type !== "mesh" || !this.world.chunks.has(key)) return;
-        this.meshes.set(key, cx, cz, msg.mesh);
+        this.meshes.set(cx, cz, msg.sections);
         // block đổi trong lúc đang dựng: dựng lại
         if ((this.version.get(key) ?? 0) !== ver) this.dirty.add(key);
       },
-      [pad.buffer],
+      transfer,
     );
-  }
-
-  /** Chunk + 1 block viền của 8 chunk kề, dạng 18 x 128 x 18. */
-  private buildPadded(cx: number, cz: number): Uint8Array {
-    const pad = new Uint8Array(PAD * PAD * CHUNK_HEIGHT);
-    for (let pz = 0; pz < PAD; pz++) {
-      for (let px = 0; px < PAD; px++) {
-        const wx = cx * 16 + px - 1, wz = cz * 16 + pz - 1;
-        const c = this.world.chunks.get(chunkKey(wx >> 4, wz >> 4));
-        if (!c) continue;
-        const lx = wx & 15, lz = wz & 15;
-        for (let y = 0; y < CHUNK_HEIGHT; y++) pad[padIndex(px, y, pz)] = c.data[(y * 16 + lz) * 16 + lx]!;
-      }
-    }
-    return pad;
   }
 
   /** Số chunk đã sửa (đang tải + đang gỡ), để HUD hiển thị. */

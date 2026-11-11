@@ -1,25 +1,18 @@
-// Dựng mesh cho một chunk từ khối dữ liệu có viền (18 x 128 x 18: chunk + 1 block
-// của các chunk kề). Chỉ vẽ mặt lộ, AO theo đỉnh, mặt nước hạ thấp 1/8.
-// Đỉnh tính theo tọa độ cục bộ của chunk (0..16) để giữ chính xác ở xa gốc tọa độ.
+// Dựng mesh cho chunk giữa của một vùng 3x3 chunk (đã có ánh sáng), chia thành 8 đoạn
+// 16 block. Chỉ vẽ mặt lộ; AO + ánh sáng mượt theo đỉnh; nước hạ 1/8, tối dần theo độ sâu.
+// Đỉnh theo tọa độ trong chunk (0..16) để giữ chính xác ở xa gốc tọa độ.
 import { B, BLOCKS, CHUNK_HEIGHT } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
+import { regionIndex } from "../light/regionLight.js";
 import { GeomBuilder, type MeshArrays } from "./geomBuilder.js";
-import { addCross } from "./shapes.js";
+import { addSpecial, type SpecialUv } from "./specialBlocks.js";
+import { sectionConnectivity } from "./connectivity.js";
 
-export const PAD = 18; // 16 + 2 viền
-export function padIndex(px: number, y: number, pz: number): number {
-  return (y * PAD + pz) * PAD + px;
-}
+export const SECTION_H = 16;
+export const SECTIONS = CHUNK_HEIGHT / SECTION_H;
 
 type Vec3 = readonly [number, number, number];
-interface FaceDef {
-  n: Vec3;
-  u: Vec3;
-  v: Vec3;
-  shade: number;
-  slot: 0 | 1 | 2 | 3; // top, bottom, side, front
-}
-
+interface FaceDef { n: Vec3; u: Vec3; v: Vec3; shade: number; slot: 0 | 1 | 2 | 3 }
 // u × v = n để đỉnh xếp ngược chiều kim đồng hồ nhìn từ ngoài
 const FACES: readonly FaceDef[] = [
   { n: [1, 0, 0], u: [0, 0, -1], v: [0, 1, 0], shade: 0.6, slot: 2 },
@@ -31,7 +24,7 @@ const FACES: readonly FaceDef[] = [
 ];
 const CORNERS: ReadonlyArray<readonly [number, number]> = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
 const AO_LEVELS = [0.5, 0.68, 0.84, 1.0] as const;
-const WATER_TOP = 14 / 16;
+const LIQUID_TOP = 14 / 16;
 const LAYER_TOP = 2 / 16;
 // texture nước gốc ngả tím; nhuộm xanh cho giống nước hơn
 const WATER_TINT = [0.55, 0.75, 1.0] as const;
@@ -45,9 +38,7 @@ for (const b of BLOCKS) {
   CUBE_SOLID[b.id] = b.render === "cube" && !b.transparent ? 1 : 0;
 }
 
-/** UV cho từng block: [top, bottom, side, front] và vài texture phụ. */
-export interface UvTable {
-  blocks: TileUV[][]; // blocks[id][slot]
+export interface UvTable extends SpecialUv {
   snowSide: TileUV;
 }
 
@@ -55,116 +46,122 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
   return {
     blocks: BLOCKS.map((b) => [uv(b.tex.top), uv(b.tex.bottom), uv(b.tex.side), uv(b.tex.front ?? b.tex.side)]),
     snowSide: uv("snow_side"),
+    railCurved: uv("rail_curved"),
+    railT: uv("rail_t"),
+    railCross: uv("rail_cross"),
+    bedFootSide: uv("bed_foot_side"),
   };
 }
 
-export interface ChunkMesh {
-  solid: MeshArrays | null; // khối + cắt alpha (lá, cỏ cao)
-  water: MeshArrays | null; // bán trong suốt
+export interface SectionMesh {
+  solid: MeshArrays | null; // khối + cắt alpha (lá, cỏ, kính, ray...) + dung nham
+  water: MeshArrays | null; // nước bán trong suốt
+  conn: Uint8Array; // độ thông giữa 6 mặt của đoạn (ẩn hang khuất)
 }
 
-/** Số block nước liên tiếp tính từ ô (x, y, z) trở lên. */
 function waterDepth(at: (x: number, y: number, z: number) => number, x: number, y: number, z: number): number {
   let d = 0;
   while (d < 32 && at(x, y + d, z) === B.WATER) d++;
   return d;
 }
 
-/** Hệ số màu cho mặt nằm dưới nước sâu depth block (đỏ tắt nhanh nhất, xanh dương chậm nhất). */
 function underwaterTint(depth: number): readonly [number, number, number] {
   const k = Math.exp(-UNDERWATER_FALLOFF * depth);
   return [0.18 + 0.82 * k, 0.28 + 0.72 * k, 0.5 + 0.5 * k];
 }
 
-export function meshChunk(pad: Uint8Array, uvt: UvTable): ChunkMesh {
-  const solid = new GeomBuilder();
-  const water = new GeomBuilder();
-  const at = (px: number, y: number, pz: number): number => {
+/** region: block của vùng 3x3 chunk; light: ánh sáng cùng chỉ số. Trả về 8 đoạn của chunk giữa. */
+export function meshRegion(region: Uint8Array, light: Uint8Array, uvt: UvTable): SectionMesh[] {
+  const at = (x: number, y: number, z: number): number => {
     if (y >= CHUNK_HEIGHT) return B.AIR;
     if (y < 0) return B.BEDROCK;
-    return pad[padIndex(px, y, pz)]!;
+    return region[regionIndex(x + 16, y, z + 16)]!;
   };
-  const pos = new Float32Array(12);
-  const uvArr = new Float32Array(8);
-  const rgb = new Float32Array(12);
+  const sky = (x: number, y: number, z: number): number =>
+    y >= CHUNK_HEIGHT ? 15 : y < 0 ? 0 : light[regionIndex(x + 16, y, z + 16)]! >> 4;
+  const blk = (x: number, y: number, z: number): number =>
+    y >= CHUNK_HEIGHT || y < 0 ? 0 : light[regionIndex(x + 16, y, z + 16)]! & 15;
+  const pos = new Float32Array(12), uvArr = new Float32Array(8), rgb = new Float32Array(12), lit = new Float32Array(8);
+  const out: SectionMesh[] = [];
 
-  for (let y = 0; y < CHUNK_HEIGHT; y++) {
-    for (let z = 0; z < 16; z++) {
-      for (let x = 0; x < 16; x++) {
-        const px = x + 1, pz = z + 1;
-        const id = pad[padIndex(px, y, pz)]!;
-        if (id === B.AIR) continue;
-        const def = BLOCKS[id]!;
-        if (def.render === "none") continue;
-        if (def.render === "cross") {
-          addCross(solid, x, y, z, uvt.blocks[id]![2]!, [1, 1, 1]);
-          continue;
-        }
+  for (let sy = 0; sy < SECTIONS; sy++) {
+    const solid = new GeomBuilder();
+    const water = new GeomBuilder();
+    for (let y = sy * SECTION_H; y < (sy + 1) * SECTION_H; y++) {
+      for (let z = 0; z < 16; z++) {
+        for (let x = 0; x < 16; x++) {
+          const id = at(x, y, z);
+          if (id === B.AIR) continue;
+          const def = BLOCKS[id]!;
+          if (def.render === "none") continue;
+          const cellLight = [sky(x, y, z) / 15, blk(x, y, z) / 15];
+          if (addSpecial(solid, id, x, y, z, at, uvt, cellLight)) continue;
 
-        const isWater = def.render === "liquid";
-        const isLayer = def.render === "layer";
-        const builder = isWater ? water : solid;
-        // nước: mặt trên hạ xuống nếu bên trên không phải nước
-        const top = isWater ? (at(px, y + 1, pz) === id ? 1 : WATER_TOP) : isLayer ? LAYER_TOP : 1;
-        const snowAbove = id === B.GRASS && at(px, y + 1, pz) === B.SNOW_LAYER;
+          const isWater = id === B.WATER;
+          const isLiquid = def.render === "liquid";
+          const isLayer = def.render === "layer";
+          const builder = isWater ? water : solid;
+          const top = isLiquid ? (at(x, y + 1, z) === id ? 1 : LIQUID_TOP) : isLayer ? LAYER_TOP : 1;
+          const snowAbove = id === B.GRASS && at(x, y + 1, z) === B.SNOW_LAYER;
 
-        for (const f of FACES) {
-          const nx = px + f.n[0], ny = y + f.n[1], nz = pz + f.n[2];
-          if (ny < 0) continue;
-          const nid = at(nx, ny, nz);
-          if (CUBE_SOLID[nid]) continue;
-          if (nid === id && def.transparent) continue; // lá–lá, nước–nước
-          if (isLayer && f.n[1] === -1) continue; // lớp tuyết nằm trên khối đặc
-          if (isWater && f.n[1] === 1 && top === 1) continue;
-          if (isLayer && f.n[1] === 0 && nid === id) continue;
+          for (const f of FACES) {
+            const nx = x + f.n[0], ny = y + f.n[1], nz = z + f.n[2];
+            if (ny < 0) continue;
+            const nid = at(nx, ny, nz);
+            if (CUBE_SOLID[nid]) continue;
+            if (nid === id && def.transparent) continue; // lá–lá, nước–nước, kính–kính
+            if (isLiquid && nid === id) continue;
+            if (isLayer && f.n[1] === -1) continue;
+            if (isLiquid && f.n[1] === 1 && top === 1) continue;
 
-          // mặt nằm dưới nước: tối dần và ám xanh theo số block nước phía trên
-          const depth = !isWater && nid === B.WATER ? waterDepth(at, nx, ny, nz) : 0;
-          const deep = depth > 0 ? underwaterTint(depth) : NO_TINT;
+            const depth = !isWater && nid === B.WATER ? waterDepth(at, nx, ny, nz) : 0;
+            const tint = isWater ? WATER_TINT : depth > 0 ? underwaterTint(depth) : NO_TINT;
+            let uv = uvt.blocks[id]![f.slot]!;
+            if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
+            const vTop = f.n[1] === 0 ? uv.v0 + (uv.v1 - uv.v0) * top : uv.v1;
+            const nSky = sky(nx, ny, nz), nBlk = blk(nx, ny, nz);
 
-          let uv = uvt.blocks[id]![f.slot]!;
-          if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
-          // khối thấp hơn (nước, tuyết): cắt texture mặt bên theo chiều cao
-          const vTop = f.n[1] === 0 ? uv.v0 + (uv.v1 - uv.v0) * top : uv.v1;
+            for (let k = 0; k < 4; k++) {
+              const [us, vs] = CORNERS[k]!;
+              let cy = 0.5 + f.n[1] * 0.5 + (f.u[1] * us + f.v[1] * vs) * 0.5;
+              if (cy > 0.99) cy = top;
+              pos[k * 3] = x + 0.5 + f.n[0] * 0.5 + (f.u[0] * us + f.v[0] * vs) * 0.5;
+              pos[k * 3 + 1] = y + cy;
+              pos[k * 3 + 2] = z + 0.5 + f.n[2] * 0.5 + (f.u[2] * us + f.v[2] * vs) * 0.5;
+              if (isWater) {
+                // nước dùng texture riêng lặp lại theo tọa độ block (để trôi được)
+                uvArr[k * 2] = f.n[0] !== 0 ? pos[k * 3 + 2]! : pos[k * 3]!;
+                uvArr[k * 2 + 1] = f.n[1] !== 0 ? pos[k * 3 + 2]! : pos[k * 3 + 1]!;
+              } else {
+                uvArr[k * 2] = us < 0 ? uv.u0 : uv.u1;
+                uvArr[k * 2 + 1] = vs < 0 ? uv.v0 : vTop;
+              }
 
-          for (let k = 0; k < 4; k++) {
-            const [us, vs] = CORNERS[k]!;
-            const cx = 0.5 + f.n[0] * 0.5 + (f.u[0] * us + f.v[0] * vs) * 0.5;
-            let cy = 0.5 + f.n[1] * 0.5 + (f.u[1] * us + f.v[1] * vs) * 0.5;
-            const cz = 0.5 + f.n[2] * 0.5 + (f.u[2] * us + f.v[2] * vs) * 0.5;
-            if (cy > 0.99) cy = top; // hạ đỉnh trên cùng cho nước / lớp tuyết
-            pos[k * 3] = x + cx;
-            pos[k * 3 + 1] = y + cy;
-            pos[k * 3 + 2] = z + cz;
-            if (isWater) {
-              // nước dùng texture riêng lặp lại theo tọa độ block (để trôi được)
-              const wu = f.n[0] !== 0 ? pos[k * 3 + 2]! : pos[k * 3]!;
-              const wv = f.n[1] !== 0 ? pos[k * 3 + 2]! : pos[k * 3 + 1]!;
-              uvArr[k * 2] = wu;
-              uvArr[k * 2 + 1] = wv;
-            } else {
-              uvArr[k * 2] = us < 0 ? uv.u0 : uv.u1;
-              uvArr[k * 2 + 1] = vs < 0 ? uv.v0 : vTop;
+              let shade = f.shade, s = nSky, bl = nBlk, cnt = 1;
+              if (!isLiquid) {
+                const ax = nx + f.u[0] * us, ay = ny + f.u[1] * us, az = nz + f.u[2] * us;
+                const bx = nx + f.v[0] * vs, by = ny + f.v[1] * vs, bz = nz + f.v[2] * vs;
+                const qx = ax + f.v[0] * vs, qy = ay + f.v[1] * vs, qz = az + f.v[2] * vs;
+                const s1 = OPAQUE[at(ax, ay, az)]!, s2 = OPAQUE[at(bx, by, bz)]!;
+                const c = s1 && s2 ? 1 : OPAQUE[at(qx, qy, qz)]!;
+                shade *= AO_LEVELS[s1 && s2 ? 0 : 3 - (s1 + s2 + c)]!;
+                // ánh sáng mượt: trung bình các ô không đặc quanh đỉnh
+                if (!s1) { s += sky(ax, ay, az); bl += blk(ax, ay, az); cnt++; }
+                if (!s2) { s += sky(bx, by, bz); bl += blk(bx, by, bz); cnt++; }
+                if (!c) { s += sky(qx, qy, qz); bl += blk(qx, qy, qz); cnt++; }
+              }
+              rgb[k * 3] = shade * tint[0];
+              rgb[k * 3 + 1] = shade * tint[1];
+              rgb[k * 3 + 2] = shade * tint[2];
+              lit[k * 2] = s / cnt / 15;
+              lit[k * 2 + 1] = def.lightEmit > 0 ? def.lightEmit / 15 : bl / cnt / 15;
             }
-
-            let light = f.shade;
-            if (!isWater) {
-              const ax = nx + f.u[0] * us, ay = ny + f.u[1] * us, az = nz + f.u[2] * us;
-              const bx = nx + f.v[0] * vs, by = ny + f.v[1] * vs, bz = nz + f.v[2] * vs;
-              const s1 = OPAQUE[at(ax, ay, az)]!;
-              const s2 = OPAQUE[at(bx, by, bz)]!;
-              const c = s1 && s2 ? 1 : OPAQUE[at(ax + f.v[0] * vs, ay + f.v[1] * vs, az + f.v[2] * vs)]!;
-              light *= AO_LEVELS[s1 && s2 ? 0 : 3 - (s1 + s2 + c)]!;
-            }
-            const tint = isWater ? WATER_TINT : deep;
-            rgb[k * 3] = light * tint[0];
-            rgb[k * 3 + 1] = light * tint[1];
-            rgb[k * 3 + 2] = light * tint[2];
+            builder.quad(pos, uvArr, rgb, lit);
           }
-          builder.quad(pos, uvArr, rgb);
         }
       }
     }
+    out.push({ solid: solid.build(), water: water.build(), conn: sectionConnectivity(region, sy, SECTION_H) });
   }
-  return { solid: solid.build(), water: water.build() };
+  return out;
 }

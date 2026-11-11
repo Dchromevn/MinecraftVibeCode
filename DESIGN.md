@@ -306,6 +306,33 @@ liệu thì sáng, thiếu thì mờ.
   (0.04, 0.025) block/giây; mặt dưới nước nhân hệ số exp(-0.35 × độ sâu).
 - Quặng mỗi chunk: than 16 cụm, sắt 12, kim cương 3, sỏi 3 khối cầu bán kính 2.
 
+## Phụ lục — Thông số chi tiết của Giai đoạn 2b
+
+- Hang sợi mì: tần số 1/56, kéo giãn trục y 1.6, ngưỡng 0.085. Hang phô mai: tần số
+  1/72, ngưỡng 0.56, chỉ dưới y = 64. Noise 3D lấy mẫu mỗi 4 block rồi nội suy (chunk
+  và truy vấn từng điểm dùng cùng hàm nên trùng khớp). Không đục trong 7 block dưới mặt
+  đất, thu hẹp dần trong dải 8 block. Ô bị đục có y ≤ 11 thành dung nham.
+- Không đục cạnh cột đang có nước bề mặt (cùng độ cao) và sát dưới đáy nước, nên
+  biển/sông/hồ không thủng xuống hang.
+- Cửa hang: vùng 64x64, xác suất 0.85, đường hầm đào chéo tối đa 160 bước, không đi
+  xa quá 60 block theo chiều ngang, dừng khi gặp hang noise; miệng loe rộng; không
+  trồng cây trong 3 block quanh miệng hang.
+- Hồ ngầm: vùng 64x64, xác suất 0.35, mực nước y = 20–50; mọi ô hang dưới mực nước
+  trong vùng đó là nước; đập đá 2 block ở biên vùng; lớp đá ở y = 12 ngăn với dung
+  nham; không có hồ ngầm trong vùng của hầm mỏ.
+- Mạch nước trần hang: 70% số chunk, mạch dung nham 25% (chỉ dưới y = 30); trần
+  phải dày ≥ 2 block. Mạch nước trên núi cũng cần đá ngay phía trên.
+- Hầm mỏ: vùng 256x256, xác suất 0.9; phòng y = 24–44 dưới đất khô sâu ≥ 8 block;
+  hành lang luôn dưới đất khô ≥ 8 block (không thủng đáy nước); các thông số khác
+  như phụ lục 1b bên dưới. Ray tự chọn thẳng/cong/ngã ba/ngã tư theo ray kề.
+- Ánh sáng: tính trong worker cho vùng 3x3 chunk (48 x 128 x 48) mỗi lần dựng mesh
+  chunk giữa (ánh sáng lan tối đa 14 ô nên luôn đúng, kể cả xuyên chunk); sửa block
+  thì dựng lại mọi chunk trong bán kính 15 block. Đỉnh lưu (trời, block) riêng; shader
+  tính độ sáng = max(trời × hệ số ban ngày, block × màu vàng ấm), đường cong
+  (f / (3 − 2f))^1.6, tối thiểu 0.004.
+- Ẩn đoạn khuất: đoạn 16x16x16, BFS từ đoạn chứa camera qua các mặt thông nhau,
+  trong khối nhìn và tầm nhìn + 1. Camera ở trong khối đặc thì tắt (nhìn xuyên).
+
 ## Phụ lục — Thông số chi tiết đã tinh chỉnh (từ Giai đoạn 1b cũ, dùng cho 2b)
 
 Các giá trị dưới đây đã đo và chỉnh khi làm hang động/hầm mỏ/ánh sáng trên bản

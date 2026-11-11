@@ -34,6 +34,7 @@ function treesNear(gen: ChunkGenerator, cx: number, cz: number): Tree[] {
       if (p >= chance || !hasGrassSurface(col)) continue;
       if (col.biome === 4 /* núi */ && col.height > BIOMES.MOUNTAIN_TREE_MAX_Y) continue;
       if (col.height + trunk + 3 >= CHUNK_HEIGHT) continue;
+      if (gen.entrances.mouthNear(x, z, col.height, 3)) continue; // không trồng lên miệng hang
       out.push({ x, z, base: col.height + 1, trunk, rng });
     }
   }

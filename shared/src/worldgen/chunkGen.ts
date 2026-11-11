@@ -7,14 +7,26 @@ import { hashInts, mulberry32, randInt } from "../rng.js";
 import { BIOME, TerrainSampler, hasGrassSurface, type Column } from "./terrainSampler.js";
 import { placeTallGrass, placeTrees } from "./trees.js";
 import { placeSprings } from "./springs.js";
-
-const SEA = WORLD.SEA_LEVEL;
+import { CaveField } from "./caveField.js";
+import { CaveRules } from "./caveRules.js";
+import { EntrancePlanner } from "./entrances.js";
+import { carveChunk } from "./caves.js";
+import { MineshaftPlanner } from "./mineshaft.js";
+import { placeCaveSprings } from "./caveSprings.js";
 
 export class ChunkGenerator {
   readonly sampler: TerrainSampler;
+  readonly caves: CaveField;
+  readonly rules: CaveRules;
+  readonly entrances: EntrancePlanner;
+  readonly mineshafts: MineshaftPlanner;
 
   constructor(readonly seed: number) {
     this.sampler = new TerrainSampler(seed);
+    this.caves = new CaveField(seed);
+    this.rules = new CaveRules(this.sampler);
+    this.entrances = new EntrancePlanner(this.sampler, this.caves);
+    this.mineshafts = new MineshaftPlanner(this);
   }
 
   generate(cx: number, cz: number): Uint8Array {
@@ -26,10 +38,13 @@ export class ChunkGenerator {
         cols.push(col);
         this.fillColumn(data, lx, lz, col, cx * 16 + lx, cz * 16 + lz);
       }
-    this.placeOres(data, cx, cz);
+    this.placeOres(data, cx, cz); // trước khi đục hang để quặng lộ ra trên vách
+    carveChunk(this, data, cx, cz, cols);
+    this.mineshafts.apply(data, cx, cz);
     placeTrees(this, data, cx, cz);
     placeTallGrass(this, data, cx, cz, cols);
     placeSprings(this.sampler, data, cx, cz, cols);
+    placeCaveSprings(this.seed, data, cx, cz, cols);
     return data;
   }
 

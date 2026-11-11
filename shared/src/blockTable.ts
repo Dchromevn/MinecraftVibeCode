@@ -1,5 +1,6 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Giai đoạn 2a có id 0–17, 20, 21, 32, 34; các id còn lại "dành chỗ" cho 2b.
+// Đủ id 0–34 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
+import { LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
 const same = (t: string): BlockTextures => ({ top: t, bottom: t, side: t });
@@ -35,7 +36,6 @@ function def(
 /** Không va chạm, không che khuất, ánh sáng đi qua. */
 const OPEN: Partial<BlockDef> = { transparent: true, solid: false, opaque: false, lightOpacity: 0 };
 const PICK_ONLY: Partial<BlockDef> = { toolRequired: true };
-const reserved = (id: number): BlockDef => def(id, `reserved_${id}`, 0, "none", [], same(""), { ...OPEN, render: "none" });
 
 const TABLE: BlockDef[] = [
   def(0, "air", 0, "none", [], same(""), { ...OPEN, render: "none" }),
@@ -71,26 +71,61 @@ const TABLE: BlockDef[] = [
   // sỏi: 10% rơi đá lửa thay cho sỏi (Giai đoạn 4 xử lý)
   def(16, "gravel", 0.9, "shovel", [drop("gravel", 0.9), drop("flint", 0.1)], same("gravel"), { falls: true }),
   def(17, "water", Infinity, "none", [], same("water"), { ...OPEN, liquid: true, lightOpacity: 2, render: "liquid" }),
-  reserved(18), // dung nham (2b)
-  reserved(19), // đá cuội rêu (2b)
+  def(18, "lava", Infinity, "none", [], same("lava"), {
+    ...OPEN,
+    liquid: true,
+    lightEmit: LIGHT.LAVA,
+    lightOpacity: 15,
+    render: "liquid",
+  }),
+  def(19, "mossy_cobble", 10, "pickaxe", [drop("mossy_cobble")], same("mossy_cobble"), PICK_ONLY),
   def(20, "sandstone", 4, "pickaxe", [drop("sandstone")], same("sandstone"), PICK_ONLY),
   def(21, "snow_layer", 0.5, "shovel", [], { top: "snow", bottom: "snow", side: "snow" }, {
     ...OPEN,
     box: [0, 0, 0, 1, 2 / 16, 1],
     render: "layer",
   }),
-  reserved(22), // hàng rào (2b)
-  reserved(23), // đường ray (2b)
-  reserved(24), // mạng nhện (2b)
-  reserved(25), // đuốc (2b)
-  reserved(26), // lò nung (2b)
-  reserved(27), // kính (2b)
-  reserved(28), // thang (2b)
-  reserved(29), // cửa gỗ (2b)
-  reserved(30), // đất cày (2b)
-  reserved(31), // lúa mì (2b)
+  def(22, "fence", 3, "axe", [drop("fence")], same("fence"), {
+    ...OPEN,
+    solid: true,
+    box: [0.375, 0, 0.375, 0.625, 1.5, 0.625], // cao 1.5 để không nhảy qua được
+    render: "fence",
+  }),
+  def(23, "rail", 1, "pickaxe", [drop("rail")], same("rail"), { ...OPEN, render: "rail" }),
+  def(24, "cobweb", 6, "sword", [drop("string")], same("cobweb"), {
+    ...OPEN,
+    lightOpacity: 1,
+    moveFactor: MOVE.COBWEB_FACTOR,
+    render: "cross",
+  }),
+  def(25, "torch", 0, "none", [drop("torch")], same("torch"), { ...OPEN, lightEmit: LIGHT.TORCH, render: "torch" }),
+  def(26, "furnace", 5, "pickaxe", [drop("furnace")], {
+    top: "furnace_top",
+    bottom: "furnace_top",
+    side: "furnace_side",
+    front: "furnace_front",
+  }, PICK_ONLY),
+  def(27, "glass", 0.45, "none", [], same("glass"), { transparent: true, opaque: false, lightOpacity: 0 }),
+  def(28, "ladder", 0.6, "axe", [drop("ladder")], same("ladder"), { ...OPEN, render: "ladder" }),
+  def(29, "door", 4.5, "axe", [drop("door")], { top: "door_upper", bottom: "door_lower", side: "door_lower" }, {
+    ...OPEN,
+    solid: true,
+    render: "door",
+  }),
+  def(30, "farmland", 0.9, "shovel", [drop("dirt")], { top: "farmland", bottom: "dirt", side: "dirt" }, {
+    transparent: true,
+    opaque: false,
+    box: [0, 0, 0, 1, 15 / 16, 1],
+    render: "farmland",
+  }),
+  def(31, "wheat", 0, "none", [drop("wheat"), drop("seeds")], same("wheat_7"), { ...OPEN, render: "crop" }),
   def(32, "sapling", 0, "none", [drop("sapling")], same("sapling"), { ...OPEN, render: "cross" }),
-  reserved(33), // giường (2b)
+  def(33, "bed", 0.3, "none", [drop("bed")], {
+    top: "bed_head_top",
+    bottom: "planks",
+    side: "bed_head_side",
+    front: "bed_foot_top", // dùng làm mặt trên nửa chân giường
+  }, { transparent: true, opaque: false, lightOpacity: 0, box: [0, 0, 0, 1, 9 / 16, 1], render: "bed" }),
   def(34, "deepslate", 12, "pickaxe", [drop("deepslate")], {
     top: "deepslate_top",
     bottom: "deepslate_top",

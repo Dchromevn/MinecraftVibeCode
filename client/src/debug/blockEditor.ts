@@ -4,8 +4,11 @@ import * as THREE from "three";
 import { B, BLOCKS, raycast, type BlockId, type World } from "../../../shared/src/index.js";
 
 const REACH = 12; // tầm với debug (rộng hơn tầm với thật để kiểm tra cho tiện)
+/** 1–9 chọn 9 block đầu; lăn chuột duyệt cả danh sách. */
 export const PALETTE: readonly BlockId[] = [
-  B.STONE, B.DIRT, B.PLANKS, B.LOG, B.COBBLE, B.SAND, B.GRAVEL, B.SANDSTONE, B.SAPLING,
+  B.STONE, B.PLANKS, B.TORCH, B.GLASS, B.FENCE, B.RAIL, B.LADDER, B.COBWEB, B.DOOR,
+  B.BED, B.FURNACE, B.FARMLAND, B.WHEAT, B.LOG, B.DIRT, B.COBBLE, B.SAND, B.GRAVEL,
+  B.SANDSTONE, B.MOSSY_COBBLE, B.DEEPSLATE, B.SAPLING, B.WORKBENCH, B.CHEST, B.LEAVES, B.WATER, B.LAVA,
 ];
 
 /** Có thể đặt đè lên các block này. */
@@ -39,7 +42,12 @@ export class BlockEditor {
     document.addEventListener("contextmenu", (e) => e.preventDefault());
     document.addEventListener("keydown", (e) => {
       const n = Number(e.key);
-      if (Number.isInteger(n) && n >= 1 && n <= PALETTE.length) this.selected = n - 1;
+      if (Number.isInteger(n) && n >= 1 && n <= 9) this.selected = n - 1;
+    });
+    document.addEventListener("wheel", (e) => {
+      if (!this.isLocked()) return;
+      const d = e.deltaY > 0 ? 1 : -1;
+      this.selected = (this.selected + d + PALETTE.length) % PALETTE.length;
     });
   }
 

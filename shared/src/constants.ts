@@ -103,7 +103,7 @@ export const BIOMES = {
   MOUNTAIN_TREE_MAX_Y: 88,
 } as const;
 
-// Hang động (Giai đoạn 2b, thông số từ 1b cũ)
+// Hang động (2.1, Giai đoạn 2b). Sinh theo từng chunk, liền mạch qua ranh giới.
 export const CAVES = {
   NOISE_GRID: 4, // lấy mẫu noise 3D mỗi 4 block rồi nội suy tuyến tính
   NOODLE_FREQ: 1 / 56, // hang "sợi mì": giao của hai mặt noise gần 0
@@ -114,20 +114,33 @@ export const CAVES = {
   CHEESE_MAX_Y: 64,
   SURFACE_MARGIN: 7, // không đục trong 7 block dưới mặt đất (trừ cửa hang)
   FADE_BAND: 8, // hang thu hẹp dần trong dải này thay vì bị cắt phẳng
-  ENTRANCE_SPACING: 60, // khoảng 1 cửa hang mỗi 60x60 block
-  ENTRANCE_MAX_LENGTH: 160,
   LAVA_MAX_Y: 11, // ô bị đục có y <= 11 thành dung nham
+  // cửa hang: mỗi vùng 64x64 có thể có một đường hầm đào chéo từ mặt đất xuống
+  ENTRANCE_REGION: 64,
+  ENTRANCE_CHANCE: 0.85,
+  ENTRANCE_MAX_STEPS: 160,
+  ENTRANCE_MAX_REACH: 60, // không đi xa điểm xuất phát quá 60 block theo chiều ngang
+  // hồ ngầm: mỗi vùng 64x64 có thể có mực nước riêng trong khoảng y = 20–50
+  LAKE_REGION: 64,
+  LAKE_CHANCE: 0.35,
+  LAKE_MIN_Y: 20,
+  LAKE_MAX_Y: 50,
+  LAKE_DAM: 2, // gần biên vùng hồ không đục dưới mực nước (giữ nước không tràn)
+  // mạch nước / dung nham trên trần hang
+  SPRING_WATER_CHANCE: 0.7, // mỗi chunk có hang
+  SPRING_LAVA_CHANCE: 0.25,
+  SPRING_LAVA_MAX_Y: 30,
 } as const;
 
-// Hầm mỏ bỏ hoang (Giai đoạn 2b, thông số từ 1b cũ)
+// Hầm mỏ bỏ hoang (2.9). Lập kế hoạch theo vùng, mỗi chunk đặt phần thuộc về nó.
 export const MINESHAFT = {
-  COUNT_MIN: 2,
-  COUNT_MAX: 4,
-  MIN_SPACING: 80,
+  REGION: 256, // khoảng 1 hệ thống mỗi vùng 256x256
+  CHANCE: 0.9,
   ROOM_Y_MIN: 24,
   ROOM_Y_MAX: 44,
   Y_MIN: 20, // hành lang không xuống dưới / lên trên khoảng này
   Y_MAX: 50,
+  MIN_COVER: 8, // luôn nằm dưới mặt đất khô ít nhất 8 block (không thủng đáy nước)
   MAX_PIECES: 40,
   MAX_RADIUS: 72,
   CORRIDOR_MIN: 8,

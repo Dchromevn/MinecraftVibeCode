@@ -1,21 +1,19 @@
-// Đối tượng three.js cho mesh của từng chunk (đặc + nước), tạo từ mảng worker trả về.
+// Đối tượng three.js cho mesh của từng đoạn chunk (đặc + nước), tạo từ mảng worker
+// trả về; ẩn đoạn khuất; nước có sóng và texture trôi; ánh sáng qua shader.
 import * as THREE from "three";
+import { BLOCKS, chunkKey, type World } from "../../../shared/src/index.js";
 import type { MeshArrays } from "../mesh/geomBuilder.js";
-import type { ChunkMesh } from "../mesh/mesher.js";
+import { SECTIONS, type SectionMesh } from "../mesh/mesher.js";
+import { applyChunkShader, type ChunkUniforms } from "./chunkShader.js";
+import { SectionCuller, sectionKey } from "./sectionCuller.js";
 
 /** Thông số hiển thị nước (chỉ là hình ảnh, không ảnh hưởng lối chơi). */
-const WATER = {
-  OPACITY: 0.8,
-  WAVE_HEIGHT: 0.035, // block
-  WAVE_FREQ: 0.9,
-  WAVE_SPEED: 1.6,
-  DRIFT_U: 0.04, // block/giây
-  DRIFT_V: 0.025,
-} as const;
+const WATER = { OPACITY: 0.8, DRIFT_U: 0.04, DRIFT_V: 0.025 } as const;
 
-interface Entry {
+interface SectionEntry {
   solid: THREE.Mesh | null;
   water: THREE.Mesh | null;
+  conn: Uint8Array;
 }
 
 function toGeometry(m: MeshArrays): THREE.BufferGeometry {
@@ -23,24 +21,28 @@ function toGeometry(m: MeshArrays): THREE.BufferGeometry {
   g.setAttribute("position", new THREE.BufferAttribute(m.positions, 3));
   g.setAttribute("color", new THREE.BufferAttribute(m.colors, 3));
   g.setAttribute("uv", new THREE.BufferAttribute(m.uvs, 2));
+  g.setAttribute("aLight", new THREE.BufferAttribute(m.light, 2));
   g.setIndex(new THREE.BufferAttribute(m.indices, 1));
   g.computeBoundingSphere();
   return g;
 }
 
 export class ChunkMeshes {
-  private readonly entries = new Map<number, Entry>();
+  private readonly sections = new Map<number, SectionEntry>();
+  private readonly chunks = new Set<number>(); // chunk đã có mesh
   private readonly solidMat: THREE.MeshBasicMaterial;
   private readonly waterMat: THREE.MeshBasicMaterial;
-
-  private readonly time = { value: 0 };
+  private readonly culler = new SectionCuller();
+  readonly uniforms: ChunkUniforms = { uTime: { value: 0 }, uDaylight: { value: 1 }, uMinLight: { value: 0 } };
+  culling = true;
+  drawnSections = 0;
 
   constructor(
     private readonly scene: THREE.Scene,
     texture: THREE.Texture,
     private readonly waterTexture: THREE.Texture,
   ) {
-    // một vật liệu cho cả khối đặc và lá/cỏ (alphaTest) để giảm lệnh vẽ
+    // một vật liệu cho cả khối đặc và lá/cỏ/kính (alphaTest) để giảm lệnh vẽ
     this.solidMat = new THREE.MeshBasicMaterial({ map: texture, vertexColors: true, alphaTest: 0.5 });
     this.waterMat = new THREE.MeshBasicMaterial({
       map: waterTexture,
@@ -50,40 +52,20 @@ export class ChunkMeshes {
       depthWrite: false,
       side: THREE.DoubleSide,
     });
-    // gợn sóng: dịch đỉnh trên của mặt nước lên xuống theo sóng sin (không dựng lại mesh)
-    this.waterMat.onBeforeCompile = (shader) => {
-      shader.uniforms.uTime = this.time;
-      shader.vertexShader = shader.vertexShader
-        .replace("#include <common>", "#include <common>\nuniform float uTime;")
-        .replace(
-          "#include <begin_vertex>",
-          `#include <begin_vertex>
-          vec4 wPos = modelMatrix * vec4(position, 1.0);
-          if (fract(position.y) > 0.5) {
-            transformed.y += (sin(wPos.x * ${WATER.WAVE_FREQ.toFixed(3)} + uTime * ${WATER.WAVE_SPEED.toFixed(3)})
-              + sin(wPos.z * ${(WATER.WAVE_FREQ * 0.8).toFixed(3)} + uTime * ${(WATER.WAVE_SPEED * 0.75).toFixed(3)}))
-              * ${WATER.WAVE_HEIGHT.toFixed(3)};
-          }`,
-        );
-    };
-  }
-
-  /** Gọi mỗi khung: sóng và texture nước trôi chậm. */
-  update(seconds: number): void {
-    this.time.value = seconds;
-    this.waterTexture.offset.set(seconds * WATER.DRIFT_U, seconds * WATER.DRIFT_V);
+    applyChunkShader(this.solidMat, this.uniforms, false);
+    applyChunkShader(this.waterMat, this.uniforms, true);
   }
 
   get count(): number {
-    return this.entries.size;
+    return this.chunks.size;
   }
 
   has(key: number): boolean {
-    return this.entries.has(key);
+    return this.chunks.has(key);
   }
 
-  set(key: number, cx: number, cz: number, mesh: ChunkMesh): void {
-    this.remove(key);
+  set(cx: number, cz: number, sections: SectionMesh[]): void {
+    this.remove(cx, cz);
     const make = (arr: MeshArrays | null, mat: THREE.Material, order: number): THREE.Mesh | null => {
       if (!arr) return null;
       const m = new THREE.Mesh(toGeometry(arr), mat);
@@ -94,21 +76,51 @@ export class ChunkMeshes {
       this.scene.add(m);
       return m;
     };
-    this.entries.set(key, { solid: make(mesh.solid, this.solidMat, 0), water: make(mesh.water, this.waterMat, 1) });
+    sections.forEach((s, sy) => {
+      this.sections.set(sectionKey(cx, sy, cz), {
+        solid: make(s.solid, this.solidMat, 0),
+        water: make(s.water, this.waterMat, 1),
+        conn: s.conn,
+      });
+    });
+    this.chunks.add(chunkKey(cx, cz));
   }
 
-  remove(key: number): void {
-    const e = this.entries.get(key);
-    if (!e) return;
-    for (const m of [e.solid, e.water]) {
-      if (!m) continue;
-      this.scene.remove(m);
-      m.geometry.dispose();
+  remove(cx: number, cz: number): void {
+    if (!this.chunks.delete(chunkKey(cx, cz))) return;
+    for (let sy = 0; sy < SECTIONS; sy++) {
+      const key = sectionKey(cx, sy, cz);
+      const e = this.sections.get(key);
+      if (!e) continue;
+      for (const m of [e.solid, e.water]) {
+        if (!m) continue;
+        this.scene.remove(m);
+        m.geometry.dispose();
+      }
+      this.sections.delete(key);
     }
-    this.entries.delete(key);
   }
 
-  keys(): IterableIterator<number> {
-    return this.entries.keys();
+  chunkKeys(): number[] {
+    return [...this.chunks];
+  }
+
+  /** Gọi mỗi khung trước khi vẽ: sóng, texture nước trôi, ẩn đoạn khuất. */
+  update(seconds: number, camera: THREE.Camera, radius: number, world: World): void {
+    this.uniforms.uTime.value = seconds;
+    this.waterTexture.offset.set(seconds * WATER.DRIFT_U, seconds * WATER.DRIFT_V);
+    // camera bay xuyên vào khối đặc (debug) thì không ẩn gì, để nhìn xuyên thấy mạng hang
+    const p = camera.position;
+    const inside = BLOCKS[world.getBlock(Math.floor(p.x), Math.floor(p.y), Math.floor(p.z))]!.opaque;
+    const useCulling =
+      this.culling && !inside && this.culler.update(camera, radius + 1, (k) => this.sections.get(k)?.conn ?? null);
+    let drawn = 0;
+    for (const [key, e] of this.sections) {
+      const v = !useCulling || this.culler.visible.has(key);
+      if (e.solid) e.solid.visible = v;
+      if (e.water) e.water.visible = v;
+      if (v && (e.solid || e.water)) drawn++;
+    }
+    this.drawnSections = drawn;
   }
 }

@@ -2,7 +2,7 @@
 import type { ToolTier } from "./constants.js";
 import { BLOCKS } from "./blockTable.js";
 
-/** Id block theo bảng 2.2. Id chưa có dữ liệu (làm ở 2b) là block "dành chỗ", vẽ như không khí. */
+/** Id block theo bảng 2.2. */
 export const B = {
   AIR: 0,
   GRASS: 1,
@@ -46,9 +46,13 @@ export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
 
 /**
  * Cách vẽ: cube = khối đầy đủ; cross = hai mặt chéo chữ X; liquid = chất lỏng
- * (mặt trên thấp hơn); layer = lớp mỏng sát sàn; post/torch/rail dùng ở 2b.
+ * (mặt trên thấp hơn); layer = lớp mỏng sát sàn; fence = cột + thanh nối;
+ * rail = tấm sát sàn tự chọn thẳng/cong; torch = que nhỏ; ladder = tấm sát tường;
+ * door = tấm mỏng; crop = dạng #; bed = cao 9/16; farmland = thấp hơn 1/16.
  */
-export type RenderKind = "none" | "cube" | "cross" | "liquid" | "layer" | "post" | "torch" | "rail";
+export type RenderKind =
+  | "none" | "cube" | "cross" | "liquid" | "layer" | "fence" | "rail"
+  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland";
 
 export interface BlockTextures {
   top: string;

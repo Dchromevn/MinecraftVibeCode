@@ -44,5 +44,7 @@ export function placeSprings(
   const y = s.low + 1 + Math.floor(rng() * (s.high - s.low - 1));
   const i = blockIndex(s.lx, y, s.lz);
   const cur = data[i]!;
-  if (BLOCKS[cur]!.opaque && cur !== B.BEDROCK) data[i] = B.WATER;
+  // phía trên phải còn block đặc (hang có thể đã đục mất)
+  const above = y + 1 < 128 ? data[blockIndex(s.lx, y + 1, s.lz)]! : B.AIR;
+  if (BLOCKS[cur]!.opaque && cur !== B.BEDROCK && BLOCKS[above]!.opaque) data[i] = B.WATER;
 }

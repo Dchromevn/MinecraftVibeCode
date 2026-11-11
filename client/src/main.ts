@@ -1,6 +1,6 @@
-// Giai đoạn 2a: thế giới vô hạn có biome, tải chunk theo tầm nhìn, sinh/dựng mesh
-// trong Web Worker, camera bay + công cụ phá/đặt block để debug.
-// Tham số URL: ?seed= ?pos=x,y,z ?look=yaw,pitch ?vd=8 ?nomsg=1 ?debug=1
+// Giai đoạn 2a/2b: thế giới vô hạn có biome, hang động, hầm mỏ, ánh sáng; tải chunk theo
+// tầm nhìn, sinh/ánh sáng/dựng mesh trong Web Worker; camera bay + phá/đặt block để debug.
+// Tham số URL: ?seed= ?pos=x,y,z ?look=yaw,pitch ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
 import { BLOCKS, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
@@ -14,7 +14,11 @@ import { ChunkMeshes } from "./world/chunkMeshes.js";
 import { ChunkManager } from "./world/chunkManager.js";
 import { BlockEditor } from "./debug/blockEditor.js";
 
-const EXTRA_TEXTURES = ["crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side"];
+const EXTRA_TEXTURES = [
+  "crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side",
+  "rail_curved", "rail_t", "rail_cross", "bed_foot_side",
+];
+const NIGHT_VISION = 0.45; // độ sáng tối thiểu khi bật nhìn đêm (debug)
 
 function readVec(params: URLSearchParams, name: string, n: number): number[] | null {
   const v = params.get(name)?.split(",").map(Number);
@@ -94,7 +98,14 @@ async function main(): Promise<void> {
     (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot };
   }
 
+  if (params.get("nv") === "1") meshes.uniforms.uMinLight.value = NIGHT_VISION;
+  if (params.get("nocull") === "1") meshes.culling = false;
   document.addEventListener("keydown", (e) => {
+    if (e.code === "KeyN") meshes.uniforms.uMinLight.value = meshes.uniforms.uMinLight.value > 0 ? 0 : NIGHT_VISION;
+    if (e.code === "F4") {
+      e.preventDefault();
+      meshes.culling = !meshes.culling;
+    }
     if (e.code !== "BracketLeft" && e.code !== "BracketRight") return;
     const d = e.code === "BracketLeft" ? -1 : 1;
     chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, chunks.viewDistance + d));
@@ -123,7 +134,7 @@ async function main(): Promise<void> {
     chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
     editor.update();
     sky.follow(camera);
-    meshes.update(now / 1000);
+    meshes.update(now / 1000, camera, chunks.viewDistance, world);
     renderer.render(scene, camera);
 
     if (fps.tick(now) || firstFrame) {
@@ -136,9 +147,9 @@ async function main(): Promise<void> {
         `${STR.hudFps}: ${fps.fps}`,
         `${STR.hudPos}: ${p.x.toFixed(1)} ${p.y.toFixed(1)} ${p.z.toFixed(1)} · ${STR.hudChunk}: ${Math.floor(p.x / 16)}, ${Math.floor(p.z / 16)}`,
         `${STR.hudBiome}: ${STR.biomes[col.biome]} (${STR.hudGround} y=${col.height})`,
-        `${STR.hudLoaded}: ${world.chunks.size} · ${STR.hudMeshed}: ${meshes.count} · ${STR.hudModified}: ${chunks.modifiedCount()}`,
+        `${STR.hudLoaded}: ${world.chunks.size} · ${STR.hudMeshed}: ${meshes.count} · ${STR.hudSections}: ${meshes.drawnSections} · ${STR.hudModified}: ${chunks.modifiedCount()}`,
         `${STR.hudJobs}: ${chunks.pendingGen} / ${chunks.pendingMesh} · ${pool.size} ${STR.hudWorkers} (${pool.lastGenMs.toFixed(1)} / ${pool.lastMeshMs.toFixed(1)} ms)`,
-        `${STR.hudViewDistance}: ${chunks.viewDistance} chunk ([ ])`,
+        `${STR.hudViewDistance}: ${chunks.viewDistance} chunk ([ ]) · ${STR.hudCulling}: ${meshes.culling ? STR.on : STR.off} (F4) · ${STR.hudNightVision}: ${meshes.uniforms.uMinLight.value > 0 ? STR.on : STR.off} (N)`,
         `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls} · ${STR.hudMemory}: ${heapMb()}`,
         `${STR.hudSeed}: ${seedText} (${seed})`,
         `${STR.hudSelected}: ${STR.blocks[sel.key] ?? sel.key}`,

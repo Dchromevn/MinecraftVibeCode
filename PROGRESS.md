@@ -9,8 +9,8 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 |---|---|---|
 | 0 | Dựng khung | xong |
 | 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
-| 2a | Thế giới vô hạn và biome | chờ người dùng test |
-| 2b | Hang động, hầm mỏ, ánh sáng, block mới | chưa làm — đã có một phần từ "1b" cũ (xem ghi chú) |
+| 2a | Thế giới vô hạn và biome | xong (người dùng bảo "tiếp" sau khi sửa lỗi, 2026-11-11) |
+| 2b | Hang động, hầm mỏ, ánh sáng, block mới | chờ người dùng test |
 | 3 | Người chơi và tương tác block | chưa làm |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
@@ -212,3 +212,46 @@ Kèm theo yêu cầu bổ sung "nước tự nhiên" của người dùng: phầ
 - Block nước đơn lẻ cạnh đất: đã kiểm tra, cả 14/14 khối nước nhỏ đều là mạch nước đặt trên đồi cỏ thường (y 75–79). Nay mạch nước chỉ ở biome núi, mặt đất ≥ 85, vách ≥ 4 block (còn ~1 mạch trên 576 chunk quanh điểm xuất phát). Không có vũng nước nhỏ nào do sông/hồ.
 - Tự phát hiện thêm: vệt sỏi đáy nước tính theo tọa độ trong chunk nên lặp lại mỗi chunk và đứt ở ranh giới; đã đổi sang tọa độ thế giới.
 - Kiểm tra lại: typecheck/build qua; sinh lại vẫn giống hệt; 0 ô nước hở ngoài mạch nước; mặt nước đổi 18% điểm ảnh sau 0,7 giây (sóng chạy).
+
+---
+
+## Giai đoạn 2b — Hang động, hầm mỏ, ánh sáng, block mới (2026-11-11)
+
+Giai đoạn 2a được coi là đạt khi người dùng bảo "tiếp" sau lần sửa lỗi.
+
+### File đã tạo / sửa
+
+- `shared/src/blockTable.ts`, `blocks.ts` — đủ id 0–34 (dung nham, đá cuội rêu, hàng rào, ray, mạng nhện, đuốc, lò nung, kính, thang, cửa, đất cày, lúa mì, giường) và các kiểu vẽ mới.
+- `shared/src/constants.ts` — CAVES, MINESHAFT cho bản sinh theo từng chunk.
+- `shared/src/worldgen/caveField.ts` (trường hang), `caveRules.ts` (ô đục thành gì, chống thủng nước, hồ ngầm), `entrances.ts` (cửa hang theo vùng), `caves.ts` (đục trong chunk), `natural.ts` (block tự nhiên cho bộ lập kế hoạch), `mineshaftCenter.ts`, `mineshaft.ts`, `mineshaftParts.ts` (hầm mỏ theo vùng), `caveSprings.ts`; sửa `chunkGen.ts`, `trees.ts` (không trồng lên miệng hang), `springs.ts`, `terrainSampler.ts` (cache cột).
+- `client/src/light/regionLight.ts` — ánh sáng vùng 3x3 chunk.
+- `client/src/mesh/{mesher,specialBlocks,shapes,connectivity,geomBuilder}.ts` — mesh theo đoạn 16 block, ánh sáng mượt, hình dạng đặc biệt, độ thông.
+- `client/src/world/{chunkMeshes,chunkShader,sectionCuller,chunkManager}.ts` — mesh theo đoạn, shader ánh sáng (uDaylight, nhìn đêm), ẩn đoạn khuất, dựng lại 15 block quanh chỗ sửa.
+- `client/src/workers/{protocol,worldWorker}.ts`, `client/src/main.ts`, `strings.ts`, `debug/blockEditor.ts` (bảng block đầy đủ, lăn chuột), `fallbackTextures.ts`, `scripts/texture-map.json` (27 texture mới). Xóa `client/src/mesh/shade.ts`.
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng.
+- Sinh theo từng chunk xác định: sinh lại theo thứ tự ngược bằng bộ sinh mới giống hệt từng byte (4 vùng, 3 seed). Sinh 1 chunk 3–4,5 ms (lần đầu chạm hầm mỏ ~120 ms để lập kế hoạch).
+- Hang chiếm 2,8–4,3% lòng đất; có dung nham, hồ ngầm (đến ~10.000 ô nước), 80–100 mạch nước và 20–35 mạch dung nham mỗi ~144 chunk.
+- 0 ô nước/dung nham "hở" ngoài mạch; 0 chỗ không khí trong hang nằm cạnh nước bề mặt (không thủng đáy biển/sông/hồ).
+- Hầm mỏ quanh (87, 32, 157): 138 ray, 146 hàng rào, 6 đuốc, 22 mạng nhện, 1 rương.
+- Ánh sáng: 0 ô lệch trên 100.352 ô ở ranh giới chunk (tính từ hai vùng khác nhau); 6/6 đuốc đúng mức 14 và ô kề 13; 100% ô hang sâu tối hẳn ánh sáng trời. Tính ánh sáng ~2,6–4,7 ms, dựng mesh ~9–10 ms mỗi chunk (Node).
+- Trình duyệt headless: mặt đất ~126 nghìn tam giác / 226 lệnh vẽ (2a tương đương); trong hang/hầm mỏ chỉ 8–40 nghìn tam giác nhờ ẩn đoạn khuất. Bay 2 phút: bộ nhớ JS sau dọn rác 80–117 MB, không tăng dần; block đã sửa còn khi quay lại. Đặt đuốc trong hang tối thì vùng quanh sáng lên.
+- Ảnh chụp: hành lang hầm mỏ (ray, khung, đuốc), hồ dung nham, hồ ngầm, mạch nước trần hang, nhìn xuyên đá thấy mạng hang.
+
+### Cần người dùng kiểm tra
+
+- FPS tầm nhìn 8 so với 2a (F4 bật/tắt ẩn hang khuất để so).
+- Bay xuống lòng đất (N nhìn đêm): hang nối nhau, hồ dung nham ở đáy, hồ ngầm, mạch nước; hang và hầm mỏ liền mạch qua ranh giới chunk.
+- Tìm hầm mỏ: ray thẳng/cong/ngã rẽ, khung gỗ, mạng nhện, rương.
+- Đặt đuốc (phím 3) trong hang tối rồi phá đi, kể cả sát ranh giới chunk.
+- Đặt thử các block mới (lăn chuột): hàng rào nối nhau, ray tự cong, thang bám tường, cửa, giường 2 ô, kính, lúa, đất cày.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Ánh sáng không lưu theo chunk như PLAN ghi, mà tính lại trong worker từ vùng 3x3 mỗi lần dựng mesh (kết quả giống hệt, đơn giản hơn, không phải đồng bộ xuyên chunk). Đổi block thì dựng lại tối đa 9 chunk (~vài chục ms).
+- Chưa có dữ liệu phụ cho block (hướng, giai đoạn lớn): cửa chọn hướng theo tường kề, lúa luôn vẽ giai đoạn chín, lò nung luôn tắt, giường chọn đầu/chân theo ô kề. Giai đoạn 4 sẽ cần thêm dữ liệu phụ cho block.
+- Mạch nước/dung nham vẫn chỉ là một block cho tới Giai đoạn 4.
+- Mỗi hầm mỏ hiện chỉ có 1–2 rương (50% nhánh cụt có đáy đặc).
+- Debug: `?nv=1`, `?nocull=1`, phím N, F4.

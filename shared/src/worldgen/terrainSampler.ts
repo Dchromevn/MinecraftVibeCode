@@ -64,9 +64,17 @@ export class TerrainSampler {
   }
 
   /** Cột hoàn chỉnh (có hồ). */
+  private readonly cache = new Map<number, Column>();
+
+  /** Cột hoàn chỉnh (có hồ), có cache. Không được sửa đối tượng trả về. */
   column(x: number, z: number): Column {
+    const key = (x + 0x800000) * 0x1000000 + (z + 0x800000);
+    const hit = this.cache.get(key);
+    if (hit) return hit;
     const col = this.baseColumn(x, z);
     this.lakes.apply(x, z, col);
+    if (this.cache.size > 65536) this.cache.clear();
+    this.cache.set(key, col);
     return col;
   }
 
