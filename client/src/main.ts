@@ -1,26 +1,42 @@
-// Giai đoạn 1/1b: thế giới voxel có hang động, hầm mỏ, ánh sáng; camera bay, HUD debug.
-// Tham số URL: ?seed= ?pos=x,y,z ?look=yaw,pitch ?cut=y ?nocull=1 ?nomsg=1 ?nv=1
+// Giai đoạn 2a: thế giới vô hạn có biome, tải chunk theo tầm nhìn, sinh/dựng mesh
+// trong Web Worker, camera bay + công cụ phá/đặt block để debug.
+// Tham số URL: ?seed= ?pos=x,y,z ?look=yaw,pitch ?vd=8 ?nomsg=1 ?debug=1
 import * as THREE from "three";
-import { allBlockTextureNames, generateWorld, seedFromString, CHUNK_HEIGHT, MAP_SIZE } from "../../shared/src/index.js";
+import { BLOCKS, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
 import { createFog, createSky } from "./sky.js";
 import { Hud, FpsCounter } from "./hud.js";
-import { LightMap, MAP_CHUNKS, SECTIONS_Y } from "./light/lightMap.js";
-import { computeAllLight } from "./light/lighting.js";
-import { SectionRenderer } from "./mesh/sectionRenderer.js";
+import { buildUvTable } from "./mesh/mesher.js";
+import { WorkerPool } from "./workers/workerPool.js";
+import { ChunkMeshes } from "./world/chunkMeshes.js";
+import { ChunkManager } from "./world/chunkManager.js";
+import { BlockEditor } from "./debug/blockEditor.js";
 
-const VIEW_DISTANCE = 260; // đủ thấy toàn bản đồ 256 block
-const MESH_BUDGET_MS = 6; // thời gian dựng mesh mỗi khung
-const MESH_BULK_BUDGET_MS = 40;
-const CRACK_TEXTURES = ["crack_0", "crack_1", "crack_2", "crack_3", "crack_4"];
-const TOTAL_SECTIONS = MAP_CHUNKS * MAP_CHUNKS * SECTIONS_Y;
-const NIGHT_VISION = 0.45; // độ sáng tối thiểu khi bật nhìn đêm (debug)
+const EXTRA_TEXTURES = ["crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side"];
 
 function readVec(params: URLSearchParams, name: string, n: number): number[] | null {
   const v = params.get(name)?.split(",").map(Number);
   return v && v.length === n && v.every(Number.isFinite) ? v : null;
+}
+
+/** Tìm điểm trên đất liền gần gốc tọa độ để bắt đầu. */
+function findSpawn(sampler: TerrainSampler): { x: number; z: number; h: number } {
+  for (let r = 0; r < 4000; r += 16) {
+    for (let a = 0; a < 16; a++) {
+      const x = Math.round(r * Math.cos((a / 16) * Math.PI * 2));
+      const z = Math.round(r * Math.sin((a / 16) * Math.PI * 2));
+      const c = sampler.column(x, z);
+      if (c.height > c.waterTop) return { x, z, h: c.height };
+    }
+  }
+  return { x: 0, z: 0, h: WORLD.SEA_LEVEL };
+}
+
+function heapMb(): string {
+  const mem = (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory;
+  return mem ? `${(mem.usedJSHeapSize / 1048576).toFixed(0)} MB` : "–";
 }
 
 async function main(): Promise<void> {
@@ -28,22 +44,10 @@ async function main(): Promise<void> {
   const params = new URLSearchParams(location.search);
   const seedText = params.get("seed") ?? "voxel";
   const seed = seedFromString(seedText);
-
-  hud.setCenter(STR.loadingWorld);
-  await new Promise((r) => requestAnimationFrame(r));
-  const tGen = performance.now();
-  const world = generateWorld(seed);
-  const genMs = performance.now() - tGen;
-
-  hud.setCenter(STR.loadingLight);
-  await new Promise((r) => requestAnimationFrame(r));
-  const tLight = performance.now();
-  const light = new LightMap();
-  computeAllLight(world, light);
-  const lightMs = performance.now() - tLight;
+  const hideMsg = params.get("nomsg") === "1";
 
   hud.setCenter(STR.loadingTextures);
-  const atlas = await buildAtlas([...allBlockTextureNames(), ...CRACK_TEXTURES]);
+  const atlas = await buildAtlas([...allBlockTextureNames(), ...EXTRA_TEXTURES]);
 
   const renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -51,12 +55,27 @@ async function main(): Promise<void> {
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.fog = createFog(VIEW_DISTANCE);
-  const sky = createSky(VIEW_DISTANCE * 2);
+  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 2000);
+  const sky = createSky(1000);
   scene.add(sky.mesh);
 
-  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, VIEW_DISTANCE * 3);
-  camera.position.set(MAP_SIZE / 2 + 0.5, world.heightAt(MAP_SIZE / 2, MAP_SIZE / 2) + 12, MAP_SIZE / 2 + 0.5);
+  const world = new World(seed);
+  const sampler = new TerrainSampler(seed);
+  const workers = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
+  const pool = new WorkerPool(workers, { type: "init", seed, uvt: buildUvTable((n) => atlas.uv(n)) });
+  const meshes = new ChunkMeshes(scene, atlas.texture);
+  const chunks = new ChunkManager(world, pool, meshes);
+  const vd = Number(params.get("vd"));
+  if (Number.isFinite(vd) && vd > 0) {
+    chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, vd));
+  }
+  const applyViewDistance = (): void => {
+    scene.fog = createFog(chunks.viewDistance * 16);
+  };
+  applyViewDistance();
+
+  const spawn = findSpawn(sampler);
+  camera.position.set(spawn.x + 0.5, spawn.h + 12, spawn.z + 0.5);
   const fly = new FlyCamera(camera, renderer.domElement);
   fly.pitch = -0.35;
   const pos = readVec(params, "pos", 3);
@@ -67,33 +86,19 @@ async function main(): Promise<void> {
     fly.pitch = look[1]!;
   }
 
-  const sections = new SectionRenderer(scene, world, light, atlas);
-  sections.culling = params.get("nocull") !== "1";
-  if (params.get("nv") === "1") sections.minLight.value = NIGHT_VISION;
-  sections.markAll();
+  const editor = new BlockEditor(scene, world, camera, () => fly.locked, (x, _y, z) => chunks.onBlockChanged(x, z));
+  // debug: cho script kiểm tra điều khiển camera / sửa block từ ngoài (?debug=1);
+  // autopilot = vận tốc tự bay (block/giây), áp trong vòng lặp khung hình
+  const autopilot = { vx: 0, vz: 0 };
+  if (params.get("debug") === "1") {
+    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot };
+  }
 
-  // debug: mặt cắt ngang, ẩn mọi block cao hơn cutY (?cut=Y, PageUp/PageDown chỉnh, End tắt)
-  let cutY: number | null = params.has("cut") ? Number(params.get("cut")) : null;
-  if (cutY !== null && !Number.isFinite(cutY)) cutY = null;
-  sections.cutY = cutY;
   document.addEventListener("keydown", (e) => {
-    if (e.code === "KeyN") {
-      sections.minLight.value = sections.minLight.value > 0 ? 0 : NIGHT_VISION;
-      return;
-    }
-    if (e.code === "F4") {
-      e.preventDefault();
-      sections.culling = !sections.culling;
-      return;
-    }
-    const start = cutY ?? Math.min(CHUNK_HEIGHT - 1, Math.floor(camera.position.y));
-    if (e.code === "PageUp") cutY = Math.min(CHUNK_HEIGHT - 1, start + 1);
-    else if (e.code === "PageDown") cutY = Math.max(0, start - 1);
-    else if (e.code === "End") cutY = null;
-    else return;
-    e.preventDefault();
-    sections.cutY = cutY;
-    sections.markAll();
+    if (e.code !== "BracketLeft" && e.code !== "BracketRight") return;
+    const d = e.code === "BracketLeft" ? -1 : 1;
+    chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, chunks.viewDistance + d));
+    applyViewDistance();
   });
 
   window.addEventListener("resize", () => {
@@ -102,47 +107,47 @@ async function main(): Promise<void> {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  const hideMsg = params.get("nomsg") === "1"; // debug: ẩn dòng hướng dẫn (chụp ảnh)
   const fps = new FpsCounter();
   let prev = performance.now();
   let firstFrame = true;
+  const dir = new THREE.Vector3();
 
   function frame(now: number): void {
     const dt = Math.min(0.1, (now - prev) / 1000);
     prev = now;
-
-    // dựng hàng loạt (lúc tải / đổi mặt cắt) thì cho nhiều thời gian hơn
-    sections.update(sections.pending > 64 ? MESH_BULK_BUDGET_MS : MESH_BUDGET_MS);
     fly.update(dt);
-    sky.follow(camera);
+    camera.position.x += autopilot.vx * dt;
+    camera.position.z += autopilot.vz * dt;
     camera.updateMatrixWorld();
-    sections.cull(camera);
-
-    sections.drawn.clear();
+    camera.getWorldDirection(dir);
+    chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
+    editor.update();
+    sky.follow(camera);
     renderer.render(scene, camera);
 
     if (fps.tick(now) || firstFrame) {
       firstFrame = false;
       const p = camera.position;
-      const pending = sections.pending ? ` (${STR.hudPending} ${sections.pending})` : "";
+      const col = sampler.column(Math.floor(p.x), Math.floor(p.z));
+      const sel = BLOCKS[editor.selectedBlock]!;
       hud.setInfo([
         `${STR.title} — ${STR.stage}`,
         `${STR.hudFps}: ${fps.fps}`,
-        `${STR.hudPos}: ${p.x.toFixed(1)} ${p.y.toFixed(1)} ${p.z.toFixed(1)}`,
-        `${STR.hudChunks}: ${sections.drawnChunks()} / ${MAP_CHUNKS * MAP_CHUNKS} · ${STR.hudSections}: ${sections.drawn.size} / ${TOTAL_SECTIONS}${pending}`,
-        `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls}`,
+        `${STR.hudPos}: ${p.x.toFixed(1)} ${p.y.toFixed(1)} ${p.z.toFixed(1)} · ${STR.hudChunk}: ${Math.floor(p.x / 16)}, ${Math.floor(p.z / 16)}`,
+        `${STR.hudBiome}: ${STR.biomes[col.biome]} (${STR.hudGround} y=${col.height})`,
+        `${STR.hudLoaded}: ${world.chunks.size} · ${STR.hudMeshed}: ${meshes.count} · ${STR.hudModified}: ${chunks.modifiedCount()}`,
+        `${STR.hudJobs}: ${chunks.pendingGen} / ${chunks.pendingMesh} · ${pool.size} ${STR.hudWorkers} (${pool.lastGenMs.toFixed(1)} / ${pool.lastMeshMs.toFixed(1)} ms)`,
+        `${STR.hudViewDistance}: ${chunks.viewDistance} chunk ([ ])`,
+        `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls} · ${STR.hudMemory}: ${heapMb()}`,
         `${STR.hudSeed}: ${seedText} (${seed})`,
-        `${STR.hudGenTime}: ${genMs.toFixed(0)} ms · ${STR.hudLightTime}: ${lightMs.toFixed(0)} ms · ${STR.hudMeshTime}: ${sections.totalMeshMs.toFixed(0)} ms`,
-        `${STR.hudMineshafts}: ${world.mineshafts.map((m) => `${m.x},${m.z}`).join(" · ")}`,
-        `${STR.hudCulling}: ${sections.culling ? STR.on : STR.off} (F4) · ${STR.hudNightVision}: ${sections.minLight.value > 0 ? STR.on : STR.off} (N)`,
-        cutY === null ? STR.hudCutHint : `${STR.hudCut}: y ≤ ${cutY}`,
+        `${STR.hudSelected}: ${STR.blocks[sel.key] ?? sel.key}`,
         atlas.missing.length ? `${STR.hudMissingTextures}: ${atlas.missing.join(", ")}` : "",
       ]);
       hud.setCenter(fly.locked || hideMsg ? null : STR.clickToControl);
     }
     requestAnimationFrame(frame);
   }
-  hud.setCenter(STR.clickToControl);
+  hud.setCenter(STR.loadingWorld);
   requestAnimationFrame(frame);
 }
 

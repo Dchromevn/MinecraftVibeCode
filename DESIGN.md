@@ -32,6 +32,17 @@ Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển ti
 | Núi | đá lộ ra trên cao, tuyết trên đỉnh | cây thưa ở chân núi |
 | Đại dương | nước, đáy cát và sỏi | không |
 
+Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền mạch qua chunk):
+- Sông: trường noise riêng, nơi giá trị gần 0 thì khoét lòng sông rộng 5–12
+  block, sâu 3–5 block, mặt nước y = 62, uốn lượn và đổ ra biển; bờ thoải, đáy
+  cát và sỏi; không cắt qua núi cao hơn y = 85.
+- Hồ: đường kính 8–20 block ở vùng đất bằng, khoảng 1 hồ mỗi vùng 128x128;
+  mặt nước bằng điểm thấp nhất của bờ, có thể cao hơn mực biển.
+- Mạch nước trên núi: thỉnh thoảng một nguồn nước gắn trên vách núi hoặc sườn
+  dốc (có đá phía trên), để chảy thành thác khi có nước chảy (Giai đoạn 4).
+- Nước sinh sẵn (biển, sông, hồ, hồ ngầm) phải "tĩnh": không ô nước nào có
+  không khí bên cạnh hoặc bên dưới. Chỉ các mạch nước/dung nham là ô "hở".
+
 Dưới lòng đất:
 - Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá sâu (y < 8) → đá nền.
   Quặng chỉ thay ô đá thường, nên kim cương nằm ở y = 8–15.
@@ -39,8 +50,15 @@ Dưới lòng đất:
   kim cương (y < 16, cụm 3).
 - Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
 - Hang lớn dạng "phô mai": noise 3D tần số thấp, hiếm hơn.
-- Hang không đục đá nền, không đục ngay dưới đáy biển; có cửa hang lộ ra mặt đất.
+- Hang không đục đá nền; có cửa hang lộ ra mặt đất.
 - Dưới y = 12: đáy hang là hồ dung nham.
+- Hồ ngầm: trong hang lớn, phần đáy hang dưới một mực nước ngẫu nhiên của
+  từng vùng (tính bằng noise, trong khoảng y = 20–50) được lấp đầy nước. Dưới
+  y = 12 vẫn là dung nham, không trộn lẫn.
+- Mạch nước trong hang: khoảng 1 nguồn mỗi chunk có hang (ngẫu nhiên), đặt trên
+  trần hoặc vách hang để chảy thành dòng/thác nhỏ. Mạch dung nham tương tự nhưng
+  hiếm hơn, chỉ dưới y = 30.
+- Hang không đục vào ngay dưới đáy biển, sông, hồ (tránh nước tràn ngập hang).
 - Hầm mỏ bỏ hoang: xem 2.9.
 
 ### 2.2 Block
@@ -224,6 +242,9 @@ liệu thì sáng, thiếu thì mờ.
 - Nước gặp dung nham: nguồn dung nham thành đá vỏ chai (nếu có texture) hoặc
   đá cuội, dung nham chảy thành đá cuội.
 - Chỉ cập nhật chất lỏng ở chunk gần người chơi.
+- Khi tải một chunk, quét các ô chất lỏng "hở" (có không khí bên cạnh/bên dưới)
+  để đưa vào hàng đợi chảy. Nhờ vậy mạch nước sinh từ trước Giai đoạn 4 tự chảy
+  thành dòng mà không cần sinh lại thế giới.
 
 ### 2.11 Làng
 
@@ -258,7 +279,24 @@ liệu thì sáng, thiếu thì mờ.
 
 ---
 
-## Phụ lục — Thông số chi tiết đã tinh chỉnh (từ Giai đoạn 1b cũ)
+## Phụ lục — Thông số chi tiết của Giai đoạn 2a
+
+- Chiều cao là hàm liên tục của các trường noise: lục địa (1/700, 4 octave,
+  biển khi < -0.3, đất liền khi > 0), chi tiết (1/64), đồi (1/180), núi (1/320,
+  nâng 20 + 18 theo đỉnh núi 1/90). Đáy biển 52 ± 3, đất liền 66 ± 8, tối đa 115.
+- Biome: nhiệt độ (1/800) và độ ẩm (1/700). Tuyết khi nhiệt độ < -0.3; sa mạc khi
+  nhiệt độ > 0.3 và độ ẩm < 0; rừng khi độ ẩm > 0.1. Núi khi mức nâng > 0.55
+  hoặc mặt đất cao hơn y = 88; đá lộ trên y = 92, tuyết phủ trên y = 100.
+- Cây: lưới 5x5, mỗi ô tối đa 1 cây; xác suất mỗi ô: đồng cỏ 0.12, rừng 0.85,
+  tuyết 0.15, núi 0.12 (dưới y = 88). Cỏ cao: đồng cỏ 20%, rừng 10%, núi 5%.
+- Sông: noise 1/420; lòng sông |noise| < 0.022, bờ thoải tới 0.075 (nhân 0.75–1.25
+  theo noise độ rộng 1/260); tắt dần khi địa hình cao 79–85.
+- Hồ: vùng 128x128, xác suất 0.8, thử 8 chỗ, bờ chênh tối đa 5 block, bán kính 4–10,
+  đáy sâu 1–4. Đo được: khoảng 50% số vùng có hồ (gần như mọi vùng đất liền).
+- Mạch nước trên núi: chunk có mặt đất ≥ y = 75, xác suất 0.3, vách cao ≥ 2 block.
+- Quặng mỗi chunk: than 16 cụm, sắt 12, kim cương 3, sỏi 3 khối cầu bán kính 2.
+
+## Phụ lục — Thông số chi tiết đã tinh chỉnh (từ Giai đoạn 1b cũ, dùng cho 2b)
 
 Các giá trị dưới đây đã đo và chỉnh khi làm hang động/hầm mỏ/ánh sáng trên bản
 đồ cố định. Giai đoạn 2 giữ lại làm điểm xuất phát, chỉnh cho khớp mục 2.1/2.9.

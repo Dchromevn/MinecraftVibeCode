@@ -9,7 +9,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 |---|---|---|
 | 0 | Dựng khung | xong |
 | 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
-| 2a | Thế giới vô hạn và biome | chưa làm |
+| 2a | Thế giới vô hạn và biome | chờ người dùng test |
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | chưa làm — đã có một phần từ "1b" cũ (xem ghi chú) |
 | 3 | Người chơi và tương tác block | chưa làm |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
@@ -157,3 +157,50 @@ Thêm theo yêu cầu người dùng, trước Giai đoạn 2. Đã ghi vào `PL
 - Rương hầm mỏ mới có vị trí, chưa có đồ (Giai đoạn 6).
 - Đổi chiều cao thế giới làm khác hoàn toàn địa hình của seed cũ.
 - Debug mới: `N` nhìn đêm, `F4` ẩn hang khuất, `?nv=1`, `?nocull=1`, `?nomsg=1`.
+
+---
+
+## Giai đoạn 2a — Thế giới vô hạn và biome (2026-11-11)
+
+Kèm theo yêu cầu bổ sung "nước tự nhiên" của người dùng: phần trên mặt đất (sông, hồ, mạch nước núi) làm trong 2a; phần dưới lòng đất (hồ ngầm, mạch nước/dung nham trong hang, không đục hang dưới đáy nước) ghi vào 2b. Đã cập nhật `PLAN.md` mục 2.1, 2.10, giai đoạn 2a/2b/4 và `DESIGN.md`.
+
+### File đã tạo / sửa
+
+- `shared/src/constants.ts` (thế giới, địa hình, biome, sông, hồ, mạch nước) + `shared/src/gameplay.ts` (thông số lối chơi tách ra cho file ngắn).
+- `shared/src/blocks.ts`, `blockTable.ts` — đánh số lại theo bảng 2.2 (id 0–17, 20, 21, 32, 34; id còn lại "dành chỗ" cho 2b); rơi ra dạng danh sách; quặng sắt rơi sắt thô.
+- `shared/src/chunk.ts`, `world.ts` — chunk 16x128x16, `World` dùng bảng băm (cx, cz), đánh dấu chunk đã sửa.
+- `shared/src/raycast.ts` — raycast DDA (dùng lại ở Giai đoạn 3).
+- `shared/src/worldgen/{terrainSampler,chunkGen,trees,lakes,springs,index}.ts` — sinh theo từng chunk: địa hình liên tục, 6 biome, sông, hồ, mạch nước núi, quặng/sỏi xuyên chunk, cây xuyên chunk, cỏ cao, tuyết phủ, đá sâu.
+- Xóa bộ sinh bản đồ cố định cũ (`terrain`, `decorate`, `caves`, `mineshaft*`) và ánh sáng/ẩn hang cũ ở client — mã vẫn còn trong commit `a098b81` để 2b dùng lại.
+- `client/src/mesh/mesher.ts` (dựng mesh từ khối có viền 18x128x18, nước hạ 1/8, lớp tuyết, cỏ có tuyết), `geomBuilder.ts` (không cần three, chạy trong worker).
+- `client/src/workers/{protocol,worldWorker,workerPool}.ts` — sinh chunk và dựng mesh trong 1–4 Web Worker.
+- `client/src/world/{chunkManager,chunkMeshes}.ts` — tải/gỡ theo tầm nhìn (mặc định 8, phím [ ]), ưu tiên chunk gần và trước mặt, gỡ ngoài bán kính + 2, giữ chunk đã sửa trong bộ nhớ; nước bán trong suốt.
+- `client/src/debug/blockEditor.ts` — công cụ tạm: chuột trái phá, chuột phải đặt, 1–9 chọn block.
+- `client/src/main.ts`, `strings.ts`, `fallbackTextures.ts`, `scripts/texture-map.json` — HUD mới (biome, chunk, việc đang chờ, bộ nhớ), 6 texture mới.
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng.
+- Sinh 1 chunk khoảng 1 ms; sinh lại theo thứ tự khác cho kết quả giống hệt từng byte.
+- Trên vùng 6000x6000: đồng cỏ 24%, rừng 19%, sa mạc 7%, tuyết 13%, núi 7%, biển 31%; độ cao 49–108. Ngoài vùng núi chỉ ~0,06% cặp cột kề nhau chênh ≥ 4 block.
+- Sông: bề rộng đo theo hàng ngang trung vị 11 block (đo chéo nên thiên cao). Hồ: có ở khoảng 50% số vùng 128x128 (gần như mọi vùng đất liền), mặt nước cao hơn mực biển.
+- Cây ở mép chunk đủ tán như cây ở giữa chunk (98–100% trong vùng rừng).
+- Nước sinh sẵn: 0 ô hở trên ba vùng thử; mạch nước núi: ~10 trên 144 chunk vùng núi.
+- Trình duyệt headless (dựng hình bằng CPU): bay thẳng 2 phút ~2.900 block, số chunk trong bộ nhớ giữ ~314, bộ nhớ JS sau dọn rác 36–58 MB không tăng dần, hàng đợi gần như trống; quay về thì block đã đặt/đào vẫn còn.
+- Raycast đúng ở tọa độ âm và biên chunk; sửa block ở góc chunk đánh dấu đủ 4 chunk.
+- Ảnh chụp: đồng cỏ, rừng, sa mạc, đồng tuyết, núi (đá + tuyết), đại dương, sông, hồ, mạch nước trên sườn dốc.
+
+### Cần người dùng kiểm tra
+
+- FPS với tầm nhìn 8 trên máy thật (headless chỉ đo được 21–53 FPS vì dựng hình bằng CPU).
+- Bay nhanh (Ctrl) có bị khựng/thấy lỗ chunk chưa tải không.
+- Phá/đặt block bằng chuột, bay xa rồi quay lại xem còn không.
+- Ranh giới biome trông có hợp lý không; tìm sông, hồ, mạch nước.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Chưa có ánh sáng (2b): mọi nơi sáng đều như ban ngày, chỉ có AO và độ sáng theo hướng mặt.
+- Texture nước gốc màu xanh tím; đã nhuộm thêm xanh, có thể chỉnh `WATER_TINT` trong mesher.
+- Đồi cát trong sa mạc có thể khá dốc (tới y = 88); cao hơn y = 88 luôn là núi.
+- Thứ tự tải chưa tính chiều cao camera; bay rất cao vẫn tải theo hình tròn trên mặt phẳng.
+- Debug: `?debug=1` mở `window.__game` (camera, chunk, world, autopilot) cho script kiểm tra; `?vd=` đặt tầm nhìn.

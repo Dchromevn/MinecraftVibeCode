@@ -60,6 +60,16 @@
     { "dest": "textures/rail.png", "src": "carts_mcl_minecarts/default_rail.png" },
     { "dest": "textures/cobweb.png", "src": "default_mcl_core/mcl_core_web.png" },
     { "dest": "textures/torch.png", "src": "default_mcl_core/default_torch_on_floor.png" },
+    { "dest": "textures/sandstone.png", "src": "default_mcl_core/sand/default_sandstone.png" },
+    { "dest": "textures/snow.png", "src": "default_mcl_core/soil/default_snow.png" },
+    {
+      "dest": "textures/snow_side.png",
+      "src": "default_mcl_core/soil/default_snow_side.png",
+      "base": "default_mcl_core/soil/default_dirt.png"
+    },
+    { "dest": "textures/deepslate.png", "src": "mcl_deepslate/mcl_deepslate.png" },
+    { "dest": "textures/deepslate_top.png", "src": "mcl_deepslate/mcl_deepslate_top.png" },
+    { "dest": "textures/sapling.png", "src": "default_mcl_core/trees/default_sapling.png" },
     { "dest": "textures/player.png", "src": "HUD/character.png" },
     {
       "dest": "icons/{tier}_pickaxe.png",

@@ -33,6 +33,12 @@ const PALETTE: Record<string, Palette> = {
   rail: ["#6b4a2a", "#9a9a9a"],
   cobweb: ["#dddddd", "#ffffff"],
   torch: ["#6b4a2a", "#ffd040"],
+  sandstone: ["#d8c88a", "#c9b878"],
+  snow: ["#f4f8ff", "#e2ebf5"],
+  snow_side: ["#8b5a2b", "#f4f8ff"],
+  deepslate: ["#4a4a50", "#38383d"],
+  deepslate_top: ["#4a4a50", "#2f2f33"],
+  sapling: ["#3f8f2a", "#6b4a2a"],
   missing: ["#ff00ff", "#000000"],
 };
 

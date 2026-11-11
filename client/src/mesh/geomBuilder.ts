@@ -1,5 +1,11 @@
-// Gom đỉnh/màu/uv/chỉ số rồi tạo BufferGeometry.
-import * as THREE from "three";
+// Gom đỉnh/màu/uv/chỉ số thành mảng có kiểu (chạy được trong Web Worker, không cần three).
+
+export interface MeshArrays {
+  positions: Float32Array;
+  colors: Float32Array;
+  uvs: Float32Array;
+  indices: Uint16Array | Uint32Array;
+}
 
 export class GeomBuilder {
   private positions: number[] = [];
@@ -17,7 +23,7 @@ export class GeomBuilder {
     for (let i = 0; i < 8; i++) this.uvs.push(uv[i]!);
     for (let i = 0; i < 12; i++) this.colors.push(rgb[i]!);
     const b = this.vcount;
-    // chọn đường chéo đi qua cặp đỉnh sáng hơn để AO/ánh sáng không bị vằn
+    // chọn đường chéo đi qua cặp đỉnh sáng hơn để AO không bị vằn
     const l0 = rgb[0]! + rgb[1]! + rgb[2]!;
     const l1 = rgb[3]! + rgb[4]! + rgb[5]!;
     const l2 = rgb[6]! + rgb[7]! + rgb[8]!;
@@ -27,19 +33,23 @@ export class GeomBuilder {
     this.vcount += 4;
   }
 
-  build(): THREE.BufferGeometry | null {
-    if (this.vcount === 0) return null;
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.Float32BufferAttribute(this.positions, 3));
-    g.setAttribute("color", new THREE.Float32BufferAttribute(this.colors, 3));
-    g.setAttribute("uv", new THREE.Float32BufferAttribute(this.uvs, 2));
-    g.setIndex(
-      this.vcount > 65535
-        ? new THREE.Uint32BufferAttribute(this.indices, 1)
-        : new THREE.Uint16BufferAttribute(this.indices, 1),
-    );
-    g.computeBoundingSphere();
-    g.computeBoundingBox();
-    return g;
+  get vertexCount(): number {
+    return this.vcount;
   }
+
+  build(): MeshArrays | null {
+    if (this.vcount === 0) return null;
+    return {
+      positions: new Float32Array(this.positions),
+      colors: new Float32Array(this.colors),
+      uvs: new Float32Array(this.uvs),
+      indices: this.vcount > 65535 ? new Uint32Array(this.indices) : new Uint16Array(this.indices),
+    };
+  }
+}
+
+/** Các buffer cần chuyển (transfer) khi gửi qua postMessage. */
+export function meshTransferables(m: MeshArrays | null): ArrayBuffer[] {
+  if (!m) return [];
+  return [m.positions.buffer, m.colors.buffer, m.uvs.buffer, m.indices.buffer] as ArrayBuffer[];
 }

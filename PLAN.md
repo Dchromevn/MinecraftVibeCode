@@ -97,6 +97,17 @@ Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển ti
 | Núi | đá lộ ra trên cao, tuyết trên đỉnh | cây thưa ở chân núi |
 | Đại dương | nước, đáy cát và sỏi | không |
 
+Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền mạch qua chunk):
+- Sông: trường noise riêng, nơi giá trị gần 0 thì khoét lòng sông rộng 5–12
+  block, sâu 3–5 block, mặt nước y = 62, uốn lượn và đổ ra biển; bờ thoải, đáy
+  cát và sỏi; không cắt qua núi cao hơn y = 85.
+- Hồ: đường kính 8–20 block ở vùng đất bằng, khoảng 1 hồ mỗi vùng 128x128;
+  mặt nước bằng điểm thấp nhất của bờ, có thể cao hơn mực biển.
+- Mạch nước trên núi: thỉnh thoảng một nguồn nước gắn trên vách núi hoặc sườn
+  dốc (có đá phía trên), để chảy thành thác khi có nước chảy (Giai đoạn 4).
+- Nước sinh sẵn (biển, sông, hồ, hồ ngầm) phải "tĩnh": không ô nước nào có
+  không khí bên cạnh hoặc bên dưới. Chỉ các mạch nước/dung nham là ô "hở".
+
 Dưới lòng đất:
 - Lớp: mặt biome → 3 lớp đất (hoặc cát/sa thạch) → đá → đá sâu (y < 8) → đá nền.
   Quặng chỉ thay ô đá thường, nên kim cương nằm ở y = 8–15.
@@ -104,8 +115,15 @@ Dưới lòng đất:
   kim cương (y < 16, cụm 3).
 - Hang dạng "sợi mì": noise 3D, đục rỗng nơi hai trường noise cùng gần 0.
 - Hang lớn dạng "phô mai": noise 3D tần số thấp, hiếm hơn.
-- Hang không đục đá nền, không đục ngay dưới đáy biển; có cửa hang lộ ra mặt đất.
+- Hang không đục đá nền; có cửa hang lộ ra mặt đất.
 - Dưới y = 12: đáy hang là hồ dung nham.
+- Hồ ngầm: trong hang lớn, phần đáy hang dưới một mực nước ngẫu nhiên của
+  từng vùng (tính bằng noise, trong khoảng y = 20–50) được lấp đầy nước. Dưới
+  y = 12 vẫn là dung nham, không trộn lẫn.
+- Mạch nước trong hang: khoảng 1 nguồn mỗi chunk có hang (ngẫu nhiên), đặt trên
+  trần hoặc vách hang để chảy thành dòng/thác nhỏ. Mạch dung nham tương tự nhưng
+  hiếm hơn, chỉ dưới y = 30.
+- Hang không đục vào ngay dưới đáy biển, sông, hồ (tránh nước tràn ngập hang).
 - Hầm mỏ bỏ hoang: xem 2.9.
 
 ### 2.2 Block
@@ -289,6 +307,9 @@ liệu thì sáng, thiếu thì mờ.
 - Nước gặp dung nham: nguồn dung nham thành đá vỏ chai (nếu có texture) hoặc
   đá cuội, dung nham chảy thành đá cuội.
 - Chỉ cập nhật chất lỏng ở chunk gần người chơi.
+- Khi tải một chunk, quét các ô chất lỏng "hở" (có không khí bên cạnh/bên dưới)
+  để đưa vào hàng đợi chảy. Nhờ vậy mạch nước sinh từ trước Giai đoạn 4 tự chảy
+  thành dòng mà không cần sinh lại thế giới.
 
 ### 2.11 Làng
 
@@ -474,6 +495,8 @@ BIOME, ĐỊA HÌNH, QUẶNG
 - Quặng theo cụm (mục 2.1), sỏi, đá sâu dưới y = 8, đá nền y = 0.
 - Nước là block tĩnh, vẽ bán trong suốt, mặt nước thấp hơn 1/8 block, không vẽ
   mặt tiếp giáp giữa hai block nước. Mô phỏng chảy làm ở Giai đoạn 4.
+- Nước tự nhiên trên mặt đất theo mục 2.1: sông, hồ, mạch nước trên núi
+  (mạch nước chỉ là một block nước cho tới Giai đoạn 4).
 
 BLOCK CẦN CHO ĐỊA HÌNH
 - Đánh số lại block theo bảng 2.2 (id 0–15 giữ nguyên). Thêm ở giai đoạn này:
@@ -487,6 +510,8 @@ NGHIỆM THU
 - Bay xa rồi quay lại: block đã sửa vẫn còn.
 - Thấy ít nhất 4 biome khác nhau và đại dương; ranh giới biome không có vách vô lý.
 - Cây ở mép chunk không bị cụt.
+- Đi/bay thấp vài phút trên mặt đất gặp được sông và hồ; có mạch nước trên vách núi.
+- Nước sinh sẵn không có ô hở (trừ mạch nước).
 - Cùng seed cho ra cùng thế giới.
 - FPS 60 với tầm nhìn 8 chunk trên laptop thông thường.
 
@@ -502,6 +527,8 @@ HANG ĐỘNG
   trên vách hang. Không đục đá nền, không đục ngay dưới đáy biển/hồ.
 - Cửa hang lộ ra mặt đất: lập kế hoạch theo vùng (seed + tọa độ vùng), mỗi chunk
   chỉ đục phần thuộc về nó.
+- Hồ ngầm, mạch nước trong hang, mạch dung nham (dưới y = 30) theo mục 2.1.
+  Không đục hang ngay dưới đáy biển, sông, hồ.
 
 HẦM MỎ BỎ HOANG
 - Theo mục 2.9, lập kế hoạch theo vùng, liền mạch qua nhiều chunk. Rương trong
@@ -530,6 +557,8 @@ BLOCK MỚI CÒN LẠI
 NGHIỆM THU
 - Xuống lòng đất: hang nối nhau, không có hang cụt vuông vức, có hồ dung nham
   ở đáy; hang và hầm mỏ liền mạch qua ranh giới chunk.
+- Gặp được hồ ngầm và mạch nước trên vách hang.
+- Không có hang nào bị ngập nước kín do thủng đáy biển/sông/hồ.
 - Tìm được hầm mỏ có đường ray (có đoạn cong/ngã rẽ), khung gỗ, mạng nhện, rương.
 - Trong hang thì tối, đặt đuốc thì sáng vùng xung quanh; phá đuốc thì tối lại,
   kể cả khi đuốc ở sát ranh giới chunk.
@@ -594,7 +623,8 @@ TRỒNG TRỌT
 - Đứng/nhảy lên đất cày có thể làm nó thành đất.
 
 CHẤT LỎNG
-- Mô phỏng chảy theo mục 2.10, chỉ ở chunk gần người chơi.
+- Mô phỏng chảy theo mục 2.10, chỉ ở chunk gần người chơi. Mạch nước/dung nham
+  đã sinh sẵn trong thế giới phải tự chảy khi chunk được tải (quét ô chất lỏng hở).
 - Xô (tùy chọn nếu dễ): múc và đổ nước/dung nham.
 
 SINH TỒN

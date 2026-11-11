@@ -2,6 +2,7 @@
 import type { ToolTier } from "./constants.js";
 import { BLOCKS } from "./blockTable.js";
 
+/** Id block theo bảng 2.2. Id chưa có dữ liệu (làm ở 2b) là block "dành chỗ", vẽ như không khí. */
 export const B = {
   AIR: 0,
   GRASS: 1,
@@ -20,24 +21,34 @@ export const B = {
   BEDROCK: 14,
   TALLGRASS: 15,
   GRAVEL: 16,
-  MOSSY_COBBLE: 17,
-  WATER: 18,
-  LAVA: 19,
-  FENCE: 20,
-  RAIL_Z: 21, // đường ray chạy dọc trục Z
-  RAIL_X: 22, // đường ray chạy dọc trục X
-  COBWEB: 23,
-  TORCH: 24,
+  WATER: 17,
+  LAVA: 18,
+  MOSSY_COBBLE: 19,
+  SANDSTONE: 20,
+  SNOW_LAYER: 21,
+  FENCE: 22,
+  RAIL: 23,
+  COBWEB: 24,
+  TORCH: 25,
+  FURNACE: 26,
+  GLASS: 27,
+  LADDER: 28,
+  DOOR: 29,
+  FARMLAND: 30,
+  WHEAT: 31,
+  SAPLING: 32,
+  BED: 33,
+  DEEPSLATE: 34,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 
-export type ToolKind = "pickaxe" | "axe" | "shovel" | "none";
+export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
 
 /**
- * Cách vẽ: cube = khối đầy đủ; cross = hai mặt chéo chữ X; post = cột hàng rào;
- * torch = que đuốc; rail = mặt phẳng sát sàn.
+ * Cách vẽ: cube = khối đầy đủ; cross = hai mặt chéo chữ X; liquid = chất lỏng
+ * (mặt trên thấp hơn); layer = lớp mỏng sát sàn; post/torch/rail dùng ở 2b.
  */
-export type RenderKind = "none" | "cube" | "cross" | "post" | "torch" | "rail";
+export type RenderKind = "none" | "cube" | "cross" | "liquid" | "layer" | "post" | "torch" | "rail";
 
 export interface BlockTextures {
   top: string;
@@ -48,7 +59,7 @@ export interface BlockTextures {
 
 export interface BlockDrop {
   item: string;
-  chance: number; // 0..1
+  chance: number; // 0..1, mỗi mục tung xác suất riêng (Giai đoạn 4 dùng)
 }
 
 /** Hộp va chạm trong block, đơn vị block: [minX, minY, minZ, maxX, maxY, maxZ]. */
@@ -61,13 +72,14 @@ export interface BlockDef {
   tool: ToolKind; // công cụ đúng loại để được hệ số tốc độ
   toolRequired: boolean; // đào tay vẫn phá nhưng không rơi gì
   minTier: ToolTier | null; // cấp cuốc tối thiểu để rơi đồ (quặng)
-  drop: BlockDrop | null;
+  drops: readonly BlockDrop[];
   transparent: boolean; // mặt kề block này vẫn được vẽ
   solid: boolean; // có va chạm
   box: BlockBox | null; // hộp va chạm nếu không phải cả khối (null = cả khối hoặc không va chạm)
-  opaque: boolean; // che khuất hoàn toàn (AO, ẩn hang, cản sáng)
+  opaque: boolean; // che khuất hoàn toàn (AO, cản sáng)
   liquid: boolean;
-  moveFactor: number; // hệ số tốc độ khi đi trong block (mạng nhện)
+  falls: boolean; // rơi xuống khi bên dưới trống (cát, sỏi) — Giai đoạn 3
+  moveFactor: number; // hệ số tốc độ khi đi trong block
   lightEmit: number; // 0..15
   lightOpacity: number; // ánh sáng mất thêm khi đi qua block (15 = chặn hẳn)
   render: RenderKind;
@@ -89,6 +101,12 @@ export function allBlockTextureNames(): string[] {
     if (b.tex.front) names.add(b.tex.front);
   }
   return [...names];
+}
+
+/** Có vẽ được / nhắm vào được không (dùng cho raycast debug). */
+export function isTargetable(id: number): boolean {
+  const d = blockDef(id);
+  return d.render !== "none" && !d.liquid;
 }
 
 export { BLOCKS };
