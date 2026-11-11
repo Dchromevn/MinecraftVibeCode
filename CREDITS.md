@@ -13,7 +13,7 @@
 ## Thư viện mã nguồn
 
 - Three.js (MIT), Vite (MIT), ws (MIT), TypeScript (Apache-2.0),
-  tsx (MIT), concurrently (MIT).
+  tsx (MIT), concurrently (MIT), pngjs (MIT, chỉ dùng trong script nhập texture).
 
 ## Ghi chú
 

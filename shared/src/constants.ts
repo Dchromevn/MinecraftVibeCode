@@ -21,11 +21,14 @@ export const WORLD = {
   TREE_TRUNK_MAX: 6,
   TREE_CANOPY_SIZE: 5,
   SURFACE_BLOCKS_PER_TREE: 60,
+  // attempts: số cụm thử đặt mỗi chunk (chỉ đặt vào ô đá)
   ORE: {
-    coal: { maxY: 50, cluster: 8 },
-    iron: { maxY: 35, cluster: 5 },
-    diamond: { maxY: 12, cluster: 3 },
+    coal: { maxY: 50, cluster: 8, attempts: 8 },
+    iron: { maxY: 35, cluster: 5, attempts: 6 },
+    diamond: { maxY: 12, cluster: 3, attempts: 2 },
   },
+  TALLGRASS_CHANCE: 0.12, // tỷ lệ mặt cỏ có cỏ cao
+  NOISE_SCALE: 1 / 64, // tần số cơ bản của noise địa hình
 } as const;
 
 // 2.3 Cấp công cụ

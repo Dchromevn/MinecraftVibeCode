@@ -10,12 +10,19 @@
       #hud {
         position: fixed; top: 8px; left: 8px;
         color: #fff; font: 13px/1.5 monospace;
-        text-shadow: 0 0 3px #000; pointer-events: none; white-space: pre;
+        text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; white-space: pre;
+      }
+      #center {
+        position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+        color: #fff; font: 16px/1.6 monospace; text-align: center;
+        background: rgba(0, 0, 0, 0.55); padding: 12px 18px; border-radius: 6px;
+        pointer-events: none; white-space: pre;
       }
     </style>
   </head>
   <body>
     <div id="hud"></div>
+    <div id="center"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

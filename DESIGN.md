@@ -22,6 +22,9 @@ là nguồn sự thật.
 - Cỏ cao rải trên mặt cỏ.
 - Quặng theo cụm: than (y<50, cụm 8), sắt (y<35, cụm 5), kim cương (y<12, cụm 3).
 - Cùng seed phải sinh ra cùng thế giới, trên cả client và server.
+- Thông số chi tiết (thêm ở Giai đoạn 1, chỉnh được): tần số noise 1/64;
+  số cụm quặng thử đặt mỗi chunk: than 8, sắt 6, kim cương 2 (chỉ thay ô đá);
+  12% mặt cỏ có cỏ cao. Giá trị nằm trong `shared/src/constants.ts` (WORLD).
 
 ### 2.2 Block
 
