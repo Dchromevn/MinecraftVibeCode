@@ -1,6 +1,6 @@
 // Vật phẩm nằm trên đất (MECHANICS.md 11): trọng lực, va chạm với block, hãm ngang, hút về
 // người chơi trong tầm nhặt, gộp chồng khi nằm gần nhau, biến mất sau 5 phút; trôi theo dòng chất lỏng,
-// nổi lên trong nước (Giai đoạn 4c).
+// nổi lên trong nước, cháy mất khi chạm dung nham (Giai đoạn 4c).
 import { DROPPED, INVENTORY } from "./survivalConstants.js";
 import { PLAYER } from "./constants.js";
 import { moveBox, type CellReader } from "./collide.js";
@@ -64,8 +64,9 @@ export function stepItem(e: ItemEntity, dt: number, cell: CellReader, player: { 
   // trong chất lỏng: bị dòng chảy đẩy ngang; trong nước thì nổi dần lên
   const bx = Math.floor(e.x), by = Math.floor(e.y + DROPPED.SIZE / 2), bz = Math.floor(e.z);
   const here = cell(bx, by, bz) & 255;
+  if (here === B.LAVA) return false; // rơi vào dung nham: cháy mất
   const inWater = here === B.WATER;
-  if (inWater || here === B.LAVA) {
+  if (inWater) {
     const [fx, fz] = liquidFlow(cell, bx, by, bz);
     e.vx += fx * LIQUIDS.ITEM_FLOW_ACCEL * dt;
     e.vz += fz * LIQUIDS.ITEM_FLOW_ACCEL * dt;

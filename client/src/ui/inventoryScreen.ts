@@ -44,6 +44,7 @@ export class InventoryScreen {
   private readonly bookBtn = document.createElement("button");
   private drag: { button: "left" | "right"; refs: SlotRef[] } | null = null;
   private sweep = false; // đang giữ Shift + chuột trái (chuyển nhanh khi rê qua ô)
+  private pickFrom: SlotRef | null = null; // ô vừa nhấc đồ bằng chuột trái (kéo sang ô khác rồi thả = tráo đổi)
   private hover: SlotRef | null = null;
   private container: ContainerView | null = null;
   private containerClose: (() => void) | null = null;
@@ -108,6 +109,7 @@ export class InventoryScreen {
       if (e.detail === 2 && button === "left" && this.inv.cursor) collectToCursor(this.inv);
       else if (e.shiftKey || !this.inv.cursor) {
         this.inv.click(area, i, button, e.shiftKey);
+        if (!e.shiftKey && button === "left" && this.inv.cursor) this.pickFrom = ref;
         this.sweep = e.shiftKey && button === "left";
       }
       else this.drag = { button, refs: [ref] }; // đang cầm: chờ thả chuột (kéo qua nhiều ô)
@@ -132,6 +134,7 @@ export class InventoryScreen {
 
   private endDrag(): void {
     this.sweep = false;
+    this.dropDragged();
     const d = this.drag;
     if (!d) return;
     this.drag = null;
@@ -139,6 +142,19 @@ export class InventoryScreen {
     const r = d.refs[0]!;
     if (d.refs.length === 1) this.inv.click(r.area, r.i, d.button, false);
     else dragSpread(this.inv, d.refs, d.button);
+    this.refresh();
+  }
+
+  /**
+   * Kéo-thả: nhấc đồ ở ô A, thả chuột ở ô B → đặt vào B (gộp nếu cùng loại), món đang ở B (hoặc phần
+   * dư) về lại A. Thả ngay tại A thì giữ trên con trỏ như bấm thường.
+   */
+  private dropDragged(): void {
+    const from = this.pickFrom, to = this.hover;
+    this.pickFrom = null;
+    if (!from || !to || !this.inv.cursor || (to.area === from.area && to.i === from.i)) return;
+    this.inv.click(to.area, to.i, "left", false);
+    if (this.inv.cursor) this.inv.click(from.area, from.i, "left", false);
     this.refresh();
   }
 

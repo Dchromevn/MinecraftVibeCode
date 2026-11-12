@@ -565,6 +565,11 @@ Trạng thái: chờ người dùng test.
 
 - Dòng chảy chỉ đẩy vật phẩm, chưa đẩy người chơi (PLAN chỉ yêu cầu vật phẩm).
 - Nước chảy dùng chung texture nước tĩnh (chưa có texture / hướng trôi riêng cho nước chảy).
-- Vật phẩm rơi vào dung nham chưa cháy mất (ngoài phạm vi 4c).
 - Chất lỏng chỉ chạy ở chunk đã tải; đi xa rồi quay lại thì chunk được quét lại để chảy tiếp.
 - Chưa lưu được (Giai đoạn 5).
+
+### Sửa theo phản hồi 4c (2026-11-12)
+
+- Kéo-thả trong túi đồ / rương / lò: nhấc đồ ở ô A, thả chuột ở ô B → đặt vào B (gộp nếu cùng loại), đồ ở B (hoặc phần dư) về A. Thả tại chính ô A thì vẫn giữ trên con trỏ như bấm thường (`ui/inventoryScreen.ts`).
+- Vật phẩm rơi chạm dung nham thì cháy mất (`shared/src/itemEntity.ts`).
+- Kiểm tra: `npm test` 118/118; trình duyệt: kéo gỗ từ túi lên ô rương có kim cương → tráo đúng, kéo than sang ô trống → chuyển sang, thả tại chỗ → giữ trên con trỏ.

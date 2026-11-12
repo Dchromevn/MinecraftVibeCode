@@ -147,3 +147,13 @@ function mk() {
   check("raycast thường xuyên qua nước, chế độ xô trúng nguồn", pass?.y === 9 && hit?.y === 10 && (hit.cell & 255) === B.WATER);
   check("vật phẩm trong dòng nước trôi theo dòng", e.x > 4.2, `x = ${e.x.toFixed(2)}`);
 }
+{ // 11. vật phẩm chạm dung nham thì cháy mất
+  const s = mk();
+  s.floor(9);
+  s.w.setCell(0, 10, 0, B.LAVA, 0);
+  const get = (x: number, y: number, z: number): number => s.w.getCell(x, y, z);
+  const e = createItemEntity(stack("dirt"), 0.5, 11, 0.5);
+  let alive = true;
+  for (let k = 0; k < 40 && alive; k++) alive = stepItem(e, 1 / 20, get, null);
+  check("vật phẩm rơi vào dung nham cháy mất", !alive);
+}

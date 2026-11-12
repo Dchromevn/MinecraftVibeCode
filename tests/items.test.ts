@@ -134,3 +134,17 @@ const total = (inv: Inventory) => {
   check("Q vứt 1; bấm phải ra ngoài vứt 1", q?.count === 1 && inv.craft[0]?.count === 2 && d?.count === 1 && cur?.count === 4);
 }
 check("mọi vật phẩm có icon", allItems().every((i) => !!i.icon));
+{ // kéo-thả tráo đổi (giao diện gọi: nhấc ô A, bấm ô B, rồi bấm lại ô A)
+  const inv = new Inventory();
+  inv.main[0] = stack("dirt", 10);
+  inv.main[5] = stack("stone", 3);
+  inv.ext = [stack("planks", 7), null];
+  inv.click("main", 0, "left", false);
+  inv.click("ext", 0, "left", false);
+  if (inv.cursor) inv.click("main", 0, "left", false);
+  const swapped = inv.ext[0]?.item === "dirt" && inv.main[0]?.item === "planks" && !inv.cursor;
+  inv.click("main", 5, "left", false);
+  inv.click("ext", 1, "left", false);
+  if (inv.cursor) inv.click("main", 5, "left", false);
+  check("kéo đồ từ túi sang rương: ô có đồ thì tráo chỗ, ô trống thì chuyển sang", swapped && inv.ext[1]?.item === "stone" && !inv.main[5]);
+}
