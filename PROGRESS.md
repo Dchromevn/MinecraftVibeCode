@@ -12,7 +12,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 2a | Thế giới vô hạn và biome | xong (người dùng bảo "tiếp" sau khi sửa lỗi, 2026-11-11) |
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | chờ người dùng test (người dùng bảo làm tiếp 3b, test gộp) |
-| 3b | Đào, đặt, chỗ bám, cát rơi | đang làm |
+| 3b | Đào, đặt, chỗ bám, cát rơi | chờ người dùng test (test gộp với 3a) |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
@@ -333,3 +333,58 @@ thông số di chuyển ghi trong DESIGN.md 2.6.
 - Công cụ debug vẫn phá tức thì, chưa kiểm tra chỗ bám, đặt lúa ở giai đoạn chín: Giai đoạn 3b thay bằng đào/đặt thật.
 - Chưa có sát thương rơi (Giai đoạn 4 cùng thanh máu); ngồi chưa hạ camera.
 - Thêm `?walk=1` / `?fly=1`; `?pos=` mặc định bắt đầu ở chế độ bay. `?debug=1` cho script nhấn phím không cần khóa chuột.
+
+## Áp dụng MECHANICS.md cho Giai đoạn 2–3a (2026-11-12)
+
+Người dùng bảo "sửa theo MECHANICS hết, tiếp 3b". Random tick và lá tự rụng để Giai đoạn 4
+(cần có lúa/cây non dùng). Ba mục LỰA CHỌN (rìu, giáp, táo từ lá) chưa có câu trả lời rõ:
+tạm giữ theo PLAN (rìu = kiếm − 1, giáp 4%/điểm, táo 5%).
+
+- Tốc độ 4.317 / 5.612 / 1.295; bay debug 10.9; rơi tối đa 78.4.
+- Ngồi: hộp cao 1.5, mắt 1.27, trần thấp không đứng dậy; không bước khỏi mép ≥ 5/8.
+- Nhảy lúc chạy nhanh được đẩy thêm 2.8 b/s, trên không giữ đà (hãm 2/giây), vận tốc mong
+  muốn trên không 85%: chạy + nhảy liên tục 7.16 b/s, vượt khe 4 (đi bộ 2).
+- Sát thương rơi floor(quãng − 3) (nước/thang/mạng nhện tính lại); dưỡng khí 15 s, hết thì
+  2 máu/giây, hồi đầy 3.75 s; dung nham 4 máu/lần + miễn sát thương 0.5 s, cháy 15 s;
+  cháy 1 máu/giây; chỉ lưu số máu.
+- Độ bền công cụ 59/131/250/32/1561; nước cản ánh sáng 1; lá rơi thêm que 2%.
+- Công thức đào + bảng độ cứng (dùng ở 3b); mạng nhện tay không không rơi gì (20 giây).
+
+## Giai đoạn 3b — Đào, đặt, chỗ bám, cát rơi (2026-11-12)
+
+Trạng thái: chờ người dùng test (người dùng chọn làm tiếp 3b, test gộp với 3a).
+
+### File đã tạo / sửa
+
+- `shared/src/blockRules.ts` (mới) — chỗ bám theo DESIGN 2.2, kiểm tra đặt (ô thay được, chỗ bám, không chồng người chơi), phá + dây chuyền (cửa/giường mất cả hai nửa, ray tự nối lại), cát/sỏi hết đỡ thì rơi.
+- `shared/src/digging.ts` (mới) — tốc độ đào theo MECHANICS mục 4 (tay không / công cụ, dưới nước, trên không, phá ngay).
+- `shared/src/fallingBlock.ts` (mới) — cát/sỏi đang rơi, đáp đè đuốc/cỏ cao (rơi ra), cột cát chồng đúng thứ tự.
+- `shared/src/{gameplay,blockTable,blocks,physics,collide,index}.ts` — hằng số và vật lý theo MECHANICS (mục trên).
+- `client/src/interact/{interaction,crackOverlay,fallingBlocks,boxMesh}.ts` (mới) — giữ chuột trái đào, vết nứt 5 mức, chuột phải đặt (giữ để đặt lặp lại), khung viền đúng hình, cát rơi có hình, HUD "Rơi ra".
+- `client/src/player/arm.ts` (mới) — cánh tay góc nhìn thứ nhất (skin `entities/player.png`), vung khi đào/đặt.
+- `client/src/main.ts`, `strings.ts`, `flyCamera.ts`, `player/playerController.ts` (mắt hạ khi ngồi); `scripts/texture-map.json` (skin người chơi). Xóa `client/src/debug/blockEditor.ts`.
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng.
+- Vật lý 32/32 (thêm: rơi 10 block mất 7 máu, rơi vào nước không mất, chết đuối 15 s rồi 2 máu/giây, dung nham 8 máu/giây thực tế, ngồi dưới trần thấp không đứng dậy, chạy + nhảy 7.16 b/s, vượt khe chạy 4 / đi bộ 2).
+- Quy tắc 18/18: phá block dưới đuốc / tường có đuốc → đuốc rơi; phá nửa trên cửa hoặc sàn dưới cửa → mất cả cửa, 1 vật phẩm; cát rơi đè đuốc → đuốc rơi ra, cát nằm vào chỗ đó; cột cát–sỏi–cát rơi chồng đúng; không đặt đuốc lên lá/kính/không khí; lúa chỉ trên đất cày; không đặt đá chồng lên người, đuốc ở chân thì được; ray đặt nối thành góc cong; cát đặt lơ lửng thì rơi; thời gian đào tay không: đá 7.5 s, đất 0.75 s, gỗ 3 s, quặng 15 s, mạng nhện 20 s; dưới nước / trên không chậm 5 lần.
+- Trình duyệt headless: đi bộ giữ chuột trái đào cỏ rồi đất bên dưới (HUD "Rơi ra: Đất ×1"); đào đá ~7.5 s, vết nứt hiện rõ, cánh tay vung; phá đá đỡ cột cát/sỏi/cát → cả cột rơi xuống, đuốc dưới đáy rơi ra.
+
+### Cần người dùng kiểm tra (gộp 3a + 3b)
+
+- Mục "Cần người dùng kiểm tra" của 3a (đi, nhảy, rào, bơi, thang, mạng nhện, ngồi mép, F bay).
+- Ngồi (Shift): camera hạ thấp, chui qua khe cao 1.5; chạy nhanh + nhảy (Ctrl + W + Space) nhanh hơn chạy thường, vượt khe 4.
+- Giữ chuột trái đào: vết nứt, thời gian (đất < 1 s, đá 7.5 s), khi bay phá ngay; đào/đặt ở ranh giới chunk cập nhật mesh và ánh sáng.
+- Phá block dưới đuốc/ray/lúa/thang → chúng rơi theo (dây chuyền); phá nửa cửa → mất cả cửa; cát rơi khi phá block dưới, đuốc bị cát đè thì rơi ra.
+- Không đặt được đuốc lên lá/kính/không khí, lúa lên block khác đất cày, block đặc chồng lên người.
+- Rơi từ cao, ở dưới nước lâu, chạm dung nham: HUD "Máu" và "Dưỡng khí" giảm đúng (chưa chết).
+
+### Ghi chú / vấn đề còn tồn tại
+
+- "Rơi ra" chỉ hiện trên HUD, chưa có vật phẩm (Giai đoạn 4). Chưa có hotbar hình ảnh, chỉ tên block trên HUD.
+- Cánh tay không tối đi trong hang (vẽ với độ sáng cố định).
+- Texture vết nứt của REFI chỉ là vết nhỏ ở giữa ô nên mức 1–2 khó thấy trên nền tối.
+- Đuốc trên sàn được cắm trên đầu cột rào (ngoại lệ ghi trong DESIGN 2.2) để đuốc hầm mỏ không rơi khi sửa block bên cạnh.
+- Block sinh sẵn thiếu chỗ bám (nếu có) chỉ rơi khi ô bên cạnh thay đổi.
+- Ba mục LỰA CHỌN của MECHANICS vẫn chờ người dùng chọn.

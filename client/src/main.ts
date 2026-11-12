@@ -1,5 +1,5 @@
-// Giai đoạn 3a: người chơi đi bộ có vật lý (bơi, thang, mạng nhện), chế độ bay debug (F),
-// dữ liệu phụ của block; thế giới vô hạn sinh/ánh sáng/dựng mesh trong Web Worker.
+// Giai đoạn 3b: người chơi đi bộ có vật lý, đào (vết nứt) / đặt block có chỗ bám, cát rơi,
+// cánh tay; chế độ bay debug (F); thế giới vô hạn sinh/ánh sáng/dựng mesh trong Web Worker.
 // Tham số URL: ?seed= ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
 // ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
@@ -13,7 +13,8 @@ import { buildUvTable } from "./mesh/mesher.js";
 import { WorkerPool } from "./workers/workerPool.js";
 import { ChunkMeshes } from "./world/chunkMeshes.js";
 import { ChunkManager } from "./world/chunkManager.js";
-import { BlockEditor } from "./debug/blockEditor.js";
+import { Interaction } from "./interact/interaction.js";
+import { FirstPersonArm } from "./player/arm.js";
 import { PlayerController } from "./player/playerController.js";
 import { ViewEffects } from "./player/viewEffects.js";
 
@@ -49,8 +50,20 @@ function playerLine(p: PlayerController): string {
   const flags = [
     s.frozen && STR.stateFrozen, s.onGround && STR.stateGround, s.inWater && STR.stateWater,
     s.inLava && STR.stateLava, s.onLadder && STR.stateLadder, s.inWeb && STR.stateWeb, s.burnS > 0 && STR.stateBurning,
+    s.sneaking && STR.stateSneaking,
   ].filter(Boolean);
-  return `${STR.hudMode}: ${STR.modeWalking} (F) · ${flags.join(", ") || STR.stateAir} · ${STR.hudHealth}: ${s.health.toFixed(1)}/${PLAYER.MAX_HEALTH}`;
+  return `${STR.hudMode}: ${STR.modeWalking} (F) · ${flags.join(", ") || STR.stateAir} · ${STR.hudHealth}: ${s.health.toFixed(1)}/${PLAYER.MAX_HEALTH} · ${STR.hudAir}: ${s.air.toFixed(1)} s`;
+}
+
+/** Dòng HUD: block vừa rơi ra (Giai đoạn 4 mới thành vật phẩm). */
+function dropLine(it: Interaction): string {
+  if (it.lastDrops.length === 0 || performance.now() - it.lastDropTime > 4000) return "";
+  const count = new Map<string, number>();
+  for (const d of it.lastDrops) {
+    const k = BLOCKS[d.id]!.key;
+    count.set(k, (count.get(k) ?? 0) + 1);
+  }
+  return `${STR.hudDropped}: ${[...count].map(([k, n]) => `${STR.blocks[k] ?? k} ×${n}`).join(", ")}`;
 }
 
 function heapMb(): string {
@@ -69,6 +82,8 @@ async function main(): Promise<void> {
   const atlas = await buildAtlas([...allBlockTextureNames(), ...EXTRA_TEXTURES]);
 
   const renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer.autoClear = false; // vẽ thế giới rồi vẽ cánh tay đè lên
+  renderer.info.autoReset = false; // HUD đếm tam giác của cả khung hình (2 lần render)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -110,9 +125,10 @@ async function main(): Promise<void> {
   const player = new PlayerController(world, fly, camera, startFlying);
   fly.applyRotation();
 
-  const editor = new BlockEditor(
-    scene, world,
-    { camera, yaw: () => fly.yaw, locked: () => fly.locked, flying: () => player.flying },
+  const arm = new FirstPersonArm(PLAYER.FOV, window.innerWidth / window.innerHeight);
+  const interact = new Interaction(
+    scene, world, atlas,
+    { camera, player, locked: () => fly.locked || player.debugInput, yaw: () => fly.yaw, swing: () => arm.swing() },
     (x, _y, z) => chunks.onBlockChanged(x, z),
   );
   // debug: cho script kiểm tra điều khiển camera / sửa block từ ngoài (?debug=1);
@@ -120,7 +136,7 @@ async function main(): Promise<void> {
   const autopilot = { vx: 0, vz: 0 };
   if (params.get("debug") === "1") {
     player.debugInput = true;
-    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly };
+    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly, interact };
   }
 
   if (params.get("nv") === "1") meshes.uniforms.uMinLight.value = NIGHT_VISION;
@@ -141,6 +157,7 @@ async function main(): Promise<void> {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    arm.resize(camera.aspect);
   });
 
   const fps = new FpsCounter();
@@ -160,16 +177,21 @@ async function main(): Promise<void> {
     camera.updateMatrixWorld();
     camera.getWorldDirection(dir);
     chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
-    editor.update();
+    interact.update(dt);
     sky.follow(camera);
     meshes.update(now / 1000, camera, chunks.viewDistance, world);
+    renderer.info.reset();
+    renderer.clear();
     renderer.render(scene, camera);
+    arm.visible = !player.flying;
+    arm.update(dt);
+    arm.render(renderer);
 
     if (fps.tick(now) || firstFrame) {
       firstFrame = false;
       const p = camera.position;
       const col = sampler.column(Math.floor(p.x), Math.floor(p.z));
-      const sel = BLOCKS[editor.selectedBlock]!;
+      const sel = BLOCKS[interact.selectedBlock]!;
       hud.setInfo([
         `${STR.title} — ${STR.stage}`,
         `${STR.hudFps}: ${fps.fps}`,
@@ -181,6 +203,7 @@ async function main(): Promise<void> {
         `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls} · ${STR.hudMemory}: ${heapMb()}`,
         `${STR.hudSeed}: ${seedText} (${seed})`,
         playerLine(player),
+        dropLine(interact),
         `${STR.hudSelected}: ${STR.blocks[sel.key] ?? sel.key}`,
         atlas.missing.length ? `${STR.hudMissingTextures}: ${atlas.missing.join(", ")}` : "",
       ]);

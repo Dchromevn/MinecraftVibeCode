@@ -12,4 +12,7 @@ export * from "./raycast.js";
 export * from "./collide.js";
 export * from "./physics.js";
 export * from "./placement.js";
+export * from "./blockRules.js";
+export * from "./digging.js";
+export * from "./fallingBlock.js";
 export * from "./worldgen/index.js";

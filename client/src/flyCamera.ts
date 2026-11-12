@@ -1,9 +1,10 @@
 // Camera bay tự do (chế độ bay debug, phím F): WASD, Space lên, Shift xuống, Ctrl bay nhanh.
 // Cũng giữ chuột nhìn (pointer lock) và trạng thái phím cho bộ điều khiển người chơi.
 import * as THREE from "three";
+import { PLAYER } from "../../shared/src/index.js";
 
 const SENSITIVITY = 0.002;
-const SPEED = 24; // block/giây
+const SPEED = PLAYER.FLY_SPEED; // block/giây
 const FAST_MULT = 3; // giữ Ctrl
 
 export class FlyCamera {

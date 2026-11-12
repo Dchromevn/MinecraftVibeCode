@@ -1,12 +1,12 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 3a — người chơi, vật lý, dữ liệu phụ của block",
+  stage: "Giai đoạn 3b — đào, đặt, chỗ bám, cát rơi",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
     "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
-    "Công cụ debug: chuột trái phá · chuột phải đặt · 1–9 / lăn chuột chọn block",
+    "Giữ chuột trái đào · chuột phải đặt · 1–9 / lăn chuột chọn block (bay: phá ngay)",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
   hudFps: "FPS",
@@ -42,6 +42,9 @@ export const STR = {
   stateLadder: "trên thang",
   stateWeb: "mạng nhện",
   stateBurning: "đang cháy",
+  stateSneaking: "ngồi",
+  hudAir: "Dưỡng khí",
+  hudDropped: "Rơi ra",
   hudMissingTextures: "Texture vẽ tạm",
   biomes: ["Đồng cỏ", "Rừng", "Sa mạc", "Đồng tuyết", "Núi", "Đại dương"],
   blocks: {
@@ -51,6 +54,8 @@ export const STR = {
     log: "Thân gỗ",
     cobble: "Đá cuội",
     sand: "Cát",
+    tallgrass: "Cỏ cao",
+    bedrock: "Đá nền",
     gravel: "Sỏi",
     sandstone: "Sa thạch",
     sapling: "Cây non",

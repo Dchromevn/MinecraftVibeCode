@@ -95,7 +95,7 @@ export type BlockBox = readonly [number, number, number, number, number, number]
 export interface BlockDef {
   id: BlockId;
   key: string; // tên kỹ thuật, dùng cho item tương ứng
-  hardness: number; // giây đào tay không; Infinity = không phá được
+  hardness: number; // độ cứng (MECHANICS.md mục 4); 0 = phá ngay; Infinity = không phá được
   tool: ToolKind; // công cụ đúng loại để được hệ số tốc độ
   toolRequired: boolean; // đào tay vẫn phá nhưng không rơi gì
   minTier: ToolTier | null; // cấp cuốc tối thiểu để rơi đồ (quặng)

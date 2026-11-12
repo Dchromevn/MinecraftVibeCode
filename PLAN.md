@@ -220,7 +220,8 @@ kèm trong gói tin (chunk và thay đổi block).
 
 - Block cần chỗ bám: đuốc (sàn hoặc tường), thang (tường), đường ray (sàn), cửa
   và giường (sàn dưới ô thấp nhất): chỗ bám phải là khối đầy, không trong suốt
-  (không tính lá, kính). Cỏ cao, cây non: cỏ/đất/đất cày bên dưới. Lúa mì: đất
+  (không tính lá, kính); riêng đuốc trên sàn được cắm trên đầu cột rào (như đuốc
+  trong hầm mỏ). Cỏ cao, cây non: cỏ/đất/đất cày bên dưới. Lúa mì: đất
   cày bên dưới. Tuyết phủ: khối đầy bên dưới.
 - Đặt block cũng phải kiểm tra chỗ bám: không đặt đuốc lên không khí, lá, kính;
   không đặt lúa lên block khác đất cày.

@@ -2,7 +2,7 @@
 // 60 Hz, nội suy vị trí cho camera, lắc camera khi đi. Phím F bật/tắt bay (debug).
 import * as THREE from "three";
 import {
-  PHYSICS_DT, PLAYER, boxBlocked, createPlayer, playerBox, stepPlayer,
+  PHYSICS_DT, PLAYER, boxBlocked, createPlayer, eyeHeight, playerBox, stepPlayer,
   type CellReader, type PlayerInput, type PlayerState, type World,
 } from "../../../shared/src/index.js";
 import type { FlyCamera } from "../flyCamera.js";
@@ -19,6 +19,7 @@ export class PlayerController {
   private acc = 0;
   private walkDist = 0;
   private bobAmount = 0; // 0..1, mờ dần khi đứng yên / trên không
+  private eye: number = PLAYER.EYE_HEIGHT; // hạ dần khi ngồi
   private needsSpawnFix = true; // khi chunk tải xong: đẩy lên nếu đang kẹt trong block
   private readonly cell: CellReader;
 
@@ -96,6 +97,7 @@ export class PlayerController {
       if (s.onGround) this.walkDist += Math.hypot(s.x - this.prev.x, s.z - this.prev.z);
       this.acc -= PHYSICS_DT;
     }
+    this.eye += (eyeHeight(s) - this.eye) * Math.min(1, dt * 12);
     const moving = s.onGround && Math.hypot(s.vx, s.vz) > 0.5;
     this.bobAmount += ((moving ? 1 : 0) - this.bobAmount) * Math.min(1, dt * 8);
 
@@ -109,6 +111,6 @@ export class PlayerController {
     const side = Math.sin(phase) * bob * 0.5; // lắc ngang theo hướng phải của camera
     const up = Math.abs(Math.cos(phase)) * bob;
     const yaw = this.fly.yaw;
-    this.camera.position.set(x + Math.cos(yaw) * side, y + PLAYER.EYE_HEIGHT + up - bob * 0.5, z - Math.sin(yaw) * side);
+    this.camera.position.set(x + Math.cos(yaw) * side, y + this.eye + up - bob * 0.5, z - Math.sin(yaw) * side);
   }
 }

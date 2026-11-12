@@ -171,6 +171,7 @@
     { "dest": "icons/bow_pull_2.png", "src": "mcl_bows/mcl_bows_bow_2.png" },
     { "dest": "icons/arrow.png", "src": "mcl_bows/mcl_bows_arrow_inv.png" },
     { "dest": "ui/hotbar.png", "src": "default_mcl_core/gui_hud/gui_hotbar.png" },
-    { "dest": "ui/hotbar_selected.png", "src": "default_mcl_core/gui_hud/gui_hotbar_selected.png" }
+    { "dest": "ui/hotbar_selected.png", "src": "default_mcl_core/gui_hud/gui_hotbar_selected.png" },
+    { "dest": "entities/player.png", "src": "HUD/character.png" }
   ]
 }

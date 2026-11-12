@@ -4,11 +4,26 @@
 // level: cấp đào. Đào được block có minTier khi level của công cụ >= level của minTier.
 // Vàng đào rất nhanh, mau hỏng, nhưng chỉ đào được như gỗ (level 0).
 export const TOOL_TIERS = {
-  wood: { durability: 60, speed: 2, swordDamage: 4, level: 0 },
-  stone: { durability: 130, speed: 4, swordDamage: 5, level: 1 },
+  wood: { durability: 59, speed: 2, swordDamage: 4, level: 0 },
+  stone: { durability: 131, speed: 4, swordDamage: 5, level: 1 },
   iron: { durability: 250, speed: 6, swordDamage: 6, level: 2 },
   gold: { durability: 32, speed: 12, swordDamage: 4, level: 0 },
-  diamond: { durability: 1500, speed: 8, swordDamage: 7, level: 3 },
+  diamond: { durability: 1561, speed: 8, swordDamage: 7, level: 3 },
+} as const;
+
+// Đào block (MECHANICS.md mục 4): tiến độ mỗi tick = tốc_độ / độ_cứng / (30 nếu ra đồ, ngược lại 100)
+export const DIGGING = {
+  TICKS_PER_S: 20,
+  HAND_SPEED: 1,
+  SWORD_COBWEB_SPEED: 15,
+  HARVEST_DIVISOR: 30,
+  NO_HARVEST_DIVISOR: 100,
+  INSTANT_RATIO: 30, // tốc_độ / độ_cứng từ mức này: phá ngay
+  UNDERWATER_DIVISOR: 5, // đầu chìm trong nước
+  AIRBORNE_DIVISOR: 5, // không đứng trên đất
+  COOLDOWN_S: 0.25, // 5 tick chờ sau khi phá xong (trừ block phá ngay)
+  CRACK_STAGES: 5,
+  PLACE_REPEAT_S: 0.25, // giữ chuột phải: đặt lặp lại
 } as const;
 export type ToolTier = keyof typeof TOOL_TIERS;
 
@@ -45,9 +60,9 @@ export const PLAYER = {
   HEIGHT: 1.8,
   EYE_HEIGHT: 1.62,
   PHYSICS_HZ: 60,
-  WALK_SPEED: 4.3,
-  SPRINT_SPEED: 5.6,
-  SNEAK_SPEED: 1.3,
+  WALK_SPEED: 4.317,
+  SPRINT_SPEED: 5.612,
+  SNEAK_SPEED: 1.295,
   JUMP_HEIGHT: 1.25,
   GRAVITY: 32,
   REACH: 4.5,
@@ -60,14 +75,24 @@ export const PLAYER = {
   STARVE_MIN_HEALTH: 1, // không chết vì đói
   SPRINT_HUNGER_MIN: 7, // đói <= 6 không chạy nhanh được
   EAT_TIME_S: 1.6,
-  AIR_BUBBLES: 10,
-  DROWN_DAMAGE_PER_S: 2,
-  LAVA_DAMAGE_PER_S: 4,
-  LAVA_BURN_AFTER_S: 4,
+  AIR_BUBBLES: 10, // hiển thị (Giai đoạn 4); dưỡng khí thật tính bằng giây
+  AIR_S: 15, // dưỡng khí khi đầu chìm
+  AIR_REFILL_S: 3.75, // ngoi lên: hồi đầy trong thời gian này
+  DROWN_DAMAGE: 2, // mỗi giây khi hết dưỡng khí
+  LAVA_DAMAGE: 4, // mỗi lần chạm (miễn sát thương 0.5 giây giữa các lần)
+  LAVA_BURN_S: 15, // cháy, đếm lại mỗi tick còn trong dung nham
+  RESPAWN_INVULN_S: 3,
   DROPPED_ON_DEATH_LIFETIME_S: 300,
   // Thông số di chuyển bổ sung (DESIGN.md 2.6, Giai đoạn 3)
   STEP_HEIGHT: 0.6, // tự bước lên bậc thấp hơn mức này
-  TERMINAL_VELOCITY: 60, // block/giây
+  TERMINAL_VELOCITY: 78.4, // block/giây
+  SNEAK_HEIGHT: 1.5, // hộp va chạm khi ngồi
+  SNEAK_EYE_HEIGHT: 1.27,
+  SNEAK_EDGE: 0.625, // ngồi: không bước khỏi mép cao từ 5/8 block
+  SPRINT_JUMP_BOOST: 2.8, // nhảy lúc chạy nhanh: đẩy thêm về phía trước (block/giây) → chạy+nhảy ≈ 7.1
+  AIR_DRAG: 2, // trên không mà nhanh hơn vận tốc mong muốn: giảm dần theo hệ số này (1/giây)
+  AIR_SPEED_FACTOR: 0.85, // vận tốc mong muốn khi ở trên không so với trên đất
+  FLY_SPEED: 10.9, // bay debug; giữ Ctrl nhanh gấp 3
   LADDER_UP: 2.4,
   LADDER_DOWN: 3,
   SWIM_UP: 3,
@@ -75,7 +100,7 @@ export const PLAYER = {
   WATER_SPEED_FACTOR: 0.5, // đi ngang trong nước
   LAVA_SPEED_FACTOR: 0.3, // đi ngang trong dung nham
   LAVA_VERTICAL_FACTOR: 0.5, // nổi/chìm trong dung nham so với nước
-  FIRE_DAMAGE_PER_S: 1, // bị cháy sau khi ra khỏi dung nham
+  FIRE_DAMAGE: 1, // mỗi giây khi đang cháy
   // độ "bám" vận tốc ngang về vận tốc mong muốn (1/giây): trên đất, trên không, trong chất lỏng
   ACCEL_GROUND: 20,
   ACCEL_AIR: 5,

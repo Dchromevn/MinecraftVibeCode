@@ -61,7 +61,7 @@ function overlaps(boxes: number[], a: number[], dx: number, dy: number, dz: numb
 
 export interface MoveOptions {
   step: number; // bước lên tối đa (0 = không)
-  sneakEdge: boolean; // đang ngồi trên đất: không đi khỏi mép
+  edgeDrop: number; // > 0: đang ngồi trên đất, không đi khỏi mép cao từ mức này
 }
 
 export interface MoveResult {
@@ -83,9 +83,9 @@ export function moveBox(cell: CellReader, a: number[], dx: number, dy: number, d
     Math.max(a[3]!, a[3]! + dx) + m, Math.max(a[4]!, a[4]! + dy) + m, Math.max(a[5]!, a[5]! + dz) + m,
   );
 
-  if (opt.sneakEdge && dy <= 0) {
-    // thu nhỏ bước ngang tới khi bên dưới vẫn còn chỗ đứng (trong tầm bước xuống)
-    const inc = 0.05, down = -opt.step;
+  if (opt.edgeDrop > 0 && dy <= 0) {
+    // thu nhỏ bước ngang tới khi bên dưới vẫn còn chỗ đứng (trong tầm edgeDrop)
+    const inc = 0.05, down = -opt.edgeDrop;
     const stepTo0 = (v: number): number => (Math.abs(v) < inc ? 0 : v - Math.sign(v) * inc);
     while (dx !== 0 && !overlaps(boxes, a, dx, down, 0)) dx = stepTo0(dx);
     while (dz !== 0 && !overlaps(boxes, a, 0, down, dz)) dz = stepTo0(dz);
