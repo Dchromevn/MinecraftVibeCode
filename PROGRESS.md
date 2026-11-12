@@ -499,6 +499,14 @@ Trạng thái: chờ người dùng test.
 - Cần người dùng thử: cuốc đất, trồng cà rốt / khoai tây / hạt củ cải / hạt dưa / hạt bí (có sẵn trong bộ đồ thử), chờ lớn (`__game.session.ticker.speed = 300` với `?debug=1`), thân dưa / bí ra quả cạnh bên (cần ô trống có đất bên cạnh), hái quả thì thân ra quả lại; nung khoai tây; làm bát (3 ván chữ V ở bàn chế tạo) và súp (6 củ cải + bát), ăn súp được trả bát; tìm bí ngô mọc hoang trên đồng cỏ.
 - Còn tồn tại: hạt / củ mới chưa có nguồn ngoài rương hầm mỏ và bí ngô hoang (làng ở Giai đoạn 8); bí ngô chưa khắc mặt được.
 
+### Sửa theo phản hồi 4b (2026-11-12)
+
+- Ô giáp: hình bóng mờ nền chỉ hiện khi ô trống (trước đây đè lên icon giáp). Hình nhân vật trong túi đồ vẽ giáp đang mặc (`client/src/player/armorModel.ts` mới: hộp phồng quanh đầu / thân / tay / chân, ảnh `entities/armor/<cấp>_<món>.png` nhập từ REFI `mcl_armor`; `import-mc` tách layer 1 / 2 của bản gốc thành ảnh từng món).
+- Rương đôi: đổi ảnh hai nửa để khóa bạc nằm giữa (nửa A ở bên phải khi nhìn mặt trước).
+- Chuyển đồ nhanh: rê chuột vào ô rồi bấm F (như Shift + bấm); hoặc giữ Shift + giữ chuột trái rê qua nhiều ô. Shift + bấm vẫn dùng được.
+- Vật phẩm rơi chỉ bị hút về người chơi khi túi còn chỗ cho nó (trước đây túi đầy vẫn bị hút và bám theo người).
+- Đã kiểm trên trình duyệt: túi đầy → đá lửa nằm yên cách ~1 block; bỏ trống 1 ô → nhặt được; giáp hiện trên hình nhân vật; rương đôi khóa ở giữa.
+
 ### Texture gốc Minecraft (2026-11-12, người dùng chọn "cách 1")
 
 - `npm run import-mc` (`scripts/import-mc.ts`, bảng `scripts/mc-texture-map.json`): đọc thẳng `assets-src/minecraft/*.jar` (client.jar người dùng tự tải từ máy chủ Mojang) bằng zlib có sẵn của Node, không thêm thư viện; ghi vào `client/public_mc/` (không commit, © Mojang). Vite (plugin trong `client/vite.config.ts`) ưu tiên file trong `public_mc` hơn `public` cùng đường dẫn, lúc build thì chép đè vào `dist`. Thiếu file nào thì dùng REFI. Xóa `client/public_mc` để quay lại REFI.

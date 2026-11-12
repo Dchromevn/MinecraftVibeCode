@@ -2,7 +2,7 @@
 // thành khối nhỏ, vật phẩm thành tấm icon; xoay và nhấp nhô; gộp chồng; nhặt vào túi.
 import * as THREE from "three";
 import {
-  DROPPED, canPickup, createItemEntity, itemDef, popFromBlock, stepItem, tryMergeItems,
+  DROPPED, INVENTORY, canMerge, canPickup, createItemEntity, itemDef, popFromBlock, stepItem, tryMergeItems,
   type CellReader, type Inventory, type ItemEntity, type ItemStack, type Rng,
 } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
@@ -13,6 +13,12 @@ interface Entry {
   e: ItemEntity;
   obj: THREE.Object3D;
   key: string; // loại vật phẩm đang vẽ
+}
+
+/** Túi chính còn chỗ cho ít nhất 1 món s không. */
+function hasRoom(inv: Inventory, s: ItemStack): boolean {
+  const max = itemDef(s.item)?.maxStack ?? INVENTORY.MAX_STACK;
+  return inv.main.some((m) => !m || (canMerge(m, s) && m.count < max));
 }
 
 export class ItemEntities {
@@ -95,7 +101,8 @@ export class ItemEntities {
     this.time += dt;
     for (let i = this.list.length - 1; i >= 0; i--) {
       const en = this.list[i]!;
-      if (!stepItem(en.e, dt, this.cell, player)) {
+      // chỉ hút về người chơi khi túi còn chỗ cho món này
+      if (!stepItem(en.e, dt, this.cell, player && hasRoom(inv, en.e.stack) ? player : null)) {
         this.remove(i);
         continue;
       }

@@ -15,6 +15,7 @@ interface Entry {
   overlay?: string; // ghép đè ảnh này (đã nhân overlayTint) lên src
   overlayTint?: string;
   crop?: [number, number, number, number]; // x, y, rộng, cao
+  regions?: [number, number, number, number, number, number][]; // chép vùng [x, y, rộng, cao, tới x, tới y] sang ảnh trống cùng cỡ
   tiers?: Record<string, string>; // tên đích → tên trong jar ({tier} / {mcTier})
   pieces?: string[];
 }
@@ -122,6 +123,11 @@ for (const raw of map.entries)
       continue;
     }
     if (e.crop) png = crop(png, ...e.crop);
+    if (e.regions) {
+      const out = new PNG({ width: png.width, height: png.height });
+      for (const [x, y, w, h, dx, dy] of e.regions) PNG.bitblt(png, out, x, y, w, h, dx, dy);
+      png = out;
+    }
     if (e.tint) png = tint(png, e.tint);
     if (e.overlay) {
       const o = load(e.overlay);

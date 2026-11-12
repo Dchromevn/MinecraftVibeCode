@@ -1,4 +1,4 @@
-// Hình nhân vật trong túi đồ (mô hình 6 phần từ skin), đầu và thân quay theo con trỏ chuột.
+// Hình nhân vật trong túi đồ (mô hình 6 phần từ skin, kèm giáp đang mặc), đầu và thân quay theo con trỏ chuột.
 import * as THREE from "three";
 import { createPlayerModel, loadSkin, type PlayerModel } from "../player/playerModel.js";
 
@@ -23,8 +23,8 @@ export class PlayerPreview {
     document.addEventListener("mousemove", (e) => (this.mouse = { x: e.clientX, y: e.clientY }));
   }
 
-  /** Vẽ một khung (chỉ gọi khi túi đồ đang mở). */
-  render(): void {
+  /** Vẽ một khung (chỉ gọi khi túi đồ đang mở); armor: mũ, áo, quần, giày đang mặc. */
+  render(armor: readonly (string | null)[]): void {
     if (!this.renderer) {
       try {
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: false });
@@ -39,6 +39,7 @@ export class PlayerPreview {
     this.model.root.rotation.y = Math.atan(dx) * 0.6;
     this.model.head.rotation.y = Math.atan(dx) * 0.6;
     this.model.head.rotation.x = Math.atan(dy) * 0.6;
+    this.model.armor.set(armor);
     this.renderer.render(this.scene, this.camera);
   }
 }

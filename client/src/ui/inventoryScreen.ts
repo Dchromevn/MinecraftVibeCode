@@ -35,7 +35,7 @@ export class InventoryScreen {
   private readonly top = div("top");
   private readonly gridEl = div("grid");
   private readonly resultEl = div("slot result");
-  private readonly slotEls: (SlotRef & { el: HTMLDivElement })[] = [];
+  private readonly slotEls: (SlotRef & { el: HTMLDivElement; bg?: string })[] = [];
   private readonly preview = new PlayerPreview();
   private readonly book: RecipeBook;
   private readonly armorCol = div("armor");
@@ -43,6 +43,7 @@ export class InventoryScreen {
   private readonly bagLabel = div("label", STR.inventoryTitle);
   private readonly bookBtn = document.createElement("button");
   private drag: { button: "left" | "right"; refs: SlotRef[] } | null = null;
+  private sweep = false; // đang giữ Shift + chuột trái (chuyển nhanh khi rê qua ô)
   private hover: SlotRef | null = null;
   private container: ContainerView | null = null;
   private containerClose: (() => void) | null = null;
@@ -98,30 +99,39 @@ export class InventoryScreen {
 
   private slot(area: SlotArea, i: number, bg?: string): HTMLDivElement {
     const el = div("slot");
-    if (bg) el.style.backgroundImage = `url(${bg})`;
+    if (bg) el.style.backgroundImage = `url(${bg})`; // hình bóng mờ khi ô trống
     const ref = { area, i };
     el.addEventListener("mousedown", (e) => {
       e.preventDefault();
       e.stopPropagation();
       const button = e.button === 2 ? "right" : "left";
       if (e.detail === 2 && button === "left" && this.inv.cursor) collectToCursor(this.inv);
-      else if (e.shiftKey || !this.inv.cursor) this.inv.click(area, i, button, e.shiftKey);
+      else if (e.shiftKey || !this.inv.cursor) {
+        this.inv.click(area, i, button, e.shiftKey);
+        this.sweep = e.shiftKey && button === "left";
+      }
       else this.drag = { button, refs: [ref] }; // đang cầm: chờ thả chuột (kéo qua nhiều ô)
       this.refresh();
     });
-    el.addEventListener("mouseenter", () => {
+    el.addEventListener("mouseenter", (e) => {
       this.hover = ref;
+      // giữ Shift + chuột trái rê qua: chuyển nhanh từng ô đi qua
+      if (this.sweep && e.shiftKey && e.buttons & 1 && !this.inv.cursor) {
+        this.inv.click(area, i, "left", true);
+        this.refresh();
+      }
       if (this.drag && !this.drag.refs.some((r) => r.area === area && r.i === i)) {
         this.drag.refs.push(ref);
         el.classList.add("drag");
       }
     });
     el.addEventListener("mouseleave", () => (this.hover = null));
-    this.slotEls.push({ ...ref, el });
+    this.slotEls.push({ ...ref, el, bg });
     return el;
   }
 
   private endDrag(): void {
+    this.sweep = false;
     const d = this.drag;
     if (!d) return;
     this.drag = null;
@@ -136,6 +146,7 @@ export class InventoryScreen {
     if (!this.open || !this.hover) return;
     const n = Number(e.key);
     if (Number.isInteger(n) && n >= 1 && n <= 9) swapWithHotbar(this.inv, this.hover, n - 1);
+    else if (e.code === "KeyF" && !this.inv.cursor) this.inv.click(this.hover.area, this.hover.i, "left", true); // như Shift + bấm
     else if (e.code === "KeyQ") {
       const s = takeFromSlot(this.inv, this.hover, e.ctrlKey);
       if (s) this.drop(s);
@@ -202,14 +213,18 @@ export class InventoryScreen {
 
   /** Vẽ lại các ô, ô kết quả, sổ công thức, hình nhân vật (gọi mỗi khung khi đang mở). */
   refresh(): void {
-    for (const s of this.slotEls) renderSlot(s.el, this.inv.slots(s.area)[s.i] ?? null);
+    for (const s of this.slotEls) {
+      const item = this.inv.slots(s.area)[s.i] ?? null;
+      renderSlot(s.el, item);
+      if (s.bg) s.el.style.backgroundImage = item ? "none" : `url(${s.bg})`;
+    }
     renderSlot(this.cursorEl, this.inv.cursor);
     this.cursorEl.style.display = this.inv.cursor && this.open ? "" : "none";
     if (!this.open) return;
     const r = gridResult(this.inv);
     renderSlot(this.resultEl, r ? { item: r.out.item, count: r.out.count, damage: 0 } : null);
     this.book.refresh();
-    if (this.mode === "inventory") this.preview.render();
+    if (this.mode === "inventory") this.preview.render(this.inv.armor.map((s) => s?.item ?? null));
     this.container?.update();
   }
 }

@@ -581,6 +581,242 @@
   {
    "dest": "ui/empty_boots",
    "src": "gui/sprites/container/slot/boots"
+  },
+  {
+   "dest": "entities/armor/leather_helmet",
+   "src": [
+    "entity/equipment/humanoid/leather",
+    "models/armor/leather_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     0,
+     32,
+     16,
+     32,
+     0
+    ]
+   ],
+   "tint": "#A06540"
+  },
+  {
+   "dest": "entities/armor/leather_chestplate",
+   "src": [
+    "entity/equipment/humanoid/leather",
+    "models/armor/leather_layer_1"
+   ],
+   "regions": [
+    [
+     16,
+     16,
+     40,
+     16,
+     16,
+     16
+    ]
+   ],
+   "tint": "#A06540"
+  },
+  {
+   "dest": "entities/armor/leather_boots",
+   "src": [
+    "entity/equipment/humanoid/leather",
+    "models/armor/leather_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     16,
+     16,
+     16,
+     0,
+     16
+    ]
+   ],
+   "tint": "#A06540"
+  },
+  {
+   "dest": "entities/armor/leather_leggings",
+   "src": [
+    "entity/equipment/humanoid_leggings/leather",
+    "models/armor/leather_layer_2"
+   ],
+   "tint": "#A06540"
+  },
+  {
+   "dest": "entities/armor/iron_helmet",
+   "src": [
+    "entity/equipment/humanoid/iron",
+    "models/armor/iron_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     0,
+     32,
+     16,
+     32,
+     0
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/iron_chestplate",
+   "src": [
+    "entity/equipment/humanoid/iron",
+    "models/armor/iron_layer_1"
+   ],
+   "regions": [
+    [
+     16,
+     16,
+     40,
+     16,
+     16,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/iron_boots",
+   "src": [
+    "entity/equipment/humanoid/iron",
+    "models/armor/iron_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     16,
+     16,
+     16,
+     0,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/iron_leggings",
+   "src": [
+    "entity/equipment/humanoid_leggings/iron",
+    "models/armor/iron_layer_2"
+   ]
+  },
+  {
+   "dest": "entities/armor/gold_helmet",
+   "src": [
+    "entity/equipment/humanoid/gold",
+    "models/armor/gold_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     0,
+     32,
+     16,
+     32,
+     0
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/gold_chestplate",
+   "src": [
+    "entity/equipment/humanoid/gold",
+    "models/armor/gold_layer_1"
+   ],
+   "regions": [
+    [
+     16,
+     16,
+     40,
+     16,
+     16,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/gold_boots",
+   "src": [
+    "entity/equipment/humanoid/gold",
+    "models/armor/gold_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     16,
+     16,
+     16,
+     0,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/gold_leggings",
+   "src": [
+    "entity/equipment/humanoid_leggings/gold",
+    "models/armor/gold_layer_2"
+   ]
+  },
+  {
+   "dest": "entities/armor/diamond_helmet",
+   "src": [
+    "entity/equipment/humanoid/diamond",
+    "models/armor/diamond_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     0,
+     32,
+     16,
+     32,
+     0
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/diamond_chestplate",
+   "src": [
+    "entity/equipment/humanoid/diamond",
+    "models/armor/diamond_layer_1"
+   ],
+   "regions": [
+    [
+     16,
+     16,
+     40,
+     16,
+     16,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/diamond_boots",
+   "src": [
+    "entity/equipment/humanoid/diamond",
+    "models/armor/diamond_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     16,
+     16,
+     16,
+     0,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/diamond_leggings",
+   "src": [
+    "entity/equipment/humanoid_leggings/diamond",
+    "models/armor/diamond_layer_2"
+   ]
   }
  ]
 }

@@ -56,7 +56,7 @@ export const STEM_ATTACHED_TEX: Readonly<Record<number, string>> = {
 export interface UvTable extends SpecialUv {
   snowSide: TileUV;
   furnaceOn: TileUV;
-  chestFront: [TileUV, TileUV]; // hai nửa mặt trước rương đôi (nửa A, nửa B)
+  chestFront: [TileUV, TileUV]; // mặt trước rương đôi theo nửa A, nửa B (khóa ở giữa)
 }
 
 export function buildUvTable(uv: (name: string) => TileUV): UvTable {
@@ -70,7 +70,7 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     bedHeadEnd: uv("bed_head_end"),
     bedFootEnd: uv("bed_foot_end"),
     furnaceOn: uv("furnace_front_on"),
-    chestFront: [uv("chest_front_a"), uv("chest_front_b")],
+    chestFront: [uv("chest_front_b"), uv("chest_front_a")], // nửa A nằm bên phải khi nhìn mặt trước
     farmlandWet: uv("farmland_wet"),
     crops: BLOCKS.map((b) => CROP_TEX[b.id]?.map(uv)),
     stemAttached: BLOCKS.map((b) => (STEM_ATTACHED_TEX[b.id] ? uv(STEM_ATTACHED_TEX[b.id]!) : undefined)),

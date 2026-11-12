@@ -664,6 +664,22 @@
     {
       "dest": "icons/bowl.png",
       "src": "default_mcl_core/mcl_core_bowl.png"
+    },
+    {
+      "dest": "entities/armor/{tier}_{piece}.png",
+      "src": "mcl_armor/mcl_armor_{piece}_{tier}.png",
+      "tiers": [
+        "leather",
+        "iron",
+        "gold",
+        "diamond"
+      ],
+      "pieces": [
+        "helmet",
+        "chestplate",
+        "leggings",
+        "boots"
+      ]
     }
   ]
 }
