@@ -66,6 +66,7 @@ shaped("bed", 1, ["WWW", "PPP"], { W: "wool", P: "planks" });
 shaped("sandstone", 1, ["SS", "SS"], { S: "sand" });
 shaped("golden_apple", 1, ["GGG", "GAG", "GGG"], { G: "gold_ingot", A: "apple" });
 shaped("bowl", 4, ["P P", " P "], { P: "planks" });
+shaped("bucket", 1, ["I I", " I "], { I: "iron_ingot" });
 shapeless("beetroot_soup", 1, ["beetroot", "beetroot", "beetroot", "beetroot", "beetroot", "beetroot", "bowl"]);
 shapeless("melon_seeds", 1, ["melon_slice"]);
 shapeless("pumpkin_seeds", 4, ["pumpkin"]);

@@ -2,6 +2,9 @@
 // kiểm tra tia với các hộp nhắm thật của block (đuốc, ray, rào...) theo dữ liệu phụ.
 import { cellId } from "./blockMeta.js";
 import { selectionBoxes, type Box } from "./blockShapes.js";
+import { isLiquidId } from "./liquids.js";
+
+const FULL: Box = [0, 0, 0, 1, 1, 1];
 
 export interface RayHit {
   x: number;
@@ -46,12 +49,13 @@ function hitBox(
   return { t: Math.max(0, tmin), axis, sign };
 }
 
-/** getCell: id | dữ liệu phụ << 8 (âm = chưa tải, coi như không khí). */
+/** getCell: id | dữ liệu phụ << 8 (âm = chưa tải, coi như không khí). sources: trúng cả nguồn chất lỏng (múc xô). */
 export function raycast(
   getCell: (x: number, y: number, z: number) => number,
   ox: number, oy: number, oz: number,
   dx: number, dy: number, dz: number,
   maxDist: number,
+  sources = false,
 ): RayHit | null {
   const len = Math.hypot(dx, dy, dz);
   if (len === 0) return null;
@@ -72,7 +76,8 @@ export function raycast(
     const cell = getCell(x, y, z);
     if (cell > 0) {
       let best: { t: number; axis: number; sign: number } | null = null;
-      for (const b of selectionBoxes(cell, x, y, z, idAt)) {
+      const src = sources && isLiquidId(cell & 255) && ((cell >> 8) & 15) === 0;
+      for (const b of src ? [FULL] : selectionBoxes(cell, x, y, z, idAt)) {
         const h = hitBox(b, x, y, z, ox, oy, oz, dx, dy, dz);
         if (h && (!best || h.t < best.t)) best = h;
       }

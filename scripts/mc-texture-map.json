@@ -1096,6 +1096,18 @@
      }
     ]
    }
+  },
+  {
+   "dest": "icons/bucket",
+   "src": "item/bucket"
+  },
+  {
+   "dest": "icons/water_bucket",
+   "src": "item/water_bucket"
+  },
+  {
+   "dest": "icons/lava_bucket",
+   "src": "item/lava_bucket"
   }
  ]
 }

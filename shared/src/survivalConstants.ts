@@ -81,9 +81,9 @@ export const SPAWN = {
 export const STARTER_KIT: readonly (readonly [string, number])[] = [
   ["diamond_pickaxe", 1], ["diamond_axe", 1], ["diamond_shovel", 1], ["diamond_sword", 1], ["iron_hoe", 1],
   ["torch", 64], ["cobble", 64], ["planks", 64], ["bread", 64],
-  ["log", 64], ["coal", 64], ["raw_iron", 64], ["iron_ingot", 64], ["carrot", 64], ["gold_ingot", 64],
-  ["diamond", 64], ["potato", 64], ["sand", 64], ["beetroot_seeds", 64], ["dirt", 64], ["stone", 64], ["melon_seeds", 64],
-  ["seeds", 64], ["wheat", 64], ["apple", 64], ["pumpkin_seeds", 64], ["stick", 64], ["workbench", 64],
+  ["log", 64], ["coal", 64], ["raw_iron", 64], ["iron_ingot", 64], ["carrot", 64], ["water_bucket", 1],
+  ["diamond", 64], ["potato", 64], ["lava_bucket", 1], ["beetroot_seeds", 64], ["dirt", 64], ["stone", 64], ["melon_seeds", 64],
+  ["seeds", 64], ["bucket", 16], ["apple", 64], ["pumpkin_seeds", 64], ["stick", 64], ["workbench", 64],
   ["furnace", 64], ["chest", 64], ["ladder", 64], ["rail", 64], ["fence", 64], ["sapling", 64], ["door", 1], ["bed", 1],
 ];
 

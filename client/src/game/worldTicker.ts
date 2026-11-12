@@ -1,7 +1,7 @@
-// Tick thế giới phía client (Giai đoạn 4b; Giai đoạn 5 chuyển lên server): random tick 20 lần /
-// giây cho các chunk quanh người chơi, lò nung chạy cả khi đóng, giẫm đất cày.
+// Tick thế giới phía client (Giai đoạn 4b–4c; Giai đoạn 5 chuyển lên server): random tick 20 lần /
+// giây cho các chunk quanh người chơi, chất lỏng chảy, lò nung chạy cả khi đóng, giẫm đất cày.
 import {
-  B, BlockEntities, CROPS, RANDOM_TICK, blockDrops, furnaceLit, isFarmPlant, randomTick,
+  B, BlockEntities, CROPS, LIQUIDS, LiquidSim, RANDOM_TICK, blockDrops, furnaceLit, isFarmPlant, randomTick,
   type BlockId, type ItemStack, type PlayerState, type Rng, type TickWorld, type World,
 } from "../../../shared/src/index.js";
 
@@ -10,25 +10,39 @@ const SECTIONS = 8;
 export class WorldTicker {
   /** Số ô random tick mỗi đoạn mỗi tick (đổi được bằng lệnh debug). */
   speed: number = RANDOM_TICK.SPEED;
+  /** Chất lỏng: gọi liquids.notify khi block đổi để nước / dung nham chảy lại. */
+  readonly liquids: LiquidSim;
   private acc = 0;
   private readonly tw: TickWorld;
+  /** Chunk đã quét tìm chất lỏng hở (chunk gỡ khỏi bộ nhớ rồi tải lại thì quét lại). */
+  private readonly scanned = new WeakSet<object>();
 
   constructor(
     private readonly world: World,
     readonly entities: BlockEntities,
     private readonly rng: Rng,
-    private readonly onChange: (x: number, y: number, z: number) => void,
-    private readonly pop: (s: ItemStack, x: number, y: number, z: number) => void,
+    onChange: (x: number, y: number, z: number) => void,
+    pop: (s: ItemStack, x: number, y: number, z: number) => void,
   ) {
-    this.tw = {
+    const drop = (id: number, meta: number, x: number, y: number, z: number): void => {
+      for (const s of blockDrops(id, meta, null, rng, true)) pop(s, x, y, z);
+    };
+    this.liquids = new LiquidSim({
       getCell: (x, y, z) => world.getCell(x, y, z),
       setCell: (x, y, z, id, meta) => {
         if (world.setBlock(x, y, z, id as BlockId, meta)) onChange(x, y, z);
       },
-      light: (x, y, z) => world.lightAt(x, y, z),
-      drop: (id, meta, x, y, z) => {
-        for (const s of blockDrops(id, meta, null, rng, true)) pop(s, x, y, z);
+      drop,
+    });
+    this.tw = {
+      getCell: (x, y, z) => world.getCell(x, y, z),
+      setCell: (x, y, z, id, meta) => {
+        if (!world.setBlock(x, y, z, id as BlockId, meta)) return;
+        onChange(x, y, z);
+        this.liquids.notify(x, y, z); // lá rụng, cây bật ra cạnh nước...
       },
+      light: (x, y, z) => world.lightAt(x, y, z),
+      drop,
     };
   }
 
@@ -61,12 +75,18 @@ export class WorldTicker {
         for (let cx = ccx - r; cx <= ccx + r; cx++) {
           const c = this.world.getChunk(cx, cz);
           if (!c?.light) continue; // chưa có ánh sáng (chưa dựng mesh): bỏ qua
+          // chunk mới vào vùng mô phỏng: mạch nước / dung nham sinh sẵn bắt đầu chảy
+          if (!this.scanned.has(c)) {
+            this.scanned.add(c);
+            this.liquids.scanChunk(c.cx, c.cz, c.data);
+          }
           for (let sy = 0; sy < SECTIONS; sy++)
             for (let k = 0; k < this.speed; k++) {
               const n = Math.floor(this.rng() * 4096);
               randomTick(this.tw, cx * 16 + (n & 15), sy * 16 + (n >> 8), cz * 16 + ((n >> 4) & 15), this.rng);
             }
         }
+      this.liquids.step(LIQUIDS.MAX_UPDATES_PER_TICK);
     }
   }
 }

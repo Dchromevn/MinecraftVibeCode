@@ -34,6 +34,16 @@ export const CROP_DROPS = {
   MELON_SLICES: [3, 7],
 } as const satisfies Record<string, readonly [number, number]>;
 
+/** Chất lỏng (MECHANICS.md 10). DROP: lượng mất mỗi ô lan ngang trên thang 8 (nước 1 → 7 ô, dung nham 2 → 3 ô). */
+export const LIQUIDS = {
+  WATER: { drop: 1, delay: 5, search: 4, infinite: true }, // 5 tick mỗi bước (~4 ô/giây), tìm chỗ trũng trong 4 ô
+  LAVA: { drop: 2, delay: 30, search: 2, infinite: false }, // 30 tick mỗi bước (1.5 giây)
+  MAX_UPDATES_PER_TICK: 4000, // giới hạn ô chất lỏng xử lý mỗi tick (phần còn lại dời sang tick sau)
+  ITEM_FLOW_ACCEL: 6, // vật phẩm bị dòng chảy đẩy (block/giây²)
+  ITEM_FLOW_MAX: 2.5, // tốc độ trôi tối đa (block/giây)
+  ITEM_FLOAT_SPEED: 1, // vật phẩm nổi lên trong nước (block/giây)
+} as const;
+
 export const CONTAINERS = {
   CHEST_SLOTS: 27,
   FURNACE_SLOTS: 3, // nguyên liệu, nhiên liệu, thành phẩm

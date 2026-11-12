@@ -1,10 +1,14 @@
 // Vật phẩm nằm trên đất (MECHANICS.md 11): trọng lực, va chạm với block, hãm ngang, hút về
-// người chơi trong tầm nhặt, gộp chồng khi nằm gần nhau, biến mất sau 5 phút.
+// người chơi trong tầm nhặt, gộp chồng khi nằm gần nhau, biến mất sau 5 phút; trôi theo dòng chất lỏng,
+// nổi lên trong nước (Giai đoạn 4c).
 import { DROPPED, INVENTORY } from "./survivalConstants.js";
 import { PLAYER } from "./constants.js";
 import { moveBox, type CellReader } from "./collide.js";
 import { canMerge, type ItemStack } from "./inventory.js";
 import { itemDef } from "./items.js";
+import { liquidFlow } from "./liquids.js";
+import { LIQUIDS } from "./tickConstants.js";
+import { B } from "./blocks.js";
 import type { Rng } from "./rng.js";
 
 export interface ItemEntity {
@@ -57,8 +61,23 @@ export function stepItem(e: ItemEntity, dt: number, cell: CellReader, player: { 
       return true;
     }
   }
-  e.vy = Math.max(e.vy - DROPPED.GRAVITY * dt, -PLAYER.TERMINAL_VELOCITY);
-  const k = Math.max(0, 1 - DROPPED.DRAG * dt * (e.onGround ? 3 : 1));
+  // trong chất lỏng: bị dòng chảy đẩy ngang; trong nước thì nổi dần lên
+  const bx = Math.floor(e.x), by = Math.floor(e.y + DROPPED.SIZE / 2), bz = Math.floor(e.z);
+  const here = cell(bx, by, bz) & 255;
+  const inWater = here === B.WATER;
+  if (inWater || here === B.LAVA) {
+    const [fx, fz] = liquidFlow(cell, bx, by, bz);
+    e.vx += fx * LIQUIDS.ITEM_FLOW_ACCEL * dt;
+    e.vz += fz * LIQUIDS.ITEM_FLOW_ACCEL * dt;
+    const sp = Math.hypot(e.vx, e.vz);
+    if (sp > LIQUIDS.ITEM_FLOW_MAX) {
+      e.vx *= LIQUIDS.ITEM_FLOW_MAX / sp;
+      e.vz *= LIQUIDS.ITEM_FLOW_MAX / sp;
+    }
+  }
+  if (inWater) e.vy += (LIQUIDS.ITEM_FLOAT_SPEED - e.vy) * Math.min(1, 4 * dt);
+  else e.vy = Math.max(e.vy - DROPPED.GRAVITY * dt, -PLAYER.TERMINAL_VELOCITY);
+  const k = Math.max(0, 1 - DROPPED.DRAG * dt * (e.onGround && !inWater ? 3 : 1));
   e.vx *= k;
   e.vz *= k;
   const h = DROPPED.SIZE / 2;

@@ -672,6 +672,18 @@
     {
       "dest": "icons/fence.png",
       "src": "default_mcl_core/fences/default_fence_wood.png"
+    },
+    {
+      "dest": "icons/bucket.png",
+      "src": "bucket_mcl_buckets/bucket.png"
+    },
+    {
+      "dest": "icons/water_bucket.png",
+      "src": "bucket_mcl_buckets/bucket_water.png"
+    },
+    {
+      "dest": "icons/lava_bucket.png",
+      "src": "bucket_mcl_buckets/bucket_lava.png"
     }
   ]
 }

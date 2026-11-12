@@ -53,6 +53,12 @@ export class Session {
     });
   }
 
+  /** Block ở (x, y, z) vừa đổi do người chơi (đặt, phá, xô, cát rơi): dựng lại mesh và cho chất lỏng chảy lại. */
+  blockChanged(x: number, y: number, z: number): void {
+    this.onChange(x, y, z);
+    this.ticker.liquids.notify(x, y, z);
+  }
+
   /** Mở túi đồ (lưới 2x2) hoặc bàn chế tạo (lưới 3x3). */
   openScreen(mode: "inventory" | "workbench"): void {
     if (this.player.state.dead || this.screen.open) return;

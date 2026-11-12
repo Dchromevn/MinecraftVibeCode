@@ -18,6 +18,7 @@ export interface ItemDef {
   armor?: { piece: ArmorPiece; tier: ArmorTier; points: number; toughness: number; durability: number };
   food?: FoodDef;
   durability?: number; // vật phẩm có độ bền khác (cung)
+  liquid?: BlockId; // xô đang chứa chất lỏng này
 }
 
 const ITEMS = new Map<string, ItemDef>();
@@ -26,7 +27,7 @@ const add = (d: ItemDef): void => void ITEMS.set(d.key, d);
 // --- block đặt được (khối đầy vẽ 3D, còn lại vẽ phẳng) ---
 const CUBES: BlockId[] = [
   B.DIRT, B.STONE, B.COBBLE, B.SAND, B.GRAVEL, B.LOG, B.PLANKS, B.WORKBENCH, B.CHEST, B.MOSSY_COBBLE,
-  B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES, B.MELON, B.PUMPKIN,
+  B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES, B.MELON, B.PUMPKIN, B.OBSIDIAN,
 ];
 for (const id of CUBES) add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "cube", block: id }, places: id });
 for (const id of [B.TORCH, B.RAIL, B.LADDER, B.SAPLING] as BlockId[])
@@ -45,6 +46,10 @@ for (const k of [
   "stick", "coal", "raw_iron", "iron_ingot", "raw_gold", "gold_ingot", "diamond", "emerald", "flint", "string",
   "feather", "leather", "wool", "wheat", "arrow", "bowl",
 ]) add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k } });
+// xô (Giai đoạn 4c): rỗng chồng 16; có nước / dung nham không chồng; liquid = chất lỏng đang chứa
+add({ key: "bucket", maxStack: STACK.BUCKET, icon: { type: "icon", name: "bucket" } });
+add({ key: "water_bucket", maxStack: STACK.SINGLE, icon: { type: "icon", name: "water_bucket" }, liquid: B.WATER });
+add({ key: "lava_bucket", maxStack: STACK.SINGLE, icon: { type: "icon", name: "lava_bucket" }, liquid: B.LAVA });
 add({ key: "bow", maxStack: STACK.SINGLE, icon: { type: "icon", name: "bow" }, durability: BOW_DURABILITY });
 
 // --- thức ăn ---

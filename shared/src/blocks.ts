@@ -49,6 +49,7 @@ export const B = {
   PUMPKIN: 42,
   MELON_STEM: 43,
   PUMPKIN_STEM: 44,
+  OBSIDIAN: 45,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 

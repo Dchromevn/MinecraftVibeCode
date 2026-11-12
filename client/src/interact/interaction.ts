@@ -12,6 +12,7 @@ import {
 import type { Atlas } from "../atlas.js";
 import type { ItemEntities } from "../items/itemEntities.js";
 import type { PlayerController } from "../player/playerController.js";
+import { useBucket } from "./bucket.js";
 import { CrackOverlay } from "./crackOverlay.js";
 import { FallingBlocks } from "./fallingBlocks.js";
 import { BlockOutline } from "./outline.js";
@@ -156,6 +157,16 @@ export class Interaction {
     }
     // cà rốt / khoai tây: chuột phải lên mặt trên đất cày thì trồng, chỗ khác thì ăn
     const plants = food && held && itemDef(held.item)?.places !== undefined && t && (t.cell & 255) === B.FARMLAND && t.ny === 1;
+    // xô: múc nguồn chất lỏng / đổ ra
+    if (held && (held.item === "bucket" || itemDef(held.item)?.liquid !== undefined)) {
+      const ok = useBucket(held.item, {
+        world: this.world, acc: this.acc, view: this.view, dir: this.dir, target: this.target,
+        reach: flying ? REACH_FLY : PLAYER.REACH, spawnDrops: (d) => this.spawnDrops(d, null),
+      });
+      if (ok) this.view.swing();
+      this.right = false;
+      return;
+    }
     if (food && !plants) {
       if (!canEat(s, food)) return;
       this.eating += dt;

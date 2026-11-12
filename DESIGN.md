@@ -124,6 +124,7 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 42 | bí ngô | 1 | rìu | bí ngô | quả, mọc cạnh thân bí; sinh rải rác trên cỏ |
 | 43 | thân dưa | 0 | – | 1 hạt dưa | 8 giai đoạn, lớn hết thì mọc quả ra ô bên cạnh |
 | 44 | thân bí | 0 | – | 1 hạt bí | như thân dưa |
+| 45 | đá vỏ chai | 50 | cuốc kim cương | đá vỏ chai | nước chảy vào nguồn dung nham (Giai đoạn 4c) |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 
@@ -289,7 +290,11 @@ kèm trong gói tin (chunk và thay đổi block).
   món. Giáp không giảm sát thương rơi, chết đuối, đói, dung nham (lửa vẫn giảm).
   Mỗi lần giáp giảm được sát thương, mỗi món đang mặc mất 1 độ bền.
 - Cung: độ bền 384. Tên xếp chồng 64.
-- Xếp chồng: block và nguyên liệu 64, công cụ/vũ khí/giáp/giường/cửa 1.
+- Xếp chồng: block và nguyên liệu 64, công cụ/vũ khí/giáp/giường/cửa 1, xô rỗng 16,
+  xô nước / xô dung nham 1.
+- Xô (Giai đoạn 4c): xô rỗng chuột phải vào nguồn nước / dung nham thì múc (ô đó thành
+  trống); xô đầy chuột phải thì đổ một nguồn vào ô cạnh mặt đang nhắm (hoặc chính ô nhắm
+  nếu thay được: trống, chất lỏng, cỏ cao, tuyết phủ), trả lại xô rỗng. Chỉ múc được nguồn.
 - Vật phẩm rơi (MECHANICS.md 11): biến mất sau 5 phút; không nhặt được ngay (đồ đào
   ra 0.5 giây, đồ vứt bằng Q 2 giây); hai đống cùng loại cách nhau < 0.5 block thì gộp
   (tối đa 64); hút về người chơi trong 1.5 block; chết thì đồ văng ngẫu nhiên quanh chỗ chết.
@@ -478,6 +483,18 @@ và 5.5; người dùng đồng ý 2026-11-12, thay các số tương ứng ở 
   lan 3 block và chậm hơn.
 - Nước gặp dung nham: nguồn dung nham thành đá vỏ chai (nếu có texture) hoặc
   đá cuội, dung nham chảy thành đá cuội.
+- Thông số đã dùng (Giai đoạn 4c, theo MECHANICS.md 10): "lượng" 1–8 (nguồn và cột
+  đang rơi = 8); mỗi ô lan ngang nước mất 1 (lan 7 ô), dung nham mất 2 (lan 3 ô); nước
+  5 tick mỗi bước, dung nham 30 tick; tìm chỗ trũng: nước 4 ô, dung nham 2 ô (bản gốc ở
+  thế giới thường); ô đang chảy nằm trên chất lỏng / chỗ trống thì không lan ngang (chỉ
+  nguồn mới lan). Nguồn vô hạn: ô có ≥ 2 nguồn nước kề ngang và bên dưới là block đặc hoặc
+  nguồn nước. Dung nham có nước kề (trừ bên dưới): nguồn → đá vỏ chai, đang chảy → đá cuội;
+  dung nham chảy xuống ô nước → đá. Chất lỏng cuốn trôi đuốc, cỏ cao, ray, cây non, lúa,
+  cà rốt, khoai tây, củ cải, thân dưa / bí (rơi vật phẩm). Xử lý tối đa 4000 ô mỗi tick.
+- Vật phẩm trong chất lỏng bị dòng chảy đẩy (gia tốc 6, tối đa 2.5 block/giây); trong
+  nước thì nổi lên (1 block/giây).
+- Mô phỏng ở client trong các chunk đã tải (Giai đoạn 5 chuyển lên server); quét chất
+  lỏng hở khi chunk vào bán kính random tick (6 chunk).
 - Chỉ cập nhật chất lỏng ở chunk gần người chơi.
 - Khi tải một chunk, quét các ô chất lỏng "hở" (có không khí bên cạnh/bên dưới)
   để đưa vào hàng đợi chảy. Nhờ vậy mạch nước sinh từ trước Giai đoạn 4 tự chảy

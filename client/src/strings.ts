@@ -1,7 +1,7 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 4b — rương, lò nung, cửa, trồng trọt",
+  stage: "Giai đoạn 4c — chất lỏng, xô",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
@@ -64,6 +64,7 @@ export const STR = {
     carrot: "Cà rốt", potato: "Khoai tây", baked_potato: "Khoai tây nướng", beetroot: "Củ cải đường",
     beetroot_seeds: "Hạt củ cải đường", beetroot_soup: "Súp củ cải đường", melon_slice: "Lát dưa hấu",
     melon_seeds: "Hạt dưa hấu", pumpkin_seeds: "Hạt bí ngô", bowl: "Bát gỗ",
+    bucket: "Xô", water_bucket: "Xô nước", lava_bucket: "Xô dung nham",
   } as Record<string, string>,
   toolKinds: { pickaxe: "Cuốc", axe: "Rìu", shovel: "Xẻng", sword: "Kiếm", hoe: "Cuốc đất" } as Record<string, string>,
   armorPieces: { helmet: "Mũ", chestplate: "Áo giáp", leggings: "Quần giáp", boots: "Giày" } as Record<string, string>,
@@ -100,6 +101,7 @@ export const STR = {
     pumpkin: "Bí ngô",
     melon_stem: "Thân dưa hấu",
     pumpkin_stem: "Thân bí ngô",
+    obsidian: "Đá vỏ chai",
     mossy_cobble: "Đá cuội rêu",
     deepslate: "Đá sâu",
     ore_coal: "Quặng than",

@@ -196,6 +196,7 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 42 | bí ngô | 1 | rìu | bí ngô | quả, mọc cạnh thân bí; sinh rải rác trên cỏ |
 | 43 | thân dưa | 0 | – | 1 hạt dưa | 8 giai đoạn, lớn hết thì mọc quả ra ô bên cạnh |
 | 44 | thân bí | 0 | – | 1 hạt bí | như thân dưa |
+| 45 | đá vỏ chai | 50 | cuốc kim cương | đá vỏ chai | nước chảy vào nguồn dung nham (Giai đoạn 4c) |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.

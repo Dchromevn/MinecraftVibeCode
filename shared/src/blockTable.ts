@@ -1,5 +1,5 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–44 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
+// Đủ id 0–45 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
 import { LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
@@ -149,6 +149,8 @@ const TABLE: BlockDef[] = [
   def(42, "pumpkin", 1, "axe", [drop("pumpkin")], { top: "pumpkin_top", bottom: "pumpkin_top", side: "pumpkin_side" }),
   def(43, "melon_stem", 0, "none", [drop("melon_seeds")], same("melon_stem"), { ...OPEN, render: "stem", meta: "stem" }),
   def(44, "pumpkin_stem", 0, "none", [drop("pumpkin_seeds")], same("pumpkin_stem"), { ...OPEN, render: "stem", meta: "stem" }),
+  // nước chảy vào nguồn dung nham (Giai đoạn 4c)
+  def(45, "obsidian", 50, "pickaxe", [drop("obsidian")], same("obsidian"), { ...PICK_ONLY, minTier: "diamond" }),
 ];
 
 TABLE.forEach((b, i) => {

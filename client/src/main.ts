@@ -128,7 +128,7 @@ async function main(): Promise<void> {
       useBlock: (t) => session.useBlock(t),
       entities: session.entities,
     },
-    (x, _y, z) => chunks.onBlockChanged(x, z),
+    (x, y, z) => session.blockChanged(x, y, z),
   );
   // debug: cho script kiểm tra điều khiển camera / sửa block từ ngoài (?debug=1);
   // autopilot = vận tốc tự bay (block/giây), áp trong vòng lặp khung hình

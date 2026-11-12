@@ -110,6 +110,22 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
   };
   const mt = (x: number, y: number, z: number): number =>
     y >= CHUNK_HEIGHT || y < 0 ? 0 : metas[regionIndex(x + 16, y, z + 16)]!;
+  // chiều cao mặt chất lỏng tại góc ô (cx, cz): trung bình 4 ô chung góc (nguồn nặng gấp 10, ô trống
+  // tính 0, block đặc bỏ qua); có chất lỏng cùng loại phía trên thì đầy ô → mặt nước dốc liền mạch
+  const liquidCorner = (id: number, cx: number, y: number, cz: number): number => {
+    let sum = 0, n = 0;
+    for (let k = 0; k < 4; k++) {
+      const a = cx - (k & 1), b = cz - (k >> 1);
+      if (at(a, y + 1, b) === id) return 1;
+      const nid = at(a, y, b);
+      if (nid === id) {
+        const h = liquidTop(mt(a, y, b)), w = h >= LIQUID_TOP ? 10 : 1;
+        sum += h * w;
+        n += w;
+      } else if (!CUBE_SOLID[nid]) n++;
+    }
+    return n > 0 ? sum / n : LIQUID_TOP;
+  };
   const sky = (x: number, y: number, z: number): number =>
     y >= CHUNK_HEIGHT ? 15 : y < 0 ? 0 : light[regionIndex(x + 16, y, z + 16)]! >> 4;
   const blk = (x: number, y: number, z: number): number =>
@@ -163,10 +179,10 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
             for (let k = 0; k < 4; k++) {
               const [us, vs] = CORNERS[k]!;
               let cy = 0.5 + f.n[1] * 0.5 + (f.u[1] * us + f.v[1] * vs) * 0.5;
-              if (cy > 0.99) cy = top;
               pos[k * 3] = x + 0.5 + f.n[0] * 0.5 + (f.u[0] * us + f.v[0] * vs) * 0.5;
-              pos[k * 3 + 1] = y + cy;
               pos[k * 3 + 2] = z + 0.5 + f.n[2] * 0.5 + (f.u[2] * us + f.v[2] * vs) * 0.5;
+              if (cy > 0.99) cy = isLiquid && top < 1 ? liquidCorner(id, Math.round(pos[k * 3]!), y, Math.round(pos[k * 3 + 2]!)) : top;
+              pos[k * 3 + 1] = y + cy;
               if (isWater) {
                 // nước dùng texture riêng lặp lại theo tọa độ block (để trôi được)
                 uvArr[k * 2] = f.n[0] !== 0 ? pos[k * 3 + 2]! : pos[k * 3]!;

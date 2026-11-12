@@ -14,8 +14,8 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | xong (người dùng xác nhận 2026-11-12) |
 | 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
 | 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | xong (người dùng bảo "tiếp 4b", 2026-11-12) |
-| 4b | Rương, lò nung, cửa, trồng trọt | chờ người dùng test |
-| 4c | Chất lỏng, xô | chưa làm |
+| 4b | Rương, lò nung, cửa, trồng trọt | xong (người dùng bảo "làm tiếp 4c", 2026-11-12) |
+| 4c | Chất lỏng, xô | chờ người dùng test |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
 | 7 | Ngày đêm, động vật, quái vật, giường | chưa làm |
@@ -534,3 +534,37 @@ Không đổi hành vi game; định dạng dữ liệu không đổi (chưa có
 - Gộp code trùng: hàm xử lý ảnh của `import-textures` và `import-mc` về `scripts/pngTools.ts`; hàm nạp ảnh của `atlas.ts`, `itemIcons.ts`, `heldItem.ts` về `client/src/util/loadImage.ts`. Đã kiểm: hai lệnh nhập ra ảnh giống hệt trước.
 - Giữ lại có chủ đích: ảnh REFI trong `client/public` (game chạy được khi chưa có client.jar; client.jar không commit được), `fallbackTextures.ts` (AGENTS.md: thiếu ảnh thì vẽ tạm), server WebSocket tối thiểu (`npm run dev`), hằng số / ảnh cho giai đoạn sau đã có trong PLAN: `LIQUID` (4c), `DAY_CYCLE`, `MOBS`, `textures/obsidian.png` (4c), `icons/bow_pull_*` (cung, Giai đoạn 7).
 - Đã kiểm: typecheck, build, `npm test` 103/103.
+
+## Giai đoạn 4c — Chất lỏng, xô (2026-11-12)
+
+Trạng thái: chờ người dùng test.
+
+### File đã tạo / sửa
+
+- `shared/src/liquids.ts` (mới) — `LiquidSim`: hàng đợi theo tick, lan theo "lượng" (nước 7 ô / 5 tick, dung nham 3 ô / 30 tick), tìm chỗ trũng (nước 4 ô, dung nham 2 ô), chảy xuống không giới hạn (cột rơi đầy), nguồn vô hạn, rút khi mất nguồn, nước gặp dung nham (đá vỏ chai / đá cuội / đá), cuốn trôi block nhỏ (rơi vật phẩm), quét chunk tìm chất lỏng hở; `liquidFlow` (hướng dòng chảy).
+- `shared/src/{tickConstants,gameplay,blocks,blockTable,items,recipes,raycast,itemEntity,index}.ts` — hằng số `LIQUIDS` (thay `LIQUID` cũ), `STACK.BUCKET`; block 45 đá vỏ chai; xô rỗng / xô nước / xô dung nham + công thức (3 thỏi sắt chữ V); raycast có chế độ trúng nguồn chất lỏng; vật phẩm trôi theo dòng, nổi trong nước.
+- `client/src/game/worldTicker.ts` — chạy chất lỏng 20 lần / giây, quét chunk mới vào vùng mô phỏng; random tick đổi block thì báo chất lỏng.
+- `client/src/game/session.ts` (`blockChanged`: mọi thay đổi do người chơi → dựng mesh + chất lỏng), `main.ts`, `interact/bucket.ts` (mới, múc / đổ), `interact/interaction.ts`, `mesh/mesher.ts` (góc mặt chất lỏng = trung bình 4 ô chung góc → mặt nước dốc liền), `strings.ts`; `scripts/texture-map.json`, `scripts/mc-texture-map.json` (icon xô).
+- `tests/liquids.test.ts` (mới, 13 mục).
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build`, `npm test` 116/116 (chất lỏng 13/13: lan đúng 7 ô rồi dừng, tìm lỗ chỉ chảy về đó, nguồn vô hạn và tự đầy lại khi múc ô giữa, mất nguồn thì rút hết, chảy ra mép rồi rơi tới đáy, dung nham lan 3 ô và chậm, nước chảy vào nguồn dung nham → đá vỏ chai, dung nham chảy chạm nước → đá cuội, dung nham rơi xuống nước → đá, cuốn trôi đuốc và lúa, hướng dòng chảy, raycast chế độ xô, vật phẩm trôi).
+- Trình duyệt: khi tải thế giới chỉ ~60–85 ô chất lỏng chờ cập nhật (không ngập / giật); nước đổ trên nền phẳng lan thành hình thoi 7 ô, cuốn trôi đuốc và lúa; dung nham lan 3 ô; mặt nước thấp dần ra mép; xô rỗng múc nguồn thành xô nước.
+
+### Cần người dùng kiểm tra
+
+- Bộ đồ thử có 1 xô nước, 1 xô dung nham, 16 xô rỗng (làm thêm: 3 thỏi sắt chữ V ở bàn chế tạo). Đổ nước trên đất phẳng: lan 7 ô rồi dừng; đổ cạnh hố: chỉ chảy về hố; đào hố 2x2, đổ 2 xô chéo → 4 nguồn, múc mãi không hết.
+- Múc lại nguồn: nước rút dần.
+- Đổ nước cạnh dung nham: nguồn dung nham thành đá vỏ chai (cần cuốc kim cương), dung nham chảy thành đá cuội; dung nham rơi vào nước thành đá.
+- Hang / vách núi có mạch nước, dung nham sinh sẵn: chảy thành dòng, thác.
+- Nước cuốn đuốc, lúa, ray, cỏ cao; vật phẩm rơi trong dòng nước trôi theo.
+- Bơi trong nước chảy; nước cạnh ruộng làm ẩm đất cày.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Dòng chảy chỉ đẩy vật phẩm, chưa đẩy người chơi (PLAN chỉ yêu cầu vật phẩm).
+- Nước chảy dùng chung texture nước tĩnh (chưa có texture / hướng trôi riêng cho nước chảy).
+- Vật phẩm rơi vào dung nham chưa cháy mất (ngoài phạm vi 4c).
+- Chất lỏng chỉ chạy ở chunk đã tải; đi xa rồi quay lại thì chunk được quét lại để chảy tiếp.
+- Chưa lưu được (Giai đoạn 5).

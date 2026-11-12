@@ -37,7 +37,8 @@ export type ArmorTier = keyof typeof ARMOR;
 
 export const STACK = {
   DEFAULT: 64, // block, nguyên liệu, mũi tên
-  SINGLE: 1, // công cụ, vũ khí, giáp, giường, cửa
+  SINGLE: 1, // công cụ, vũ khí, giáp, giường, cửa, xô có nước / dung nham
+  BUCKET: 16, // xô rỗng
 } as const;
 
 export const BOW_DURABILITY = 384;
@@ -189,9 +190,4 @@ export const MINESHAFT_LOOT = {
   ],
 } as const;
 
-// 2.10 Chất lỏng
-export const LIQUID = {
-  WATER_SPREAD: 7,
-  LAVA_SPREAD: 3,
-} as const;
 
