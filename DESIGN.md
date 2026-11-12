@@ -26,11 +26,11 @@ Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển ti
 
 | Biome | Mặt đất | Cây và trang trí |
 |---|---|---|
-| Đồng cỏ | cỏ, đất | cây thưa, cỏ cao dày |
-| Rừng | cỏ, đất | cây dày, cỏ cao |
-| Sa mạc | cát, sa thạch bên dưới | xương rồng nếu có texture, không cây |
-| Đồng tuyết | tuyết phủ trên cỏ | cây thưa |
-| Núi | đá lộ ra trên cao, tuyết trên đỉnh | cây thưa ở chân núi |
+| Đồng cỏ | cỏ, đất | cây thưa (sồi, ít bạch dương; phần nóng khô có keo — 4d), cỏ cao dày, hoa theo đám (4d) |
+| Rừng | cỏ, đất | cây dày (sồi + khoảng 30% bạch dương — 4d), cỏ cao, hoa theo đám (4d) |
+| Sa mạc | cát, sa thạch bên dưới | xương rồng (4d), không cây |
+| Đồng tuyết | tuyết phủ trên cỏ | cây thông thưa (4d) |
+| Núi | đá lộ ra trên cao, tuyết trên đỉnh | cây thông thưa ở chân núi (4d) |
 | Đại dương | nước, đáy cát và sỏi | không |
 
 Nước tự nhiên trên mặt đất (sinh theo seed + tọa độ, liền mạch qua chunk):
@@ -530,6 +530,106 @@ và 5.5; người dùng đồng ý 2026-11-12, thay các số tương ứng ở 
 | T | chat |
 | F3 | thông tin debug |
 | Esc | menu |
+
+### 2.13 Nội dung mở rộng: loài cây, hoa, đồ xây dựng, màu, đồ sắt (người dùng chọn 2026-11-13)
+
+Làm ở Giai đoạn 4d (thứ làm thay đổi thế giới sinh ra) và 4e (thứ chỉ chế tạo ra), sau khi 5a
+test xong và trước 5b. Độ cứng ghi theo "giây, tay không" như mục 2.2 (cách quy đổi theo
+MECHANICS.md 4: block cần công cụ = độ cứng gốc × 5, không cần = × 1.5).
+
+Cách lưu: id block vẫn 8 bit (tối đa 256). Sau 4d + 4e dùng khoảng 115 id, còn đủ cho các
+giai đoạn sau. Màu (16) lưu trong dữ liệu phụ; mỗi loài cây dùng id riêng (texture, rơi đồ
+đơn giản). Khi gần hết id thì nới lên 16 bit kèm bước chuyển đổi dữ liệu đã lưu.
+
+#### Loài cây mới (4d)
+
+| Loài | Nơi mọc | Hình cây |
+|---|---|---|
+| sồi (đã có) | đồng cỏ, rừng | như hiện tại |
+| thông | đồng tuyết, chân núi | thân cao 6–9, tán hình nón nhiều tầng |
+| bạch dương | rừng (khoảng 30% số cây), rải rác ở đồng cỏ | thân trắng cao 5–7, tán như sồi |
+| keo | phần nóng và khô của đồng cỏ (gần sa mạc), thưa | thân nghiêng 1–2 nhánh, tán phẳng rộng |
+
+- Mỗi loài có: thân gỗ, ván gỗ, lá, cây non (thông số giống bản sồi). Cây non lớn thành đúng loài.
+- Lá rơi cây non đúng loài 5%, que 2%; táo chỉ rơi từ lá sồi (5%).
+- Công thức chung nhận thân / ván của mọi loài: que, bàn chế tạo, rương, bát, thang, đuốc,
+  công cụ gỗ, giường, nút gỗ; nhiên liệu lò như nhau. Thân → 4 ván cùng loài.
+- Đồ theo loài (4e): bậc, tấm, hàng rào, cửa. Hàng rào khác loài vẫn nối với nhau.
+
+#### Hoa và xương rồng (4d)
+
+| Block | Độ cứng | Nơi mọc | Rơi ra | Ghi chú |
+|---|---|---|---|---|
+| bồ công anh | 0 | đồng cỏ, rừng, theo đám | chính nó | → thuốc nhuộm vàng |
+| anh túc | 0 | đồng cỏ, rừng, theo đám | chính nó | → thuốc nhuộm đỏ |
+| hoa ngô xanh | 0 | đồng cỏ, theo đám | chính nó | → thuốc nhuộm xanh dương |
+| linh lan | 0 | rừng, theo đám | chính nó | → thuốc nhuộm trắng |
+| xương rồng | 0.6 | sa mạc, cao 1–3 | xương rồng | nung → thuốc nhuộm xanh lá |
+
+- Hoa: không va chạm, chỗ bám như cỏ cao (cỏ / đất / đất cày), bị chất lỏng cuốn trôi, đặt lại được.
+- Xương rồng: chỉ đặt trên cát hoặc xương rồng; có block ở 4 ô ngang bên cạnh thì vỡ (rơi ra);
+  random tick mọc thêm tới cao 3; chạm vào mất 1 máu (theo luật miễn sát thương 0.5 giây);
+  hộp va chạm hẹp hơn 1 block (14/16).
+
+#### Bậc, tấm, tường (4e)
+
+- Vật liệu: đá, đá cuội, đá cuội rêu, sa thạch, đá sâu, gạch đá (mới), ván gỗ 4 loài.
+  Tường chỉ cho: đá cuội, đá cuội rêu, sa thạch, đá sâu, gạch đá.
+- Gạch đá: 4 đá (2x2) → 4 gạch đá; độ cứng 7.5, cuốc bắt buộc.
+- Công thức: 6 vật liệu hình bậc → 4 bậc; 3 vật liệu một hàng ngang → 6 tấm; 6 vật liệu hai hàng → 6 tường.
+- Độ cứng, công cụ như vật liệu gốc.
+- Bậc: dữ liệu phụ bit 0–1 hướng (phía cao quay về hướng ngược người đặt), bit 2 lật ngược
+  (đặt vào nửa trên của mặt bên hoặc mặt dưới block), bit 3–5 dạng góc (thẳng, góc trong
+  trái / phải, góc ngoài trái / phải) tự tính khi đặt và khi bậc bên cạnh đổi, như ray. Va
+  chạm đúng hình bậc; mỗi nấc cao 0.5 nên đi lên cầu thang không cần nhảy (bước lên tối đa 0.6).
+- Tấm: dữ liệu phụ 0 = nửa dưới, 1 = nửa trên, 2 = đôi; đặt tấm vào tấm cùng loại thành tấm đôi
+  (rơi ra 2 tấm). Tấm nửa dưới không chặn ánh sáng hoàn toàn.
+- Tường: nối với tường, khối đầy, cổng như hàng rào; va chạm cao 1.5; cột giữa cao hơn khi không thẳng.
+
+#### Thuốc nhuộm và 16 màu (4e)
+
+- 16 màu: trắng, cam, đỏ tía, xanh nhạt, vàng, vàng chanh, hồng, xám, xám nhạt, lục lam,
+  tím, xanh dương, nâu, xanh lá, đỏ, đen.
+- Nguồn màu gốc: trắng (linh lan; GĐ 7 thêm bột xương), đỏ (anh túc, củ cải đường), vàng (bồ
+  công anh), xanh dương (hoa ngô xanh), xanh lá (nung xương rồng), đen (than — game tự đặt,
+  bản gốc dùng túi mực), nâu (đỏ + xanh lá — game tự đặt). Mỗi hoa / củ cải → 1 thuốc nhuộm.
+- Trộn (không cần bàn): cam = đỏ + vàng; tím = đỏ + xanh dương; lục lam = xanh dương + xanh lá;
+  xanh nhạt = xanh dương + trắng; vàng chanh = xanh lá + trắng; hồng = đỏ + trắng; xám = đen +
+  trắng; xám nhạt = xám + trắng; đỏ tía = tím + hồng. Mỗi lần trộn ra 2.
+- Len trước GĐ 7: 4 sợi tơ (2x2) → 1 len trắng. Len là block đặt được (độ cứng 1.2, không cần công cụ).
+- Đồ có màu (màu lưu ở dữ liệu phụ 4 bit):
+  - len: 1 thuốc nhuộm + 1 len bất kỳ → len màu đó;
+  - thảm: 2 len cùng màu → 3 thảm (cao 1/16, cần block bên dưới, độ cứng 0.15);
+  - kính màu: 8 kính quanh 1 thuốc nhuộm → 8 kính màu (bán trong suốt, ám màu; độ cứng 0.45, không rơi gì);
+  - tấm kính màu: 6 kính màu (2 hàng) → 16; hoặc 8 tấm kính quanh 1 thuốc nhuộm → 8;
+  - giường: 3 len cùng màu + 3 ván → giường màu đó; giường + thuốc nhuộm → đổi màu.
+    Giường: dữ liệu phụ thêm bit 3–6 = màu (giường đã có hiện là màu đỏ).
+
+#### Đồ sắt và đồ hay dùng (4e)
+
+| Vật phẩm / block | Công thức | Thông số |
+|---|---|---|
+| kéo | 2 thỏi sắt chéo | độ bền 238. Phá lá nhanh và rơi ra khối lá; mạng nhện nhanh và rơi ra mạng nhện (đặt được); cỏ cao rơi ra cỏ cao (đặt được). Tỉa lông cừu ở GĐ 7 |
+| bật lửa | 1 thỏi sắt + 1 đá lửa | độ bền 64. Chuột phải lên mặt trên khối đầy: đặt lửa |
+| lửa (block) | – | không va chạm, sáng 15; KHÔNG lan, không đốt block; tự tắt sau 2–6 giây (trên đá sâu / đá nền cũng vậy); nước chảy vào thì tắt; đi vào: mất 1 máu + cháy 8 giây. GĐ 10 dùng để kích hoạt cổng |
+| khối than / sắt / vàng / kim cương / ngọc lục bảo / sắt thô / vàng thô | 9 món (3x3) ↔ 1 khối | độ cứng 25 (vàng 15), cần cuốc cùng cấp với quặng; khối than là nhiên liệu 80 món |
+| mảnh sắt | 1 thỏi sắt → 9; 9 mảnh → 1 thỏi | nguyên liệu |
+| lồng đèn | 8 mảnh sắt quanh 1 đuốc | sáng 15; đặt trên sàn hoặc treo dưới trần (dữ liệu phụ bit 0); độ cứng 17.5, cuốc |
+| song sắt | 6 thỏi sắt (2 hàng) → 16 | nối với nhau và với khối đầy như tấm kính; độ cứng 25, cuốc bắt buộc |
+| tấm kính | 6 kính (2 hàng) → 16 | nối như song sắt; không rơi gì; độ cứng 0.45 |
+| cửa sắt | 6 thỏi sắt (2x3) → 3 | như cửa gỗ nhưng chuột phải KHÔNG mở được; mở khi có nút / cần gạt đang bật ở gần (dưới); độ cứng 25, cuốc bắt buộc |
+| nút đá / nút gỗ | 1 đá / 1 ván bất kỳ | gắn sàn, trần hoặc tường; bấm thì bật 1 giây (đá) / 1.5 giây (gỗ) rồi tắt; độ cứng 0.75 |
+| cần gạt | 1 que trên 1 đá cuội | gắn sàn, trần hoặc tường; bấm thì bật / tắt; độ cứng 0.75 |
+
+- Cửa sắt mở khi một nút / cần gạt đang bật cách một trong hai nửa cửa tối đa 2 ô (khoảng cách
+  cộng các trục), không có dây dẫn. Hết bật thì cửa đóng. Nút / cần gạt không làm gì khác.
+- Xô sữa chuyển sang GĐ 7 (cần bò).
+
+#### Thêm ở GĐ 7 (cùng động vật)
+
+- Thịt sống / chín các loại (bảng MECHANICS.md 3), thịt thối, xương → 3 bột xương (thuốc nhuộm
+  trắng; bón cho cây trồng / cây non lớn ngay một bậc), xô sữa (vắt bò bằng xô; uống thì hết
+  hiệu ứng đang có), cừu có màu len theo bản gốc, kéo tỉa lông cừu.
 
 ---
 
