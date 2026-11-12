@@ -49,6 +49,7 @@ export const STR = {
   hudHunger: "Đói",
   inventoryTitle: "Túi đồ",
   craftingTitle: "Chế tạo",
+  recipeBook: "Sổ công thức",
   needWorkbench: "cần bàn chế tạo",
   craftHint: "Sổ công thức: bấm để xếp nguyên liệu vào lưới (Shift: nhiều bộ)\nÔ kết quả: bấm để lấy (Shift: làm liên tục)",
   youDied: "Bạn đã chết",

@@ -32,7 +32,8 @@ export class Inventory {
     return this.main[this.selected]!;
   }
 
-  private area(a: SlotArea): Slot[] {
+  /** Mảng ô của một vùng. */
+  slots(a: SlotArea): Slot[] {
     return a === "main" ? this.main : a === "armor" ? this.armor : this.craft;
   }
 
@@ -107,7 +108,7 @@ export class Inventory {
 
   /** Công cụ / giáp mất độ bền; vỡ khi hết. Trả về true nếu vừa vỡ. */
   damageSlot(area: SlotArea, i: number, amount: number): boolean {
-    const slots = this.area(area);
+    const slots = this.slots(area);
     const t = slots[i];
     const max = t ? maxDurability(t.item) : 0;
     if (!t || max === 0) return false;
@@ -124,7 +125,7 @@ export class Inventory {
 
   /** Bấm chuột lên một ô (giao diện túi đồ). */
   click(area: SlotArea, i: number, button: "left" | "right", shift: boolean): void {
-    const slots = this.area(area);
+    const slots = this.slots(area);
     if (shift) return this.quickMove(area, i);
     const s = slots[i] ?? null;
     const c = this.cursor;
@@ -164,7 +165,7 @@ export class Inventory {
 
   /** Shift+bấm: giáp ↔ ô giáp; hotbar ↔ túi. */
   private quickMove(area: SlotArea, i: number): void {
-    const slots = this.area(area);
+    const slots = this.slots(area);
     const s = slots[i];
     if (!s) return;
     if (area === "craft") {

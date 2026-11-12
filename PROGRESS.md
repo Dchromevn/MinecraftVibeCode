@@ -440,3 +440,12 @@ thức có độ cứng, xô làm ở 4c. Mục LỰA CHỌN về rìu (Giai đo
 - Sổ công thức bên phải: sáng khi đủ nguyên liệu và vừa lưới đang mở; bấm xếp 1 bộ vào lưới, Shift xếp nhiều bộ.
 - File: `shared/src/recipes.ts` (viết lại: hình xếp, so khớp lưới), `shared/src/crafting.ts` (mới), `shared/src/inventory.ts` (vùng "craft"), `client/src/ui/inventoryScreen.ts` (viết lại), `ui/styles.ts`, `game/session.ts`, `interact/interaction.ts`, `main.ts`, `strings.ts`; PLAN.md/DESIGN.md mục 2.4.
 - Kiểm tra: 20/20 (thêm: thân gỗ → ván bằng Shift, sổ công thức xếp nhiều bộ, cuốc không làm được ở 2x2 nhưng làm được ở 3x3, rìu lật ngang khớp, hình đặt lệch vẫn khớp, 20.000 lần bấm ngẫu nhiên gồm cả lưới vẫn không mất/nhân đôi). Trình duyệt: chuột phải vào bàn mở lưới 3x3, sổ công thức xếp cuốc gỗ đúng hình, lấy ra trừ đúng 3 ván 2 que; E mở lưới 2x2.
+
+### Bổ sung 4a: giao diện theo ảnh mẫu, thao tác chuột, vật phẩm trên tay (2026-11-12)
+
+- Túi đồ: cột 4 ô giáp (hình mờ gợi ý), hình nhân vật 6 phần từ skin quay theo con trỏ, "Chế tạo" 2x2 → ô kết quả, nút sổ công thức; bàn chế tạo: nút sổ + "Chế tạo" 3x3 → ô kết quả, nhãn "Túi đồ"; 27 ô túi + hàng hotbar tách riêng; màu kiểu ô xám nổi khối. Sổ công thức mở/đóng bằng nút sách, hiện bên trái giao diện. Không làm ô tay trái (chưa có cơ chế cầm tay trái).
+- Thao tác: kéo chuột trái chia đều, kéo chuột phải đặt 1 mỗi ô, bấm đúp gom cùng loại, trỏ + phím 1–9 đổi chỗ với hotbar, trỏ + Q vứt (Ctrl+Q cả chồng), bấm ra ngoài khung vứt chồng đang cầm (chuột phải: vứt 1).
+- Tay phải: tay trống hiện cánh tay; cầm block hiện khối nhỏ xoay 45°; cầm vật phẩm khác hiện hình nổi khối dựng từ icon; vung khi đào/đặt/ăn.
+- File: `shared/src/inventoryOps.ts` (mới), `inventory.ts` (`slots()` công khai); `client/src/player/{playerModel,heldItem}.ts` (mới), `player/arm.ts`; `client/src/ui/{recipeBook,playerPreview}.ts` (mới), `ui/inventoryScreen.ts` (viết lại), `ui/styles.ts`, `strings.ts`, `main.ts`; `scripts/texture-map.json` (nút sách, hình mờ ô giáp).
+- Kiểm tra 24/24 (thêm: kéo trái chia đều, kéo phải đặt 1, bấm đúp gom, phím số đổi chỗ và ô giáp chỉ nhận đúng món, Q vứt 1, bấm phải ra ngoài vứt 1). Ảnh chụp: túi đồ và bàn chế tạo giống bố cục mẫu, sổ công thức mở bên trái; cầm cuốc / khối ván / đuốc hiện đúng ở tay phải.
+- Ghi chú: hình nhân vật dùng thêm một ngữ cảnh WebGL nhỏ (chỉ vẽ khi túi đồ mở); vật phẩm trên tay chưa tối theo ánh sáng hang.

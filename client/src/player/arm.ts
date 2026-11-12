@@ -1,10 +1,18 @@
-// Cánh tay góc nhìn thứ nhất (skin entities/player.png 64x32, cánh tay phải), vẽ trong
-// cảnh riêng chồng lên thế giới (xóa độ sâu trước) để không xuyên vào tường. Vung khi đào/đặt.
+// Tay phải góc nhìn thứ nhất, vẽ trong cảnh riêng chồng lên thế giới (xóa độ sâu trước) để
+// không xuyên vào tường: tay trống thì hiện cánh tay (skin 64x32), cầm đồ thì hiện mô hình vật
+// phẩm (block = khối nhỏ, vật phẩm khác = hình nổi khối). Vung khi đào/đặt/ăn.
 import * as THREE from "three";
+import type { Atlas } from "../atlas.js";
+import { heldModel } from "./heldItem.js";
 
 const W = 0.16, H = 0.75; // block (cánh tay 4x12 điểm ảnh, phóng to cho góc nhìn)
 const SWING_S = 0.25;
 const REST = { x: 0.48, y: -0.52, z: -0.2, rx: 1.95, ry: 0.15, rz: 0.12 };
+/** Tư thế cầm: block xoay 45°, công cụ/vật phẩm nghiêng chéo như cầm trong tay. */
+const HOLD = {
+  block: { x: 0.4, y: -0.36, z: -0.8, rx: 0.12, ry: 0.78, rz: 0, s: 0.22 },
+  flat: { x: 0.42, y: -0.3, z: -0.78, rx: 0.05, ry: -1.3, rz: 0.4, s: 0.4 },
+} as const;
 
 /** Ô điểm ảnh trên skin 64x32 → uv (v tính từ dưới lên). */
 function px(x0: number, y0: number, x1: number, y1: number): [number, number, number, number] {
@@ -17,6 +25,9 @@ export class FirstPersonArm {
   readonly scene = new THREE.Scene();
   readonly camera: THREE.PerspectiveCamera;
   private readonly pivot = new THREE.Group();
+  private readonly itemPivot = new THREE.Group();
+  private heldKey: string | null = null;
+  private holdKind: keyof typeof HOLD = "flat";
   private swingT = -1;
   visible = true;
 
@@ -43,7 +54,7 @@ export class FirstPersonArm {
       mat.needsUpdate = true;
     });
     this.pivot.add(new THREE.Mesh(geo, mat));
-    this.scene.add(this.pivot);
+    this.scene.add(this.pivot, this.itemPivot);
     this.applyPose(0);
   }
 
@@ -67,9 +78,28 @@ export class FirstPersonArm {
     this.applyPose(k);
   }
 
+  /** Đổi vật phẩm đang cầm (null = tay trống). */
+  setHeld(key: string | null, atlas: Atlas): void {
+    if (key === this.heldKey) return;
+    this.heldKey = key;
+    this.itemPivot.clear();
+    this.pivot.visible = key === null;
+    if (!key) return;
+    void heldModel(key, atlas).then((obj) => {
+      if (this.heldKey !== key) return;
+      this.itemPivot.clear();
+      this.holdKind = obj.userData.kind === "block" ? "block" : "flat";
+      this.itemPivot.add(obj);
+    });
+  }
+
   private applyPose(k: number): void {
     this.pivot.position.set(REST.x - k * 0.12, REST.y + k * 0.1, REST.z - k * 0.15);
     this.pivot.rotation.set(REST.rx - k * 0.7, REST.ry + k * 0.4, REST.rz, "YXZ");
+    const h = HOLD[this.holdKind];
+    this.itemPivot.position.set(h.x - k * 0.18, h.y + k * 0.12 - Math.sin(k * Math.PI) * 0.05, h.z - k * 0.1);
+    this.itemPivot.rotation.set(h.rx - k * 0.9, h.ry + k * 0.3, h.rz, "YXZ");
+    this.itemPivot.scale.setScalar(h.s);
   }
 
   /** Vẽ sau thế giới: xóa độ sâu rồi vẽ cánh tay. */

@@ -194,6 +194,7 @@ async function main(): Promise<void> {
     renderer.clear();
     renderer.render(scene, camera);
     arm.visible = !player.flying;
+    arm.setHeld(session.inv.held?.item ?? null, atlas);
     arm.update(dt);
     arm.render(renderer);
 

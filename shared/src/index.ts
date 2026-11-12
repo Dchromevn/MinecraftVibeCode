@@ -19,6 +19,7 @@ export * from "./items.js";
 export * from "./inventory.js";
 export * from "./recipes.js";
 export * from "./crafting.js";
+export * from "./inventoryOps.js";
 export * from "./drops.js";
 export * from "./survival.js";
 export * from "./itemEntity.js";

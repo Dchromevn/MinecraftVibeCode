@@ -495,6 +495,26 @@
     {
       "dest": "ui/slot.png",
       "src": "mcl_inventory/mcl_formspec_itemslot.png"
+    },
+    {
+      "dest": "ui/book.png",
+      "src": "HUD/craftguide_book.png"
+    },
+    {
+      "dest": "ui/empty_helmet.png",
+      "src": "mcl_inventory/mcl_inventory_empty_armor_slot_helmet.png"
+    },
+    {
+      "dest": "ui/empty_chestplate.png",
+      "src": "mcl_inventory/mcl_inventory_empty_armor_slot_chestplate.png"
+    },
+    {
+      "dest": "ui/empty_leggings.png",
+      "src": "mcl_inventory/mcl_inventory_empty_armor_slot_leggings.png"
+    },
+    {
+      "dest": "ui/empty_boots.png",
+      "src": "mcl_inventory/mcl_inventory_empty_armor_slot_boots.png"
     }
   ]
 }
