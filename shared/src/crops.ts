@@ -21,8 +21,6 @@ export const stemFruit = (id: number): number => STEM_FRUIT.get(id) ?? -1;
 export const isFarmPlant = (id: number): boolean => isCrop(id) || isStem(id);
 /** Hướng quả của thân đã ra quả, hoặc null. */
 export const stemAttachedDir = (meta: number): number | null => (meta >= ATTACHED ? (meta - ATTACHED) & 3 : null);
-/** Giai đoạn để vẽ (thân đã ra quả coi như tuổi 7). */
-export const plantStage = (id: number, meta: number): number => (isStem(id) ? Math.min(meta, STEM_RIPE) : meta & 7);
 
 export interface PlantWorld {
   getCell(x: number, y: number, z: number): number;

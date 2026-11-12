@@ -1,22 +1,12 @@
-// Icon vật phẩm cho giao diện: ưu tiên ảnh trong /icons_wiki/<khóa>.png (người dùng tự tải từ
-// minecraft.wiki, npm run wiki-icons); không có thì block khối đầy vẽ thành khối 3D nhỏ từ texture
-// block, còn lại dùng ảnh phẳng trong /icons hoặc /textures (REFI). Thiếu ảnh thì vẽ ô màu.
+// Icon vật phẩm cho giao diện: block khối đầy vẽ thành khối 3D nhỏ từ texture block, còn lại dùng
+// ảnh phẳng trong /icons hoặc /textures (ảnh gốc từ client.jar nếu đã nhập, không thì REFI).
+// Thiếu ảnh thì vẽ ô màu.
 import { BLOCKS, allItems, itemDef } from "../../../shared/src/index.js";
 import { STR } from "../strings.js";
+import { loadImage } from "../util/loadImage.js";
 
 const SIZE = 32;
-/** Chống bộ nhớ đệm trình duyệt cho icon wiki (thư mục có thể được thêm sau khi trang đã mở). */
-export const WIKI_BUST = `?t=${Date.now()}`;
 const urls = new Map<string, string>();
-
-function loadImage(url: string): Promise<HTMLImageElement | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
 
 function placeholder(ctx: CanvasRenderingContext2D, key: string): void {
   let h = 0;
@@ -54,13 +44,6 @@ async function render(key: string): Promise<string> {
   const ctx = c.getContext("2d")!;
   ctx.imageSmoothingEnabled = false;
   let ok = false;
-  const wiki = await loadImage(`/icons_wiki/${key}.png${WIKI_BUST}`);
-  if (wiki && wiki.width > 0) {
-    ctx.imageSmoothingEnabled = wiki.width > SIZE * 2; // ảnh lớn (khối 3D) thu nhỏ mượt, ảnh điểm ảnh giữ nét
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(wiki, 0, 0, wiki.width, wiki.height, 0, 0, SIZE, SIZE);
-    return c.toDataURL();
-  }
   if (def?.icon.type === "cube") ok = await drawCube(ctx, def.icon.block);
   else if (def) {
     const img = await loadImage(def.icon.type === "icon" ? `/icons/${def.icon.name}.png` : `/textures/${def.icon.name}.png`);

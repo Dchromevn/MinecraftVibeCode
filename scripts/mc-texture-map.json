@@ -339,19 +339,6 @@
    "tint": "#E0C71C"
   },
   {
-   "dest": "textures/player",
-   "src": [
-    "entity/player/wide/steve",
-    "entity/steve"
-   ],
-   "crop": [
-    0,
-    0,
-    64,
-    32
-   ]
-  },
-  {
    "dest": "entities/player",
    "src": [
     "entity/player/wide/steve",
@@ -1035,14 +1022,6 @@
    ]
   },
   {
-   "dest": "ui/hotbar",
-   "src": "gui/sprites/hud/hotbar"
-  },
-  {
-   "dest": "ui/hotbar_selected",
-   "src": "gui/sprites/hud/hotbar_selection"
-  },
-  {
    "dest": "ui/book",
    "src": "gui/sprites/recipe_book/button"
   },
@@ -1055,6 +1034,28 @@
     14,
     14
    ]
+  },
+  {
+   "dest": "icons/bed",
+   "src": "block/red_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/red_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
   }
  ]
 }

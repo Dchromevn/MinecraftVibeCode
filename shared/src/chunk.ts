@@ -17,9 +17,6 @@ export function chunkKey(cx: number, cz: number): number {
   return (cx + 0x8000) * 0x10000 + (cz + 0x8000);
 }
 
-export function keyToCoord(key: number): { cx: number; cz: number } {
-  return { cx: Math.floor(key / 0x10000) - 0x8000, cz: (key % 0x10000) - 0x8000 };
-}
 
 /** Dữ liệu thô của một chunk: id block và dữ liệu phụ cùng chỉ số. */
 export interface ChunkData {

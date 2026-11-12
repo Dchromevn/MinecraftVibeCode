@@ -1,6 +1,7 @@
 // Gộp mọi texture block thành một atlas. Thiếu file thì vẽ tạm bằng canvas.
 import * as THREE from "three";
 import { drawFallbackTile } from "./fallbackTextures.js";
+import { loadImage } from "./util/loadImage.js";
 
 export interface TileUV {
   u0: number;
@@ -19,15 +20,6 @@ export class Atlas {
   uv(name: string): TileUV {
     return this.uvs.get(name) ?? this.uvs.get("missing")!;
   }
-}
-
-function loadImage(url: string): Promise<HTMLImageElement | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
 }
 
 /**

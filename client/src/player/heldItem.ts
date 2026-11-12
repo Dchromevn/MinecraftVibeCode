@@ -4,25 +4,21 @@ import * as THREE from "three";
 import { itemDef } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
 import { blockTiles, setBoxTiles } from "../interact/boxMesh.js";
-import { WIKI_BUST } from "../ui/itemIcons.js";
+import { loadImage } from "../util/loadImage.js";
 
 const RES = 16;
 const cache = new Map<string, Promise<THREE.Object3D>>();
 
-function loadPixels(url: string): Promise<ImageData | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement("canvas");
-      c.width = c.height = RES;
-      const ctx = c.getContext("2d")!;
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, RES, RES);
-      resolve(ctx.getImageData(0, 0, RES, RES));
-    };
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
+/** Điểm ảnh của icon, thu về 16x16. */
+async function loadPixels(url: string): Promise<ImageData | null> {
+  const img = await loadImage(url);
+  if (!img) return null;
+  const c = document.createElement("canvas");
+  c.width = c.height = RES;
+  const ctx = c.getContext("2d")!;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, RES, RES);
+  return ctx.getImageData(0, 0, RES, RES);
 }
 
 /** Hình nổi khối dày 1 điểm ảnh, cạnh 1 đơn vị, tâm ở gốc, mặt hướng +Z. */
@@ -70,8 +66,7 @@ export function heldModel(key: string, atlas: Atlas): Promise<THREE.Object3D> {
       return m;
     }
     const url = icon?.type === "icon" ? `/icons/${icon.name}.png` : icon?.type === "tex" ? `/textures/${icon.name}.png` : "";
-    // ưu tiên icon minecraft.wiki nếu người dùng đã tải (npm run wiki-icons)
-    const px = (await loadPixels(`/icons_wiki/${key}.png${WIKI_BUST}`)) ?? (url ? await loadPixels(url) : null);
+    const px = url ? await loadPixels(url) : null;
     const m: THREE.Object3D = px ? extrude(px) : new THREE.Object3D();
     m.userData.kind = "flat";
     return m;

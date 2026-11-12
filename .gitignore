@@ -6,7 +6,5 @@ assets-src/
 .DS_Store
 Thumbs.db
 server/data/
-# icon tải từ minecraft.wiki (© Mojang): chỉ dùng bản chơi riêng, không commit
-client/public/icons_wiki/
 # texture gốc Minecraft nhập từ client.jar (© Mojang): chỉ dùng trên máy, không commit
 client/public_mc/

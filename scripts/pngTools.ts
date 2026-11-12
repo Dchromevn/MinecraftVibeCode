@@ -1,5 +1,5 @@
-// Ghép ảnh cho import-mc: lật, xoay, phóng (lân cận gần nhất), dán đè có độ trong suốt.
-// Dùng để dựng texture block từ ảnh thực thể (rương), xoay mặt giường, ghép ray ngã ba / ngã tư.
+// Xử lý ảnh PNG dùng chung cho import-textures và import-mc: cắt, nhân màu, lật, xoay, phóng
+// (lân cận gần nhất), dán đè có độ trong suốt, ghép nhiều mảnh (rương từ ảnh thực thể, ray ngã ba / ngã tư).
 import { PNG } from "pngjs";
 
 /** Một mảnh: vùng [x, y, rộng, cao] của ảnh nguồn (mặc định ảnh chính), dán tại (dx, dy). */
@@ -20,6 +20,17 @@ export interface Compose {
   h: number;
   parts: Part[];
   size?: number; // phóng kết quả thành size x size
+}
+
+/** Nhân màu (#RRGGBB) tại chỗ: dùng cho ảnh xám (cỏ, lá, nước, thân dưa). */
+export function tint(png: PNG, color: string): PNG {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16) / 255);
+  for (let i = 0; i < png.data.length; i += 4) {
+    png.data[i] = Math.round(png.data[i]! * r!);
+    png.data[i + 1] = Math.round(png.data[i + 1]! * g!);
+    png.data[i + 2] = Math.round(png.data[i + 2]! * b!);
+  }
+  return png;
 }
 
 export function cropPng(src: PNG, x: number, y: number, w: number, h: number): PNG {

@@ -496,8 +496,8 @@ cập nhật file đó.
 Nguồn ưu tiên tùy chọn (người dùng chọn 2026-11-12): texture gốc trong client.jar của
 Minecraft, người dùng tự tải vào `/assets-src/minecraft`, `npm run import-mc` nhập theo
 `scripts/mc-texture-map.json` vào `client/public_mc` (không commit). File có ở đó thì đè
-file REFI cùng tên; thiếu thì dùng REFI. Icon vật phẩm từ minecraft.wiki (`npm run
-wiki-icons`) vẫn được ưu tiên trên giao diện nếu có.
+file REFI cùng tên; thiếu thì dùng REFI. (Bộ icon minecraft.wiki đã bỏ 2026-11-12: client.jar
+có đủ hình gốc.)
 
 Nguyên tắc chung cho script nhập:
 - Texture có điểm trong suốt mà dùng cho block đặc (quặng, cỏ mặt bên) thì

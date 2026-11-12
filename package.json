@@ -10,11 +10,11 @@
   ],
   "scripts": {
     "dev": "concurrently -n client,server -c cyan,magenta \"npm run dev -w client\" \"npm run dev -w server\"",
-    "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json --noEmit && tsc -p client/tsconfig.json && tsc -p scripts/tsconfig.json",
+    "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json --noEmit && tsc -p client/tsconfig.json && tsc -p scripts/tsconfig.json && tsc -p tests/tsconfig.json",
     "build": "npm run build -w client && npm run build -w server",
     "import-textures": "tsx scripts/import-textures.ts",
-    "wiki-icons": "tsx scripts/import-wiki-icons.ts",
-    "import-mc": "tsx scripts/import-mc.ts"
+    "import-mc": "tsx scripts/import-mc.ts",
+    "test": "tsx tests/run.ts"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

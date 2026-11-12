@@ -484,7 +484,7 @@ Trạng thái: chờ người dùng test.
 - Mặt trên / sau rương đôi dùng texture rương thường (REFI không đủ bộ texture rương lớn).
 - Chưa lưu được: tải lại trang là mất (Giai đoạn 5).
 
-### Icon từ minecraft.wiki (2026-11-12, người dùng yêu cầu; đã bỏ quy tắc cấm trong AGENTS.md)
+### Icon từ minecraft.wiki (2026-11-12) — ĐÃ BỎ khi tái cấu trúc (xem mục "Tái cấu trúc trước 4c")
 
 - Người dùng tự lưu trang ảnh bằng trình duyệt (wiki chặn tải tự động), `npm run wiki-icons` tìm Invicon_*.png trong `assets-src` và chép vào `client/public/icons_wiki/` (không commit, ảnh © Mojang). Game ưu tiên icon wiki cho hotbar, túi đồ, sổ công thức, vật phẩm rơi, vật phẩm trên tay; thiếu thì dùng icon REFI. Đã nhập đủ 83 / 83. Texture block trong thế giới vẫn là REFI.
 - Không nên phát hành công khai kèm thư mục `icons_wiki`.
@@ -511,7 +511,7 @@ Trạng thái: chờ người dùng test.
 
 - `npm run import-mc` (`scripts/import-mc.ts`, bảng `scripts/mc-texture-map.json`): đọc thẳng `assets-src/minecraft/*.jar` (client.jar người dùng tự tải từ máy chủ Mojang) bằng zlib có sẵn của Node, không thêm thư viện; ghi vào `client/public_mc/` (không commit, © Mojang). Vite (plugin trong `client/vite.config.ts`) ưu tiên file trong `public_mc` hơn `public` cùng đường dẫn, lúc build thì chép đè vào `dist`. Thiếu file nào thì dùng REFI. Xóa `client/public_mc` để quay lại REFI.
 - Ảnh xám của bản gốc (cỏ, lá, nước, thân dưa / bí) được nhân màu đồng cỏ cố định; ảnh động lấy khung đầu; da nhân vật cắt về 64x32.
-- Bổ sung (người dùng yêu cầu "ảnh gốc hết"): `scripts/mcCompose.ts` ghép ảnh — rương dựng từ ảnh thực thể (nắp + thân + khóa, lật dọc, phóng 14→16; rương đôi từ normal_left / normal_right), giường từ ảnh block red_bed_* (mặt trên xoay 90°), ray ngã ba = ray cong + ray thẳng, ngã tư = ray thẳng + ray thẳng xoay 90°, ô hotbar cắt từ hotbar gốc, nút sổ công thức, nền ngọn lửa lò. Toàn bộ 203 ảnh lấy từ bản gốc; riêng icon giường dùng icon wiki (bản gốc không có ảnh phẳng).
+- Bổ sung (người dùng yêu cầu "ảnh gốc hết"): `scripts/pngTools.ts` (tên cũ mcCompose.ts) ghép ảnh — rương dựng từ ảnh thực thể (nắp + thân + khóa, lật dọc, phóng 14→16; rương đôi từ normal_left / normal_right), giường từ ảnh block red_bed_* (mặt trên xoay 90°), ray ngã ba = ray cong + ray thẳng, ngã tư = ray thẳng + ray thẳng xoay 90°, ô hotbar cắt từ hotbar gốc, nút sổ công thức, nền ngọn lửa lò. Toàn bộ 203 ảnh lấy từ bản gốc; icon giường ghép từ ảnh hông giường gốc (bản gốc không có ảnh phẳng).
 - Đã kiểm bằng file jar thử: giải nén đúng, nhân màu đúng, Vite trả ảnh public_mc khi có và ảnh REFI khi không. Chưa chạy với client.jar thật (người dùng tải).
 - Cách tải (PowerShell, thư mục dự án):
   ```
@@ -521,3 +521,16 @@ Trạng thái: chờ người dùng test.
   Invoke-WebRequest $v.downloads.client.url -OutFile assets-src\minecraft\client.jar
   npm run import-mc
   ```
+
+
+## Tái cấu trúc trước 4c (2026-11-12, người dùng yêu cầu)
+
+Không đổi hành vi game; định dạng dữ liệu không đổi (chưa có dữ liệu lưu).
+
+- Kiểm tra tự động đưa vào dự án: `tests/` (`harness.ts`, `run.ts`, 6 bộ: vật lý, chỗ bám, vật phẩm, rương / lò / random tick, cây trồng, sinh thế giới — 103 mục). Lệnh mới `npm test` (`-- -v` in cả mục đạt, `-- <tên>` chạy một bộ); `npm run typecheck` kiểm cả `tests/`. Trước đây các bộ này nằm ngoài dự án.
+- Bỏ bộ icon minecraft.wiki (người dùng chọn): xóa `scripts/import-wiki-icons.ts`, `scripts/wiki-icons.json`, lệnh `npm run wiki-icons`, thư mục `client/public/icons_wiki`; `ui/itemIcons.ts` và `player/heldItem.ts` chỉ còn một nguồn ảnh (client.jar nếu đã nhập, không thì REFI). Icon giường ghép từ ảnh hông giường gốc. Có thể xóa tay `assets-src/wiki_icons` và `assets-src/Icon minecraft.wiki_files`.
+- Bỏ code không dùng: `client/src/net.ts` (kết nối thử của Giai đoạn 0, không còn được gọi; Giai đoạn 5 viết lại phần mạng), `BLOCK_COUNT`, `isTargetable`, `keyToCoord`, `plantStage`, hằng số `CRAFTING` (không dùng) và `FARMING` (trùng và lệch với `CROPS` trong tickConstants.ts).
+- Bỏ ảnh không dùng: `textures/player.png` (trùng `entities/player.png`), `ui/hotbar.png`, `ui/hotbar_selected.png` (khỏi cả hai bảng ánh xạ).
+- Gộp code trùng: hàm xử lý ảnh của `import-textures` và `import-mc` về `scripts/pngTools.ts`; hàm nạp ảnh của `atlas.ts`, `itemIcons.ts`, `heldItem.ts` về `client/src/util/loadImage.ts`. Đã kiểm: hai lệnh nhập ra ảnh giống hệt trước.
+- Giữ lại có chủ đích: ảnh REFI trong `client/public` (game chạy được khi chưa có client.jar; client.jar không commit được), `fallbackTextures.ts` (AGENTS.md: thiếu ảnh thì vẽ tạm), server WebSocket tối thiểu (`npm run dev`), hằng số / ảnh cho giai đoạn sau đã có trong PLAN: `LIQUID` (4c), `DAY_CYCLE`, `MOBS`, `textures/obsidian.png` (4c), `icons/bow_pull_*` (cung, Giai đoạn 7).
+- Đã kiểm: typecheck, build, `npm test` 103/103.

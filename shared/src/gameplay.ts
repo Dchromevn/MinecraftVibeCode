@@ -43,10 +43,6 @@ export const STACK = {
 export const BOW_DURABILITY = 384;
 
 // 2.4–2.5 Chế tạo và lò nung
-export const CRAFTING = {
-  WORKBENCH_RANGE: 4, // đứng trong 4 block quanh bàn chế tạo
-} as const;
-
 export const FURNACE = {
   SMELT_TIME_S: 10,
   // số món nung được với 1 đơn vị nhiên liệu
@@ -199,10 +195,3 @@ export const LIQUID = {
   LAVA_SPREAD: 3,
 } as const;
 
-// Trồng trọt (2.2, Giai đoạn 4)
-export const FARMING = {
-  WHEAT_STAGES: 8,
-  SAPLING_GROW_MIN_S: 300,
-  SAPLING_GROW_MAX_S: 600,
-  FARMLAND_WATER_RADIUS: 4,
-} as const;

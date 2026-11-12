@@ -147,11 +147,5 @@ export function allBlockTextureNames(): string[] {
   return [...names];
 }
 
-/** Có vẽ được / nhắm vào được không (dùng cho raycast debug). */
-export function isTargetable(id: number): boolean {
-  const d = blockDef(id);
-  return d.render !== "none" && !d.liquid;
-}
 
 export { BLOCKS };
-export const BLOCK_COUNT = BLOCKS.length;

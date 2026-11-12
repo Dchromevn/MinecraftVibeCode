@@ -279,10 +279,6 @@
       "src": "default_mcl_core/stone/default_obsidian.png"
     },
     {
-      "dest": "textures/player.png",
-      "src": "HUD/character.png"
-    },
-    {
       "dest": "icons/{tier}_pickaxe.png",
       "src": "default_mcl_core/tools/default_tool_{srcTier}pick.png",
       "tiers": [
@@ -389,14 +385,6 @@
     {
       "dest": "icons/arrow.png",
       "src": "mcl_bows/mcl_bows_arrow_inv.png"
-    },
-    {
-      "dest": "ui/hotbar.png",
-      "src": "default_mcl_core/gui_hud/gui_hotbar.png"
-    },
-    {
-      "dest": "ui/hotbar_selected.png",
-      "src": "default_mcl_core/gui_hud/gui_hotbar_selected.png"
     },
     {
       "dest": "entities/player.png",

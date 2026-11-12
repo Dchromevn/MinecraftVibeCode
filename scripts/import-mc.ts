@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join } from "node:path";
 import { inflateRawSync } from "node:zlib";
 import { PNG } from "pngjs";
-import { compose, rotateCW, type Compose } from "./mcCompose.js";
+import { blitOver, compose, cropPng, rotateCW, tint, type Compose } from "./pngTools.js";
 
 interface Entry {
   dest: string;
@@ -63,42 +63,13 @@ function readEntry(path: string): Buffer | null {
   return it.method === 0 ? Buffer.from(raw) : inflateRawSync(raw);
 }
 
-// ---- xử lý ảnh ----
-const hex = (h: string): number[] => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
-
-function tint(png: PNG, color: string): PNG {
-  const [r, g, b] = hex(color);
-  for (let i = 0; i < png.data.length; i += 4) {
-    png.data[i] = Math.round(png.data[i]! * r!);
-    png.data[i + 1] = Math.round(png.data[i + 1]! * g!);
-    png.data[i + 2] = Math.round(png.data[i + 2]! * b!);
-  }
-  return png;
-}
-
-function crop(src: PNG, x: number, y: number, w: number, h: number): PNG {
-  const out = new PNG({ width: w, height: h });
-  PNG.bitblt(src, out, x, y, w, h, 0, 0);
-  return out;
-}
-
-/** Ghép over đè lên base (src-over). */
-function over(base: PNG, top: PNG): PNG {
-  for (let i = 0; i < base.data.length; i += 4) {
-    const a = top.data[i + 3]! / 255;
-    for (let c = 0; c < 3; c++) base.data[i + c] = Math.round(top.data[i + c]! * a + base.data[i + c]! * (1 - a));
-    base.data[i + 3] = Math.max(base.data[i + 3]!, top.data[i + 3]!);
-  }
-  return base;
-}
-
 function load(src: string | string[]): PNG | null {
   for (const s of Array.isArray(src) ? src : [src]) {
     const buf = readEntry(s);
     if (!buf) continue;
     let png: PNG = PNG.sync.read(buf);
     // ảnh động (dải khung dọc): lấy khung đầu
-    if (s.startsWith("block/") && png.height > png.width && png.height % png.width === 0) png = crop(png, 0, 0, png.width, png.width);
+    if (s.startsWith("block/") && png.height > png.width && png.height % png.width === 0) png = cropPng(png, 0, 0, png.width, png.width);
     return png;
   }
   return null;
@@ -134,7 +105,7 @@ for (const raw of map.entries)
       png = c;
     }
     if (e.rotate) png = rotateCW(png, e.rotate);
-    if (e.crop) png = crop(png, ...e.crop);
+    if (e.crop) png = cropPng(png, ...e.crop);
     if (e.regions) {
       const out = new PNG({ width: png.width, height: png.height });
       for (const [x, y, w, h, dx, dy] of e.regions) PNG.bitblt(png, out, x, y, w, h, dx, dy);
@@ -143,7 +114,7 @@ for (const raw of map.entries)
     if (e.tint) png = tint(png, e.tint);
     if (e.overlay) {
       const o = load(e.overlay);
-      if (o && o.width === png.width && o.height === png.height) png = over(png, e.overlayTint ? tint(o, e.overlayTint) : o);
+      if (o && o.width === png.width && o.height === png.height) blitOver(png, e.overlayTint ? tint(o, e.overlayTint) : o, 0, 0);
     }
     const dest = join(outRoot, e.dest + ".png");
     mkdirSync(dirname(dest), { recursive: true });

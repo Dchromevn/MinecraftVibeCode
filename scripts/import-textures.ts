@@ -3,6 +3,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { PNG } from "pngjs";
+import { blitOver, cropPng, tint } from "./pngTools.js";
 
 interface Entry {
   dest: string;
@@ -45,25 +46,6 @@ function hasTransparency(png: PNG): boolean {
   return false;
 }
 
-/** Ghép src đè lên base (src-over). Kích thước phải bằng nhau. */
-function composite(base: PNG, over: PNG): PNG {
-  const out = new PNG({ width: base.width, height: base.height });
-  for (let i = 0; i < out.data.length; i += 4) {
-    const a = over.data[i + 3]! / 255;
-    for (let c = 0; c < 3; c++) {
-      out.data[i + c] = Math.round(over.data[i + c]! * a + base.data[i + c]! * (1 - a));
-    }
-    out.data[i + 3] = Math.max(base.data[i + 3]!, over.data[i + 3]!);
-  }
-  return out;
-}
-
-function crop(src: PNG, x: number, y: number, w: number, h: number): PNG {
-  const out = new PNG({ width: w, height: h });
-  PNG.bitblt(src, out, x, y, w, h, 0, 0);
-  return out;
-}
-
 /** Nhân bản mục theo tiers/pieces và thay chỗ giữ chỗ. */
 function expand(entry: Entry): Entry[] {
   const tiers = entry.tiers ?? [null];
@@ -100,7 +82,7 @@ for (const raw of map.entries) {
 
     if (e.slice) {
       for (let i = 0; i < e.slice.count; i++) {
-        const frame = crop(src, 0, i * e.slice.tile, src.width, e.slice.tile);
+        const frame = cropPng(src, 0, i * e.slice.tile, src.width, e.slice.tile);
         writePng(join(destRoot, e.dest.replace("{i}", String(i))), frame);
         written++;
       }
@@ -114,18 +96,14 @@ for (const raw of map.entries) {
         missing.push(e.base);
       } else if (hasTransparency(src)) {
         const base = readPng(basePath);
-        if (base.width === src.width && base.height === src.height) out = composite(base, src);
+        if (base.width === src.width && base.height === src.height) {
+          blitOver(base, src, 0, 0);
+          out = base;
+        }
         else console.warn(`[import-textures] kích thước khác nhau, bỏ ghép: ${e.src} / ${e.base}`);
       }
     }
-    if (e.tint) {
-      const [r, g, b] = [1, 3, 5].map((k) => parseInt(e.tint!.slice(k, k + 2), 16) / 255);
-      for (let k = 0; k < out.data.length; k += 4) {
-        out.data[k] = Math.round(out.data[k]! * r!);
-        out.data[k + 1] = Math.round(out.data[k + 1]! * g!);
-        out.data[k + 2] = Math.round(out.data[k + 2]! * b!);
-      }
-    }
+    if (e.tint) tint(out, e.tint);
     writePng(join(destRoot, e.dest), out);
     written++;
   }
