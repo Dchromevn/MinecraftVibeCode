@@ -10,8 +10,8 @@ const SWING_S = 0.25;
 const REST = { x: 0.48, y: -0.52, z: -0.2, rx: 1.95, ry: 0.15, rz: 0.12 };
 /** Tư thế cầm: block xoay 45°, công cụ/vật phẩm nghiêng chéo như cầm trong tay. */
 const HOLD = {
-  block: { x: 0.42, y: -0.37, z: -0.78, rx: 0.12, ry: 0.78, rz: 0, s: 0.28 },
-  flat: { x: 0.44, y: -0.3, z: -0.75, rx: 0.05, ry: -1.3, rz: 0.4, s: 0.5 },
+  block: { x: 0.45, y: -0.39, z: -0.8, rx: 0.12, ry: 0.78, rz: 0, s: 0.33 },
+  flat: { x: 0.47, y: -0.31, z: -0.76, rx: 0.05, ry: -1.3, rz: 0.4, s: 0.6 },
 } as const;
 
 /** Ô điểm ảnh trên skin 64x32 → uv (v tính từ dưới lên). */
