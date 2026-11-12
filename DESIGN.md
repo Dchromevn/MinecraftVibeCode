@@ -170,12 +170,24 @@ Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X)
 | cửa | bit 0–1 hướng (tấm cửa nằm sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên |
 | lúa mì | 0–7 = giai đoạn lớn |
 | nước, dung nham | bit 0–2 mức 0–7 (0 = nguồn), bit 3 đang rơi |
-| lò nung, rương | bit 0–1 hướng mặt trước; riêng lò: bit 2 đang cháy (sáng 13) |
+| lò nung | bit 0–1 hướng mặt trước, bit 2 đang cháy (sáng 13) |
+| rương | bit 0–1 hướng mặt trước; bit 2–3: 0 rương đơn, 1 nửa trái, 2 nửa phải của rương đôi (trái/phải nhìn từ phía trước) |
 | đường ray | bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư) |
 | giường | bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường |
 
 Từ Giai đoạn 5, server lưu dữ liệu phụ cùng với id block trong file lưu và gửi
 kèm trong gói tin (chunk và thay đổi block).
+
+#### Rương đôi (người dùng đồng ý 2026-11-12)
+
+- Đặt một rương đơn sát cạnh một rương đơn khác, cùng hướng mặt trước, nằm cạnh nhau theo
+  chiều ngang (vuông góc với hướng mặt trước) thì hai rương tự ghép thành rương đôi. Giữ
+  Shift khi đặt thì không ghép. Tối đa 2 rương: rương thứ ba cạnh rương đôi là rương đơn.
+- Rương đôi chứa 54 ô (6 hàng); mở bên nào cũng ra cùng giao diện: 27 ô của nửa trái ở
+  trên, 27 ô của nửa phải ở dưới. Mỗi nửa vẫn lưu 27 ô của riêng nó.
+- Phá một nửa: đồ trong nửa đó rơi ra (kèm 1 rương), nửa kia trở lại rương đơn, giữ đồ.
+- Vẽ liền thành một khối dài 2 ô bằng texture rương lớn của REFI.
+- Rương sinh sẵn trong hầm mỏ là rương đơn.
 
 #### Chỗ bám của block
 
