@@ -90,14 +90,14 @@ export const SPRINGS = {
   MIN_DROP: 4, // vách cao ít nhất 4 block
 } as const;
 
-// Biome: mật độ cây (xác suất mỗi ô lưới 5x5) và cỏ cao (xác suất mỗi ô cỏ)
+// Biome: mật độ cây (xác suất mỗi ô lưới 5x5), cỏ cao và bí ngô (xác suất mỗi ô cỏ)
 export const BIOMES = {
-  plains: { treeChance: 0.12, grassChance: 0.2 },
-  forest: { treeChance: 0.85, grassChance: 0.1 },
-  desert: { treeChance: 0, grassChance: 0 },
-  snowy: { treeChance: 0.15, grassChance: 0 },
-  mountains: { treeChance: 0.12, grassChance: 0.05 },
-  ocean: { treeChance: 0, grassChance: 0 },
+  plains: { treeChance: 0.12, grassChance: 0.2, pumpkinChance: 0.002 },
+  forest: { treeChance: 0.85, grassChance: 0.1, pumpkinChance: 0.002 },
+  desert: { treeChance: 0, grassChance: 0, pumpkinChance: 0 },
+  snowy: { treeChance: 0.15, grassChance: 0, pumpkinChance: 0 },
+  mountains: { treeChance: 0.12, grassChance: 0.05, pumpkinChance: 0 },
+  ocean: { treeChance: 0, grassChance: 0, pumpkinChance: 0 },
   // ngưỡng chọn biome
   SNOWY_TEMP: -0.3,
   DESERT_TEMP: 0.3,

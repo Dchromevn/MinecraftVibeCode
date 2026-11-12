@@ -84,6 +84,18 @@
     "diamond_helmet": "Invicon_Diamond_Helmet.png",
     "diamond_chestplate": "Invicon_Diamond_Chestplate.png",
     "diamond_leggings": "Invicon_Diamond_Leggings.png",
-    "diamond_boots": "Invicon_Diamond_Boots.png"
+    "diamond_boots": "Invicon_Diamond_Boots.png",
+    "carrot": "Invicon_Carrot.png",
+    "potato": "Invicon_Potato.png",
+    "baked_potato": "Invicon_Baked_Potato.png",
+    "beetroot": "Invicon_Beetroot.png",
+    "beetroot_seeds": "Invicon_Beetroot_Seeds.png",
+    "beetroot_soup": "Invicon_Beetroot_Soup.png",
+    "melon_slice": "Invicon_Melon_Slice.png",
+    "melon_seeds": "Invicon_Melon_Seeds.png",
+    "pumpkin_seeds": "Invicon_Pumpkin_Seeds.png",
+    "bowl": "Invicon_Bowl.png",
+    "melon": "Invicon_Melon.png",
+    "pumpkin": "Invicon_Pumpkin.png"
   }
 }

@@ -8,6 +8,7 @@ interface Entry {
   dest: string;
   src: string;
   base?: string;
+  tint?: string; // nhân màu, dạng #RRGGBB
   slice?: { count: number; tile: number };
   tiers?: string[];
   pieces?: string[];
@@ -77,6 +78,7 @@ function expand(entry: Entry): Entry[] {
           .replace("{piece}", piece ?? "");
       const e: Entry = { dest: sub(entry.dest), src: sub(entry.src) };
       if (entry.base) e.base = entry.base;
+      if (entry.tint) e.tint = entry.tint;
       if (entry.slice) e.slice = entry.slice;
       out.push(e);
     }
@@ -114,6 +116,14 @@ for (const raw of map.entries) {
         const base = readPng(basePath);
         if (base.width === src.width && base.height === src.height) out = composite(base, src);
         else console.warn(`[import-textures] kích thước khác nhau, bỏ ghép: ${e.src} / ${e.base}`);
+      }
+    }
+    if (e.tint) {
+      const [r, g, b] = [1, 3, 5].map((k) => parseInt(e.tint!.slice(k, k + 2), 16) / 255);
+      for (let k = 0; k < out.data.length; k += 4) {
+        out.data[k] = Math.round(out.data[k]! * r!);
+        out.data[k + 1] = Math.round(out.data[k + 1]! * g!);
+        out.data[k + 2] = Math.round(out.data[k + 2]! * b!);
       }
     }
     writePng(join(destRoot, e.dest), out);

@@ -26,6 +26,14 @@ export const CROPS = {
   GRASS_SPREAD_TRIES: 4,
 } as const;
 
+/** Số lượng rơi khi phá cây trồng (khoảng [min, max]). */
+export const CROP_DROPS = {
+  SEEDS: [1, 3], // lúa chín: hạt lúa
+  ROOTS: [2, 5], // cà rốt, khoai tây chín
+  BEETROOT_SEEDS: [1, 4],
+  MELON_SLICES: [3, 7],
+} as const satisfies Record<string, readonly [number, number]>;
+
 export const CONTAINERS = {
   CHEST_SLOTS: 27,
   FURNACE_SLOTS: 3, // nguyên liệu, nhiên liệu, thành phẩm

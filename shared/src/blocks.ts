@@ -42,6 +42,13 @@ export const B = {
   ORE_GOLD: 35,
   ORE_GOLD_DEEP: 36,
   ORE_EMERALD: 37,
+  CARROTS: 38,
+  POTATOES: 39,
+  BEETROOTS: 40,
+  MELON: 41,
+  PUMPKIN: 42,
+  MELON_STEM: 43,
+  PUMPKIN_STEM: 44,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 
@@ -51,11 +58,12 @@ export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
  * Cách vẽ: cube = khối đầy đủ; cross = hai mặt chéo chữ X; liquid = chất lỏng
  * (mặt trên thấp hơn); layer = lớp mỏng sát sàn; fence = cột + thanh nối;
  * rail = tấm sát sàn tự chọn thẳng/cong; torch = que nhỏ; ladder = tấm sát tường;
- * door = tấm mỏng; crop = dạng #; bed = cao 9/16; farmland = thấp hơn 1/16.
+ * door = tấm mỏng; crop = dạng #; bed = cao 9/16; farmland = thấp hơn 1/16;
+ * stem = thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả).
  */
 export type RenderKind =
   | "none" | "cube" | "cross" | "liquid" | "layer" | "fence" | "rail"
-  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland";
+  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem";
 
 /**
  * Dữ liệu phụ: 1 byte mỗi block, song song với id (DESIGN.md 2.2). Block có kiểu
@@ -63,7 +71,8 @@ export type RenderKind =
  * - torch:  0 = cắm trên sàn; 1..4 = gắn tường ở hướng (giá trị − 1), nghiêng ra ngoài
  * - ladder: 0..3 = hướng bức tường mà thang bám vào
  * - door:   bit 0–1 hướng (tấm cửa sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên
- * - crop:   0..7 = giai đoạn lớn (lúa mì)
+ * - crop:   0..7 = giai đoạn lớn (lúa mì, cà rốt, khoai tây); củ cải đường 0..3
+ * - stem:   0..7 = tuổi; 8..11 = đã ra quả, quả ở hướng (giá trị − 8)
  * - liquid: bit 0–2 mức 0..7 (0 = nguồn), bit 3 đang rơi (nước, dung nham)
  * - facing: bit 0–1 hướng mặt trước; bit 2 đang cháy (lò nung)
  * - chest:  bit 0–1 hướng mặt trước; bit 2–3: 0 rương đơn, 1 nửa A, 2 nửa B của rương đôi
@@ -76,12 +85,12 @@ export type RenderKind =
  */
 export type MetaKind =
   | "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed"
-  | "chest" | "farmland" | "sapling" | "leaves";
+  | "chest" | "farmland" | "sapling" | "leaves" | "stem";
 
 /** Các bit được dùng của từng kiểu (bit khác luôn 0). */
 export const META_MASK: Readonly<Record<MetaKind, number>> = {
   none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 7,
-  chest: 15, farmland: 1, sapling: 1, leaves: 1,
+  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15,
 };
 
 export interface BlockTextures {

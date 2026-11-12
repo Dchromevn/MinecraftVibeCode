@@ -488,3 +488,28 @@ Trạng thái: chờ người dùng test.
 
 - Người dùng tự lưu trang ảnh bằng trình duyệt (wiki chặn tải tự động), `npm run wiki-icons` tìm Invicon_*.png trong `assets-src` và chép vào `client/public/icons_wiki/` (không commit, ảnh © Mojang). Game ưu tiên icon wiki cho hotbar, túi đồ, sổ công thức, vật phẩm rơi, vật phẩm trên tay; thiếu thì dùng icon REFI. Đã nhập đủ 83 / 83. Texture block trong thế giới vẫn là REFI.
 - Không nên phát hành công khai kèm thư mục `icons_wiki`.
+
+### Bổ sung 4b: cà rốt, khoai tây, củ cải đường, dưa hấu, bí ngô (2026-11-12, người dùng yêu cầu)
+
+- Mới: `shared/src/crops.ts` — cây trồng chung (lúa, cà rốt, khoai tây: 8 giai đoạn; củ cải đường: 4), công thức xác suất lớn của lúa dùng chung, thân dưa / bí: lớn tới tuổi 7 rồi mọc quả ra một ô ngang trống có đất / cỏ / đất cày bên dưới, thân chuyển "đã ra quả" (dữ liệu phụ 8–11); quả mất thì thân về tuổi 7.
+- Sửa `shared/src`: `blocks.ts` + `blockTable.ts` (id 38–44, kiểu dữ liệu phụ / cách vẽ "stem"), `randomTick.ts` (mọi cây trồng; đất cày có cây không khô thành đất), `blockRules.ts` (chỗ bám đất cày; quả bị phá → thân về 7), `drops.ts` + `tickConstants.ts` (CROP_DROPS: cà rốt / khoai chín 2–5, củ cải chín 1 + 1–4 hạt, dưa 3–7 lát), `items.ts` (hạt, bát, dưa, bí; cà rốt / khoai tây vừa ăn vừa trồng), `survivalConstants.ts` (6 món ăn; súp trả bát, không chồng; bộ đồ thử đổi sang hạt / củ mới), `recipes.ts` (bát, súp, hạt dưa, hạt bí), `smelting.ts` (khoai nướng), `gameplay.ts` (đồ rương hầm mỏ), `constants.ts` + `worldgen/trees.ts` (bí ngô mọc hoang trên cỏ ở đồng cỏ / rừng).
+- Sửa `client/src`: `mesh/shapes.ts` (vẽ thân theo tuổi, thân đã ra quả cong về phía quả), `mesh/specialBlocks.ts`, `mesh/mesher.ts` (texture theo giai đoạn: 4 ảnh cho 8 giai đoạn chia [0,0,1,1,2,2,2,3]), `main.ts`, `interact/interaction.ts` (chuột phải cà rốt / khoai lên mặt trên đất cày thì trồng, chỗ khác thì ăn; ăn súp trả lại bát), `game/worldTicker.ts` (giẫm đất cày làm rơi mọi loại cây), `strings.ts`; `scripts/texture-map.json` + `import-textures.ts` (thêm nhân màu cho thân xám), `scripts/wiki-icons.json` (thêm 12 icon).
+- Sửa lỗi có sẵn: đất cày bị vẽ đen (khối thấp lấy ánh sáng của chính ô nhưng lại chặn sáng) → đất cày không chặn sáng.
+- Đã kiểm: typecheck, build; bộ kiểm cây trồng 12/12 (chín đúng giai đoạn, rơi đồ đúng khoảng, thân ra 1 quả và ra lại sau khi hái, thân bị vây không ra quả, chỉ trồng trên đất cày, đất cày có cây không thành đất, phá đất cày → cây rơi, thiếu sáng bật ra, công thức, khoai nướng, súp trả bát, bí ngô mọc hoang xác định theo seed: 19 quả / 144 chunk); các bộ cũ 4b 12/12, vật lý 32/32, túi đồ 24/24, chỗ bám 18/18. Trình duyệt: cây theo giai đoạn, dưa, bí, thân đã ra quả, bí ngô ngoài tự nhiên.
+- Cần người dùng thử: cuốc đất, trồng cà rốt / khoai tây / hạt củ cải / hạt dưa / hạt bí (có sẵn trong bộ đồ thử), chờ lớn (`__game.session.ticker.speed = 300` với `?debug=1`), thân dưa / bí ra quả cạnh bên (cần ô trống có đất bên cạnh), hái quả thì thân ra quả lại; nung khoai tây; làm bát (3 ván chữ V ở bàn chế tạo) và súp (6 củ cải + bát), ăn súp được trả bát; tìm bí ngô mọc hoang trên đồng cỏ.
+- Còn tồn tại: hạt / củ mới chưa có nguồn ngoài rương hầm mỏ và bí ngô hoang (làng ở Giai đoạn 8); bí ngô chưa khắc mặt được.
+
+### Texture gốc Minecraft (2026-11-12, người dùng chọn "cách 1")
+
+- `npm run import-mc` (`scripts/import-mc.ts`, bảng `scripts/mc-texture-map.json`): đọc thẳng `assets-src/minecraft/*.jar` (client.jar người dùng tự tải từ máy chủ Mojang) bằng zlib có sẵn của Node, không thêm thư viện; ghi vào `client/public_mc/` (không commit, © Mojang). Vite (plugin trong `client/vite.config.ts`) ưu tiên file trong `public_mc` hơn `public` cùng đường dẫn, lúc build thì chép đè vào `dist`. Thiếu file nào thì dùng REFI. Xóa `client/public_mc` để quay lại REFI.
+- Ảnh xám của bản gốc (cỏ, lá, nước, thân dưa / bí) được nhân màu đồng cỏ cố định; ảnh động lấy khung đầu; da nhân vật cắt về 64x32.
+- Chưa ánh xạ (vẫn REFI): rương, giường (texture dạng thực thể), ray ngã ba / ngã tư (bản gốc không có), thanh công cụ, ô đồ, sách công thức.
+- Đã kiểm bằng file jar thử: giải nén đúng, nhân màu đúng, Vite trả ảnh public_mc khi có và ảnh REFI khi không. Chưa chạy với client.jar thật (người dùng tải).
+- Cách tải (PowerShell, thư mục dự án):
+  ```
+  $m = Invoke-RestMethod https://piston-meta.mojang.com/mc/game/version_manifest_v2.json
+  $v = Invoke-RestMethod ($m.versions | Where-Object id -eq $m.latest.release).url
+  New-Item -ItemType Directory -Force assets-src\minecraft | Out-Null
+  Invoke-WebRequest $v.downloads.client.url -OutFile assets-src\minecraft\client.jar
+  npm run import-mc
+  ```

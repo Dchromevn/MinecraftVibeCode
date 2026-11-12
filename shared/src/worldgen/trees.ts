@@ -1,4 +1,4 @@
-// Cây và cỏ cao. Vị trí cây quyết định theo lưới 5x5 + seed, nên chunk nào chứa
+// Cây, cỏ cao và bí ngô mọc hoang. Vị trí cây quyết định theo lưới 5x5 + seed, nên chunk nào chứa
 // phần lá của cây (kể cả cây gốc ở chunk kề) thì tự đặt phần đó.
 import { BIOMES, WORLD } from "../constants.js";
 import { B } from "../blocks.js";
@@ -86,12 +86,14 @@ export function placeTallGrass(gen: ChunkGenerator, data: Uint8Array, cx: number
     for (let lx = 0; lx < 16; lx++) {
       const col = cols[lz * 16 + lx]!;
       if (!hasGrassSurface(col)) continue;
-      const chance = BIOMES[BIOME_KEYS[col.biome]].grassChance;
-      if (hash01(gen.seed, cx * 16 + lx, cz * 16 + lz, 13) >= chance) continue;
+      const biome = BIOMES[BIOME_KEYS[col.biome]];
+      const wx = cx * 16 + lx, wz = cz * 16 + lz;
+      const pumpkin = hash01(gen.seed, wx, wz, 29) < biome.pumpkinChance;
+      if (!pumpkin && hash01(gen.seed, wx, wz, 13) >= biome.grassChance) continue;
       const y = col.height + 1;
       if (y >= CHUNK_HEIGHT || data[blockIndex(lx, col.height, lz)] !== B.GRASS) continue;
       const i = blockIndex(lx, y, lz);
-      if (data[i] === B.AIR) data[i] = B.TALLGRASS;
+      if (data[i] === B.AIR) data[i] = pumpkin ? B.PUMPKIN : B.TALLGRASS;
     }
   }
 }

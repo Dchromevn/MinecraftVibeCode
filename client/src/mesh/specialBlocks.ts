@@ -1,12 +1,14 @@
 // Vẽ block hình dạng đặc biệt theo dữ liệu phụ (DESIGN.md 2.2): đuốc sàn/tường, thang,
-// cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), lúa theo
-// giai đoạn. Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
+// cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), cây trồng theo
+// giai đoạn, thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả). Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
 import {
-  B, BLOCKS, bedDir, bedHead, doorSide, doorUpper, railKind, railRot, torchWall,
+  B, BLOCKS, STEM_RIPE, bedDir, bedHead, doorSide, doorUpper, railKind, railRot, stemAttachedDir, torchWall,
 } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
-import { addBed, addBox, addCrop, addCross, addFence, addLadder, addRail, addTorch, addTorchWall } from "./shapes.js";
+import {
+  addBed, addBox, addCrop, addCross, addFence, addLadder, addRail, addStem, addStemAttached, addTorch, addTorchWall,
+} from "./shapes.js";
 
 export interface SpecialUv {
   blocks: TileUV[][]; // [id][top, bottom, side, front]
@@ -16,7 +18,8 @@ export interface SpecialUv {
   bedFootSide: TileUV;
   bedHeadEnd: TileUV;
   bedFootEnd: TileUV;
-  wheat: TileUV[]; // giai đoạn 0..7
+  crops: (TileUV[] | undefined)[]; // [id][giai đoạn 0..7] của cây trồng
+  stemAttached: (TileUV | undefined)[]; // [id] thân đã ra quả
   farmlandWet: TileUV;
 }
 
@@ -44,8 +47,14 @@ export function addSpecial(
       addCross(b, x, y, z, t[2]!, light);
       return true;
     case "crop":
-      addCrop(b, x, y, z, id === B.WHEAT ? uv.wheat[meta & 7]! : t[2]!, light);
+      addCrop(b, x, y, z, uv.crops[id]?.[meta & 7] ?? t[2]!, light);
       return true;
+    case "stem": {
+      const d = stemAttachedDir(meta);
+      if (d !== null) addStemAttached(b, x, y, z, uv.stemAttached[id] ?? t[2]!, light, d);
+      else addStem(b, x, y, z, t[2]!, light, (Math.min(meta, STEM_RIPE) + 1) / 8);
+      return true;
+    }
     case "torch": {
       const wall = torchWall(meta);
       if (wall === null) addTorch(b, x, y, z, t[2]!, light);

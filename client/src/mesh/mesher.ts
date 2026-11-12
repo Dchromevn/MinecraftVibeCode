@@ -40,6 +40,19 @@ for (const b of BLOCKS) {
   CUBE_SOLID[b.id] = b.render === "cube" && !b.transparent ? 1 : 0;
 }
 
+/** Texture theo giai đoạn 0..7 của cây trồng (4 ảnh cho 8 giai đoạn: chia như bản gốc). */
+const STAGE4 = [0, 0, 1, 1, 2, 2, 2, 3];
+export const CROP_TEX: Readonly<Record<number, readonly string[]>> = {
+  [B.WHEAT]: Array.from({ length: 8 }, (_, i) => `wheat_${i}`),
+  [B.CARROTS]: STAGE4.map((k) => `carrots_${k}`),
+  [B.POTATOES]: STAGE4.map((k) => `potatoes_${k}`),
+  [B.BEETROOTS]: [0, 1, 2, 3].map((k) => `beetroots_${k}`),
+};
+export const STEM_ATTACHED_TEX: Readonly<Record<number, string>> = {
+  [B.MELON_STEM]: "melon_stem_attached",
+  [B.PUMPKIN_STEM]: "pumpkin_stem_attached",
+};
+
 export interface UvTable extends SpecialUv {
   snowSide: TileUV;
   furnaceOn: TileUV;
@@ -59,7 +72,8 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     furnaceOn: uv("furnace_front_on"),
     chestFront: [uv("chest_front_a"), uv("chest_front_b")],
     farmlandWet: uv("farmland_wet"),
-    wheat: Array.from({ length: 8 }, (_, i) => uv(`wheat_${i}`)),
+    crops: BLOCKS.map((b) => CROP_TEX[b.id]?.map(uv)),
+    stemAttached: BLOCKS.map((b) => (STEM_ATTACHED_TEX[b.id] ? uv(STEM_ATTACHED_TEX[b.id]!) : undefined)),
   };
 }
 

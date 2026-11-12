@@ -13,7 +13,8 @@
     "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json --noEmit && tsc -p client/tsconfig.json && tsc -p scripts/tsconfig.json",
     "build": "npm run build -w client && npm run build -w server",
     "import-textures": "tsx scripts/import-textures.ts",
-    "wiki-icons": "tsx scripts/import-wiki-icons.ts"
+    "wiki-icons": "tsx scripts/import-wiki-icons.ts",
+    "import-mc": "tsx scripts/import-mc.ts"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

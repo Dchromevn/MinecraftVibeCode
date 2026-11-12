@@ -1,0 +1,586 @@
+{
+ "notes": [
+  "Ánh xạ texture gốc (client.jar, assets/minecraft/textures/<src>.png) → client/public_mc/<dest>.png. Dùng bởi npm run import-mc.",
+  "Rương, giường (texture dạng thực thể), ray ngã ba/ngã tư, thanh công cụ, ô đồ, sách công thức: chưa ánh xạ, vẫn dùng REFI.",
+  "tint: nhân màu cho ảnh xám (màu đồng cỏ cố định). Ảnh động trong block/: lấy khung đầu."
+ ],
+ "entries": [
+  {
+   "dest": "textures/grass_top",
+   "src": "block/grass_block_top",
+   "tint": "#91BD59"
+  },
+  {
+   "dest": "textures/grass_side",
+   "src": "block/grass_block_side",
+   "overlay": "block/grass_block_side_overlay",
+   "overlayTint": "#91BD59"
+  },
+  {
+   "dest": "textures/dirt",
+   "src": "block/dirt"
+  },
+  {
+   "dest": "textures/stone",
+   "src": "block/stone"
+  },
+  {
+   "dest": "textures/cobble",
+   "src": "block/cobblestone"
+  },
+  {
+   "dest": "textures/bedrock",
+   "src": "block/bedrock"
+  },
+  {
+   "dest": "textures/sand",
+   "src": "block/sand"
+  },
+  {
+   "dest": "textures/log_side",
+   "src": "block/oak_log"
+  },
+  {
+   "dest": "textures/log_top",
+   "src": "block/oak_log_top"
+  },
+  {
+   "dest": "textures/planks",
+   "src": "block/oak_planks"
+  },
+  {
+   "dest": "textures/ore_coal",
+   "src": "block/coal_ore"
+  },
+  {
+   "dest": "textures/ore_iron",
+   "src": "block/iron_ore"
+  },
+  {
+   "dest": "textures/ore_diamond",
+   "src": "block/diamond_ore"
+  },
+  {
+   "dest": "textures/ore_gold",
+   "src": "block/gold_ore"
+  },
+  {
+   "dest": "textures/ore_gold_deep",
+   "src": "block/deepslate_gold_ore"
+  },
+  {
+   "dest": "textures/ore_emerald",
+   "src": "block/emerald_ore"
+  },
+  {
+   "dest": "textures/workbench_top",
+   "src": "block/crafting_table_top"
+  },
+  {
+   "dest": "textures/workbench_side",
+   "src": "block/crafting_table_side"
+  },
+  {
+   "dest": "textures/workbench_front",
+   "src": "block/crafting_table_front"
+  },
+  {
+   "dest": "textures/gravel",
+   "src": "block/gravel"
+  },
+  {
+   "dest": "textures/mossy_cobble",
+   "src": "block/mossy_cobblestone"
+  },
+  {
+   "dest": "textures/lava",
+   "src": "block/lava_still"
+  },
+  {
+   "dest": "textures/fence",
+   "src": "block/oak_planks"
+  },
+  {
+   "dest": "textures/rail",
+   "src": "block/rail"
+  },
+  {
+   "dest": "textures/rail_curved",
+   "src": "block/rail_corner"
+  },
+  {
+   "dest": "textures/cobweb",
+   "src": "block/cobweb"
+  },
+  {
+   "dest": "textures/torch",
+   "src": "block/torch"
+  },
+  {
+   "dest": "textures/sandstone",
+   "src": "block/sandstone"
+  },
+  {
+   "dest": "textures/snow",
+   "src": "block/snow"
+  },
+  {
+   "dest": "textures/snow_side",
+   "src": "block/grass_block_snow"
+  },
+  {
+   "dest": "textures/deepslate",
+   "src": "block/deepslate"
+  },
+  {
+   "dest": "textures/deepslate_top",
+   "src": "block/deepslate_top"
+  },
+  {
+   "dest": "textures/sapling",
+   "src": "block/oak_sapling"
+  },
+  {
+   "dest": "textures/furnace_front",
+   "src": "block/furnace_front"
+  },
+  {
+   "dest": "textures/furnace_front_on",
+   "src": "block/furnace_front_on"
+  },
+  {
+   "dest": "textures/furnace_side",
+   "src": "block/furnace_side"
+  },
+  {
+   "dest": "textures/furnace_top",
+   "src": "block/furnace_top"
+  },
+  {
+   "dest": "textures/glass",
+   "src": "block/glass"
+  },
+  {
+   "dest": "textures/ladder",
+   "src": "block/ladder"
+  },
+  {
+   "dest": "textures/door_lower",
+   "src": "block/oak_door_bottom"
+  },
+  {
+   "dest": "textures/door_upper",
+   "src": "block/oak_door_top"
+  },
+  {
+   "dest": "textures/farmland",
+   "src": "block/farmland"
+  },
+  {
+   "dest": "textures/farmland_wet",
+   "src": "block/farmland_moist"
+  },
+  {
+   "dest": "textures/obsidian",
+   "src": "block/obsidian"
+  },
+  {
+   "dest": "textures/melon_top",
+   "src": "block/melon_top"
+  },
+  {
+   "dest": "textures/melon_side",
+   "src": "block/melon_side"
+  },
+  {
+   "dest": "textures/pumpkin_top",
+   "src": "block/pumpkin_top"
+  },
+  {
+   "dest": "textures/pumpkin_side",
+   "src": "block/pumpkin_side"
+  },
+  {
+   "dest": "textures/leaves",
+   "src": "block/oak_leaves",
+   "tint": "#77AB2F"
+  },
+  {
+   "dest": "textures/tallgrass",
+   "src": [
+    "block/short_grass",
+    "block/grass"
+   ],
+   "tint": "#91BD59"
+  },
+  {
+   "dest": "textures/water",
+   "src": "block/water_still",
+   "tint": "#3F76E4"
+  },
+  {
+   "dest": "textures/crack_0",
+   "src": "block/destroy_stage_1"
+  },
+  {
+   "dest": "textures/crack_1",
+   "src": "block/destroy_stage_3"
+  },
+  {
+   "dest": "textures/crack_2",
+   "src": "block/destroy_stage_5"
+  },
+  {
+   "dest": "textures/crack_3",
+   "src": "block/destroy_stage_7"
+  },
+  {
+   "dest": "textures/crack_4",
+   "src": "block/destroy_stage_9"
+  },
+  {
+   "dest": "textures/wheat_0",
+   "src": "block/wheat_stage0"
+  },
+  {
+   "dest": "textures/wheat_1",
+   "src": "block/wheat_stage1"
+  },
+  {
+   "dest": "textures/wheat_2",
+   "src": "block/wheat_stage2"
+  },
+  {
+   "dest": "textures/wheat_3",
+   "src": "block/wheat_stage3"
+  },
+  {
+   "dest": "textures/wheat_4",
+   "src": "block/wheat_stage4"
+  },
+  {
+   "dest": "textures/wheat_5",
+   "src": "block/wheat_stage5"
+  },
+  {
+   "dest": "textures/wheat_6",
+   "src": "block/wheat_stage6"
+  },
+  {
+   "dest": "textures/wheat_7",
+   "src": "block/wheat_stage7"
+  },
+  {
+   "dest": "textures/carrots_0",
+   "src": "block/carrots_stage0"
+  },
+  {
+   "dest": "textures/potatoes_0",
+   "src": "block/potatoes_stage0"
+  },
+  {
+   "dest": "textures/beetroots_0",
+   "src": "block/beetroots_stage0"
+  },
+  {
+   "dest": "textures/carrots_1",
+   "src": "block/carrots_stage1"
+  },
+  {
+   "dest": "textures/potatoes_1",
+   "src": "block/potatoes_stage1"
+  },
+  {
+   "dest": "textures/beetroots_1",
+   "src": "block/beetroots_stage1"
+  },
+  {
+   "dest": "textures/carrots_2",
+   "src": "block/carrots_stage2"
+  },
+  {
+   "dest": "textures/potatoes_2",
+   "src": "block/potatoes_stage2"
+  },
+  {
+   "dest": "textures/beetroots_2",
+   "src": "block/beetroots_stage2"
+  },
+  {
+   "dest": "textures/carrots_3",
+   "src": "block/carrots_stage3"
+  },
+  {
+   "dest": "textures/potatoes_3",
+   "src": "block/potatoes_stage3"
+  },
+  {
+   "dest": "textures/beetroots_3",
+   "src": "block/beetroots_stage3"
+  },
+  {
+   "dest": "textures/melon_stem",
+   "src": "block/melon_stem",
+   "tint": "#80DF10"
+  },
+  {
+   "dest": "textures/melon_stem_attached",
+   "src": "block/attached_melon_stem",
+   "tint": "#E0C71C"
+  },
+  {
+   "dest": "textures/pumpkin_stem",
+   "src": "block/pumpkin_stem",
+   "tint": "#80DF10"
+  },
+  {
+   "dest": "textures/pumpkin_stem_attached",
+   "src": "block/attached_pumpkin_stem",
+   "tint": "#E0C71C"
+  },
+  {
+   "dest": "textures/player",
+   "src": [
+    "entity/player/wide/steve",
+    "entity/steve"
+   ],
+   "crop": [
+    0,
+    0,
+    64,
+    32
+   ]
+  },
+  {
+   "dest": "entities/player",
+   "src": [
+    "entity/player/wide/steve",
+    "entity/steve"
+   ],
+   "crop": [
+    0,
+    0,
+    64,
+    32
+   ]
+  },
+  {
+   "dest": "icons/{tier}_{piece}",
+   "src": "item/{mcTier}_{piece}",
+   "tiers": {
+    "wood": "wooden",
+    "stone": "stone",
+    "iron": "iron",
+    "gold": "golden",
+    "diamond": "diamond"
+   },
+   "pieces": [
+    "pickaxe",
+    "axe",
+    "shovel",
+    "sword",
+    "hoe"
+   ]
+  },
+  {
+   "dest": "icons/{tier}_{piece}",
+   "src": "item/{mcTier}_{piece}",
+   "tiers": {
+    "leather": "leather",
+    "iron": "iron",
+    "gold": "golden",
+    "diamond": "diamond"
+   },
+   "pieces": [
+    "helmet",
+    "chestplate",
+    "leggings",
+    "boots"
+   ]
+  },
+  {
+   "dest": "icons/stick",
+   "src": "item/stick"
+  },
+  {
+   "dest": "icons/coal",
+   "src": "item/coal"
+  },
+  {
+   "dest": "icons/iron_ingot",
+   "src": "item/iron_ingot"
+  },
+  {
+   "dest": "icons/diamond",
+   "src": "item/diamond"
+  },
+  {
+   "dest": "icons/apple",
+   "src": "item/apple"
+  },
+  {
+   "dest": "icons/bread",
+   "src": "item/bread"
+  },
+  {
+   "dest": "icons/raw_iron",
+   "src": "item/raw_iron"
+  },
+  {
+   "dest": "icons/raw_gold",
+   "src": "item/raw_gold"
+  },
+  {
+   "dest": "icons/gold_ingot",
+   "src": "item/gold_ingot"
+  },
+  {
+   "dest": "icons/emerald",
+   "src": "item/emerald"
+  },
+  {
+   "dest": "icons/golden_apple",
+   "src": "item/golden_apple"
+  },
+  {
+   "dest": "icons/wheat",
+   "src": "item/wheat"
+  },
+  {
+   "dest": "icons/flint",
+   "src": "item/flint"
+  },
+  {
+   "dest": "icons/string",
+   "src": "item/string"
+  },
+  {
+   "dest": "icons/feather",
+   "src": "item/feather"
+  },
+  {
+   "dest": "icons/leather",
+   "src": "item/leather"
+  },
+  {
+   "dest": "icons/arrow",
+   "src": "item/arrow"
+  },
+  {
+   "dest": "icons/bow",
+   "src": "item/bow"
+  },
+  {
+   "dest": "icons/carrot",
+   "src": "item/carrot"
+  },
+  {
+   "dest": "icons/potato",
+   "src": "item/potato"
+  },
+  {
+   "dest": "icons/baked_potato",
+   "src": "item/baked_potato"
+  },
+  {
+   "dest": "icons/beetroot",
+   "src": "item/beetroot"
+  },
+  {
+   "dest": "icons/beetroot_seeds",
+   "src": "item/beetroot_seeds"
+  },
+  {
+   "dest": "icons/beetroot_soup",
+   "src": "item/beetroot_soup"
+  },
+  {
+   "dest": "icons/melon_slice",
+   "src": "item/melon_slice"
+  },
+  {
+   "dest": "icons/melon_seeds",
+   "src": "item/melon_seeds"
+  },
+  {
+   "dest": "icons/pumpkin_seeds",
+   "src": "item/pumpkin_seeds"
+  },
+  {
+   "dest": "icons/bowl",
+   "src": "item/bowl"
+  },
+  {
+   "dest": "icons/seeds",
+   "src": "item/wheat_seeds"
+  },
+  {
+   "dest": "icons/bow_pull_0",
+   "src": "item/bow_pulling_0"
+  },
+  {
+   "dest": "icons/bow_pull_1",
+   "src": "item/bow_pulling_1"
+  },
+  {
+   "dest": "icons/bow_pull_2",
+   "src": "item/bow_pulling_2"
+  },
+  {
+   "dest": "icons/wool",
+   "src": "block/white_wool"
+  },
+  {
+   "dest": "icons/door",
+   "src": "item/oak_door"
+  },
+  {
+   "dest": "icons/furnace_fire",
+   "src": "gui/sprites/container/furnace/lit_progress"
+  },
+  {
+   "dest": "ui/heart",
+   "src": "gui/sprites/hud/heart/full"
+  },
+  {
+   "dest": "ui/heart_gone",
+   "src": "gui/sprites/hud/heart/container"
+  },
+  {
+   "dest": "ui/hunger",
+   "src": "gui/sprites/hud/food_full"
+  },
+  {
+   "dest": "ui/hunger_gone",
+   "src": "gui/sprites/hud/food_empty"
+  },
+  {
+   "dest": "ui/bubble",
+   "src": "gui/sprites/hud/air"
+  },
+  {
+   "dest": "ui/armor",
+   "src": "gui/sprites/hud/armor_full"
+  },
+  {
+   "dest": "ui/armor_gone",
+   "src": "gui/sprites/hud/armor_empty"
+  },
+  {
+   "dest": "ui/empty_helmet",
+   "src": "gui/sprites/container/slot/helmet"
+  },
+  {
+   "dest": "ui/empty_chestplate",
+   "src": "gui/sprites/container/slot/chestplate"
+  },
+  {
+   "dest": "ui/empty_leggings",
+   "src": "gui/sprites/container/slot/leggings"
+  },
+  {
+   "dest": "ui/empty_boots",
+   "src": "gui/sprites/container/slot/boots"
+  }
+ ]
+}

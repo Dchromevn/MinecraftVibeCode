@@ -1,7 +1,7 @@
 // Tick thế giới phía client (Giai đoạn 4b; Giai đoạn 5 chuyển lên server): random tick 20 lần /
 // giây cho các chunk quanh người chơi, lò nung chạy cả khi đóng, giẫm đất cày.
 import {
-  B, BlockEntities, CROPS, RANDOM_TICK, blockDrops, furnaceLit, randomTick,
+  B, BlockEntities, CROPS, RANDOM_TICK, blockDrops, furnaceLit, isFarmPlant, randomTick,
   type BlockId, type ItemStack, type PlayerState, type Rng, type TickWorld, type World,
 } from "../../../shared/src/index.js";
 
@@ -37,8 +37,11 @@ export class WorldTicker {
     if (s.landFall <= CROPS.TRAMPLE_MIN_FALL) return;
     const x = Math.floor(s.x), y = Math.floor(s.y - 0.01), z = Math.floor(s.z);
     if (this.world.getBlock(x, y, z) !== B.FARMLAND || this.rng() >= s.landFall - CROPS.TRAMPLE_MIN_FALL) return;
-    if (this.world.getBlock(x, y + 1, z) === B.WHEAT) this.tw.drop(B.WHEAT, this.world.getMeta(x, y + 1, z), x, y + 1, z);
-    this.tw.setCell(x, y + 1, z, B.AIR, 0);
+    const above = this.world.getBlock(x, y + 1, z);
+    if (isFarmPlant(above)) {
+      this.tw.drop(above, this.world.getMeta(x, y + 1, z), x, y + 1, z);
+      this.tw.setCell(x, y + 1, z, B.AIR, 0);
+    }
     this.tw.setCell(x, y, z, B.DIRT, 0);
   }
 

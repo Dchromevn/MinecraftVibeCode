@@ -209,3 +209,28 @@ export function addBed(
   face(b, P([[0, 0, 0], [0, 0, 1], [0, h, 1], [0, h, 0]]), su0, sv0, su1, sv1);
   face(b, P([[1, 0, 1], [1, 0, 0], [1, h, 0], [1, h, 1]]), su1, sv0, su0, sv1);
 }
+
+/** Thân dưa / bí chưa ra quả: chữ X cao h (0..1), lấy phần trên của texture. */
+export function addStem(b: GeomBuilder, x: number, y: number, z: number, uv: TileUV, light: readonly number[], h: number): void {
+  setLight(light, 0.95);
+  const lo = 0.15, hi = 0.85, t = y + h;
+  const [u0, v0, u1, v1] = sub(uv, 0, 16 - h * 16, 16, 16);
+  face(b, [x + lo, y, z + lo, x + hi, y, z + hi, x + hi, t, z + hi, x + lo, t, z + lo], u0, v0, u1, v1);
+  face(b, [x + hi, y, z + hi, x + lo, y, z + lo, x + lo, t, z + lo, x + hi, t, z + hi], u0, v0, u1, v1);
+  face(b, [x + hi, y, z + lo, x + lo, y, z + hi, x + lo, t, z + hi, x + hi, t, z + lo], u0, v0, u1, v1);
+  face(b, [x + lo, y, z + hi, x + hi, y, z + lo, x + hi, t, z + lo, x + lo, t, z + hi], u0, v0, u1, v1);
+}
+
+/** Thân đã ra quả: một tấm qua tâm nằm dọc hướng quả dir; mép trái texture (chỗ thân cong) ở phía quả. */
+export function addStemAttached(b: GeomBuilder, x: number, y: number, z: number, uv: TileUV, light: readonly number[], dir: number): void {
+  setLight(light, 0.95);
+  // dựng cho quả ở hướng 0 (+Z): tấm x = 0.5, z từ 1 (phía quả) về 0, rồi xoay
+  const P = (pts: number[][]): number[] =>
+    pts.flatMap(([px, py, pz]) => {
+      const [rx, rz] = rotXZ(px!, pz!, dir);
+      return [x + rx, y + py!, z + rz];
+    });
+  const { u0, v0, u1, v1 } = uv;
+  face(b, P([[0.5, 0, 1], [0.5, 0, 0], [0.5, 1, 0], [0.5, 1, 1]]), u0, v0, u1, v1);
+  face(b, P([[0.5, 0, 0], [0.5, 0, 1], [0.5, 1, 1], [0.5, 1, 0]]), u1, v0, u0, v1);
+}

@@ -7,6 +7,7 @@ export const SMELTING: Readonly<Record<string, string>> = {
   raw_gold: "gold_ingot",
   sand: "glass",
   cobble: "stone",
+  potato: "baked_potato",
 };
 
 /** Số món nung được với 1 đơn vị nhiên liệu (0 = không đốt được). */

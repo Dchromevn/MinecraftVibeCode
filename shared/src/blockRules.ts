@@ -5,6 +5,7 @@ import { HDX, HDZ, cellId, cellMeta, doorUpper, torchWall } from "./blockMeta.js
 import { collisionBoxes } from "./blockShapes.js";
 import { chestPartner, linkedCell, updateRailsAround, type PlacedCell } from "./placement.js";
 import { chestMeta, facingDir } from "./blockMeta.js";
+import { isFarmPlant, stemDetach } from "./crops.js";
 
 export interface BlockAccess {
   /** id | dữ liệu phụ << 8; âm = chunk chưa tải. */
@@ -57,7 +58,12 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
     case B.SAPLING:
       return below === B.GRASS || below === B.DIRT || below === B.FARMLAND;
     case B.WHEAT:
-      return below === B.FARMLAND;
+    case B.CARROTS:
+    case B.POTATOES:
+    case B.BEETROOTS:
+    case B.MELON_STEM:
+    case B.PUMPKIN_STEM:
+      return isFarmPlant(id) && below === B.FARMLAND;
     case B.DOOR: {
       if (doorUpper(m)) return below === B.DOOR;
       return isFullSolid(below) && idAt(x, y + 1, z) === B.DOOR;
@@ -134,6 +140,8 @@ export function settle(
       drops.push({ id, meta: cell >> 8, forced: true, x, y, z });
       if (id === B.RAIL) updateRailsAround(x, y, z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
       push(x, y, z);
+    } else if (stemDetach(id, cell >> 8, x, y, z, idAt) !== null) {
+      acc.setCell(x, y, z, id, stemDetach(id, cell >> 8, x, y, z, idAt)!); // quả bị phá: thân về tuổi 7
     } else if (BLOCKS[id]!.falls && canFallInto(idAt(x, y - 1, z))) {
       acc.setCell(x, y, z, B.AIR, 0);
       startFalling(x, y, z, id, cell >> 8);

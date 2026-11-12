@@ -26,7 +26,7 @@ const add = (d: ItemDef): void => void ITEMS.set(d.key, d);
 // --- block đặt được (khối đầy vẽ 3D, còn lại vẽ phẳng) ---
 const CUBES: BlockId[] = [
   B.DIRT, B.STONE, B.COBBLE, B.SAND, B.GRAVEL, B.LOG, B.PLANKS, B.WORKBENCH, B.CHEST, B.MOSSY_COBBLE,
-  B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES,
+  B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES, B.MELON, B.PUMPKIN,
 ];
 for (const id of CUBES) add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "cube", block: id }, places: id });
 for (const id of [B.TORCH, B.RAIL, B.LADDER, B.SAPLING, B.FENCE] as BlockId[])
@@ -34,16 +34,21 @@ for (const id of [B.TORCH, B.RAIL, B.LADDER, B.SAPLING, B.FENCE] as BlockId[])
 add({ key: "door", maxStack: STACK.SINGLE, icon: { type: "icon", name: "door" }, places: B.DOOR });
 add({ key: "bed", maxStack: STACK.SINGLE, icon: { type: "icon", name: "bed" }, places: B.BED });
 add({ key: "seeds", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "seeds" }, places: B.WHEAT });
+for (const [k, id] of [["beetroot_seeds", B.BEETROOTS], ["melon_seeds", B.MELON_STEM], ["pumpkin_seeds", B.PUMPKIN_STEM]] as const)
+  add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k }, places: id });
+/** Thức ăn trồng được: chuột phải lên đất cày thì trồng, chỗ khác thì ăn. */
+const PLANTED: Readonly<Record<string, BlockId>> = { carrot: B.CARROTS, potato: B.POTATOES };
 
 // --- nguyên liệu ---
 for (const k of [
   "stick", "coal", "raw_iron", "iron_ingot", "raw_gold", "gold_ingot", "diamond", "emerald", "flint", "string",
-  "feather", "leather", "wool", "wheat", "arrow",
+  "feather", "leather", "wool", "wheat", "arrow", "bowl",
 ]) add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k } });
 add({ key: "bow", maxStack: STACK.SINGLE, icon: { type: "icon", name: "bow" }, durability: BOW_DURABILITY });
 
 // --- thức ăn ---
-for (const [k, f] of Object.entries(FOODS)) add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k }, food: f });
+for (const [k, f] of Object.entries(FOODS))
+  add({ key: k, maxStack: f.single ? STACK.SINGLE : STACK.DEFAULT, icon: { type: "icon", name: k }, food: f, places: PLANTED[k] });
 
 // --- công cụ: 5 loại x 5 cấp ---
 export const TOOL_KINDS = ["pickaxe", "axe", "shovel", "sword", "hoe"] as const;

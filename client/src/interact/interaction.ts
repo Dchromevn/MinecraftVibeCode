@@ -154,7 +154,9 @@ export class Interaction {
       this.right = false;
       return;
     }
-    if (food) {
+    // cà rốt / khoai tây: chuột phải lên mặt trên đất cày thì trồng, chỗ khác thì ăn
+    const plants = food && held && itemDef(held.item)?.places !== undefined && t && (t.cell & 255) === B.FARMLAND && t.ny === 1;
+    if (food && !plants) {
       if (!canEat(s, food)) return;
       this.eating += dt;
       this.view.swing();
@@ -162,6 +164,15 @@ export class Interaction {
         eat(s, food);
         this.view.inv.takeHeld(1);
         this.eating = 0;
+        // súp: trả lại bát (vào tay nếu tay trống, không thì vào túi, đầy túi thì rơi ra)
+        if (food.returns) {
+          const inv = this.view.inv, bowl = { item: food.returns, count: 1, damage: 0 };
+          if (!inv.held) inv.main[inv.selected] = bowl;
+          else {
+            const left = inv.add(bowl);
+            if (left) this.view.items.throw(left, this.view.camera.position, this.dir);
+          }
+        }
       }
       return;
     }

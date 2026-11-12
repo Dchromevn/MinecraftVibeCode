@@ -4,7 +4,8 @@
   "notes": [
     "base: nếu ảnh nguồn có điểm trong suốt thì ghép đè lên ảnh base; nếu không thì sao chép nguyên.",
     "slice: cắt ảnh nguồn theo chiều dọc thành count khung cao tile px; dest dùng {i}.",
-    "tiers/pieces: nhân bản mục theo cấp và loại giáp; {tier} là tên đích, {srcTier} là tên nguồn (iron -> steel)."
+    "tiers/pieces: nhân bản mục theo cấp và loại giáp; {tier} là tên đích, {srcTier} là tên nguồn (iron -> steel).",
+    "tint: nhân màu (ảnh xám như thân dưa / bí)."
   ],
   "entries": [
     {
@@ -539,6 +540,130 @@
     {
       "dest": "textures/bed_foot_end.png",
       "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_red.png"
+    },
+    {
+      "dest": "textures/carrots_0.png",
+      "src": "farming_mcl_farming/farming_carrot_1.png"
+    },
+    {
+      "dest": "textures/potatoes_0.png",
+      "src": "farming_mcl_farming/mcl_farming_potatoes_stage_0.png"
+    },
+    {
+      "dest": "textures/beetroots_0.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot_0.png"
+    },
+    {
+      "dest": "textures/carrots_1.png",
+      "src": "farming_mcl_farming/farming_carrot_2.png"
+    },
+    {
+      "dest": "textures/potatoes_1.png",
+      "src": "farming_mcl_farming/mcl_farming_potatoes_stage_1.png"
+    },
+    {
+      "dest": "textures/beetroots_1.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot_1.png"
+    },
+    {
+      "dest": "textures/carrots_2.png",
+      "src": "farming_mcl_farming/farming_carrot_3.png"
+    },
+    {
+      "dest": "textures/potatoes_2.png",
+      "src": "farming_mcl_farming/mcl_farming_potatoes_stage_2.png"
+    },
+    {
+      "dest": "textures/beetroots_2.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot_2.png"
+    },
+    {
+      "dest": "textures/carrots_3.png",
+      "src": "farming_mcl_farming/farming_carrot_4.png"
+    },
+    {
+      "dest": "textures/potatoes_3.png",
+      "src": "farming_mcl_farming/mcl_farming_potatoes_stage_3.png"
+    },
+    {
+      "dest": "textures/beetroots_3.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot_3.png"
+    },
+    {
+      "dest": "textures/melon_top.png",
+      "src": "farming_mcl_farming/farming_melon_top.png"
+    },
+    {
+      "dest": "textures/melon_side.png",
+      "src": "farming_mcl_farming/farming_melon_side.png"
+    },
+    {
+      "dest": "textures/melon_stem.png",
+      "src": "farming_mcl_farming/mcl_farming_melon_stem_disconnected.png",
+      "tint": "#80DF10"
+    },
+    {
+      "dest": "textures/melon_stem_attached.png",
+      "src": "farming_mcl_farming/mcl_farming_melon_stem_connected.png",
+      "tint": "#E0C71C"
+    },
+    {
+      "dest": "textures/pumpkin_top.png",
+      "src": "farming_mcl_farming/farming_pumpkin_top.png"
+    },
+    {
+      "dest": "textures/pumpkin_side.png",
+      "src": "farming_mcl_farming/farming_pumpkin_side.png"
+    },
+    {
+      "dest": "textures/pumpkin_stem.png",
+      "src": "farming_mcl_farming/mcl_farming_pumpkin_stem_disconnected.png",
+      "tint": "#80DF10"
+    },
+    {
+      "dest": "textures/pumpkin_stem_attached.png",
+      "src": "farming_mcl_farming/mcl_farming_pumpkin_stem_connected.png",
+      "tint": "#E0C71C"
+    },
+    {
+      "dest": "icons/carrot.png",
+      "src": "farming_mcl_farming/farming_carrot.png"
+    },
+    {
+      "dest": "icons/potato.png",
+      "src": "farming_mcl_farming/farming_potato.png"
+    },
+    {
+      "dest": "icons/baked_potato.png",
+      "src": "farming_mcl_farming/farming_potato_baked.png"
+    },
+    {
+      "dest": "icons/beetroot.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot.png"
+    },
+    {
+      "dest": "icons/beetroot_seeds.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot_seeds.png"
+    },
+    {
+      "dest": "icons/beetroot_soup.png",
+      "src": "farming_mcl_farming/mcl_farming_beetroot_soup.png"
+    },
+    {
+      "dest": "icons/melon_slice.png",
+      "src": "farming_mcl_farming/farming_melon.png"
+    },
+    {
+      "dest": "icons/melon_seeds.png",
+      "src": "farming_mcl_farming/mcl_farming_melon_seeds.png"
+    },
+    {
+      "dest": "icons/pumpkin_seeds.png",
+      "src": "farming_mcl_farming/mcl_farming_pumpkin_seeds.png"
+    },
+    {
+      "dest": "icons/bowl.png",
+      "src": "default_mcl_core/mcl_core_bowl.png"
     }
   ]
 }

@@ -1,9 +1,10 @@
-// Hành vi random tick (DESIGN.md "Random tick và trồng trọt"; MECHANICS.md 1, 9): lúa lớn / bật
-// ra, đất cày ẩm-khô-thành đất, cây non lớn thành cây, lá xa thân gỗ rụng, cỏ lan / chết.
+// Hành vi random tick (DESIGN.md "Random tick và trồng trọt"; MECHANICS.md 1, 9): cây trồng lớn /
+// bật ra (crops.ts), đất cày ẩm-khô-thành đất, cây non lớn thành cây, lá xa thân gỗ rụng, cỏ lan / chết.
 import { B } from "./blocks.js";
 import { CROPS, WORLD } from "./constants.js";
 import { farmlandWet, leavesPersistent } from "./blockMeta.js";
 import { isFullSolid } from "./blockRules.js";
+import { growPlant, isFarmPlant, stemDetach } from "./crops.js";
 import { randInt, type Rng } from "./rng.js";
 import { treeCanopy } from "./worldgen/trees.js";
 
@@ -22,34 +23,18 @@ const idOf = (w: TickWorld, x: number, y: number, z: number): number => {
   return c < 0 ? -1 : c & 255;
 };
 
-function wheat(w: TickWorld, x: number, y: number, z: number, meta: number, rng: Rng): void {
+/** Cây trồng / thân: tối quá thì bật ra, đủ sáng thì lớn. */
+function plant(w: TickWorld, id: number, x: number, y: number, z: number, meta: number, rng: Rng): void {
   const light = w.light(x, y, z);
   if (light < 0) return;
   if (light < CROPS.POP_LIGHT) {
     w.setCell(x, y, z, B.AIR, 0);
-    w.drop(B.WHEAT, meta, x, y, z);
+    w.drop(id, meta, x, y, z);
     return;
   }
-  const stage = meta & 7;
-  if (light < CROPS.GROW_LIGHT || stage >= 7) return;
-  const fl = (dx: number, dz: number): number => {
-    const c = w.getCell(x + dx, y - 1, z + dz);
-    if (c < 0 || (c & 255) !== B.FARMLAND) return 0;
-    return farmlandWet(c >> 8) ? 1 : 0.5; // 1 = ẩm, 0.5 = khô
-  };
-  const under = fl(0, 0);
-  let points = CROPS.BASE_POINTS + (under === 1 ? CROPS.FARMLAND_WET : under ? CROPS.FARMLAND_DRY : 0);
-  for (let dx = -1; dx <= 1; dx++)
-    for (let dz = -1; dz <= 1; dz++) {
-      if (!dx && !dz) continue;
-      const f = fl(dx, dz);
-      points += f === 1 ? CROPS.NEIGHBOR_WET : f ? CROPS.NEIGHBOR_DRY : 0;
-    }
-  const isWheat = (dx: number, dz: number): boolean => idOf(w, x + dx, y, z + dz) === B.WHEAT;
-  const diag = isWheat(1, 1) || isWheat(1, -1) || isWheat(-1, 1) || isWheat(-1, -1);
-  const rows = (isWheat(1, 0) || isWheat(-1, 0)) && (isWheat(0, 1) || isWheat(0, -1));
-  if (diag || rows) points /= 2;
-  if (rng() < 1 / (Math.floor(CROPS.POINTS_DIVIDEND / points) + 1)) w.setCell(x, y, z, B.WHEAT, stage + 1);
+  const fixed = stemDetach(id, meta, x, y, z, (a, b, c) => idOf(w, a, b, c));
+  if (fixed !== null) return w.setCell(x, y, z, id, fixed);
+  if (light >= CROPS.GROW_LIGHT) growPlant(w, id, meta, x, y, z, rng);
 }
 
 function farmland(w: TickWorld, x: number, y: number, z: number, meta: number): void {
@@ -59,7 +44,7 @@ function farmland(w: TickWorld, x: number, y: number, z: number, meta: number): 
     for (let dz = -r; dz <= r && !wet; dz++)
       for (let dx = -r; dx <= r && !wet; dx++) if (idOf(w, x + dx, y + dy, z + dz) === B.WATER) wet = true;
   if (wet !== farmlandWet(meta)) return w.setCell(x, y, z, B.FARMLAND, wet ? 1 : 0);
-  if (!wet && idOf(w, x, y + 1, z) !== B.WHEAT) w.setCell(x, y, z, B.DIRT, 0);
+  if (!wet && !isFarmPlant(idOf(w, x, y + 1, z))) w.setCell(x, y, z, B.DIRT, 0);
 }
 
 /** Mọc cây tại gốc (x, y, z) nếu đủ chỗ; trả về true nếu mọc. */
@@ -121,7 +106,12 @@ export function randomTick(w: TickWorld, x: number, y: number, z: number, rng: R
   const id = c & 255, meta = c >> 8;
   switch (id) {
     case B.WHEAT:
-      return wheat(w, x, y, z, meta, rng);
+    case B.CARROTS:
+    case B.POTATOES:
+    case B.BEETROOTS:
+    case B.MELON_STEM:
+    case B.PUMPKIN_STEM:
+      return plant(w, id, x, y, z, meta, rng);
     case B.FARMLAND:
       return farmland(w, x, y, z, meta);
     case B.SAPLING: {

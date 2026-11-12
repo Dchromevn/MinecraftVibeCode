@@ -1,5 +1,5 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–37 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
+// Đủ id 0–44 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
 import { LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
@@ -120,6 +120,7 @@ const TABLE: BlockDef[] = [
   def(30, "farmland", 0.6, "shovel", [drop("dirt")], { top: "farmland", bottom: "dirt", side: "dirt" }, {
     transparent: true,
     opaque: false,
+    lightOpacity: 0, // khối thấp lấy ánh sáng của chính ô: không chặn sáng, nếu không sẽ bị vẽ đen
     box: [0, 0, 0, 1, 15 / 16, 1],
     render: "farmland",
     meta: "farmland",
@@ -140,6 +141,14 @@ const TABLE: BlockDef[] = [
   def(35, "ore_gold", 3, "pickaxe", [drop("raw_gold")], same("ore_gold"), { ...PICK_ONLY, minTier: "iron" }),
   def(36, "ore_gold_deep", 4.5, "pickaxe", [drop("raw_gold")], same("ore_gold_deep"), { ...PICK_ONLY, minTier: "iron" }),
   def(37, "ore_emerald", 3, "pickaxe", [drop("emerald")], same("ore_emerald"), { ...PICK_ONLY, minTier: "iron" }),
+  // cây trồng: số lượng rơi theo giai đoạn xử lý trong drops.ts
+  def(38, "carrots", 0, "none", [drop("carrot")], same("carrots_3"), { ...OPEN, render: "crop", meta: "crop" }),
+  def(39, "potatoes", 0, "none", [drop("potato")], same("potatoes_3"), { ...OPEN, render: "crop", meta: "crop" }),
+  def(40, "beetroots", 0, "none", [drop("beetroot_seeds")], same("beetroots_3"), { ...OPEN, render: "crop", meta: "crop" }),
+  def(41, "melon", 1, "axe", [drop("melon_slice")], { top: "melon_top", bottom: "melon_top", side: "melon_side" }),
+  def(42, "pumpkin", 1, "axe", [drop("pumpkin")], { top: "pumpkin_top", bottom: "pumpkin_top", side: "pumpkin_side" }),
+  def(43, "melon_stem", 0, "none", [drop("melon_seeds")], same("melon_stem"), { ...OPEN, render: "stem", meta: "stem" }),
+  def(44, "pumpkin_stem", 0, "none", [drop("pumpkin_seeds")], same("pumpkin_stem"), { ...OPEN, render: "stem", meta: "stem" }),
 ];
 
 TABLE.forEach((b, i) => {
