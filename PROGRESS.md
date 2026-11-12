@@ -483,3 +483,8 @@ Trạng thái: chờ người dùng test.
 - Rương sinh sẵn chỉ có ở hầm mỏ; mọi rương chưa từng mở được coi là rương sinh sẵn (rương người chơi đặt luôn tạo dữ liệu rỗng ngay khi đặt).
 - Mặt trên / sau rương đôi dùng texture rương thường (REFI không đủ bộ texture rương lớn).
 - Chưa lưu được: tải lại trang là mất (Giai đoạn 5).
+
+### Icon từ minecraft.wiki (2026-11-12, người dùng yêu cầu; đã bỏ quy tắc cấm trong AGENTS.md)
+
+- Người dùng tự lưu trang ảnh bằng trình duyệt (wiki chặn tải tự động), `npm run wiki-icons` tìm Invicon_*.png trong `assets-src` và chép vào `client/public/icons_wiki/` (không commit, ảnh © Mojang). Game ưu tiên icon wiki cho hotbar, túi đồ, sổ công thức, vật phẩm rơi, vật phẩm trên tay; thiếu thì dùng icon REFI. Đã nhập đủ 83 / 83. Texture block trong thế giới vẫn là REFI.
+- Không nên phát hành công khai kèm thư mục `icons_wiki`.

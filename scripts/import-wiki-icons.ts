@@ -1,10 +1,10 @@
 // Icon vật phẩm từ minecraft.wiki (do người dùng tự tải bằng trình duyệt; wiki chặn tải tự động).
 //   npm run wiki-icons -- --page   tạo assets-src/wiki_icons/tai-icon.html: mở bằng trình duyệt (đã vào
 //                                  minecraft.wiki một lần), rồi "Lưu trang → Toàn bộ trang web" vào cùng thư mục.
-//   npm run wiki-icons             tìm các file Invicon_*.png trong assets-src/wiki_icons (kể cả thư mục con),
+//   npm run wiki-icons             tìm các file Invicon_*.png ở bất kỳ đâu trong assets-src (trừ REFI_Textures),
 //                                  chép thành client/public/icons_wiki/<khóa>.png (thư mục không commit).
 // Game ưu tiên icons_wiki nếu có file, không có thì dùng icon REFI. Xóa thư mục icons_wiki để quay lại.
-import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync as readBytes, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { readFileSync } from "node:fs";
 
@@ -31,17 +31,22 @@ ${imgs}`;
   process.exit(0);
 }
 
-/** Mọi file trong thư mục (đệ quy), khóa theo tên file viết thường. */
+/** Mọi file trong thư mục (đệ quy, bỏ qua bộ REFI), khóa theo tên file viết thường. */
 function listFiles(dir: string, out = new Map<string, string>()): Map<string, string> {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
-    if (statSync(p).isDirectory()) listFiles(p, out);
-    else out.set(name.toLowerCase(), p);
+    if (statSync(p).isDirectory()) {
+      if (name !== "REFI_Textures") listFiles(p, out);
+    } else out.set(name.toLowerCase(), p);
   }
   return out;
 }
 
-const files = listFiles(srcDir);
+/** File có đúng là ảnh PNG không (trang chống bot đôi khi lưu ra HTML mang đuôi .png). */
+const isPng = (p: string): boolean => readBytes(p).subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+
+const files = listFiles(join(root, "assets-src"));
+const notPng: string[] = [];
 mkdirSync(outDir, { recursive: true });
 const missing: string[] = [];
 let n = 0;
@@ -51,8 +56,13 @@ for (const [key, file] of Object.entries(map.icons)) {
     missing.push(`${key} (${file})`);
     continue;
   }
+  if (!isPng(src)) {
+    notPng.push(file);
+    continue;
+  }
   copyFileSync(src, join(outDir, `${key}.png`));
   n++;
 }
 console.log(`[wiki-icons] Đã chép ${n} icon vào client/public/icons_wiki.`);
 if (missing.length) console.log(`[wiki-icons] Thiếu ${missing.length}: ${missing.join(", ")}`);
+if (notPng.length) console.log(`[wiki-icons] Không phải ảnh PNG (bỏ qua) ${notPng.length}: ${notPng.join(", ")}`);
