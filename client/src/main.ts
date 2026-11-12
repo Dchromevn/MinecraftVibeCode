@@ -26,7 +26,7 @@ const EXTRA_TEXTURES = [
   "crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side",
   "rail_curved", "rail_t", "rail_cross", "bed_foot_side", "furnace_front_on",
   "wheat_0", "wheat_1", "wheat_2", "wheat_3", "wheat_4", "wheat_5", "wheat_6",
-  "chest_front_a", "chest_front_b", "farmland_wet",
+  "chest_front_a", "chest_front_b", "farmland_wet", "bed_head_end", "bed_foot_end",
 ];
 const NIGHT_VISION = 0.45; // độ sáng tối thiểu khi bật nhìn đêm (debug)
 

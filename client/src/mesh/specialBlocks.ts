@@ -2,11 +2,11 @@
 // cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), lúa theo
 // giai đoạn. Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
 import {
-  B, BLOCKS, bedHead, doorSide, doorUpper, railKind, railRot, torchWall,
+  B, BLOCKS, bedDir, bedHead, doorSide, doorUpper, railKind, railRot, torchWall,
 } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
-import { addBox, addCrop, addCross, addFence, addLadder, addRail, addTorch, addTorchWall } from "./shapes.js";
+import { addBed, addBox, addCrop, addCross, addFence, addLadder, addRail, addTorch, addTorchWall } from "./shapes.js";
 
 export interface SpecialUv {
   blocks: TileUV[][]; // [id][top, bottom, side, front]
@@ -14,6 +14,8 @@ export interface SpecialUv {
   railT: TileUV;
   railCross: TileUV;
   bedFootSide: TileUV;
+  bedHeadEnd: TileUV;
+  bedFootEnd: TileUV;
   wheat: TileUV[]; // giai đoạn 0..7
   farmlandWet: TileUV;
 }
@@ -73,9 +75,11 @@ export function addSpecial(
       return true;
     }
     case "bed": {
-      const foot = !bedHead(meta);
-      const top = foot ? t[3]! : t[0]!;
-      addBox(b, x, y, z, 0, 16, 0, 9, 0, 16, { top, side: foot ? uv.bedFootSide : t[2]!, bottom: t[1]! }, light);
+      const head = bedHead(meta);
+      addBed(b, x, y, z, {
+        top: head ? t[0]! : t[3]!, end: head ? uv.bedHeadEnd : uv.bedFootEnd,
+        side: head ? t[2]! : uv.bedFootSide, bottom: t[1]!,
+      }, light, bedDir(meta), head);
       return true;
     }
     case "farmland": {

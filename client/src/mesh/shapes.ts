@@ -173,3 +173,39 @@ export function addTorchWall(
   face(b, [...P(-a, 0, a), ...P(a, 0, a), ...P(a, H, a), ...P(-a, H, a)], su0, sv0, su1, sv1);
   face(b, [...P(a, 0, -a), ...P(-a, 0, -a), ...P(-a, H, -a), ...P(a, H, -a)], su0, sv0, su1, sv1);
 }
+
+export interface BedTex {
+  top: TileUV; // đầu: gối + sọc chăn (gối ở bên phải texture); chân: toàn chăn
+  end: TileUV; // mặt đầu / mặt cuối giường (2 chân)
+  side: TileUV; // mặt hông (1 chân ở phía chân giường, đầu giường ở bên phải texture)
+  bottom: TileUV;
+}
+
+/**
+ * Một nửa giường cao 9/16, hướng dir (từ chân tới đầu: 0 Nam +Z, 1 Tây −X, 2 Bắc −Z, 3 Đông +X).
+ * Dựng cho hướng +Z rồi xoay; không vẽ mặt tiếp giáp với nửa kia; mặt hông bên +X lật ngang
+ * để đầu giường luôn đúng phía.
+ */
+export function addBed(
+  b: GeomBuilder, x: number, y: number, z: number, t: BedTex, light: readonly number[], dir: number, head: boolean,
+): void {
+  const h = 9 / 16;
+  const P = (pts: number[][]): number[] =>
+    pts.flatMap(([px, py, pz]) => {
+      const [rx, rz] = rotXZ(px!, pz!, dir);
+      return [x + rx, y + py!, z + rz];
+    });
+  const [su0, sv0, su1, sv1] = sub(t.side, 0, 0, 16, 9);
+  const [eu0, ev0, eu1, ev1] = sub(t.end, 0, 0, 16, 9);
+  setLight(light, 1);
+  face(b, P([[0, h, 1], [1, h, 1], [1, h, 0], [0, h, 0]]), t.top.u0, t.top.v0, t.top.u1, t.top.v1, 1); // gối về phía +Z
+  setLight(light, 0.5);
+  face(b, P([[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1]]), t.bottom.u0, t.bottom.v0, t.bottom.u1, t.bottom.v1);
+  setLight(light, 0.8);
+  if (head) face(b, P([[0, 0, 1], [1, 0, 1], [1, h, 1], [0, h, 1]]), eu0, ev0, eu1, ev1); // mặt đầu giường
+  else face(b, P([[1, 0, 0], [0, 0, 0], [0, h, 0], [1, h, 0]]), eu0, ev0, eu1, ev1); // mặt cuối giường
+  setLight(light, 0.6);
+  // hông −X: u tăng về phía +Z (đầu giường bên phải); hông +X: lật ngang
+  face(b, P([[0, 0, 0], [0, 0, 1], [0, h, 1], [0, h, 0]]), su0, sv0, su1, sv1);
+  face(b, P([[1, 0, 1], [1, 0, 0], [1, h, 0], [1, h, 1]]), su1, sv0, su0, sv1);
+}

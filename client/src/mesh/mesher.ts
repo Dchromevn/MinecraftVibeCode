@@ -54,6 +54,8 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     railT: uv("rail_t"),
     railCross: uv("rail_cross"),
     bedFootSide: uv("bed_foot_side"),
+    bedHeadEnd: uv("bed_head_end"),
+    bedFootEnd: uv("bed_foot_end"),
     furnaceOn: uv("furnace_front_on"),
     chestFront: [uv("chest_front_a"), uv("chest_front_b")],
     farmlandWet: uv("farmland_wet"),

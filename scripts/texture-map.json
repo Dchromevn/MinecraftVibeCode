@@ -267,11 +267,11 @@
     },
     {
       "dest": "textures/bed_head_side.png",
-      "src": "beds_mcl_beds/mcl_beds_bed_side_top_red.png"
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_red.png"
     },
     {
       "dest": "textures/bed_foot_side.png",
-      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_red.png"
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_red.png"
     },
     {
       "dest": "textures/obsidian.png",
@@ -531,6 +531,14 @@
     {
       "dest": "icons/furnace_fire_bg.png",
       "src": "default_mcl_core/gui_hud/default_furnace_fire_bg.png"
+    },
+    {
+      "dest": "textures/bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_red.png"
+    },
+    {
+      "dest": "textures/bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_red.png"
     }
   ]
 }
