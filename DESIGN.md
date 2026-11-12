@@ -235,7 +235,7 @@ Làm được mọi lúc (trong túi đồ):
 - 4 ván gỗ → 1 bàn chế tạo
 - 1 than + 1 que → 4 đuốc
 
-Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương):
+Cần bàn chế tạo (lưới 3x3; X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương):
 - cuốc, rìu: 3 X + 2 que · xẻng: 1 X + 2 que · kiếm: 2 X + 1 que
 - cuốc đất: 2 X + 2 que
 - mũ 5 X · áo 8 X · quần 7 X · giày 4 X (da / sắt / vàng / kim cương)
@@ -250,8 +250,22 @@ Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội 
 - giường: 3 len + 3 ván gỗ
 - sa thạch: 4 cát
 
-Giao diện chế tạo dạng danh sách (không cần lưới kéo thả): công thức đủ nguyên
-liệu thì sáng, thiếu thì mờ.
+Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả kèm sổ công thức.
+- Túi đồ (phím E) có lưới 2x2; chuột phải vào bàn chế tạo mở màn hình bàn chế tạo có
+  lưới 3x3 (giữ Shift + chuột phải thì vẫn đặt block lên bàn). Công thức "làm được
+  mọi lúc" làm được ở cả hai lưới; công thức cần bàn chế tạo chỉ làm được ở lưới 3x3.
+- Xếp nguyên liệu vào lưới đúng hình thì ô kết quả hiện thành phẩm; bấm ô kết quả để
+  lấy (mỗi ô lưới mất 1 nguyên liệu), Shift + bấm thì làm liên tục vào túi đồ. Một số
+  công thức không cần hình (thân gỗ → ván, đuốc...). Hình lật ngang cũng được.
+- Đóng giao diện thì nguyên liệu còn trong lưới trả về túi (thừa thì vứt ra).
+- Sổ công thức (danh sách bên phải): đủ nguyên liệu thì sáng, thiếu thì mờ; bấm một
+  công thức thì nguyên liệu tự xếp vào lưới, Shift + bấm xếp nhiều bộ nhất có thể.
+- Hình xếp (X = vật liệu, | = que): cuốc XXX / ·|· / ·|·; rìu XX / X| / ·|; xẻng X / | / |;
+  kiếm X / X / |; cuốc đất XX / ·| / ·|; mũ XXX / X·X; áo X·X / XXX / XXX; quần XXX / X·X /
+  X·X; giày X·X / X·X; que: 2 ván dọc; bàn chế tạo: 2x2 ván; đuốc: than trên que;
+  rương / lò nung: vòng 8 ô; thang: |·| / ||| / |·|; cửa: 2x3 ván; hàng rào: ván|ván x2;
+  ray: sắt·sắt / sắt|sắt / sắt·sắt; bánh mì: 3 lúa ngang; giường: 3 len trên 3 ván;
+  sa thạch: 2x2 cát; táo vàng: 8 thỏi vàng quanh táo; cung, mũi tên theo hình quen thuộc.
 
 ### 2.5 Lò nung
 
