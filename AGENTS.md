@@ -11,6 +11,8 @@ chỉ chứa quy tắc làm việc.
    Nếu chưa có file này thì dự án chưa bắt đầu: làm Giai đoạn 0.
 3. Nếu có `DESIGN.md` thì đó là nguồn sự thật về thông số game (do người dùng
    có thể đã chỉnh). Khi `DESIGN.md` và `PLAN.md` khác nhau, theo `DESIGN.md`.
+4. Đầu mỗi giai đoạn, đọc các mục trong `MECHANICS.md` thuộc giai đoạn đó (bảng
+   ở mục 13 của file) và làm theo phần "Cách agent dùng file này".
 
 ## Quy tắc quan trọng nhất: mỗi lần chỉ làm MỘT giai đoạn
 
