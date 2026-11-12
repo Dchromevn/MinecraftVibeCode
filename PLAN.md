@@ -60,9 +60,10 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 |---|---|---|
 | 0 | Dựng khung | đã xong |
 | 1 | Thế giới voxel cơ bản (bản cố định) | đã xong |
-| 2a | Thế giới vô hạn và biome | |
-| 2b | Hang động, hầm mỏ, ánh sáng, block mới | |
-| 3 | Người chơi và tương tác block | |
+| 2a | Thế giới vô hạn và biome | đã xong |
+| 2b | Hang động, hầm mỏ, ánh sáng, block mới | đã xong |
+| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | |
+| 3b | Đào, đặt, chỗ bám, cát rơi | |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | |
 | 5 | Mạng nhiều người và lưu thế giới | |
 | 6 | Chiến đấu PvP và hồi sinh | |
@@ -189,6 +190,46 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
+
+#### Dữ liệu phụ của block
+
+Mỗi chunk có thêm một mảng 1 byte/block song song với mảng id block. Ý nghĩa
+của byte do từng loại block quy định, khai báo trong `/shared/src/blocks.ts`;
+block không dùng thì luôn là 0. Hàm đọc/ghi block nhận và trả cả id lẫn dữ liệu
+phụ. Sinh thế giới ghi dữ liệu phụ ngay khi sinh (ray, đuốc trong hầm mỏ); mesh,
+ánh sáng, va chạm và raycast đọc dữ liệu phụ để biết hình dạng, không đoán lại
+theo ô kề lúc vẽ.
+
+Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X).
+
+| Block | Ý nghĩa byte dữ liệu phụ |
+|---|---|
+| đuốc | 0 = cắm trên sàn; 1–4 = gắn tường ở hướng (giá trị − 1), nghiêng ra ngoài |
+| thang | 0–3 = hướng bức tường mà thang bám vào |
+| cửa | bit 0–1 hướng (tấm cửa nằm sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên |
+| lúa mì | 0–7 = giai đoạn lớn |
+| nước, dung nham | bit 0–2 mức 0–7 (0 = nguồn), bit 3 đang rơi |
+| lò nung, rương | bit 0–1 hướng mặt trước; riêng lò: bit 2 đang cháy (sáng 13) |
+| đường ray | bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư) |
+| giường | bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường |
+
+Từ Giai đoạn 5, server lưu dữ liệu phụ cùng với id block trong file lưu và gửi
+kèm trong gói tin (chunk và thay đổi block).
+
+#### Chỗ bám của block
+
+- Block cần chỗ bám: đuốc (sàn hoặc tường), thang (tường), đường ray (sàn), cửa
+  và giường (sàn dưới ô thấp nhất): chỗ bám phải là khối đầy, không trong suốt
+  (không tính lá, kính). Cỏ cao, cây non: cỏ/đất/đất cày bên dưới. Lúa mì: đất
+  cày bên dưới. Tuyết phủ: khối đầy bên dưới.
+- Đặt block cũng phải kiểm tra chỗ bám: không đặt đuốc lên không khí, lá, kính;
+  không đặt lúa lên block khác đất cày.
+- Block mất chỗ bám thì rơi ra thành vật phẩm của nó (đường ray, đuốc, thang,
+  cây non...); riêng cỏ cao rơi theo tỉ lệ như khi phá; tuyết phủ không rơi gì.
+- Kiểm tra dây chuyền: block mất chỗ bám làm block khác mất chỗ bám thì xử lý
+  tiếp. Cát/sỏi rơi xuống đè lên đuốc (hoặc block không va chạm khác) thì block
+  đó rơi ra, cát/sỏi nằm vào chỗ đó.
+- Cửa và giường chiếm 2 ô: phá một nửa thì nửa kia cũng mất, chỉ rơi 1 vật phẩm.
 
 ### 2.3 Công cụ, vũ khí, giáp
 
@@ -605,26 +646,34 @@ NGHIỆM THU
 
 ### Giai đoạn 3 — Người chơi và tương tác block (chỉ client)
 
+Chia hai phần 3a và 3b; người dùng chơi thử sau mỗi phần.
+
+### Giai đoạn 3a — Dữ liệu phụ, vật lý người chơi, hình dạng block
+
+DỮ LIỆU PHỤ (mục 2.2)
+- Mảng dữ liệu phụ trong chunk; hàm đọc/ghi block nhận và trả cả id lẫn dữ liệu
+  phụ; gửi kèm sang worker sinh/dựng mesh.
+- Sinh thế giới ghi dữ liệu phụ ngay khi sinh: ray hầm mỏ (thẳng/cong/ngã rẽ),
+  đuốc trên cột.
+- Mesh vẽ theo dữ liệu phụ: đuốc trên tường nghiêng, thang, cửa (hướng, mở),
+  ray, giường, lúa theo giai đoạn, mặt trước lò nung/rương theo hướng, lò đang
+  cháy phát sáng, mặt nước theo mức.
+- Công cụ đặt block debug ghi dữ liệu phụ đúng (theo mặt được bấm, hướng nhìn).
+
 VẬT LÝ
 - Theo mục 2.6. Hàm bước vật lý đặt trong `/shared`, thuần túy và xác định,
   để server dùng lại.
-- Va chạm AABB từng trục; hỗ trợ hộp va chạm không phải khối đầy (hàng rào,
-  đất cày, giường).
+- Va chạm AABB từng trục; hộp va chạm theo hình dạng thật (hàng rào nối nhau
+  cao 1.5, đất cày, giường, cửa theo hướng và trạng thái mở).
+- Tự bước lên bậc thấp; ngồi (Shift) không rơi khỏi mép.
 - Bơi trong nước, leo thang, chậm lại trong mạng nhện, dung nham gây sát
   thương (chỉ lưu số máu, chưa hiển thị).
 - Chunk chưa tải xong thì giữ người chơi đứng yên, không rơi xuyên đất.
 
-TƯƠNG TÁC
-- Pointer lock; raycast DDA trong tầm 4.5; khung viền quanh block đang nhắm
-  (đúng hình dạng block đặc biệt).
-- Giữ chuột trái để đào, vết nứt 5 mức.
-- Chuột phải đặt block; không đặt chồng lên người chơi. Đuốc và thang chỉ đặt
-  được lên mặt block đặc; đuốc đặt lên tường thì nghiêng.
-- Block chịu trọng lực (cát, sỏi) rơi xuống khi bên dưới trống.
-- Tạm thời: phím 1–9 chọn loại block, số lượng vô hạn.
-
-HÌNH ẢNH
-- Tâm ngắm, cánh tay vung, camera lắc khi đi, FOV tăng khi chạy nhanh.
+NHẮM VÀ HÌNH ẢNH
+- Pointer lock; raycast DDA trúng đúng hình dạng block (đuốc, ray, rào...);
+  khung viền quanh block đang nhắm đúng hình dạng.
+- Tâm ngắm, camera lắc khi đi, FOV tăng khi chạy nhanh.
 - Màn hình ám xanh khi ở dưới nước.
 - Phím F bật/tắt chế độ bay để debug.
 
@@ -632,8 +681,28 @@ NGHIỆM THU
 - Không xuyên tường, không kẹt góc, không rung khi đứng sát tường.
 - Nhảy lên được block cao 1, không lên được block cao 2; không nhảy qua hàng rào.
 - Bơi, leo thang, đi qua mạng nhện hoạt động đúng.
+- Ray hầm mỏ vẽ đúng thẳng/cong/ngã rẽ; đuốc đặt lên tường thì nghiêng.
+
+### Giai đoạn 3b — Đào, đặt, chỗ bám, cát rơi
+
+TƯƠNG TÁC
+- Tầm với 4.5. Giữ chuột trái để đào theo thời gian ở mục 2.2 (tay không), vết
+  nứt 5 mức. Khi đang bay (phím F) thì phá tức thì.
+- Chuột phải đặt block; không đặt chồng lên người chơi; kiểm tra chỗ bám khi đặt
+  (mục 2.2). Đuốc đặt lên tường thì nghiêng.
+- Block mất chỗ bám rơi ra (xử lý dây chuyền); cửa/giường phá một nửa thì mất cả
+  hai (mục 2.2). Chưa có túi đồ nên ở giai đoạn này block chỉ biến mất; Giai
+  đoạn 4 mới tạo vật phẩm rơi thật.
+- Block chịu trọng lực (cát, sỏi) rơi xuống khi bên dưới trống.
+- Tạm thời: phím 1–9 chọn loại block, số lượng vô hạn.
+- Cánh tay vung khi đào/đặt.
+
+NGHIỆM THU
 - Đào/đặt ở biên chunk cập nhật đúng cả mesh và ánh sáng.
-- Cát rơi xuống khi phá block bên dưới.
+- Cát rơi xuống khi phá block bên dưới; đuốc bị cát đè thì rơi ra.
+- Phá block dưới đuốc/ray/lúa thì chúng rơi theo, kể cả dây chuyền; phá nửa cửa
+  thì mất cả cửa.
+- Không đặt được đuốc lên lá/kính/không khí, lúa lên block khác đất cày.
 
 ---
 
@@ -689,6 +758,7 @@ SERVER VÀ LƯU TRỮ
   - `world.json`: seed, giờ trong ngày, điểm hồi sinh;
   - chunk đã bị sửa: mỗi vùng 32x32 chunk một file, nén (zlib), chỉ lưu chunk
     khác với bản sinh gốc;
+  - chunk lưu cả dữ liệu phụ (mục 2.2) cùng với id block;
   - nội dung rương, lò nung, vật phẩm rơi;
   - người chơi: vị trí, máu, đói, túi đồ, điểm hồi sinh, theo tên đăng nhập.
 - Tự lưu mỗi 60 giây và khi tắt server (bắt SIGINT/SIGTERM). Ghi file an toàn
@@ -707,11 +777,14 @@ GIAO THỨC
 - Server gửi chunk cho client theo bán kính tầm nhìn: chỉ gửi danh sách block
   khác bản sinh gốc kèm seed nếu client sinh được, hoặc gửi chunk nén nếu
   nhanh hơn. Client không tự quyết định nội dung chunk.
+- Gói chunk và gói thay đổi block luôn kèm dữ liệu phụ của block.
 
 DI CHUYỂN VÀ HÀNH ĐỘNG
 - Client dự đoán + server hiệu chỉnh (reconciliation) như thiết kế chuẩn;
   người chơi khác nội suy trễ 100 ms.
 - Server chạy cùng hàm vật lý với input nhận được; không tin vị trí client gửi.
+- Phá block tức thì (như khi đang bay ở Giai đoạn 3b) chỉ server cho phép với
+  quản trị viên; người chơi thường phải đào đủ thời gian.
 - Mọi hành động (đào, đặt, túi đồ, chế tạo, lò nung, rương, cửa, ăn, trồng
   trọt) do server kiểm tra rồi phát cho người chơi ở gần.
 - Chất lỏng, cây lớn, lúa lớn, lò nung chạy ở server.

@@ -1,6 +1,6 @@
 # DESIGN.md — Thông số game (nguồn sự thật)
 
-Bản sao mục 2 của `PLAN.md` (bản sinh tồn thế giới mở, đồng bộ 2026-11-12:
+Bản sao mục 2 của `PLAN.md` (bản sinh tồn thế giới mở, đồng bộ 2026-11-12 — dữ liệu phụ, chỗ bám, thông số di chuyển;
 thêm vàng, ngọc lục bảo, tăng mật độ quặng và hầm mỏ).
 Khi cần đổi thông số thì sửa ở đây và trong `/shared/src/constants.ts`.
 Khi `DESIGN.md` và `PLAN.md` khác nhau, theo `DESIGN.md`.
@@ -121,6 +121,46 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 Đào sai cấp công cụ với quặng: không rơi gì.
 
+#### Dữ liệu phụ của block
+
+Mỗi chunk có thêm một mảng 1 byte/block song song với mảng id block. Ý nghĩa
+của byte do từng loại block quy định, khai báo trong `/shared/src/blocks.ts`;
+block không dùng thì luôn là 0. Hàm đọc/ghi block nhận và trả cả id lẫn dữ liệu
+phụ. Sinh thế giới ghi dữ liệu phụ ngay khi sinh (ray, đuốc trong hầm mỏ); mesh,
+ánh sáng, va chạm và raycast đọc dữ liệu phụ để biết hình dạng, không đoán lại
+theo ô kề lúc vẽ.
+
+Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X).
+
+| Block | Ý nghĩa byte dữ liệu phụ |
+|---|---|
+| đuốc | 0 = cắm trên sàn; 1–4 = gắn tường ở hướng (giá trị − 1), nghiêng ra ngoài |
+| thang | 0–3 = hướng bức tường mà thang bám vào |
+| cửa | bit 0–1 hướng (tấm cửa nằm sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên |
+| lúa mì | 0–7 = giai đoạn lớn |
+| nước, dung nham | bit 0–2 mức 0–7 (0 = nguồn), bit 3 đang rơi |
+| lò nung, rương | bit 0–1 hướng mặt trước; riêng lò: bit 2 đang cháy (sáng 13) |
+| đường ray | bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư) |
+| giường | bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường |
+
+Từ Giai đoạn 5, server lưu dữ liệu phụ cùng với id block trong file lưu và gửi
+kèm trong gói tin (chunk và thay đổi block).
+
+#### Chỗ bám của block
+
+- Block cần chỗ bám: đuốc (sàn hoặc tường), thang (tường), đường ray (sàn), cửa
+  và giường (sàn dưới ô thấp nhất): chỗ bám phải là khối đầy, không trong suốt
+  (không tính lá, kính). Cỏ cao, cây non: cỏ/đất/đất cày bên dưới. Lúa mì: đất
+  cày bên dưới. Tuyết phủ: khối đầy bên dưới.
+- Đặt block cũng phải kiểm tra chỗ bám: không đặt đuốc lên không khí, lá, kính;
+  không đặt lúa lên block khác đất cày.
+- Block mất chỗ bám thì rơi ra thành vật phẩm của nó (đường ray, đuốc, thang,
+  cây non...); riêng cỏ cao rơi theo tỉ lệ như khi phá; tuyết phủ không rơi gì.
+- Kiểm tra dây chuyền: block mất chỗ bám làm block khác mất chỗ bám thì xử lý
+  tiếp. Cát/sỏi rơi xuống đè lên đuốc (hoặc block không va chạm khác) thì block
+  đó rơi ra, cát/sỏi nằm vào chỗ đó.
+- Cửa và giường chiếm 2 ô: phá một nửa thì nửa kia cũng mất, chỉ rơi 1 vật phẩm.
+
 ### 2.3 Công cụ, vũ khí, giáp
 
 | Cấp | Độ bền | Hệ số tốc độ đào | Sát thương kiếm |
@@ -200,6 +240,17 @@ liệu thì sáng, thiếu thì mờ.
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
 
+Thông số di chuyển bổ sung (đề xuất ở Giai đoạn 3, người dùng đồng ý 2026-11-12):
+- Tự bước lên bậc cao tới 0.6 block mà không cần nhảy (tuyết phủ, đất cày,
+  giường); block cao 1 vẫn phải nhảy.
+- Tốc độ rơi tối đa 60 block/giây.
+- Thang: leo lên 2.4 block/giây (giữ Space hoặc W), tụt xuống tối đa 3; giữ
+  Shift thì đứng yên trên thang.
+- Bơi: chìm tối đa 2 block/giây, giữ Space nổi lên 3. Đi ngang trong nước bằng
+  50% tốc độ đi bộ; trong dung nham 30%, nổi/chìm bằng 50% so với nước.
+- Chạy nhanh: góc nhìn (FOV) rộng thêm 10%.
+- Bị cháy sau khi ra khỏi dung nham: mất 1 máu mỗi giây trong 4 giây.
+
 ### 2.7 Ngày đêm, sinh vật, giường
 
 - Một ngày 20 phút: ngày 10 phút, đêm 7 phút, bình minh và hoàng hôn mỗi lúc
@@ -219,8 +270,7 @@ liệu thì sáng, thiếu thì mờ.
 | Gà | 4 | như trên, rơi chậm | thịt gà sống, lông |
 | Cừu | 8 | như trên; tỉa lông bằng kéo hoặc giết | len |
 
-- KHÔNG làm các sinh vật mang thiết kế riêng của Minecraft (quái nổ màu xanh,
-  người cao đen dịch chuyển, rồng End...). Nếu cần quái mới thì tự thiết kế.
+
 - Động vật sinh trên cỏ khi tạo chunk mới, theo đàn 2–4 con; không sinh lại liên tục.
 - Giường: ngủ được khi đêm và không có quái trong 8 block. Ngủ thì đặt điểm hồi
   sinh. Khi hơn một nửa số người chơi đang online cùng ngủ thì tua sang sáng.
