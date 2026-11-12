@@ -358,6 +358,11 @@ Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả k
   táo 4 / 2.4, bánh mì 5 / 6, táo vàng 4 / 9.6 và hồi 4 máu trong 5 giây; thịt (Giai
   đoạn 7) theo bảng MECHANICS.md 3.
 - Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
+- Chỗ xuất phát (tới Giai đoạn 5, người dùng chọn 2026-11-12): mỗi lần vào game chọn ngẫu
+  nhiên một điểm đất liền trong bán kính 1000 block; chết thì hồi sinh lại điểm đó
+  (?spawn=fixed: đất liền gần gốc nhất). Từ Giai đoạn 5 server giữ điểm hồi sinh chung.
+- Bộ đồ thử khi mới vào game (chỉ bản chạy thử `npm run dev`, ?kit=0 để tắt): công cụ kim
+  cương, cuốc đất sắt, 64 mỗi loại block / nguyên liệu / thức ăn cần để thử (STARTER_KIT trong /shared).
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
 

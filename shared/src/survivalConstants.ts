@@ -59,6 +59,26 @@ export const DROPPED = {
   DEATH_SCATTER: 3,
 } as const;
 
+/** Chỗ xuất phát ngẫu nhiên (client, tới khi có server ở Giai đoạn 5). */
+export const SPAWN = {
+  RANDOM_RADIUS: 1000,
+  TRIES: 200,
+  MAX_HEIGHT: 95, // tránh đỉnh núi tuyết
+} as const;
+
+/**
+ * Bộ đồ thử khi mới vào game (chỉ bản chạy thử npm run dev; ?kit=0 để tắt). Hotbar trước, rồi túi.
+ * Đồ chỉ chồng được 1 (công cụ, cửa, giường) thì cho 1.
+ */
+export const STARTER_KIT: readonly (readonly [string, number])[] = [
+  ["diamond_pickaxe", 1], ["diamond_axe", 1], ["diamond_shovel", 1], ["diamond_sword", 1], ["iron_hoe", 1],
+  ["torch", 64], ["cobble", 64], ["planks", 64], ["bread", 64],
+  ["log", 64], ["coal", 64], ["raw_iron", 64], ["iron_ingot", 64], ["raw_gold", 64], ["gold_ingot", 64],
+  ["diamond", 64], ["emerald", 64], ["sand", 64], ["glass", 64], ["dirt", 64], ["stone", 64], ["gravel", 64],
+  ["seeds", 64], ["wheat", 64], ["apple", 64], ["golden_apple", 64], ["stick", 64], ["workbench", 64],
+  ["furnace", 64], ["chest", 64], ["ladder", 64], ["rail", 64], ["fence", 64], ["sapling", 64], ["door", 1], ["bed", 1],
+];
+
 export const INVENTORY = {
   HOTBAR: 9,
   MAIN: 36, // 9 hotbar + 27 túi

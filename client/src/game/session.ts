@@ -2,7 +2,7 @@
 // túi đồ (E), giáp (độ bền), chết → văng đồ → hồi sinh. Lệnh debug lấy đồ khi ?debug=1.
 import * as THREE from "three";
 import {
-  B, BlockEntities, FURNACE_RULES, Inventory, PLAYER, chestHalf, chestPartner, chestRules, doorUpper, itemDef, joinChest,
+  B, BlockEntities, FURNACE_RULES, Inventory, PLAYER, STARTER_KIT, chestHalf, chestPartner, chestRules, doorUpper, itemDef, joinChest,
   mulberry32, splitChest, stack, type ChestEntity, type FurnaceEntity, type RayHit, type Rng, type World,
 } from "../../../shared/src/index.js";
 import { STR } from "../strings.js";
@@ -112,6 +112,11 @@ export class Session {
     this.inv.ext = e.slots;
     this.inv.extRules = FURNACE_RULES;
     this.openContainer("furnace", STR.blocks.furnace ?? "", 3, e, () => undefined);
+  }
+
+  /** Bộ đồ thử khi mới vào game (không phát lại khi hồi sinh). */
+  giveStarterKit(): void {
+    for (const [k, n] of STARTER_KIT) this.inv.add(stack(k, n));
   }
 
   /** Debug (?debug=1): thêm vật phẩm vào túi. */

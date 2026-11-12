@@ -18,6 +18,7 @@ import { FirstPersonArm } from "./player/arm.js";
 import { PlayerController } from "./player/playerController.js";
 import { ViewEffects } from "./player/viewEffects.js";
 import { Session } from "./game/session.js";
+import { fixedSpawn, randomSpawn } from "./game/spawn.js";
 import { preloadIcons } from "./ui/itemIcons.js";
 import { injectStyles } from "./ui/styles.js";
 
@@ -32,19 +33,6 @@ const NIGHT_VISION = 0.45; // độ sáng tối thiểu khi bật nhìn đêm (d
 function readVec(params: URLSearchParams, name: string, n: number): number[] | null {
   const v = params.get(name)?.split(",").map(Number);
   return v && v.length === n && v.every(Number.isFinite) ? v : null;
-}
-
-/** Tìm điểm trên đất liền gần gốc tọa độ để bắt đầu. */
-function findSpawn(sampler: TerrainSampler): { x: number; z: number; h: number } {
-  for (let r = 0; r < 4000; r += 16) {
-    for (let a = 0; a < 16; a++) {
-      const x = Math.round(r * Math.cos((a / 16) * Math.PI * 2));
-      const z = Math.round(r * Math.sin((a / 16) * Math.PI * 2));
-      const c = sampler.column(x, z);
-      if (c.height > c.waterTop) return { x, z, h: c.height };
-    }
-  }
-  return { x: 0, z: 0, h: WORLD.SEA_LEVEL };
 }
 
 /** Dòng HUD về người chơi: chế độ, trạng thái vật lý, máu. */
@@ -106,7 +94,8 @@ async function main(): Promise<void> {
   applyViewDistance();
 
   // mặc định đi bộ từ mặt đất gần gốc; ?pos= bắt đầu ở chế độ bay (để chụp/kiểm tra)
-  const spawn = findSpawn(sampler);
+  // chỗ xuất phát ngẫu nhiên mỗi lần vào game (?spawn=fixed: đất liền gần gốc nhất)
+  const spawn = params.get("spawn") === "fixed" ? fixedSpawn(sampler) : randomSpawn(sampler);
   camera.position.set(spawn.x + 0.5, spawn.h + 1 + PLAYER.EYE_HEIGHT, spawn.z + 0.5);
   const fly = new FlyCamera(camera, renderer.domElement);
   const pos = readVec(params, "pos", 3);
@@ -126,6 +115,8 @@ async function main(): Promise<void> {
     { x: spawn.x + 0.5, y: spawn.h + 1, z: spawn.z + 0.5 },
     (x, _y, z) => chunks.onBlockChanged(x, z),
   );
+  // bộ đồ thử khi mới vào (chỉ khi chạy npm run dev; ?kit=0 để tắt)
+  if (import.meta.env.DEV && params.get("kit") !== "0") session.giveStarterKit();
   const interact = new Interaction(
     scene, world, atlas,
     {
