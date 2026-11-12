@@ -29,8 +29,9 @@ const CUBES: BlockId[] = [
   B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES, B.MELON, B.PUMPKIN,
 ];
 for (const id of CUBES) add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "cube", block: id }, places: id });
-for (const id of [B.TORCH, B.RAIL, B.LADDER, B.SAPLING, B.FENCE] as BlockId[])
+for (const id of [B.TORCH, B.RAIL, B.LADDER, B.SAPLING] as BlockId[])
   add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "tex", name: BLOCKS[id]!.tex.side }, places: id });
+add({ key: "fence", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "fence" }, places: B.FENCE }); // icon riêng: 2 cột + 2 thanh
 add({ key: "door", maxStack: STACK.SINGLE, icon: { type: "icon", name: "door" }, places: B.DOOR });
 add({ key: "bed", maxStack: STACK.SINGLE, icon: { type: "icon", name: "bed" }, places: B.BED });
 add({ key: "seeds", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "seeds" }, places: B.WHEAT });

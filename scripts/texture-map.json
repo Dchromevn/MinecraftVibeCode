@@ -668,6 +668,10 @@
         "leggings",
         "boots"
       ]
+    },
+    {
+      "dest": "icons/fence.png",
+      "src": "default_mcl_core/fences/default_fence_wood.png"
     }
   ]
 }
