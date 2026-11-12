@@ -511,7 +511,7 @@ Trạng thái: chờ người dùng test.
 
 - `npm run import-mc` (`scripts/import-mc.ts`, bảng `scripts/mc-texture-map.json`): đọc thẳng `assets-src/minecraft/*.jar` (client.jar người dùng tự tải từ máy chủ Mojang) bằng zlib có sẵn của Node, không thêm thư viện; ghi vào `client/public_mc/` (không commit, © Mojang). Vite (plugin trong `client/vite.config.ts`) ưu tiên file trong `public_mc` hơn `public` cùng đường dẫn, lúc build thì chép đè vào `dist`. Thiếu file nào thì dùng REFI. Xóa `client/public_mc` để quay lại REFI.
 - Ảnh xám của bản gốc (cỏ, lá, nước, thân dưa / bí) được nhân màu đồng cỏ cố định; ảnh động lấy khung đầu; da nhân vật cắt về 64x32.
-- Chưa ánh xạ (vẫn REFI): rương, giường (texture dạng thực thể), ray ngã ba / ngã tư (bản gốc không có), thanh công cụ, ô đồ, sách công thức.
+- Bổ sung (người dùng yêu cầu "ảnh gốc hết"): `scripts/mcCompose.ts` ghép ảnh — rương dựng từ ảnh thực thể (nắp + thân + khóa, lật dọc, phóng 14→16; rương đôi từ normal_left / normal_right), giường từ ảnh block red_bed_* (mặt trên xoay 90°), ray ngã ba = ray cong + ray thẳng, ngã tư = ray thẳng + ray thẳng xoay 90°, ô hotbar cắt từ hotbar gốc, nút sổ công thức, nền ngọn lửa lò. Toàn bộ 203 ảnh lấy từ bản gốc; riêng icon giường dùng icon wiki (bản gốc không có ảnh phẳng).
 - Đã kiểm bằng file jar thử: giải nén đúng, nhân màu đúng, Vite trả ảnh public_mc khi có và ảnh REFI khi không. Chưa chạy với client.jar thật (người dùng tải).
 - Cách tải (PowerShell, thư mục dự án):
   ```

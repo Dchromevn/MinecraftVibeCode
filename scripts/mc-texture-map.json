@@ -1,8 +1,8 @@
 {
  "notes": [
   "Ánh xạ texture gốc (client.jar, assets/minecraft/textures/<src>.png) → client/public_mc/<dest>.png. Dùng bởi npm run import-mc.",
-  "Rương, giường (texture dạng thực thể), ray ngã ba/ngã tư, thanh công cụ, ô đồ, sách công thức: chưa ánh xạ, vẫn dùng REFI.",
-  "tint: nhân màu cho ảnh xám (màu đồng cỏ cố định). Ảnh động trong block/: lấy khung đầu."
+  "tint: nhân màu cho ảnh xám (màu đồng cỏ cố định). Ảnh động trong block/: lấy khung đầu.",
+  "compose: ghép mảnh (rương từ ảnh thực thể, ray ngã ba / ngã tư); rotate: xoay 90° theo chiều kim đồng hồ (mặt trên giường)."
  ],
  "entries": [
   {
@@ -816,6 +816,244 @@
    "src": [
     "entity/equipment/humanoid_leggings/diamond",
     "models/armor/diamond_layer_2"
+   ]
+  },
+  {
+   "dest": "textures/chest_top",
+   "src": "entity/chest/normal",
+   "compose": {
+    "w": 14,
+    "h": 14,
+    "size": 16,
+    "parts": [
+     {
+      "x": 28,
+      "y": 0,
+      "w": 14,
+      "h": 14,
+      "flipV": true
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/chest_side",
+   "src": "entity/chest/normal",
+   "compose": {
+    "w": 14,
+    "h": 15,
+    "size": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 14,
+      "w": 14,
+      "h": 5,
+      "flipV": true
+     },
+     {
+      "x": 0,
+      "y": 33,
+      "w": 14,
+      "h": 10,
+      "dy": 5,
+      "flipV": true
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/chest_front",
+   "src": "entity/chest/normal",
+   "compose": {
+    "w": 14,
+    "h": 15,
+    "size": 16,
+    "parts": [
+     {
+      "x": 42,
+      "y": 14,
+      "w": 14,
+      "h": 5,
+      "flipV": true
+     },
+     {
+      "x": 42,
+      "y": 33,
+      "w": 14,
+      "h": 10,
+      "dy": 5,
+      "flipV": true
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "w": 2,
+      "h": 4,
+      "dx": 6,
+      "dy": 3,
+      "flipV": true
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/chest_front_a",
+   "src": "entity/chest/normal_left",
+   "compose": {
+    "w": 15,
+    "h": 15,
+    "size": 16,
+    "parts": [
+     {
+      "x": 43,
+      "y": 14,
+      "w": 15,
+      "h": 5,
+      "flipV": true
+     },
+     {
+      "x": 43,
+      "y": 33,
+      "w": 15,
+      "h": 10,
+      "dy": 5,
+      "flipV": true
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "w": 1,
+      "h": 4,
+      "dx": 14,
+      "dy": 3,
+      "flipV": true
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/chest_front_b",
+   "src": "entity/chest/normal_right",
+   "compose": {
+    "w": 15,
+    "h": 15,
+    "size": 16,
+    "parts": [
+     {
+      "x": 43,
+      "y": 14,
+      "w": 15,
+      "h": 5,
+      "flipV": true
+     },
+     {
+      "x": 43,
+      "y": 33,
+      "w": 15,
+      "h": 10,
+      "dy": 5,
+      "flipV": true
+     },
+     {
+      "x": 1,
+      "y": 1,
+      "w": 1,
+      "h": 4,
+      "dx": 0,
+      "dy": 3,
+      "flipV": true
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/bed_head_top",
+   "src": "block/red_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/bed_foot_top",
+   "src": "block/red_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/bed_head_side",
+   "src": "block/red_bed_head_east"
+  },
+  {
+   "dest": "textures/bed_foot_side",
+   "src": "block/red_bed_foot_east"
+  },
+  {
+   "dest": "textures/bed_foot_end",
+   "src": "block/red_bed_foot_south"
+  },
+  {
+   "dest": "textures/bed_head_end",
+   "src": [
+    "block/red_bed_head_north",
+    "block/red_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "textures/rail_t",
+   "src": "block/rail",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "from": "block/rail_corner"
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "dest": "textures/rail_cross",
+   "src": "block/rail",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "rot": 1
+     },
+     {}
+    ]
+   }
+  },
+  {
+   "dest": "ui/slot",
+   "src": "gui/sprites/hud/hotbar",
+   "crop": [
+    1,
+    1,
+    20,
+    20
+   ]
+  },
+  {
+   "dest": "ui/hotbar",
+   "src": "gui/sprites/hud/hotbar"
+  },
+  {
+   "dest": "ui/hotbar_selected",
+   "src": "gui/sprites/hud/hotbar_selection"
+  },
+  {
+   "dest": "ui/book",
+   "src": "gui/sprites/recipe_book/button"
+  },
+  {
+   "dest": "icons/furnace_fire_bg",
+   "src": "gui/container/furnace",
+   "crop": [
+    56,
+    36,
+    14,
+    14
    ]
   }
  ]

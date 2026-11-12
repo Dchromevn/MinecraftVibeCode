@@ -7,6 +7,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { dirname, join } from "node:path";
 import { inflateRawSync } from "node:zlib";
 import { PNG } from "pngjs";
+import { compose, rotateCW, type Compose } from "./mcCompose.js";
 
 interface Entry {
   dest: string;
@@ -16,6 +17,8 @@ interface Entry {
   overlayTint?: string;
   crop?: [number, number, number, number]; // x, y, rộng, cao
   regions?: [number, number, number, number, number, number][]; // chép vùng [x, y, rộng, cao, tới x, tới y] sang ảnh trống cùng cỡ
+  rotate?: number; // xoay 90° theo chiều kim đồng hồ n lần
+  compose?: Compose; // ghép nhiều mảnh (ảnh thực thể rương, ray ngã ba / ngã tư)
   tiers?: Record<string, string>; // tên đích → tên trong jar ({tier} / {mcTier})
   pieces?: string[];
 }
@@ -122,6 +125,15 @@ for (const raw of map.entries)
       missing.push(`${e.dest} ← ${[e.src].flat().join(" | ")}`);
       continue;
     }
+    if (e.compose) {
+      const c = compose(e.compose, png, load);
+      if (!c) {
+        missing.push(`${e.dest} ← ${e.compose.parts.map((p) => p.from).filter(Boolean).join(" | ")}`);
+        continue;
+      }
+      png = c;
+    }
+    if (e.rotate) png = rotateCW(png, e.rotate);
     if (e.crop) png = crop(png, ...e.crop);
     if (e.regions) {
       const out = new PNG({ width: png.width, height: png.height });
