@@ -81,13 +81,7 @@ Giai đoạn 0 phải tạo đủ các lệnh này.
 - Bảng ánh xạ file nằm trong `PLAN.md`, mục 3.
 - Nếu thư mục nguồn chưa có hoặc thiếu file: tự vẽ texture tạm bằng canvas để
   game vẫn chạy, và báo người dùng file nào thiếu.
-- TUYỆT ĐỐI không tải, sao chép hay dùng texture, model, âm thanh, tên riêng
-  hoặc logo của Minecraft/Mojang. Không đặt tên game, tên vật phẩm, tên thế
-  giới hay tên sinh vật trùng thương hiệu của họ (Nether, End, Ender, Creeper...).
-- Không nhập các skin sinh vật mang thiết kế riêng của Minecraft có trong bộ
-  REFI (creeper, enderman, dragon, wither, ghast, blaze...). Danh sách skin
-  được dùng nằm trong `PLAN.md` mục 3.4.
-- Mọi tài nguyên bên ngoài phải được ghi vào `CREDITS.md` kèm giấy phép.
+
 
 ## Ngôn ngữ
 
