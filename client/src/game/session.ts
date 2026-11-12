@@ -8,7 +8,6 @@ import type { PlayerController } from "../player/playerController.js";
 import { lockPointer, type FlyCamera } from "../flyCamera.js";
 import { InventoryScreen } from "../ui/inventoryScreen.js";
 import { SurvivalHud } from "../ui/survivalHud.js";
-import { nearWorkbench } from "../../../shared/src/index.js";
 
 export class Session {
   readonly inv = new Inventory();
@@ -28,10 +27,6 @@ export class Session {
     this.hud = new SurvivalHud(() => this.respawn());
     this.screen = new InventoryScreen(
       this.inv,
-      () => {
-        const s = this.player.state;
-        return nearWorkbench((x, y, z) => world.getBlock(x, y, z), s.x, s.y + 1, s.z);
-      },
       (st) => {
         this.camera.getWorldDirection(this.dir);
         this.items.throw(st, this.camera.position, this.dir);
@@ -42,10 +37,17 @@ export class Session {
       if (this.player.state.dead) return;
       if (e.code === "KeyE" && (this.fly.locked || this.screen.open)) {
         e.preventDefault();
-        if (!this.screen.open) document.exitPointerLock();
-        this.screen.toggle();
+        if (this.screen.open) this.screen.close();
+        else this.openScreen("inventory");
       } else if (e.code === "Escape" && this.screen.open) this.screen.close();
     });
+  }
+
+  /** Mở túi đồ (lưới 2x2) hoặc bàn chế tạo (lưới 3x3). */
+  openScreen(mode: "inventory" | "workbench"): void {
+    if (this.player.state.dead || this.screen.open) return;
+    document.exitPointerLock();
+    this.screen.show(mode);
   }
 
   /** Debug (?debug=1): thêm vật phẩm vào túi. */

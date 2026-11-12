@@ -11,7 +11,7 @@ export interface ItemStack {
 }
 
 export type Slot = ItemStack | null;
-export type SlotArea = "main" | "armor";
+export type SlotArea = "main" | "armor" | "craft";
 
 export const stack = (item: string, count = 1, damage = 0): ItemStack => ({ item, count, damage });
 const maxOf = (item: string): number => itemDef(item)?.maxStack ?? INVENTORY.MAX_STACK;
@@ -24,13 +24,36 @@ export class Inventory {
   readonly armor: Slot[] = new Array<Slot>(INVENTORY.ARMOR).fill(null); // mũ, áo, quần, giày
   cursor: Slot = null;
   selected = 0; // ô hotbar đang cầm
+  /** Lưới chế tạo đang mở (2x2 túi đồ hoặc 3x3 bàn chế tạo), theo hàng. */
+  craft: Slot[] = new Array<Slot>(4).fill(null);
+  craftSize = 2;
 
   get held(): Slot {
     return this.main[this.selected]!;
   }
 
   private area(a: SlotArea): Slot[] {
-    return a === "main" ? this.main : this.armor;
+    return a === "main" ? this.main : a === "armor" ? this.armor : this.craft;
+  }
+
+  /** Đổi cỡ lưới chế tạo; đồ trong lưới cũ trả về túi. Trả về phần không vừa (vứt ra). */
+  setCraftSize(n: number): ItemStack[] {
+    const over = this.returnCraft();
+    this.craftSize = n;
+    this.craft = new Array<Slot>(n * n).fill(null);
+    return over;
+  }
+
+  /** Trả đồ trong lưới chế tạo về túi; trả về phần không vừa. */
+  returnCraft(): ItemStack[] {
+    const over: ItemStack[] = [];
+    for (let i = 0; i < this.craft.length; i++) {
+      const s = this.craft[i];
+      this.craft[i] = null;
+      const left = s ? this.add(s) : null;
+      if (left) over.push(left);
+    }
+    return over;
   }
 
   /** Thêm vào túi (gộp chồng trước, rồi ô trống; hotbar trước túi). Trả về phần thừa. */
@@ -144,6 +167,10 @@ export class Inventory {
     const slots = this.area(area);
     const s = slots[i];
     if (!s) return;
+    if (area === "craft") {
+      slots[i] = this.add(s); // về túi; không vừa thì giữ lại trong lưới
+      return;
+    }
     if (area === "main") {
       const piece = ARMOR_PIECES.indexOf(itemDef(s.item)?.armor?.piece ?? ("" as never));
       if (piece >= 0 && !this.armor[piece]) {
@@ -184,7 +211,7 @@ export class Inventory {
   /** Lấy hết đồ ra (khi chết). */
   takeAll(): ItemStack[] {
     const out: ItemStack[] = [];
-    for (const slots of [this.main, this.armor])
+    for (const slots of [this.main, this.armor, this.craft])
       for (let i = 0; i < slots.length; i++) {
         if (slots[i]) out.push(slots[i]!);
         slots[i] = null;

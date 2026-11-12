@@ -3,7 +3,7 @@
 // Tham số URL: ?seed= ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
 // ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
-import { PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
+import { B, PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
@@ -130,6 +130,12 @@ async function main(): Promise<void> {
       camera, player, inv: session.inv, items: session.items, rng: session.rng,
       locked: () => (fly.locked || player.debugInput) && !session.screen.open,
       yaw: () => fly.yaw, swing: () => arm.swing(),
+      sneaking: () => player.state.sneaking || fly.keys.has("ShiftLeft") || fly.keys.has("ShiftRight"),
+      useBlock: (id) => {
+        if (id !== B.WORKBENCH) return false;
+        session.openScreen("workbench");
+        return true;
+      },
     },
     (x, _y, z) => chunks.onBlockChanged(x, z),
   );

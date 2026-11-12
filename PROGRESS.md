@@ -432,3 +432,11 @@ thức có độ cứng, xô làm ở 4c. Mục LỰA CHỌN về rìu (Giai đo
 - Vật phẩm rơi trong hố sâu ≥ 2 block không tự hút lên (phải xuống nhặt), giống thể loại gốc.
 - Ô giáp trống chưa có hình mờ gợi ý; cánh tay chưa đổi hình theo vật phẩm đang cầm.
 - Chưa lưu được: tải lại trang là mất túi đồ (Giai đoạn 5).
+
+### Bổ sung 4a: chế tạo bằng lưới (2026-11-12, người dùng chọn hướng 3)
+
+- Túi đồ (E) có lưới 2x2; chuột phải vào bàn chế tạo mở lưới 3x3 (Shift + chuột phải vẫn đặt block). Bỏ luật "đứng trong 4 block quanh bàn".
+- Công thức có hình xếp (lật ngang được, đặt lệch chỗ trong lưới được) hoặc không cần hình; ô kết quả: bấm lấy lên con trỏ, Shift làm liên tục vào túi; đóng giao diện thì nguyên liệu trong lưới trả về túi.
+- Sổ công thức bên phải: sáng khi đủ nguyên liệu và vừa lưới đang mở; bấm xếp 1 bộ vào lưới, Shift xếp nhiều bộ.
+- File: `shared/src/recipes.ts` (viết lại: hình xếp, so khớp lưới), `shared/src/crafting.ts` (mới), `shared/src/inventory.ts` (vùng "craft"), `client/src/ui/inventoryScreen.ts` (viết lại), `ui/styles.ts`, `game/session.ts`, `interact/interaction.ts`, `main.ts`, `strings.ts`; PLAN.md/DESIGN.md mục 2.4.
+- Kiểm tra: 20/20 (thêm: thân gỗ → ván bằng Shift, sổ công thức xếp nhiều bộ, cuốc không làm được ở 2x2 nhưng làm được ở 3x3, rìu lật ngang khớp, hình đặt lệch vẫn khớp, 20.000 lần bấm ngẫu nhiên gồm cả lưới vẫn không mất/nhân đôi). Trình duyệt: chuột phải vào bàn mở lưới 3x3, sổ công thức xếp cuốc gỗ đúng hình, lấy ra trừ đúng 3 ván 2 que; E mở lưới 2x2.

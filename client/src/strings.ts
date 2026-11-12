@@ -6,7 +6,8 @@ export const STR = {
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
     "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
-    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn · 1–9 / lăn chuột chọn ô · E túi đồ · Q vứt (Ctrl+Q cả chồng)",
+    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn / mở bàn chế tạo (Shift: đặt) · 1–9 / lăn chuột chọn ô\n" +
+    "E túi đồ · Q vứt (Ctrl+Q cả chồng)",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
   hudFps: "FPS",
@@ -49,8 +50,7 @@ export const STR = {
   inventoryTitle: "Túi đồ",
   craftingTitle: "Chế tạo",
   needWorkbench: "cần bàn chế tạo",
-  nearWorkbench: "Đang ở gần bàn chế tạo",
-  craftHint: "Bấm để chế tạo · Shift+bấm: chế tạo nhiều nhất có thể",
+  craftHint: "Sổ công thức: bấm để xếp nguyên liệu vào lưới (Shift: nhiều bộ)\nÔ kết quả: bấm để lấy (Shift: làm liên tục)",
   youDied: "Bạn đã chết",
   respawn: "Hồi sinh",
   durability: "Độ bền",

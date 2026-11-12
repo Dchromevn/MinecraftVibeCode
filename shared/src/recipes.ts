@@ -1,8 +1,5 @@
-// Công thức chế tạo (DESIGN.md 2.4), giao diện dạng danh sách: đủ nguyên liệu thì làm được.
-// "hand" làm mọi lúc; "workbench" cần đứng trong CRAFTING.WORKBENCH_RANGE block quanh bàn chế tạo.
-import { CRAFTING } from "./constants.js";
-import { B } from "./blocks.js";
-import type { Inventory, ItemStack } from "./inventory.js";
+// Công thức chế tạo (DESIGN.md 2.4): lưới 2x2 (túi đồ) hoặc 3x3 (bàn chế tạo). Công thức có
+// hình xếp (được lật ngang) hoặc không cần hình. Mỗi ô lưới dùng 1 nguyên liệu mỗi lần làm.
 import { ARMOR_PIECES, TOOL_KINDS } from "./items.js";
 
 export interface Ingredient {
@@ -13,66 +10,115 @@ export interface Ingredient {
 export interface Recipe {
   id: string;
   out: Ingredient;
-  inputs: readonly Ingredient[];
-  station: "hand" | "workbench";
+  station: "hand" | "workbench"; // hand: cả lưới 2x2 và 3x3; workbench: chỉ 3x3
+  shape: readonly string[] | null; // hàng, ký tự theo key; " " = ô trống; null = không cần hình
+  key: Readonly<Record<string, string>>;
+  shapeless: readonly string[]; // không cần hình: mỗi phần tử là 1 ô
+  inputs: readonly Ingredient[]; // tổng nguyên liệu cho 1 lần (sổ công thức)
 }
 
 const R: Recipe[] = [];
-const rec = (out: string, n: number, inputs: [string, number][], station: Recipe["station"] = "workbench"): void =>
-  void R.push({ id: `${out}#${R.length}`, out: { item: out, count: n }, inputs: inputs.map(([item, count]) => ({ item, count })), station });
 
-// làm mọi lúc
-rec("planks", 4, [["log", 1]], "hand");
-rec("stick", 4, [["planks", 2]], "hand");
-rec("workbench", 1, [["planks", 4]], "hand");
-rec("torch", 4, [["coal", 1], ["stick", 1]], "hand");
+function totals(items: string[]): Ingredient[] {
+  const m = new Map<string, number>();
+  for (const i of items) m.set(i, (m.get(i) ?? 0) + 1);
+  return [...m].map(([item, count]) => ({ item, count }));
+}
 
-// công cụ: X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương
+function shaped(out: string, n: number, shape: string[], key: Record<string, string>, station: Recipe["station"] = "workbench"): void {
+  const cells = shape.join("").split("").filter((c) => c !== " ").map((c) => key[c]!);
+  R.push({ id: `${out}#${R.length}`, out: { item: out, count: n }, station, shape, key, shapeless: [], inputs: totals(cells) });
+}
+
+function shapeless(out: string, n: number, items: string[], station: Recipe["station"] = "hand"): void {
+  R.push({ id: `${out}#${R.length}`, out: { item: out, count: n }, station, shape: null, key: {}, shapeless: items, inputs: totals(items) });
+}
+
+// làm mọi lúc (vừa lưới 2x2)
+shapeless("planks", 4, ["log"]);
+shaped("stick", 4, ["P", "P"], { P: "planks" }, "hand");
+shaped("workbench", 1, ["PP", "PP"], { P: "planks" }, "hand");
+shaped("torch", 4, ["C", "S"], { C: "coal", S: "stick" }, "hand");
+
+// công cụ: X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương; | = que
 const TOOL_MAT: [string, string][] = [["wood", "planks"], ["stone", "cobble"], ["iron", "iron_ingot"], ["gold", "gold_ingot"], ["diamond", "diamond"]];
-const TOOL_COST: Record<(typeof TOOL_KINDS)[number], [number, number]> = {
-  pickaxe: [3, 2], axe: [3, 2], shovel: [1, 2], sword: [2, 1], hoe: [2, 2],
+const TOOL_SHAPE: Record<(typeof TOOL_KINDS)[number], string[]> = {
+  pickaxe: ["XXX", " | ", " | "], axe: ["XX", "X|", " |"], shovel: ["X", "|", "|"], sword: ["X", "X", "|"], hoe: ["XX", " |", " |"],
 };
 for (const [tier, mat] of TOOL_MAT)
-  for (const kind of TOOL_KINDS) rec(`${tier}_${kind}`, 1, [[mat, TOOL_COST[kind][0]], ["stick", TOOL_COST[kind][1]]]);
+  for (const kind of TOOL_KINDS) shaped(`${tier}_${kind}`, 1, TOOL_SHAPE[kind], { X: mat, "|": "stick" });
 
-// giáp: mũ 5 · áo 8 · quần 7 · giày 4 (da / sắt / vàng / kim cương)
+// giáp (da / sắt / vàng / kim cương)
 const ARMOR_MAT: [string, string][] = [["leather", "leather"], ["iron", "iron_ingot"], ["gold", "gold_ingot"], ["diamond", "diamond"]];
-const ARMOR_COST = [5, 8, 7, 4];
-for (const [tier, mat] of ARMOR_MAT) ARMOR_PIECES.forEach((p, i) => rec(`${tier}_${p}`, 1, [[mat, ARMOR_COST[i]!]]));
+const ARMOR_SHAPE = [["XXX", "X X"], ["X X", "XXX", "XXX"], ["XXX", "X X", "X X"], ["X X", "X X"]];
+for (const [tier, mat] of ARMOR_MAT) ARMOR_PIECES.forEach((p, i) => shaped(`${tier}_${p}`, 1, ARMOR_SHAPE[i]!, { X: mat }));
 
-rec("bow", 1, [["stick", 3], ["string", 3]]);
-rec("arrow", 4, [["stick", 1], ["flint", 1], ["feather", 1]]);
-rec("chest", 1, [["planks", 8]]);
-rec("furnace", 1, [["cobble", 8]]);
-rec("ladder", 3, [["stick", 7]]);
-rec("door", 3, [["planks", 6]]);
-rec("fence", 3, [["stick", 4], ["planks", 2]]);
-rec("rail", 16, [["iron_ingot", 6], ["stick", 1]]);
-rec("bread", 1, [["wheat", 3]]);
-rec("bed", 1, [["wool", 3], ["planks", 3]]);
-rec("sandstone", 1, [["sand", 4]]);
-rec("golden_apple", 1, [["apple", 1], ["gold_ingot", 8]]);
+shaped("bow", 1, [" |T", "| T", " |T"], { "|": "stick", T: "string" });
+shaped("arrow", 4, ["F", "|", "E"], { F: "flint", "|": "stick", E: "feather" });
+shaped("chest", 1, ["PPP", "P P", "PPP"], { P: "planks" });
+shaped("furnace", 1, ["CCC", "C C", "CCC"], { C: "cobble" });
+shaped("ladder", 3, ["| |", "|||", "| |"], { "|": "stick" });
+shaped("door", 3, ["PP", "PP", "PP"], { P: "planks" });
+shaped("fence", 3, ["P|P", "P|P"], { P: "planks", "|": "stick" });
+shaped("rail", 16, ["I I", "I|I", "I I"], { I: "iron_ingot", "|": "stick" });
+shaped("bread", 1, ["WWW"], { W: "wheat" });
+shaped("bed", 1, ["WWW", "PPP"], { W: "wool", P: "planks" });
+shaped("sandstone", 1, ["SS", "SS"], { S: "sand" });
+shaped("golden_apple", 1, ["GGG", "GAG", "GGG"], { G: "gold_ingot", A: "apple" });
 
 export const RECIPES: readonly Recipe[] = R;
 
-/** Có bàn chế tạo trong phạm vi quanh (x, y, z) không. */
-export function nearWorkbench(getId: (x: number, y: number, z: number) => number, x: number, y: number, z: number): boolean {
-  const r = CRAFTING.WORKBENCH_RANGE;
-  const fx = Math.floor(x), fy = Math.floor(y), fz = Math.floor(z);
-  for (let dy = -r; dy <= r; dy++)
-    for (let dz = -r; dz <= r; dz++)
-      for (let dx = -r; dx <= r; dx++) if (getId(fx + dx, fy + dy, fz + dz) === B.WORKBENCH) return true;
-  return false;
+/** Dùng được ở lưới cỡ size không (2x2: chỉ công thức tay và vừa khung 2x2). */
+export function fitsGrid(r: Recipe, size: number): boolean {
+  if (size >= 3) return true;
+  if (r.station === "workbench") return false;
+  if (!r.shape) return r.shapeless.length <= size * size;
+  return r.shape.length <= size && r.shape.every((row) => row.length <= size);
 }
 
-export function hasIngredients(inv: Inventory, r: Recipe): boolean {
-  return r.inputs.every((i) => inv.count(i.item) >= i.count);
+/** Cắt lưới (size x size, khóa vật phẩm hoặc null) về khung chứa các ô có đồ. */
+function trim(grid: readonly (string | null)[], size: number): (string | null)[][] | null {
+  let r0 = size, r1 = -1, c0 = size, c1 = -1;
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (grid[r * size + c]) {
+        r0 = Math.min(r0, r); r1 = Math.max(r1, r); c0 = Math.min(c0, c); c1 = Math.max(c1, c);
+      }
+  if (r1 < 0) return null;
+  const out: (string | null)[][] = [];
+  for (let r = r0; r <= r1; r++) out.push(grid.slice(r * size + c0, r * size + c1 + 1) as (string | null)[]);
+  return out;
 }
 
-/** Chế tạo một lần: bớt nguyên liệu, thêm thành phẩm vào túi. Trả về phần thừa (vứt ra) hoặc null. */
-export function craft(inv: Inventory, r: Recipe, workbench: boolean): { ok: boolean; overflow: ItemStack | null } {
-  if (r.station === "workbench" && !workbench) return { ok: false, overflow: null };
-  if (!hasIngredients(inv, r)) return { ok: false, overflow: null };
-  for (const i of r.inputs) inv.remove(i.item, i.count);
-  return { ok: true, overflow: inv.add({ item: r.out.item, count: r.out.count, damage: 0 }) };
+function shapeEquals(m: (string | null)[][], r: Recipe, mirror: boolean): boolean {
+  const s = r.shape!;
+  if (m.length !== s.length || s.some((row) => row.length !== m[0]!.length)) return false;
+  for (let y = 0; y < s.length; y++)
+    for (let x = 0; x < s[y]!.length; x++) {
+      const ch = s[y]![mirror ? s[y]!.length - 1 - x : x]!;
+      if ((ch === " " ? null : r.key[ch]!) !== m[y]![x]) return false;
+    }
+  return true;
+}
+
+/** Công thức khớp với lưới (khóa vật phẩm từng ô), hoặc null. */
+export function matchGrid(grid: readonly (string | null)[], size: number): Recipe | null {
+  const m = trim(grid, size);
+  if (!m) return null;
+  const items = grid.filter((g): g is string => !!g).sort();
+  for (const r of R) {
+    if (!fitsGrid(r, size)) continue;
+    if (r.shape) {
+      if (shapeEquals(m, r, false) || shapeEquals(m, r, true)) return r;
+    } else if (items.length === r.shapeless.length && [...r.shapeless].sort().every((it, i) => it === items[i])) return r;
+  }
+  return null;
+}
+
+/** Vị trí (chỉ số ô trong lưới size) và vật phẩm để xếp một bộ nguyên liệu (góc trên trái). */
+export function layout(r: Recipe, size: number): { i: number; item: string }[] {
+  if (!r.shape) return r.shapeless.map((item, i) => ({ i, item }));
+  const out: { i: number; item: string }[] = [];
+  r.shape.forEach((row, y) => [...row].forEach((ch, x) => ch !== " " && out.push({ i: y * size + x, item: r.key[ch]! })));
+  return out;
 }

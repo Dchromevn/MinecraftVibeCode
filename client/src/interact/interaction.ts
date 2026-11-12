@@ -26,6 +26,9 @@ export interface InteractView {
   locked: () => boolean;
   yaw: () => number;
   swing: () => void;
+  /** Chuột phải vào block có chức năng (bàn chế tạo...): true nếu đã xử lý. */
+  useBlock: (id: number) => boolean;
+  sneaking: () => boolean;
 }
 
 export class Interaction {
@@ -129,6 +132,12 @@ export class Interaction {
     if (!this.right) {
       this.placeCooldown = 0;
       this.eating = 0;
+      return;
+    }
+    // chuột phải vào bàn chế tạo (không giữ Shift): mở giao diện thay vì đặt / ăn
+    const t = this.target;
+    if (t && !this.view.sneaking() && this.view.useBlock(t.cell & 255)) {
+      this.right = false;
       return;
     }
     if (food) {
