@@ -1,6 +1,6 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–45 theo bảng 2.2 (hành vi đặc biệt làm ở Giai đoạn 3, 4, 7).
-import { LIGHT, MOVE } from "./constants.js";
+// Đủ id 0–45 theo bảng 2.2, 46–62 theo mục 2.13 (Giai đoạn 4d).
+import { LEAF_DROPS, LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
 const same = (t: string): BlockTextures => ({ top: t, bottom: t, side: t });
@@ -46,7 +46,7 @@ const TABLE: BlockDef[] = [
   def(4, "cobble", 2, "pickaxe", [drop("cobble")], same("cobble"), PICK_ONLY),
   def(5, "sand", 0.5, "shovel", [drop("sand")], same("sand"), { falls: true }),
   def(6, "log", 2, "axe", [drop("log")], { top: "log_top", bottom: "log_top", side: "log_side" }),
-  def(7, "leaves", 0.2, "none", [drop("apple", 0.05), drop("sapling", 0.05), drop("stick", 0.02)], same("leaves"), {
+  def(7, "leaves", 0.2, "none", [drop("apple", LEAF_DROPS.APPLE), drop("sapling", LEAF_DROPS.SAPLING), drop("stick", LEAF_DROPS.STICK)], same("leaves"), {
     transparent: true,
     opaque: false,
     lightOpacity: 1,
@@ -151,7 +151,36 @@ const TABLE: BlockDef[] = [
   def(44, "pumpkin_stem", 0, "none", [drop("pumpkin_seeds")], same("pumpkin_stem"), { ...OPEN, render: "stem", meta: "stem" }),
   // nước chảy vào nguồn dung nham (Giai đoạn 4c)
   def(45, "obsidian", 50, "pickaxe", [drop("obsidian")], same("obsidian"), { ...PICK_ONLY, minTier: "diamond" }),
+  // Giai đoạn 4d: thông, bạch dương, keo (thân, lá, ván, cây non) — mỗi loài 4 id liền nhau
+  ...woodDefs(46, "spruce"),
+  ...woodDefs(50, "birch"),
+  ...woodDefs(54, "acacia"),
+  ...(["dandelion", "poppy", "cornflower", "lily_of_the_valley"] as const).map((k, i) =>
+    def(58 + i, k, 0, "none", [drop(k)], same(k), { ...OPEN, render: "cross" })),
+  def(62, "cactus", 0.4, "none", [drop("cactus")], { top: "cactus_top", bottom: "cactus_bottom", side: "cactus_side" }, {
+    transparent: true,
+    opaque: false,
+    lightOpacity: 0,
+    box: [1 / 16, 0, 1 / 16, 15 / 16, 15 / 16, 15 / 16], // hẹp hơn 1 block: chạm vào là bị đâm
+    render: "cactus",
+    meta: "cactus",
+  }),
 ];
+
+/** Thân, lá, ván, cây non của một loài gỗ (thông số như bản sồi). Táo chỉ rơi từ lá sồi. */
+function woodDefs(id: number, w: string): BlockDef[] {
+  return [
+    def(id, `${w}_log`, 2, "axe", [drop(`${w}_log`)], { top: `${w}_log_top`, bottom: `${w}_log_top`, side: `${w}_log` }),
+    def(id + 1, `${w}_leaves`, 0.2, "none", [drop(`${w}_sapling`, LEAF_DROPS.SAPLING), drop("stick", LEAF_DROPS.STICK)], same(`${w}_leaves`), {
+      transparent: true,
+      opaque: false,
+      lightOpacity: 1,
+      meta: "leaves",
+    }),
+    def(id + 2, `${w}_planks`, 2, "axe", [drop(`${w}_planks`)], same(`${w}_planks`)),
+    def(id + 3, `${w}_sapling`, 0, "none", [drop(`${w}_sapling`)], same(`${w}_sapling`), { ...OPEN, render: "cross", meta: "sapling" }),
+  ];
+}
 
 TABLE.forEach((b, i) => {
   if (b.id !== i) throw new Error(`blockTable: id ${b.id} ở vị trí ${i}`);

@@ -25,6 +25,8 @@ export interface Column {
   mountain: number; // 0..1 mức nâng của núi
   river: boolean; // nằm trong lòng sông
   lake: boolean;
+  temp: number; // trường nhiệt độ (chọn biome, loài cây)
+  humid: number; // trường độ ẩm
 }
 
 export function smoothstep(a: number, b: number, x: number): number {
@@ -114,17 +116,17 @@ export class TerrainSampler {
     const height = Math.max(2, Math.min(T.MAX_HEIGHT, Math.round(raw)));
 
     let biome: BiomeId;
+    const t = this.temp.fbm(x * T.TEMP_FREQ, z * T.TEMP_FREQ, 2);
+    const h = this.humid.fbm(x * T.HUMID_FREQ, z * T.HUMID_FREQ, 2);
     if (height < SEA && land < 0.5) biome = BIOME.OCEAN;
     else if (mountain > BIOMES.MOUNTAIN_FACTOR || height > T.MOUNTAIN_FROM_Y) biome = BIOME.MOUNTAINS;
     else {
-      const t = this.temp.fbm(x * T.TEMP_FREQ, z * T.TEMP_FREQ, 2);
-      const h = this.humid.fbm(x * T.HUMID_FREQ, z * T.HUMID_FREQ, 2);
       if (t < BIOMES.SNOWY_TEMP) biome = BIOME.SNOWY;
       else if (t > BIOMES.DESERT_TEMP && h < BIOMES.DESERT_HUMID) biome = BIOME.DESERT;
       else if (h > BIOMES.FOREST_HUMID) biome = BIOME.FOREST;
       else biome = BIOME.PLAINS;
     }
-    return { height, waterTop: SEA, biome, land, mountain, river, lake: false };
+    return { height, waterTop: SEA, biome, land, mountain, river, lake: false, temp: t, humid: h };
   }
 }
 

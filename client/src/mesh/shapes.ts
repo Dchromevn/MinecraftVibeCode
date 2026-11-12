@@ -66,6 +66,31 @@ export interface BoxTex {
 }
 
 /**
+ * Xương rồng: 4 mặt bên thu vào 1/16 (dùng nguyên texture, gai ở mép ảnh), mặt trên / dưới
+ * phủ cả ô. top / bottom = có vẽ mặt đó (không vẽ khi tiếp giáp khúc xương rồng khác).
+ */
+export function addCactus(
+  b: GeomBuilder, x: number, y: number, z: number, tex: BoxTex, light: readonly number[], top: boolean, bottom: boolean,
+): void {
+  const i = 1 / 16, X0 = x + i, X1 = x + 1 - i, Z0 = z + i, Z1 = z + 1 - i, Y1 = y + 1;
+  const s = tex.side;
+  setLight(light, 0.6);
+  face(b, [X1, y, z + 1, X1, y, z, X1, Y1, z, X1, Y1, z + 1], s.u0, s.v0, s.u1, s.v1);
+  face(b, [X0, y, z, X0, y, z + 1, X0, Y1, z + 1, X0, Y1, z], s.u0, s.v0, s.u1, s.v1);
+  setLight(light, 0.8);
+  face(b, [x, y, Z1, x + 1, y, Z1, x + 1, Y1, Z1, x, Y1, Z1], s.u0, s.v0, s.u1, s.v1);
+  face(b, [x + 1, y, Z0, x, y, Z0, x, Y1, Z0, x + 1, Y1, Z0], s.u0, s.v0, s.u1, s.v1);
+  if (top) {
+    setLight(light, 1);
+    face(b, [x, Y1, z + 1, x + 1, Y1, z + 1, x + 1, Y1, z, x, Y1, z], tex.top.u0, tex.top.v0, tex.top.u1, tex.top.v1);
+  }
+  if (bottom) {
+    setLight(light, 0.5);
+    face(b, [x, y, z, x + 1, y, z, x + 1, y, z + 1, x, y, z + 1], tex.bottom.u0, tex.bottom.v0, tex.bottom.u1, tex.bottom.v1);
+  }
+}
+
+/**
  * Hộp trong ô, kích thước theo điểm ảnh (0..16). faces: bit 1 trên, 2 dưới,
  * 4 +X, 8 -X, 16 +Z, 32 -Z. Texture cắt đúng vị trí điểm ảnh.
  */

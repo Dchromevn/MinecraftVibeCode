@@ -6,6 +6,7 @@ import { collisionBoxes } from "./blockShapes.js";
 import { chestPartner, linkedCell, updateRailsAround, type PlacedCell } from "./placement.js";
 import { chestMeta, facingDir } from "./blockMeta.js";
 import { isFarmPlant, stemDetach } from "./crops.js";
+import { isFlower, isSapling } from "./woods.js";
 
 export interface BlockAccess {
   /** id | dữ liệu phụ << 8; âm = chunk chưa tải. */
@@ -38,11 +39,23 @@ export function isReplaceable(id: number): boolean {
   return !d || d.render === "none" || d.liquid || id === B.TALLGRASS || id === B.SNOW_LAYER;
 }
 
+/** Xương rồng: 4 ô ngang bên cạnh không có block va chạm / dung nham (DESIGN.md 2.13). */
+export function cactusSidesFree(idAt: IdAt, x: number, y: number, z: number): boolean {
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+    const n = idAt(x + dx, y, z + dz);
+    if (n === B.LAVA || BLOCKS[n]?.solid) return false;
+  }
+  return true;
+}
+
 /** Block ở ô có còn chỗ bám không. */
 export function hasSupport(cell: number, x: number, y: number, z: number, idAt: IdAt): boolean {
   const id = cellId(cell), m = cellMeta(cell);
   const below = idAt(x, y - 1, z);
+  if (isSapling(id) || isFlower(id)) return below === B.GRASS || below === B.DIRT || below === B.FARMLAND;
   switch (id) {
+    case B.CACTUS:
+      return (below === B.SAND || below === B.CACTUS) && cactusSidesFree(idAt, x, y, z);
     case B.TORCH: {
       const wall = torchWall(m);
       // đuốc trên sàn: khối đầy, hoặc đầu cột rào (như đuốc trong hầm mỏ)
@@ -55,7 +68,6 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
     case B.SNOW_LAYER:
       return isFullSolid(below);
     case B.TALLGRASS:
-    case B.SAPLING:
       return below === B.GRASS || below === B.DIRT || below === B.FARMLAND;
     case B.WHEAT:
     case B.CARROTS:

@@ -108,7 +108,7 @@ export const BIOMES = {
   plains: { treeChance: 0.12, grassChance: 0.2, pumpkinChance: 0.002 },
   forest: { treeChance: 0.85, grassChance: 0.1, pumpkinChance: 0.002 },
   desert: { treeChance: 0, grassChance: 0, pumpkinChance: 0 },
-  snowy: { treeChance: 0.15, grassChance: 0, pumpkinChance: 0 },
+  snowy: { treeChance: 0.3, grassChance: 0, pumpkinChance: 0 }, // rừng thông thưa (4d: 0.15 → 0.3)
   mountains: { treeChance: 0.12, grassChance: 0.05, pumpkinChance: 0 },
   ocean: { treeChance: 0, grassChance: 0, pumpkinChance: 0 },
   // ngưỡng chọn biome
@@ -189,3 +189,4 @@ export const MOVE = {
 export * from "./gameplay.js";
 export * from "./survivalConstants.js";
 export * from "./tickConstants.js";
+export * from "./floraConstants.js";

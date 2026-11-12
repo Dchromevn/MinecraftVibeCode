@@ -7,7 +7,7 @@ import {
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
 import {
-  addBed, addBox, addCrop, addCross, addFence, addLadder, addRail, addStem, addStemAttached, addTorch, addTorchWall,
+  addBed, addBox, addCactus, addCrop, addCross, addFence, addLadder, addRail, addStem, addStemAttached, addTorch, addTorchWall,
 } from "./shapes.js";
 
 export interface SpecialUv {
@@ -91,6 +91,9 @@ export function addSpecial(
       }, light, bedDir(meta), head);
       return true;
     }
+    case "cactus":
+      addCactus(b, x, y, z, { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at(x, y + 1, z) !== id, at(x, y - 1, z) !== id);
+      return true;
     case "farmland": {
       const up = OPAQUE[at(x, y + 1, z)] === 1;
       addBox(b, x, y, z, 0, 16, 0, 15, 0, 16, { top: meta & 1 ? uv.farmlandWet : t[0]!, side: t[2]!, bottom: t[1]! }, light, up ? 62 : 63);

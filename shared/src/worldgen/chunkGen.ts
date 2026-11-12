@@ -5,6 +5,7 @@ import { B, type BlockId } from "../blocks.js";
 import { CHUNK_HEIGHT, blockIndex, emptyChunkData, type ChunkData } from "../chunk.js";
 import { BIOME, TerrainSampler, hasGrassSurface, type Column } from "./terrainSampler.js";
 import { placeTallGrass, placeTrees } from "./trees.js";
+import { placeCacti, placeFlowers } from "./flora.js";
 import { placeSprings } from "./springs.js";
 import { CaveField } from "./caveField.js";
 import { CaveRules } from "./caveRules.js";
@@ -44,6 +45,8 @@ export class ChunkGenerator {
     carveChunk(this, data, cx, cz, cols);
     this.mineshafts.apply(data, meta, cx, cz); // ray, đuốc ghi dữ liệu phụ ngay khi sinh
     placeTrees(this, data, cx, cz);
+    placeFlowers(this.sampler, data, cx, cz, cols);
+    placeCacti(this.sampler, data, cx, cz, cols);
     placeTallGrass(this, data, cx, cz, cols);
     placeSprings(this.sampler, data, cx, cz, cols);
     placeCaveSprings(this.seed, data, cx, cz, cols);

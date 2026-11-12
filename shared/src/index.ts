@@ -2,6 +2,7 @@
 export * from "./constants.js";
 export * from "./blocks.js";
 export * from "./blockMeta.js";
+export * from "./woods.js";
 export * from "./blockShapes.js";
 export * from "./rng.js";
 export * from "./noise.js";

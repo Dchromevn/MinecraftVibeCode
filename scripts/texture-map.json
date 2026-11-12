@@ -684,6 +684,114 @@
     {
       "dest": "icons/lava_bucket.png",
       "src": "bucket_mcl_buckets/bucket_lava.png"
+    },
+    {
+      "dest": "textures/spruce_log.png",
+      "src": "default_mcl_core/trees/mcl_core_log_spruce.png"
+    },
+    {
+      "dest": "textures/spruce_log_top.png",
+      "src": "default_mcl_core/trees/mcl_core_log_spruce_top.png"
+    },
+    {
+      "dest": "textures/spruce_leaves.png",
+      "src": "default_mcl_core/trees/mcl_core_leaves_spruce.png"
+    },
+    {
+      "dest": "textures/spruce_planks.png",
+      "src": "default_mcl_core/trees/mcl_core_planks_spruce.png"
+    },
+    {
+      "dest": "textures/spruce_sapling.png",
+      "src": "default_mcl_core/trees/mcl_core_sapling_spruce.png"
+    },
+    {
+      "dest": "textures/birch_log.png",
+      "src": "default_mcl_core/trees/mcl_core_log_birch.png"
+    },
+    {
+      "dest": "textures/birch_log_top.png",
+      "src": "default_mcl_core/trees/mcl_core_log_birch_top.png"
+    },
+    {
+      "dest": "textures/birch_leaves.png",
+      "src": "default_mcl_core/trees/mcl_core_leaves_birch.png"
+    },
+    {
+      "dest": "textures/birch_planks.png",
+      "src": "default_mcl_core/trees/mcl_core_planks_birch.png"
+    },
+    {
+      "dest": "textures/birch_sapling.png",
+      "src": "default_mcl_core/trees/mcl_core_sapling_birch.png"
+    },
+    {
+      "dest": "textures/acacia_log.png",
+      "src": "default_mcl_core/trees/default_acacia_tree.png"
+    },
+    {
+      "dest": "textures/acacia_log_top.png",
+      "src": "default_mcl_core/trees/default_acacia_tree_top.png"
+    },
+    {
+      "dest": "textures/acacia_leaves.png",
+      "src": "default_mcl_core/trees/default_acacia_leaves.png"
+    },
+    {
+      "dest": "textures/acacia_planks.png",
+      "src": "default_mcl_core/trees/default_acacia_wood.png"
+    },
+    {
+      "dest": "textures/acacia_sapling.png",
+      "src": "default_mcl_core/trees/default_acacia_sapling.png"
+    },
+    {
+      "dest": "textures/dandelion.png",
+      "src": "flowers_mcl_flowers/flowers_dandelion_yellow.png"
+    },
+    {
+      "dest": "textures/poppy.png",
+      "src": "flowers_mcl_flowers/mcl_flowers_poppy.png"
+    },
+    {
+      "dest": "textures/cornflower.png",
+      "src": "flowers_mcl_flowers/mcl_flowers_cornflower.png"
+    },
+    {
+      "dest": "textures/lily_of_the_valley.png",
+      "src": "flowers_mcl_flowers/mcl_flowers_lily_of_the_valley.png"
+    },
+    {
+      "dest": "textures/cactus_side.png",
+      "src": "default_mcl_core/plants/mcl_core_cactus_side.png"
+    },
+    {
+      "dest": "textures/cactus_top.png",
+      "src": "default_mcl_core/plants/mcl_core_cactus_top.png"
+    },
+    {
+      "dest": "textures/cactus_bottom.png",
+      "src": "default_mcl_core/plants/mcl_core_cactus_bottom.png"
+    },
+    {
+      "dest": "icons/white_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_white.png"
+    },
+    {
+      "dest": "icons/red_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_red.png"
+    },
+    {
+      "dest": "icons/yellow_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_yellow.png"
+    },
+    {
+      "dest": "icons/blue_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_blue.png"
+    },
+    {
+      "dest": "icons/green_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_dark_green.png"
     }
   ]
 }

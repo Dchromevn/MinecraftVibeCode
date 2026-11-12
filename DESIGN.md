@@ -29,7 +29,7 @@ Biome (chọn theo hai trường noise nhiệt độ và độ ẩm, chuyển ti
 | Đồng cỏ | cỏ, đất | cây thưa (sồi, ít bạch dương; phần nóng khô có keo — 4d), cỏ cao dày, hoa theo đám (4d) |
 | Rừng | cỏ, đất | cây dày (sồi + khoảng 30% bạch dương — 4d), cỏ cao, hoa theo đám (4d) |
 | Sa mạc | cát, sa thạch bên dưới | xương rồng (4d), không cây |
-| Đồng tuyết | tuyết phủ trên cỏ | cây thông thưa (4d) |
+| Đồng tuyết | tuyết phủ trên cỏ | rừng thông thưa (4d) |
 | Núi | đá lộ ra trên cao, tuyết trên đỉnh | cây thông thưa ở chân núi (4d) |
 | Đại dương | nước, đáy cát và sỏi | không |
 
@@ -555,6 +555,22 @@ giai đoạn sau. Màu (16) lưu trong dữ liệu phụ; mỗi loài cây dùng
 - Công thức chung nhận thân / ván của mọi loài: que, bàn chế tạo, rương, bát, thang, đuốc,
   công cụ gỗ, giường, nút gỗ; nhiên liệu lò như nhau. Thân → 4 ván cùng loài.
 - Đồ theo loài (4e): bậc, tấm, hàng rào, cửa. Hàng rào khác loài vẫn nối với nhau.
+
+Thông số đã dùng (Giai đoạn 4d, `/shared/src/floraConstants.ts`):
+- Thân: sồi 4–6, bạch dương 5–7, thông 6–9, keo 5–7 khúc. Thông: 1–2 khúc thân trần, hai ô lá
+  trên ngọn, các tầng bán kính 1–3 xen kẽ to / nhỏ. Keo: 2–3 khúc thẳng, nghiêng 1–2 bước theo một
+  hướng, tán bán kính 3 + tầng trên bán kính 2; 50% có nhánh phụ (tán bán kính 2).
+- Mật độ cây (xác suất mỗi ô lưới 5x5): đồng tuyết 0.15 → 0.3 (rừng thông thưa), các biome khác giữ nguyên.
+- Tỉ lệ loài: rừng 30% bạch dương; đồng cỏ 10% bạch dương; chân núi 70% thông; đồng cỏ có nhiệt
+  độ > 0.1 và độ ẩm < 0.05 (sát sa mạc) toàn cây keo. Loài chọn bằng số băm riêng nên cây sồi
+  giữ đúng vị trí / hình dạng như trước 4d.
+- Hoa: lưới 12x12, mỗi ô có thể có một đám một loại hoa (đồng cỏ 55%, rừng 40%, núi 15%), bán
+  kính 3, 45% ô cỏ trong đám có hoa. Đồng cỏ: bồ công anh, anh túc, hoa ngô xanh; rừng: bồ công
+  anh, anh túc, linh lan; núi: bồ công anh, anh túc.
+- Xương rồng: lưới 4x4, 8% ô có cây (vị trí 0–2 trong ô nên hai cây không bao giờ sát nhau), cao
+  1–3; chỉ sinh khi 4 cột bên cạnh cũng là sa mạc khô và không cao hơn. Random tick tăng tuổi
+  0–15, đủ tuổi thì mọc thêm một khúc (tối đa 3). Chạm vào: 1 máu (mỗi 0.5 giây do miễn sát thương).
+- Phiên bản bộ sinh thế giới `WORLDGEN_VERSION = 2`.
 
 #### Hoa và xương rồng (4d)
 

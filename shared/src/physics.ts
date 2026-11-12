@@ -2,7 +2,7 @@
 // định, bước cố định 1/PHYSICS_HZ giây — client chạy để dự đoán, server (Giai đoạn 5)
 // chạy lại để kiểm tra. Sinh tồn (đói, hồi máu, giáp, chết) trong survival.ts.
 import { B } from "./blocks.js";
-import { MOVE, PLAYER } from "./constants.js";
+import { CACTUS, MOVE, PLAYER } from "./constants.js";
 import { boxBlocked, moveBox, type CellReader } from "./collide.js";
 import { HUNGER } from "./survivalConstants.js";
 import { createSurvival, hurt, tickSurvival, type SurvivalState } from "./survival.js";
@@ -20,6 +20,7 @@ export interface PlayerState extends SurvivalState {
   inLava: boolean;
   onLadder: boolean;
   inWeb: boolean;
+  inCactus: boolean; // chạm xương rồng (hộp người chạm vào ô xương rồng)
   headInWater: boolean;
   collidedH: boolean;
   frozen: boolean; // chunk dưới chân chưa tải: đứng yên
@@ -48,7 +49,7 @@ export const JUMP_VELOCITY = Math.sqrt(2 * PLAYER.GRAVITY * PLAYER.JUMP_HEIGHT);
 export function createPlayer(x: number, y: number, z: number): PlayerState {
   return {
     x, y, z, vx: 0, vy: 0, vz: 0,
-    onGround: false, sneaking: false, inWater: false, inLava: false, onLadder: false, inWeb: false,
+    onGround: false, sneaking: false, inWater: false, inLava: false, onLadder: false, inWeb: false, inCactus: false,
     headInWater: false, collidedH: false, frozen: false,
     air: PLAYER.AIR_S, fallDist: 0, landFall: 0, burnS: 0, fireTimer: 0, drownTimer: 0,
     ...createSurvival(),
@@ -66,7 +67,7 @@ export function playerBox(s: { x: number; y: number; z: number; sneaking?: boole
 
 /** Người chơi đang chạm block gì (nước, dung nham, thang, mạng nhện). */
 function scanEnvironment(s: PlayerState, cell: CellReader): void {
-  s.inWater = s.inLava = s.onLadder = s.inWeb = false;
+  s.inWater = s.inLava = s.onLadder = s.inWeb = s.inCactus = false;
   const a = playerBox(s);
   for (let y = Math.floor(a[1]!); y <= Math.floor(a[4]! - 1e-6); y++)
     for (let z = Math.floor(a[2]!); z <= Math.floor(a[5]! - 1e-6); z++)
@@ -78,6 +79,7 @@ function scanEnvironment(s: PlayerState, cell: CellReader): void {
         else if (id === B.LAVA) s.inLava = true;
         else if (id === B.LADDER) s.onLadder = true;
         else if (id === B.COBWEB) s.inWeb = true;
+        else if (id === B.CACTUS) s.inCactus = true;
       }
   const eye = cell(Math.floor(s.x), Math.floor(s.y + eyeHeight(s)), Math.floor(s.z));
   s.headInWater = eye >= 0 && (eye & 255) === B.WATER;
@@ -111,8 +113,9 @@ function horizontal(s: PlayerState, inp: PlayerInput, liquid: boolean, dt: numbe
   }
 }
 
-/** Dung nham, cháy, chết đuối (MECHANICS.md 5.5). */
+/** Dung nham, cháy, chết đuối (MECHANICS.md 5.5), xương rồng (DESIGN.md 2.13). */
 function environmentDamage(s: PlayerState, dt: number): void {
+  if (s.inCactus) hurt(s, CACTUS.DAMAGE, "other");
   if (s.inLava) {
     hurt(s, PLAYER.LAVA_DAMAGE, "lava");
     s.burnS = PLAYER.LAVA_BURN_S;

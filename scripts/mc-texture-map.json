@@ -1108,6 +1108,117 @@
   {
    "dest": "icons/lava_bucket",
    "src": "item/lava_bucket"
+  },
+  {
+   "dest": "textures/spruce_log",
+   "src": "block/spruce_log"
+  },
+  {
+   "dest": "textures/spruce_log_top",
+   "src": "block/spruce_log_top"
+  },
+  {
+   "dest": "textures/spruce_leaves",
+   "src": "block/spruce_leaves",
+   "tint": "#619961"
+  },
+  {
+   "dest": "textures/spruce_planks",
+   "src": "block/spruce_planks"
+  },
+  {
+   "dest": "textures/spruce_sapling",
+   "src": "block/spruce_sapling"
+  },
+  {
+   "dest": "textures/birch_log",
+   "src": "block/birch_log"
+  },
+  {
+   "dest": "textures/birch_log_top",
+   "src": "block/birch_log_top"
+  },
+  {
+   "dest": "textures/birch_leaves",
+   "src": "block/birch_leaves",
+   "tint": "#80A755"
+  },
+  {
+   "dest": "textures/birch_planks",
+   "src": "block/birch_planks"
+  },
+  {
+   "dest": "textures/birch_sapling",
+   "src": "block/birch_sapling"
+  },
+  {
+   "dest": "textures/acacia_log",
+   "src": "block/acacia_log"
+  },
+  {
+   "dest": "textures/acacia_log_top",
+   "src": "block/acacia_log_top"
+  },
+  {
+   "dest": "textures/acacia_leaves",
+   "src": "block/acacia_leaves",
+   "tint": "#77AB2F"
+  },
+  {
+   "dest": "textures/acacia_planks",
+   "src": "block/acacia_planks"
+  },
+  {
+   "dest": "textures/acacia_sapling",
+   "src": "block/acacia_sapling"
+  },
+  {
+   "dest": "textures/dandelion",
+   "src": "block/dandelion"
+  },
+  {
+   "dest": "textures/poppy",
+   "src": "block/poppy"
+  },
+  {
+   "dest": "textures/cornflower",
+   "src": "block/cornflower"
+  },
+  {
+   "dest": "textures/lily_of_the_valley",
+   "src": "block/lily_of_the_valley"
+  },
+  {
+   "dest": "textures/cactus_side",
+   "src": "block/cactus_side"
+  },
+  {
+   "dest": "textures/cactus_top",
+   "src": "block/cactus_top"
+  },
+  {
+   "dest": "textures/cactus_bottom",
+   "src": "block/cactus_bottom"
+  },
+  {
+   "dest": "icons/white_dye",
+   "src": "item/white_dye"
+  },
+  {
+   "dest": "icons/red_dye",
+   "src": "item/red_dye"
+  },
+  {
+   "dest": "icons/yellow_dye",
+   "src": "item/yellow_dye"
+  },
+  {
+   "dest": "icons/blue_dye",
+   "src": "item/blue_dye"
+  },
+  {
+   "dest": "icons/green_dye",
+   "src": "item/green_dye"
   }
  ]
 }

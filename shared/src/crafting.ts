@@ -3,7 +3,7 @@
 import { INVENTORY } from "./survivalConstants.js";
 import { canMerge, type Inventory, type ItemStack } from "./inventory.js";
 import { itemDef } from "./items.js";
-import { fitsGrid, layout, matchGrid, type Recipe } from "./recipes.js";
+import { ITEM_TAGS, fitsGrid, layout, matchGrid, type Recipe } from "./recipes.js";
 
 const maxOf = (item: string): number => itemDef(item)?.maxStack ?? INVENTORY.MAX_STACK;
 
@@ -56,9 +56,20 @@ function available(inv: Inventory, item: string): number {
   return inv.count(item) + inv.craft.reduce((n, s) => n + (s && s.item === item ? s.count : 0), 0);
 }
 
+/**
+ * Vật phẩm cụ thể dùng cho nguyên liệu (nhóm "#planks": loại có nhiều nhất), hoặc null nếu không
+ * loại nào đủ count. Sổ công thức xếp một loại cho cả nhóm (không trộn), chia lưới vẫn trộn được.
+ */
+function pick(count: (item: string) => number, want: string, need: number): string | null {
+  const opts = ITEM_TAGS[want] ?? [want];
+  let best: string | null = null;
+  for (const o of opts) if (count(o) >= need && (!best || count(o) > count(best))) best = o;
+  return best;
+}
+
 /** Sổ công thức: đủ nguyên liệu (túi + lưới) và vừa lưới đang mở. */
 export function canFill(inv: Inventory, r: Recipe): boolean {
-  return fitsGrid(r, inv.craftSize) && r.inputs.every((i) => available(inv, i.item) >= i.count);
+  return fitsGrid(r, inv.craftSize) && r.inputs.every((i) => pick((it) => available(inv, it), i.item, i.count) !== null);
 }
 
 /**
@@ -73,10 +84,12 @@ export function fillFromBook(inv: Inventory, r: Recipe, many: boolean): boolean 
     over.forEach((s, i) => (inv.craft[i] = s));
     return false;
   }
-  const cells = layout(r, inv.craftSize);
+  const use = new Map<string, string>(); // nguyên liệu (có thể là nhóm) → vật phẩm cụ thể trong túi
+  for (const i of r.inputs) use.set(i.item, pick((it) => inv.count(it), i.item, i.count)!);
+  const cells = layout(r, inv.craftSize).map((c) => ({ i: c.i, item: use.get(c.item)! }));
   let sets = 1;
   if (many) {
-    sets = Math.min(...r.inputs.map((i) => Math.floor(inv.count(i.item) / i.count)), ...cells.map((c) => maxOf(c.item)));
+    sets = Math.min(...r.inputs.map((i) => Math.floor(inv.count(use.get(i.item)!) / i.count)), ...cells.map((c) => maxOf(c.item)));
     sets = Math.max(1, sets);
   }
   for (const c of cells) {

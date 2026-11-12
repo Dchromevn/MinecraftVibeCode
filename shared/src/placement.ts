@@ -2,6 +2,7 @@
 // và các block 2 ô (cửa, giường). Giai đoạn 3a dùng cho công cụ đặt block debug;
 // Giai đoạn 3b thêm kiểm tra chỗ bám, Giai đoạn 5 server dùng lại.
 import { B } from "./blocks.js";
+import { isLeaves } from "./woods.js";
 import {
   HDX, HDZ, bedDir, bedHead, bedMeta, cellId, cellMeta, chestHalf, chestMeta, dirFromYaw, dirOf, doorMeta, doorUpper,
   facingDir, opposite, railMetaFromNeighbors, torchMeta,
@@ -48,10 +49,8 @@ export function placementCells(
       return one(opposite(look)); // mặt trước quay về phía người chơi
     case B.WHEAT:
       return one(0); // gieo hạt: giai đoạn 0
-    case B.LEAVES:
-      return one(1); // lá người chơi đặt: không bao giờ rụng
     default:
-      return one(0);
+      return one(isLeaves(id) ? 1 : 0); // lá người chơi đặt (mọi loài): không bao giờ rụng
   }
 }
 

@@ -1,6 +1,17 @@
 // Công thức chế tạo (DESIGN.md 2.4): lưới 2x2 (túi đồ) hoặc 3x3 (bàn chế tạo). Công thức có
 // hình xếp (được lật ngang) hoặc không cần hình. Mỗi ô lưới dùng 1 nguyên liệu mỗi lần làm.
+import { BLOCKS } from "./blocks.js";
 import { ARMOR_PIECES, TOOL_KINDS } from "./items.js";
+import { LOG_ITEMS, PLANK_ITEMS, WOODS } from "./woods.js";
+
+/** Nhóm nguyên liệu (Giai đoạn 4d): ô lưới nhận bất kỳ vật phẩm nào trong nhóm, có thể trộn loài. */
+export const ITEM_TAGS: Readonly<Record<string, readonly string[]>> = { "#planks": PLANK_ITEMS, "#log": LOG_ITEMS };
+
+/** Vật phẩm have có dùng được cho nguyên liệu want (khóa vật phẩm hoặc nhóm "#...") không. */
+export function ingredientMatches(want: string, have: string | null): boolean {
+  if (!have) return false;
+  return want === have || (ITEM_TAGS[want]?.includes(have) ?? false);
+}
 
 export interface Ingredient {
   item: string;
@@ -35,13 +46,13 @@ function shapeless(out: string, n: number, items: string[], station: Recipe["sta
 }
 
 // làm mọi lúc (vừa lưới 2x2)
-shapeless("planks", 4, ["log"]);
-shaped("stick", 4, ["P", "P"], { P: "planks" }, "hand");
-shaped("workbench", 1, ["PP", "PP"], { P: "planks" }, "hand");
+for (const w of WOODS) shapeless(BLOCKS[w.planks]!.key, 4, [BLOCKS[w.log]!.key]); // thân → 4 ván cùng loài
+shaped("stick", 4, ["P", "P"], { P: "#planks" }, "hand");
+shaped("workbench", 1, ["PP", "PP"], { P: "#planks" }, "hand");
 shaped("torch", 4, ["C", "S"], { C: "coal", S: "stick" }, "hand");
 
 // công cụ: X = ván gỗ / đá cuội / thỏi sắt / thỏi vàng / kim cương; | = que
-const TOOL_MAT: [string, string][] = [["wood", "planks"], ["stone", "cobble"], ["iron", "iron_ingot"], ["gold", "gold_ingot"], ["diamond", "diamond"]];
+const TOOL_MAT: [string, string][] = [["wood", "#planks"], ["stone", "cobble"], ["iron", "iron_ingot"], ["gold", "gold_ingot"], ["diamond", "diamond"]];
 const TOOL_SHAPE: Record<(typeof TOOL_KINDS)[number], string[]> = {
   pickaxe: ["XXX", " | ", " | "], axe: ["XX", "X|", " |"], shovel: ["X", "|", "|"], sword: ["X", "X", "|"], hoe: ["XX", " |", " |"],
 };
@@ -55,21 +66,27 @@ for (const [tier, mat] of ARMOR_MAT) ARMOR_PIECES.forEach((p, i) => shaped(`${ti
 
 shaped("bow", 1, [" |T", "| T", " |T"], { "|": "stick", T: "string" });
 shaped("arrow", 4, ["F", "|", "E"], { F: "flint", "|": "stick", E: "feather" });
-shaped("chest", 1, ["PPP", "P P", "PPP"], { P: "planks" });
+shaped("chest", 1, ["PPP", "P P", "PPP"], { P: "#planks" });
 shaped("furnace", 1, ["CCC", "C C", "CCC"], { C: "cobble" });
 shaped("ladder", 3, ["| |", "|||", "| |"], { "|": "stick" });
-shaped("door", 3, ["PP", "PP", "PP"], { P: "planks" });
-shaped("fence", 3, ["P|P", "P|P"], { P: "planks", "|": "stick" });
+shaped("door", 3, ["PP", "PP", "PP"], { P: "#planks" }); // cửa / rào theo loài gỗ: Giai đoạn 4e
+shaped("fence", 3, ["P|P", "P|P"], { P: "#planks", "|": "stick" });
 shaped("rail", 16, ["I I", "I|I", "I I"], { I: "iron_ingot", "|": "stick" });
 shaped("bread", 1, ["WWW"], { W: "wheat" });
-shaped("bed", 1, ["WWW", "PPP"], { W: "wool", P: "planks" });
+shaped("bed", 1, ["WWW", "PPP"], { W: "wool", P: "#planks" });
 shaped("sandstone", 1, ["SS", "SS"], { S: "sand" });
 shaped("golden_apple", 1, ["GGG", "GAG", "GGG"], { G: "gold_ingot", A: "apple" });
-shaped("bowl", 4, ["P P", " P "], { P: "planks" });
+shaped("bowl", 4, ["P P", " P "], { P: "#planks" });
 shaped("bucket", 1, ["I I", " I "], { I: "iron_ingot" });
 shapeless("beetroot_soup", 1, ["beetroot", "beetroot", "beetroot", "beetroot", "beetroot", "beetroot", "bowl"]);
 shapeless("melon_seeds", 1, ["melon_slice"]);
 shapeless("pumpkin_seeds", 4, ["pumpkin"]);
+// thuốc nhuộm từ hoa và củ cải đường (xanh lá: nung xương rồng)
+shapeless("yellow_dye", 1, ["dandelion"]);
+shapeless("red_dye", 1, ["poppy"]);
+shapeless("red_dye", 1, ["beetroot"]);
+shapeless("blue_dye", 1, ["cornflower"]);
+shapeless("white_dye", 1, ["lily_of_the_valley"]);
 
 export const RECIPES: readonly Recipe[] = R;
 
@@ -101,7 +118,7 @@ function shapeEquals(m: (string | null)[][], r: Recipe, mirror: boolean): boolea
   for (let y = 0; y < s.length; y++)
     for (let x = 0; x < s[y]!.length; x++) {
       const ch = s[y]![mirror ? s[y]!.length - 1 - x : x]!;
-      if ((ch === " " ? null : r.key[ch]!) !== m[y]![x]) return false;
+      if (ch === " " ? m[y]![x] !== null : !ingredientMatches(r.key[ch]!, m[y]![x]!)) return false;
     }
   return true;
 }

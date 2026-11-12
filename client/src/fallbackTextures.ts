@@ -3,6 +3,8 @@ import { hashString, mulberry32 } from "../../shared/src/index.js";
 
 type Palette = [base: string, accent: string];
 
+const FLOWERS = new Set(["dandelion", "poppy", "cornflower", "lily_of_the_valley"]);
+
 const PALETTE: Record<string, Palette> = {
   grass_top: ["#5fa83a", "#4d8f2f"],
   grass_side: ["#8b5a2b", "#5fa83a"],
@@ -58,6 +60,28 @@ const PALETTE: Record<string, Palette> = {
   bed_foot_top: ["#c03030", "#a02020"],
   bed_head_side: ["#c03030", "#9c7640"],
   bed_foot_side: ["#c03030", "#9c7640"],
+  spruce_log: ["#3d2b1a", "#2c1f12"],
+  spruce_log_top: ["#7a5a38", "#3d2b1a"],
+  spruce_leaves: ["#2f5f3a", "#244a2d"],
+  spruce_planks: ["#7a5a38", "#664a2e"],
+  spruce_sapling: ["#2f5f3a", "#3d2b1a"],
+  birch_log: ["#e8e4d8", "#3a3a3a"],
+  birch_log_top: ["#c8b47a", "#e8e4d8"],
+  birch_leaves: ["#6a9a45", "#557d37"],
+  birch_planks: ["#d4c48a", "#c0ae74"],
+  birch_sapling: ["#6a9a45", "#e8e4d8"],
+  acacia_log: ["#6e6862", "#57524d"],
+  acacia_log_top: ["#b05a32", "#6e6862"],
+  acacia_leaves: ["#5a8a2a", "#4a7322"],
+  acacia_planks: ["#b05a32", "#9a4d2a"],
+  acacia_sapling: ["#5a8a2a", "#6e6862"],
+  dandelion: ["#3f8f2a", "#f2d22a"],
+  poppy: ["#3f8f2a", "#d0302a"],
+  cornflower: ["#3f8f2a", "#4a6ae0"],
+  lily_of_the_valley: ["#3f8f2a", "#f4f4f4"],
+  cactus_side: ["#2f8a2a", "#1f6a1f"],
+  cactus_top: ["#3a9a32", "#2f8a2a"],
+  cactus_bottom: ["#3a9a32", "#2f8a2a"],
   missing: ["#ff00ff", "#000000"],
 };
 
@@ -99,6 +123,13 @@ export function drawFallbackTile(
 
   const [base, accent] = PALETTE[name] ?? PALETTE.missing!;
 
+  if (FLOWERS.has(name)) {
+    // thân xanh + bông hoa nhỏ màu accent
+    for (let j = 8; j < 16; j++) dot(7, j, base);
+    for (let i = 5; i <= 9; i++) for (let j = 3; j <= 7; j++) if ((i - 7) ** 2 + (j - 5) ** 2 <= 5) dot(i, j, accent);
+    return;
+  }
+
   if (name === "tallgrass") {
     for (let k = 0; k < 6; k++) {
       const i0 = 2 + Math.floor(rng() * 12);
@@ -114,12 +145,12 @@ export function drawFallbackTile(
 
   if (name === "grass_side") {
     for (let i = 0; i < 16; i++) for (let j = 0; j < 3 + (i % 3 === 0 ? 1 : 0); j++) dot(i, j, accent);
-  } else if (name === "leaves") {
+  } else if (name.endsWith("leaves")) {
     for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) if (rng() < 0.2) ctx.clearRect(x + i * px, y + j * px, px, px);
-  } else if (name === "log_side" || name === "planks") {
-    const vertical = name === "log_side";
+  } else if (name === "log_side" || name.endsWith("planks") || /_log$/.test(name)) {
+    const vertical = !name.endsWith("planks");
     for (let k = 0; k < 16; k += 4) for (let t = 0; t < 16; t++) (vertical ? dot(k, t, accent) : dot(t, k, accent));
-  } else if (name === "log_top") {
+  } else if (name.endsWith("log_top")) {
     for (let r = 2; r < 8; r += 2) for (let a = 0; a < 32; a++) {
       dot(Math.round(8 + r * Math.cos(a / 5)), Math.round(8 + r * Math.sin(a / 5)), accent);
     }

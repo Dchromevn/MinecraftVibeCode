@@ -1,5 +1,6 @@
 // Kiểm tra 4a: túi đồ không nhân đôi/mất đồ, chế tạo, rơi đồ theo công cụ, đói, ăn, giáp, chết.
 import {
+  ITEM_TAGS,
   B, Inventory, RECIPES, armorReduce, blockDrops, fillFromBook, gridResult, takeResult, matchGrid, createPlayer, eat, FOODS, hurt, mulberry32, stack,
   stepPlayer, tickSurvival, allItems, itemDef, BLOCKS, makeCell, dragSpread, collectToCursor, swapWithHotbar,
   takeFromSlot, dropCursor, type PlayerInput,
@@ -57,7 +58,7 @@ const total = (inv: Inventory) => {
     && g([null, "planks", "planks", null, "stick", "planks", null, "stick", null]) === "wood_axe"
     && g(["planks", "planks", "planks", null, null, "stick", null, "stick", null]) === null);
   check("hình đặt lệch vị trí trong lưới vẫn khớp (que ở cột phải)", g([null, null, "planks", null, null, "planks", null, null, null]) === "stick");
-  const missing = RECIPES.flatMap((x) => [x.out.item, ...x.inputs.map((i) => i.item)]).filter((k) => !itemDef(k));
+  const missing = RECIPES.flatMap((x) => [x.out.item, ...x.inputs.flatMap((i) => ITEM_TAGS[i.item] ?? [i.item])]).filter((k) => !itemDef(k));
   check("mọi công thức dùng vật phẩm có trong bảng", missing.length === 0, missing.join(","));
 }
 { // 3. rơi đồ theo cấp công cụ

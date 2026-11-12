@@ -1,7 +1,7 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 5a — chơi chung qua server",
+  stage: "Giai đoạn 4d — loài cây, hoa, xương rồng",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · C ngồi (khi bay: xuống) · Shift hoặc nhấn đúp W chạy nhanh (khi bay: bay nhanh)\n" +
@@ -77,6 +77,9 @@ export const STR = {
     beetroot_seeds: "Hạt củ cải đường", beetroot_soup: "Súp củ cải đường", melon_slice: "Lát dưa hấu",
     melon_seeds: "Hạt dưa hấu", pumpkin_seeds: "Hạt bí ngô", bowl: "Bát gỗ",
     bucket: "Xô", water_bucket: "Xô nước", lava_bucket: "Xô dung nham",
+    white_dye: "Thuốc nhuộm trắng", red_dye: "Thuốc nhuộm đỏ", yellow_dye: "Thuốc nhuộm vàng",
+    blue_dye: "Thuốc nhuộm xanh dương", green_dye: "Thuốc nhuộm xanh lá",
+    "#planks": "Ván gỗ (loại nào cũng được)", "#log": "Thân gỗ (loại nào cũng được)",
   } as Record<string, string>,
   toolKinds: { pickaxe: "Cuốc", axe: "Rìu", shovel: "Xẻng", sword: "Kiếm", hoe: "Cuốc đất" } as Record<string, string>,
   armorPieces: { helmet: "Mũ", chestplate: "Áo giáp", leggings: "Quần giáp", boots: "Giày" } as Record<string, string>,
@@ -86,15 +89,15 @@ export const STR = {
   blocks: {
     stone: "Đá",
     dirt: "Đất",
-    planks: "Ván gỗ",
-    log: "Thân gỗ",
+    planks: "Ván gỗ sồi",
+    log: "Thân gỗ sồi",
     cobble: "Đá cuội",
     sand: "Cát",
     tallgrass: "Cỏ cao",
     bedrock: "Đá nền",
     gravel: "Sỏi",
     sandstone: "Sa thạch",
-    sapling: "Cây non",
+    sapling: "Cây sồi non",
     torch: "Đuốc",
     glass: "Kính",
     fence: "Hàng rào",
@@ -127,8 +130,13 @@ export const STR = {
     lava: "Dung nham",
     workbench: "Bàn chế tạo",
     chest: "Rương",
-    leaves: "Lá",
+    leaves: "Lá sồi",
     grass: "Cỏ",
+    spruce_log: "Thân gỗ thông", spruce_planks: "Ván gỗ thông", spruce_leaves: "Lá thông", spruce_sapling: "Cây thông non",
+    birch_log: "Thân gỗ bạch dương", birch_planks: "Ván gỗ bạch dương", birch_leaves: "Lá bạch dương", birch_sapling: "Cây bạch dương non",
+    acacia_log: "Thân gỗ keo", acacia_planks: "Ván gỗ keo", acacia_leaves: "Lá keo", acacia_sapling: "Cây keo non",
+    dandelion: "Bồ công anh", poppy: "Anh túc", cornflower: "Hoa ngô xanh", lily_of_the_valley: "Linh lan",
+    cactus: "Xương rồng",
   } as Record<string, string>,
   serverConnecting: "Server: đang kết nối...",
   serverConnected: "Server: đã kết nối",

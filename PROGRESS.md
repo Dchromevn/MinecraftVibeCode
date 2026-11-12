@@ -17,7 +17,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 4b | Rương, lò nung, cửa, trồng trọt | xong (người dùng xác nhận 2026-11-12) |
 | 4c | Chất lỏng, xô | xong (người dùng xác nhận 2026-11-12) |
 | 5a | Server làm chủ thế giới, chơi chung qua link | xong (người dùng xác nhận 2026-11-13) |
-| 4d | Loài cây mới, hoa, xương rồng | chưa làm (sau 5a, trước 5b) |
+| 4d | Loài cây mới, hoa, xương rồng | chờ người dùng test |
 | 4e | Bậc, tấm, tường, 16 màu, đồ sắt | chưa làm (trước 5b) |
 | 5b | Lưu thế giới, đăng nhập | chưa làm |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
@@ -617,6 +617,41 @@ Trạng thái: xong (người dùng xác nhận 2026-11-13). Người dùng ch�
 - Bộ đồ thử: khi `debug: true` mỗi tên mới vào được 1 bộ (kể cả qua link).
 - Thế giới thử ở chế độ dev: Vite 5173 + server 8080; cổng 8080 khi chạy dev có thể phục vụ bản build cũ — dùng 5173.
 
+## Giai đoạn 4d — Loài cây mới, hoa, xương rồng (2026-11-13)
+
+Trạng thái: chờ người dùng test. Người dùng chọn (2026-11-13): thuốc nhuộm lấy từ hoa + xương rồng; làm 4d, 4e trước 5b.
+
+### File đã tạo / sửa
+
+- `/shared` mới: `floraConstants.ts` (thông số cây, hoa, xương rồng, `WORLDGEN_VERSION = 2`), `woods.ts` (bảng 4 loài gỗ, `isLog` / `isLeaves` / `isSapling` / `isFlower`), `worldgen/treeShapes.ts` (hình cây sồi / bạch dương / thông / keo, dùng chung cho cây sinh sẵn và cây non), `worldgen/flora.ts` (đám hoa, xương rồng).
+- `/shared` sửa: `blocks.ts` + `blockTable.ts` (id 46–62, kiểu vẽ / dữ liệu phụ "cactus"), `worldgen/trees.ts` (chọn loài theo biome, tầm với 5 block), `worldgen/terrainSampler.ts` (cột có thêm nhiệt độ / độ ẩm), `worldgen/chunkGen.ts`, `randomTick.ts` (cây non mọi loài, lá mọi loài rụng, xương rồng mọc), `blockRules.ts` (chỗ bám hoa / cây non / xương rồng), `placement.ts`, `liquids.ts` (nước cuốn hoa, cây non), `physics.ts` (chạm xương rồng mất máu), `items.ts` (vật phẩm mới, 5 thuốc nhuộm), `recipes.ts` + `crafting.ts` (nhóm nguyên liệu `#planks`, sổ công thức chọn loại ván có trong túi), `smelting.ts` (xương rồng → thuốc nhuộm xanh lá, thân / ván mọi loài là nhiên liệu), `constants.ts` (đồng tuyết mật độ cây 0.3).
+- `/client`: `mesh/shapes.ts` + `mesh/specialBlocks.ts` (vẽ xương rồng), `strings.ts` (tên tiếng Việt), `fallbackTextures.ts`.
+- `scripts/texture-map.json`, `scripts/mc-texture-map.json` (27 ảnh mới mỗi bảng: lá thông / bạch dương nhân màu riêng), `client/public/textures|icons` (ảnh REFI mới).
+- `tests/flora.test.ts` (mới, 20 mục), `tests/items.test.ts`, `tests/run.ts`.
+
+### Đã tự kiểm tra
+
+- `npm run typecheck`, `npm run build`, `npm test` 152/152 (4d 20/20: đồng tuyết toàn thông, rừng sồi xen bạch dương, đồng cỏ nóng có keo, sa mạc có xương rồng và không có cây trên cột sa mạc, có hoa; 0 / 4602 lá bị đứt khỏi thân trong 5 vùng 3x3 chunk (cây liền mạch qua ranh giới chunk); hoa / xương rồng sinh sẵn đều đúng chỗ bám; cây non 3 loài lớn đúng loài; thân thông → 4 ván thông; que từ ván trộn loài; sổ công thức xếp ván bạch dương cho cuốc gỗ; thuốc nhuộm từ hoa, củ cải, nung xương rồng; nhiên liệu; xương rồng chỉ đặt trên cát, không sát block, tự lớn đúng 3 khúc, đặt kính cạnh thì khúc đó và khúc trên rơi ra; đi vào xương rồng bị chặn và mất 1 máu mỗi 0.5 giây).
+- Sinh thế giới vẫn xác định (sinh ngược thứ tự ra giống hệt). So với commit trước: mọi ô gỗ sồi còn lại nằm đúng chỗ cũ (0 ô mới) — cây sồi không đổi, chỉ một phần cây chuyển sang loài khác theo biome.
+- Trình duyệt (server thử cổng 8090): rừng thông trên đồng tuyết (`?fly=1&pos=-127.5,84,18&look=0,-0.45`), keo thân nghiêng tán phẳng gần (11, 69, 12), bạch dương thân trắng (38, 65, −18), đám bồ công anh / hoa ngô xanh (13, 71, 0), xương rồng thu vào mép trên sa mạc (26, 80, 26); sổ công thức có thuốc nhuộm, nguyên liệu nhóm hiện "Ván gỗ (loại nào cũng được)".
+
+### Cần người dùng kiểm tra
+
+- Đi khắp nơi: đồng tuyết có rừng thông, rừng có bạch dương xen sồi, đồng cỏ gần sa mạc có keo; cây không bị cắt cụt ở ranh giới chunk.
+- Hái hoa (bồ công anh, anh túc, hoa ngô xanh, linh lan), đặt lại lên cỏ / đất; đổ nước lên thì hoa trôi.
+- Xương rồng: chạm vào mất máu; đặt block sát bên thì xương rồng vỡ; chỉ đặt được trên cát.
+- Chặt gỗ từng loài → ván đúng loài; dùng ván mọi loài (trộn cũng được) làm que, bàn, rương, công cụ gỗ; sổ công thức sáng khi chỉ có ván loài khác.
+- Hoa → thuốc nhuộm (vàng / đỏ / xanh dương / trắng), củ cải → đỏ, nung xương rồng → xanh lá.
+- Trồng cây non thông / bạch dương / keo, chờ lớn (tăng tốc random tick như hướng dẫn 4b nếu có).
+- Lưu ý: bộ đồ thử đã đầy 36 ô nên không chứa thêm đồ 4d; vứt bớt đồ rồi lấy bằng lệnh `__game.give("spruce_sapling", 16)` (khi mở `?debug=1`).
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Thế giới cũ của cùng seed đổi theo (cây loài khác, hoa, xương rồng); chưa có dữ liệu lưu nên không cần chuyển đổi. Server đang chạy phải khởi động lại để dùng bộ sinh mới.
+- Thân cây keo nghiêng vẫn dùng thân gỗ đứng (chưa có hướng xoay thân gỗ).
+- Hàng rào, cửa vẫn ra loại sồi dù làm từ ván loài nào (theo loài ở 4e). Thuốc nhuộm chưa dùng vào việc gì (đồ có màu ở 4e).
+- Vật phẩm rơi chạm xương rồng không bị hủy (bản gốc có); chưa làm vì không có trong đặc tả.
+
 ## Bàn giao cho phiên sau (2026-11-12)
 
 Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md → PLAN.md → DESIGN.md → PROGRESS.md (mục này trước tiên).
@@ -624,7 +659,7 @@ Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md �
 ### Trạng thái
 
 - Xong: 0 → 4c (người dùng xác nhận 4a, 4b, 4c đều đạt, 2026-11-12).
-- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. Kế tiếp (người dùng chọn 2026-11-13): 4d → 4e → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
+- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: chờ người dùng test. Kế tiếp (người dùng chọn 2026-11-13): 4e → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
 - Lựa chọn của người dùng cho 4d / 4e: thuốc nhuộm lấy từ hoa + xương rồng; cửa sắt mở bằng nút / cần gạt đơn giản (không dây redstone); lửa không lan; xô sữa để GĐ 7.
 - Đã chọn (2026-11-12): sát thương rìu = kiếm cùng cấp − 1 (rìu yếu hơn kiếm) — dùng ở Giai đoạn 6.
 

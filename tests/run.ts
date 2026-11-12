@@ -12,6 +12,7 @@ const SUITES: [string, () => Promise<unknown>][] = [
   ["chất lỏng (4c)", () => import("./liquids.test.js")],
   ["server (5a)", () => import("./server.test.js")],
   ["sinh thế giới", () => import("./worldgen.test.js")],
+  ["loài cây, hoa, xương rồng (4d)", () => import("./flora.test.js")],
 ];
 
 const args = process.argv.slice(2);

@@ -4,6 +4,7 @@
 import { B, BLOCKS } from "./blocks.js";
 import { HDX, HDZ, liquidFalling, liquidLevel } from "./blockMeta.js";
 import { LIQUIDS } from "./tickConstants.js";
+import { FLOWER_BLOCKS, WOODS } from "./woods.js";
 
 export interface LiquidWorld {
   /** id | dữ liệu phụ << 8; âm = chunk chưa tải (coi như chặn). */
@@ -28,7 +29,8 @@ const FALLING = 8;
 
 /** Block bị chất lỏng cuốn trôi (rơi ra vật phẩm) — MECHANICS.md 10. */
 const BREAKS = new Set<number>([
-  B.TORCH, B.TALLGRASS, B.RAIL, B.SAPLING, B.WHEAT, B.CARROTS, B.POTATOES, B.BEETROOTS, B.MELON_STEM, B.PUMPKIN_STEM,
+  B.TORCH, B.TALLGRASS, B.RAIL, B.WHEAT, B.CARROTS, B.POTATOES, B.BEETROOTS, B.MELON_STEM, B.PUMPKIN_STEM,
+  ...WOODS.map((w) => w.sapling), ...FLOWER_BLOCKS,
 ]);
 export const isLiquidId = (id: number): boolean => FLUIDS.has(id);
 

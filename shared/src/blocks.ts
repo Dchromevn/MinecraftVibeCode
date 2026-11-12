@@ -50,6 +50,24 @@ export const B = {
   MELON_STEM: 43,
   PUMPKIN_STEM: 44,
   OBSIDIAN: 45,
+  // Giai đoạn 4d: loài cây (thân, lá, ván, cây non), hoa, xương rồng
+  SPRUCE_LOG: 46,
+  SPRUCE_LEAVES: 47,
+  SPRUCE_PLANKS: 48,
+  SPRUCE_SAPLING: 49,
+  BIRCH_LOG: 50,
+  BIRCH_LEAVES: 51,
+  BIRCH_PLANKS: 52,
+  BIRCH_SAPLING: 53,
+  ACACIA_LOG: 54,
+  ACACIA_LEAVES: 55,
+  ACACIA_PLANKS: 56,
+  ACACIA_SAPLING: 57,
+  DANDELION: 58,
+  POPPY: 59,
+  CORNFLOWER: 60,
+  LILY_OF_THE_VALLEY: 61,
+  CACTUS: 62,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 
@@ -60,11 +78,12 @@ export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
  * (mặt trên thấp hơn); layer = lớp mỏng sát sàn; fence = cột + thanh nối;
  * rail = tấm sát sàn tự chọn thẳng/cong; torch = que nhỏ; ladder = tấm sát tường;
  * door = tấm mỏng; crop = dạng #; bed = cao 9/16; farmland = thấp hơn 1/16;
- * stem = thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả).
+ * stem = thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả);
+ * cactus = khối thu vào 1/16 ở bốn mặt bên.
  */
 export type RenderKind =
   | "none" | "cube" | "cross" | "liquid" | "layer" | "fence" | "rail"
-  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem";
+  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem" | "cactus";
 
 /**
  * Dữ liệu phụ: 1 byte mỗi block, song song với id (DESIGN.md 2.2). Block có kiểu
@@ -82,16 +101,17 @@ export type RenderKind =
  * - leaves: bit 0 = do người chơi đặt (không rụng)
  * - rail:   bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư)
  * - bed:    bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường
+ * - cactus: 0..15 = tuổi (đủ tuổi thì mọc thêm một khúc)
  * Hàm giải mã / mã hóa nằm trong blockMeta.ts.
  */
 export type MetaKind =
   | "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed"
-  | "chest" | "farmland" | "sapling" | "leaves" | "stem";
+  | "chest" | "farmland" | "sapling" | "leaves" | "stem" | "cactus";
 
 /** Các bit được dùng của từng kiểu (bit khác luôn 0). */
 export const META_MASK: Readonly<Record<MetaKind, number>> = {
   none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 7,
-  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15,
+  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15, cactus: 15,
 };
 
 export interface BlockTextures {

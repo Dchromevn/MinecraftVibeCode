@@ -4,6 +4,10 @@
 import { B, BLOCKS, type BlockId, type ToolKind } from "./blocks.js";
 import { ARMOR, BOW_DURABILITY, STACK, TOOL_TIERS, type ArmorTier, type ToolTier } from "./constants.js";
 import { ARMOR_FORMULA, FOODS, type FoodDef } from "./survivalConstants.js";
+import { FLOWER_BLOCKS, WOODS } from "./woods.js";
+
+/** Thuốc nhuộm có từ Giai đoạn 4d (nguồn màu gốc). */
+export const BASE_DYES = ["white_dye", "red_dye", "yellow_dye", "blue_dye", "green_dye"] as const;
 
 export type ArmorPiece = "helmet" | "chestplate" | "leggings" | "boots";
 export const ARMOR_PIECES: readonly ArmorPiece[] = ["helmet", "chestplate", "leggings", "boots"];
@@ -28,9 +32,11 @@ const add = (d: ItemDef): void => void ITEMS.set(d.key, d);
 const CUBES: BlockId[] = [
   B.DIRT, B.STONE, B.COBBLE, B.SAND, B.GRAVEL, B.LOG, B.PLANKS, B.WORKBENCH, B.CHEST, B.MOSSY_COBBLE,
   B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES, B.MELON, B.PUMPKIN, B.OBSIDIAN,
+  // Giai đoạn 4d: thân, ván, lá của thông / bạch dương / keo; xương rồng
+  ...WOODS.filter((w) => w.kind !== "oak").flatMap((w) => [w.log, w.planks, w.leaves]), B.CACTUS,
 ];
 for (const id of CUBES) add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "cube", block: id }, places: id });
-for (const id of [B.TORCH, B.RAIL, B.LADDER, B.SAPLING] as BlockId[])
+for (const id of [B.TORCH, B.RAIL, B.LADDER, ...WOODS.map((w) => w.sapling), ...FLOWER_BLOCKS] as BlockId[])
   add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "tex", name: BLOCKS[id]!.tex.side }, places: id });
 add({ key: "fence", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "fence" }, places: B.FENCE }); // icon riêng: 2 cột + 2 thanh
 add({ key: "door", maxStack: STACK.SINGLE, icon: { type: "icon", name: "door" }, places: B.DOOR });
@@ -45,6 +51,7 @@ const PLANTED: Readonly<Record<string, BlockId>> = { carrot: B.CARROTS, potato: 
 for (const k of [
   "stick", "coal", "raw_iron", "iron_ingot", "raw_gold", "gold_ingot", "diamond", "emerald", "flint", "string",
   "feather", "leather", "wool", "wheat", "arrow", "bowl",
+  ...BASE_DYES, // thuốc nhuộm từ hoa / xương rồng / củ cải (Giai đoạn 4d; trộn màu ở 4e)
 ]) add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k } });
 // xô (Giai đoạn 4c): rỗng chồng 16; có nước / dung nham không chồng; liquid = chất lỏng đang chứa
 add({ key: "bucket", maxStack: STACK.BUCKET, icon: { type: "icon", name: "bucket" } });
