@@ -646,7 +646,9 @@ NGHIỆM THU
 
 ### Giai đoạn 3 — Người chơi và tương tác block (chỉ client)
 
-Chia hai phần 3a và 3b; người dùng chơi thử sau mỗi phần.
+Chia hai phần 3a và 3b; người dùng chơi thử sau mỗi phần. Đọc thêm MECHANICS.md
+mục 2 (di chuyển), 4 (công thức đào), 5.5 (sát thương rơi, chết đuối, dung nham —
+chỉ lưu số).
 
 ### Giai đoạn 3a — Dữ liệu phụ, vật lý người chơi, hình dạng block
 
@@ -686,8 +688,9 @@ NGHIỆM THU
 ### Giai đoạn 3b — Đào, đặt, chỗ bám, cát rơi
 
 TƯƠNG TÁC
-- Tầm với 4.5. Giữ chuột trái để đào theo thời gian ở mục 2.2 (tay không), vết
-  nứt 5 mức. Khi đang bay (phím F) thì phá tức thì.
+- Tầm với 4.5. Giữ chuột trái để đào theo công thức đào (MECHANICS.md mục 4,
+  DESIGN.md mục 2.2; tay không), vết nứt 5 mức. Khi đang bay (phím F) thì phá
+  tức thì.
 - Chuột phải đặt block; không đặt chồng lên người chơi; kiểm tra chỗ bám khi đặt
   (mục 2.2). Đuốc đặt lên tường thì nghiêng.
 - Block mất chỗ bám rơi ra (xử lý dây chuyền); cửa/giường phá một nửa thì mất cả

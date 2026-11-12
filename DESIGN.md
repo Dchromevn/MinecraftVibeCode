@@ -86,7 +86,7 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 4 | đá cuội | 10 | cuốc (bắt buộc) | đá cuội | |
 | 5 | cát | 0.75 | xẻng | cát | rơi xuống khi bên dưới trống |
 | 6 | thân gỗ | 3 | rìu | thân gỗ | |
-| 7 | lá | 0.3 | – | 5% táo, 5% cây non | |
+| 7 | lá | 0.3 | – | 5% táo, 5% cây non, 2% que | tỉ lệ táo: chờ người dùng chọn (MECHANICS 9.4) |
 | 8 | ván gỗ | 3 | rìu | ván gỗ | |
 | 9 | quặng than | 15 | cuốc gỗ+ | than | |
 | 10 | quặng sắt | 15 | cuốc đá+ | sắt thô | ĐỔI: không rơi thẳng thỏi nữa, phải nung |
@@ -119,6 +119,37 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 37 | quặng ngọc lục bảo | 15 | cuốc sắt+ | ngọc lục bảo | chỉ ở núi, từng khối lẻ |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
+
+#### Đào block (theo MECHANICS.md mục 4, áp dụng từ Giai đoạn 3b)
+
+Cột "Độ cứng (giây, tay không)" ở bảng trên được thay bằng độ cứng dưới đây và công
+thức (thời gian đào tay không vẫn khớp số giây cũ):
+
+```
+tốc_độ = tốc độ công cụ nếu đúng loại công cụ, ngược lại 1
+tiến_độ_mỗi_tick (20 tick/giây) = tốc_độ / độ_cứng / (30 nếu đào được ra đồ, ngược lại 100)
+phá xong khi tổng tiến độ ≥ 1
+```
+
+- Đầu chìm trong nước: tốc độ ÷ 5. Không đứng trên mặt đất (nhảy, bơi, leo): ÷ 5.
+- `tốc_độ / độ_cứng ≥ 30` hoặc độ cứng 0: phá ngay, không có vết nứt. Độ cứng vô
+  hạn: không phá được. Phá xong một block thì chờ 5 tick (0.25 giây) mới đào tiếp.
+- Tốc độ công cụ: tay 1 · gỗ 2 · đá 4 · sắt 6 · kim cương 8 · vàng 12. Kiếm với
+  mạng nhện 15. Khi đang bay (debug) thì phá ngay.
+
+| Block | Độ cứng | Block | Độ cứng |
+|---|---|---|---|
+| đất, cát | 0.5 | đá | 1.5 |
+| cỏ, sỏi, đất cày | 0.6 | đá cuội, đá cuội rêu | 2 |
+| lá | 0.2 | thân gỗ, ván gỗ, hàng rào | 2 |
+| kính | 0.3 | bàn chế tạo, rương | 2.5 |
+| thang | 0.4 | cửa gỗ | 3 |
+| sa thạch | 0.8 | các loại quặng | 3 |
+| giường | 0.2 | đá sâu | 3 |
+| quặng vàng đá sâu | 4.5 | tuyết phủ | 0.1 |
+| lò nung | 3.5 | đá vỏ chai | 50 |
+| mạng nhện | 4 | đá nền | không phá được |
+| đường ray | 0.7 | đuốc, cỏ cao, lúa, cây non | 0 |
 Đào sai cấp công cụ với quặng: không rơi gì.
 
 #### Dữ liệu phụ của block
@@ -165,10 +196,10 @@ kèm trong gói tin (chunk và thay đổi block).
 
 | Cấp | Độ bền | Hệ số tốc độ đào | Sát thương kiếm |
 |---|---|---|---|
-| gỗ | 60 | x2 | 4 |
-| đá | 130 | x4 | 5 |
+| gỗ | 59 | x2 | 4 |
+| đá | 131 | x4 | 5 |
 | sắt | 250 | x6 | 6 |
-| kim cương | 1500 | x8 | 7 |
+| kim cương | 1561 | x8 | 7 |
 | vàng | 32 | x12 | 4 |
 
 - Cấp vàng đào rất nhanh nhưng mau hỏng, và chỉ đào được những gì cuốc gỗ đào
@@ -240,16 +271,31 @@ liệu thì sáng, thiếu thì mờ.
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
 
-Thông số di chuyển bổ sung (đề xuất ở Giai đoạn 3, người dùng đồng ý 2026-11-12):
-- Tự bước lên bậc cao tới 0.6 block mà không cần nhảy (tuyết phủ, đất cày,
-  giường); block cao 1 vẫn phải nhảy.
-- Tốc độ rơi tối đa 60 block/giây.
-- Thang: leo lên 2.4 block/giây (giữ Space hoặc W), tụt xuống tối đa 3; giữ
-  Shift thì đứng yên trên thang.
+Thông số di chuyển và sát thương môi trường (Giai đoạn 3, theo MECHANICS.md mục 2
+và 5.5; người dùng đồng ý 2026-11-12, thay các số tương ứng ở trên):
+- Đi bộ 4.317 · chạy nhanh 5.612 · ngồi 1.295 block/giây. Không chạy nhanh khi
+  đang ngồi. Nhảy lúc chạy nhanh được đẩy thêm về phía trước: chạy + nhảy liên tục
+  trung bình khoảng 7.1 block/giây, vượt khe khoảng 4 block (đi bộ + nhảy khoảng 2).
+- Ngồi: hộp va chạm cao 1.5, mắt ở 1.27; trần thấp thì không đứng dậy được. Ngồi
+  thì không bước khỏi mép cao từ 5/8 block trở lên.
+- Bay (debug): 10.9 block/giây, giữ Ctrl nhanh gấp 3.
+- Tự bước lên bậc cao tới 0.6 block mà không cần nhảy (đất cày, giường); block cao
+  1 vẫn phải nhảy.
+- Tốc độ rơi tối đa 78.4 block/giây.
+- Thang: leo lên 2.4 block/giây (giữ Space hoặc W áp vào thang), tụt xuống tối đa
+  3; giữ Shift thì đứng yên trên thang.
 - Bơi: chìm tối đa 2 block/giây, giữ Space nổi lên 3. Đi ngang trong nước bằng
   50% tốc độ đi bộ; trong dung nham 30%, nổi/chìm bằng 50% so với nước.
 - Chạy nhanh: góc nhìn (FOV) rộng thêm 10%.
-- Bị cháy sau khi ra khỏi dung nham: mất 1 máu mỗi giây trong 4 giây.
+- Sát thương rơi: floor(khoảng rơi − 3). Rơi vào nước, thang, mạng nhện thì tính lại
+  khoảng rơi từ đầu.
+- Dưỡng khí 15 giây khi đầu chìm trong nước; hết thì mất 2 máu mỗi giây; ngoi đầu
+  lên thì hồi đầy trong 3.75 giây. (Thanh 10 bong bóng ở Giai đoạn 4 hiển thị số này.)
+- Dung nham: 4 máu mỗi lần chạm; bị cháy 15 giây, đếm lại từ đầu mỗi tick còn ở
+  trong dung nham. Đang cháy: 1 máu mỗi giây; xuống nước thì tắt.
+- Sau khi nhận sát thương: miễn sát thương 0.5 giây; đòn mới mạnh hơn chỉ gây phần
+  chênh lệch (nên dung nham thực tế khoảng 2 lần mỗi giây). Vừa hồi sinh: miễn 3 giây.
+- Giai đoạn 3 chỉ lưu số máu (chưa hiển thị, chưa chết).
 
 ### 2.7 Ngày đêm, sinh vật, giường
 
@@ -423,7 +469,7 @@ Các giá trị dưới đây đã đo và chỉnh khi làm hang động/hầm m
 - Hầm mỏ: phòng 7–11 x 7–11 cao 4–6, hành lang 8–25, khung chống mỗi 4–5 block,
   20% khung có đuốc, ray 70%, mạng nhện 4% (ngã rẽ 30%), rương ở 50% nhánh cụt,
   tối đa 70 đoạn (2b), bán kính 72 block, cầu thang 5 bậc.
-- Ánh sáng: đuốc 14, dung nham 15; lá cản 1, nước 2, mạng nhện 1; đổi block thì
+- Ánh sáng: đuốc 14, dung nham 15; lá cản 1, nước 1 (MECHANICS mục 6), mạng nhện 1; đổi block thì
   tính lại vùng ±15 block. Đường cong độ sáng: (f / (3 − 2f))^1.6, tối thiểu 0.004.
 - Client vẽ theo đoạn 16x16x16 và ẩn đoạn khuất (duyệt từ đoạn chứa camera
   qua các mặt thông nhau).
