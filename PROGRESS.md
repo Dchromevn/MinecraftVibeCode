@@ -13,8 +13,8 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | xong (người dùng xác nhận 2026-11-12) |
 | 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
-| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | chờ người dùng test |
-| 4b | Rương, lò nung, cửa, trồng trọt | chưa làm |
+| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | xong (người dùng bảo "tiếp 4b", 2026-11-12) |
+| 4b | Rương, lò nung, cửa, trồng trọt | đang làm |
 | 4c | Chất lỏng, xô | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |

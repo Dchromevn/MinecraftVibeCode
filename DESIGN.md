@@ -174,6 +174,9 @@ Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X)
 | rương | bit 0–1 hướng mặt trước; bit 2–3: 0 rương đơn, 1 nửa trái, 2 nửa phải của rương đôi (trái/phải nhìn từ phía trước) |
 | đường ray | bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư) |
 | giường | bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường |
+| đất cày | bit 0 = ẩm (có nước trong 4 block ngang) |
+| cây non | bit 0 = giai đoạn ẩn (0–1), qua giai đoạn cuối thì mọc thành cây |
+| lá | bit 0 = lá do người chơi đặt (không bao giờ rụng); khoảng cách tới thân gỗ tính khi cần |
 
 Từ Giai đoạn 5, server lưu dữ liệu phụ cùng với id block trong file lưu và gửi
 kèm trong gói tin (chunk và thay đổi block).
@@ -188,6 +191,41 @@ kèm trong gói tin (chunk và thay đổi block).
 - Phá một nửa: đồ trong nửa đó rơi ra (kèm 1 rương), nửa kia trở lại rương đơn, giữ đồ.
 - Vẽ liền thành một khối dài 2 ô bằng texture rương lớn của REFI.
 - Rương sinh sẵn trong hầm mỏ là rương đơn.
+
+#### Random tick và trồng trọt (Giai đoạn 4b, MECHANICS.md 1 và 9)
+
+- Mỗi tick (20 tick/giây), với mỗi đoạn 16x16x16 của các chunk trong bán kính
+  RANDOM_TICK_RADIUS = 6 chunk quanh người chơi, chọn ngẫu nhiên 3 ô (RANDOM_TICK_SPEED, chỉnh
+  được bằng lệnh debug) và gọi hành vi của block ở đó. Trung bình một ô nhận random tick
+  khoảng 68 giây một lần. Chưa có server thì client tự chạy.
+- Ánh sáng tại một ô = max(ánh sáng trời, ánh sáng block) lấy từ bảng ánh sáng worker trả về
+  khi dựng mesh (chưa có ngày đêm nên ánh sáng trời không nhân hệ số giờ).
+- Lúa: ánh sáng < 8 thì bật ra (rơi hạt / lúa); ≥ 9 thì mỗi random tick lên 1 giai đoạn với
+  xác suất 1 / (floor(25 / điểm) + 1); điểm = 1 + đất cày bên dưới (khô 1, ẩm 3) + mỗi ô đất
+  cày trong 8 ô quanh (khô 0.25, ẩm 0.75); chia đôi nếu có lúa ở ô chéo hoặc lúa ở cả hai
+  phía theo hai trục.
+- Đất cày: ẩm khi có nước trong 4 block ngang (cùng tầng hoặc cao hơn 1); hết nước thì khô;
+  khô và không có cây trồng phía trên thì random tick biến về đất. Rơi / nhảy lên đất cày:
+  xác suất (quãng rơi − 0.5) biến về đất.
+- Cuốc đất: chuột phải vào đất / cỏ có ô trống phía trên → đất cày, cuốc mất 1 độ bền.
+- Cây non: ánh sáng ≥ 9, mỗi random tick xác suất 1/7 tiến 1 giai đoạn ẩn; qua giai đoạn cuối
+  thì mọc thành cây (thân 4–6, tán như cây sinh sẵn) nếu đủ chỗ trống; cỏ bên dưới thành đất.
+- Lá: random tick tìm thân gỗ qua các lá liền nhau trong 6 bước (khoảng cách Manhattan);
+  không có thì lá rụng (rơi cây non 5%, que 2%, táo 5%). Lá người chơi đặt không rụng.
+- Cỏ: bị khối đặc che phía trên thì thành đất; ánh sáng phía trên ≥ 9 thì thử 4 lần lan
+  sang đất trong phạm vi 3x5x3 (đất đó phải có ánh sáng phía trên ≥ 4 và không bị che).
+
+#### Rương và lò nung (Giai đoạn 4b)
+
+- Nội dung rương / lò lưu theo vị trí block, giữ trong bộ nhớ cả khi chunk bị gỡ (Giai đoạn 5
+  server lưu xuống đĩa). Phá rương / lò: đồ bên trong rơi ra.
+- Rương hầm mỏ: lần đầu mở hoặc phá thì sinh đồ theo bảng MINESHAFT_LOOT với số ngẫu nhiên
+  từ seed + vị trí (cùng seed cùng đồ).
+- Lò nung: nhiên liệu đốt cháy đủ cho N món x 10 giây (than 8, thân gỗ / ván 1.5, que 0.5);
+  đang cháy mà còn nguyên liệu nung được thì tiến độ tăng, đủ 10 giây ra 1 thành phẩm; hết
+  nguyên liệu thì tiến độ về 0. Lò chạy cả khi đóng giao diện; đang cháy thì phát sáng 13.
+  Ô nhiên liệu chỉ nhận vật phẩm đốt được; ô thành phẩm chỉ lấy ra.
+- Chuột phải vào rương, lò nung, bàn chế tạo, cửa: mở / dùng (giữ Shift thì đặt block).
 
 #### Chỗ bám của block
 

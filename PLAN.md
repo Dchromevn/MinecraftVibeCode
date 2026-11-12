@@ -215,6 +215,9 @@ Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X)
 | rương | bit 0–1 hướng mặt trước; bit 2–3: 0 rương đơn, 1 nửa trái, 2 nửa phải của rương đôi (trái/phải nhìn từ phía trước) |
 | đường ray | bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư) |
 | giường | bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường |
+| đất cày | bit 0 = ẩm (có nước trong 4 block ngang) |
+| cây non | bit 0 = giai đoạn ẩn (0–1), qua giai đoạn cuối thì mọc thành cây |
+| lá | bit 0 = lá do người chơi đặt (không bao giờ rụng); khoảng cách tới thân gỗ tính khi cần |
 
 Từ Giai đoạn 5, server lưu dữ liệu phụ cùng với id block trong file lưu và gửi
 kèm trong gói tin (chunk và thay đổi block).
