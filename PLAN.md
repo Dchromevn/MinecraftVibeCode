@@ -71,7 +71,7 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 | 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | đã xong |
 | 4b | Rương, lò nung, cửa, trồng trọt | đã xong |
 | 4c | Chất lỏng, xô | đã xong |
-| 5a | Server làm chủ thế giới, chơi chung qua link | |
+| 5a | Server làm chủ thế giới, chơi chung qua link | đã xong |
 | 4d | Loài cây mới, hoa, xương rồng (sau 5a, trước 5b) | |
 | 4e | Bậc, tấm, tường, 16 màu, đồ sắt (trước 5b) | |
 | 5b | Lưu thế giới, đăng nhập | |
