@@ -2,7 +2,7 @@
 import { ChunkGenerator } from "../../../shared/src/index.js";
 import { meshRegion, type UvTable } from "../mesh/mesher.js";
 import { meshTransferables } from "../mesh/geomBuilder.js";
-import { buildRegion, centerLight, computeRegionLight } from "../light/regionLight.js";
+import { buildRegion, centerLight, computeRegionLight } from "../../../shared/src/index.js";
 import type { FromWorker, ToWorker } from "./protocol.js";
 
 interface WorkerScope {

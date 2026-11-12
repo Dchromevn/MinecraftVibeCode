@@ -1,9 +1,9 @@
-// Giai đoạn 4a: vật phẩm, túi đồ (E), chế tạo, đói/máu/giáp, chết và hồi sinh; đào/đặt có chỗ
-// bám, vật lý người chơi; chế độ bay debug (F); thế giới sinh/ánh sáng/dựng mesh trong Web Worker.
-// Tham số URL: ?seed= ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
+// Client (Giai đoạn 5a): vào game bằng tên, thế giới / túi đồ / vật phẩm do server quyết định; client sinh
+// địa hình theo seed của server, ánh sáng / dựng mesh trong Web Worker, vật lý người chơi (tin client đến 5c).
+// Tham số URL: ?name= (vào luôn) ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
 // ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
-import { PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
+import { PLAYER, World, WORLD, allBlockTextureNames, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
@@ -18,7 +18,8 @@ import { FirstPersonArm } from "./player/arm.js";
 import { PlayerController } from "./player/playerController.js";
 import { ViewEffects } from "./player/viewEffects.js";
 import { Session } from "./game/session.js";
-import { fixedSpawn, randomSpawn } from "./game/spawn.js";
+import { joinGame } from "./net/joinScreen.js";
+import { NetClient } from "./net/netClient.js";
 import { preloadIcons } from "./ui/itemIcons.js";
 import { CROP_TEX, STEM_ATTACHED_TEX } from "./mesh/mesher.js";
 import { injectStyles } from "./ui/styles.js";
@@ -56,13 +57,13 @@ function heapMb(): string {
 async function main(): Promise<void> {
   const hud = new Hud();
   const params = new URLSearchParams(location.search);
-  const seedText = params.get("seed") ?? "voxel";
-  const seed = seedFromString(seedText);
   const hideMsg = params.get("nomsg") === "1";
+  injectStyles();
+  const { conn, welcome, early } = await joinGame(params);
+  const seed = welcome.seed;
 
   hud.setCenter(STR.loadingTextures);
   const atlas = await buildAtlas([...allBlockTextureNames(), ...EXTRA_TEXTURES]);
-  injectStyles();
   await preloadIcons();
 
   const renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -94,10 +95,9 @@ async function main(): Promise<void> {
   };
   applyViewDistance();
 
-  // mặc định đi bộ từ mặt đất gần gốc; ?pos= bắt đầu ở chế độ bay (để chụp/kiểm tra)
-  // chỗ xuất phát ngẫu nhiên mỗi lần vào game (?spawn=fixed: đất liền gần gốc nhất)
-  const spawn = params.get("spawn") === "fixed" ? fixedSpawn(sampler) : randomSpawn(sampler);
-  camera.position.set(spawn.x + 0.5, spawn.h + 1 + PLAYER.EYE_HEIGHT, spawn.z + 0.5);
+  // xuất phát ở điểm server chọn; ?pos= bắt đầu ở chế độ bay (để chụp / kiểm tra)
+  const spawn = welcome.spawn;
+  camera.position.set(spawn.x, spawn.y + PLAYER.EYE_HEIGHT, spawn.z);
   const fly = new FlyCamera(camera, renderer.domElement);
   const pos = readVec(params, "pos", 3);
   if (pos) camera.position.set(pos[0]!, pos[1]!, pos[2]!);
@@ -111,31 +111,29 @@ async function main(): Promise<void> {
   fly.applyRotation();
 
   const arm = new FirstPersonArm(PLAYER.FOV, window.innerWidth / window.innerHeight);
-  const session = new Session(
-    scene, atlas, world, player, fly, renderer.domElement, camera,
-    { x: spawn.x + 0.5, y: spawn.h + 1, z: spawn.z + 0.5 },
-    (x, _y, z) => chunks.onBlockChanged(x, z),
-  );
-  // bộ đồ thử khi mới vào (chỉ khi chạy npm run dev; ?kit=0 để tắt)
-  if (import.meta.env.DEV && params.get("kit") !== "0") session.giveStarterKit();
+  const net = new NetClient(conn, { world, chunks, scene, atlas, camera, player, yaw: () => fly.yaw, pitch: () => fly.pitch });
+  const session = new Session(scene, atlas, world, player, fly, renderer.domElement, spawn, conn);
   const interact = new Interaction(
     scene, world, atlas,
     {
-      camera, player, inv: session.inv, items: session.items, rng: session.rng,
+      camera, player, inv: session.inv, net: net.actions(),
       locked: () => (fly.locked || player.debugInput) && !session.screen.open,
-      yaw: () => fly.yaw, swing: () => arm.swing(),
+      yaw: () => fly.yaw,
+      swing: () => {
+        arm.swing();
+        net.swings++;
+      },
       sneaking: () => player.state.sneaking || fly.keys.has("ShiftLeft") || fly.keys.has("ShiftRight"),
-      useBlock: (t) => session.useBlock(t),
-      entities: session.entities,
     },
-    (x, y, z) => session.blockChanged(x, y, z),
+    (x, _y, z) => chunks.onBlockChanged(x, z),
   );
+  net.start(session, interact, early);
   // debug: cho script kiểm tra điều khiển camera / sửa block từ ngoài (?debug=1);
   // autopilot = vận tốc tự bay (block/giây), áp trong vòng lặp khung hình
   const autopilot = { vx: 0, vz: 0 };
   if (params.get("debug") === "1") {
     player.debugInput = true;
-    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly, interact, session,
+    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly, interact, session, net,
       give: (k: string, n?: number) => session.give(k, n) };
   }
 
@@ -179,6 +177,7 @@ async function main(): Promise<void> {
     chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
     interact.update(dt);
     session.update(dt);
+    net.update(dt);
     sky.follow(camera);
     meshes.update(now / 1000, camera, chunks.viewDistance, world);
     renderer.info.reset();
@@ -202,7 +201,7 @@ async function main(): Promise<void> {
         `${STR.hudJobs}: ${chunks.pendingGen} / ${chunks.pendingMesh} · ${pool.size} ${STR.hudWorkers} (${pool.lastGenMs.toFixed(1)} / ${pool.lastMeshMs.toFixed(1)} ms)`,
         `${STR.hudViewDistance}: ${chunks.viewDistance} chunk ([ ]) · ${STR.hudCulling}: ${meshes.culling ? STR.on : STR.off} (F4) · ${STR.hudNightVision}: ${meshes.uniforms.uMinLight.value > 0 ? STR.on : STR.off} (N)`,
         `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls} · ${STR.hudMemory}: ${heapMb()}`,
-        `${STR.hudSeed}: ${seedText} (${seed})`,
+        `${STR.hudSeed}: ${seed} · ${STR.hudPlayers}: ${net.remote.count + 1} (${[welcome.name, ...net.remote.names()].join(", ")})`,
         playerLine(player),
         atlas.missing.length ? `${STR.hudMissingTextures}: ${atlas.missing.join(", ")}` : "",
       ]);

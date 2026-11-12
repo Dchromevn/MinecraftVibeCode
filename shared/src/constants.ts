@@ -4,6 +4,19 @@
 export const NET = {
   DEFAULT_PORT: 8080,
   SERVER_TICK_RATE: 20,
+  PROTOCOL_VERSION: 1, // client và server phải cùng số này
+  WS_PATH: "/ws",
+  NAME_MAX: 16, // tên người chơi: 1–16 ký tự chữ, số, _
+  SIM_RADIUS: 6, // chunk quanh mỗi người chơi được server tải và mô phỏng
+  GEN_PER_TICK: 4, // số chunk server sinh mỗi tick (tránh khựng khi có người mới vào)
+  LIGHT_PER_TICK: 6, // số chunk server tính lại ánh sáng mỗi tick
+  MOVE_HZ: 20, // client gửi vị trí mỗi giây
+  PLAYER_VIEW: 160, // gửi người chơi khác trong bán kính (block)
+  ITEM_VIEW: 64, // gửi vật phẩm rơi trong bán kính (block)
+  INTERP_DELAY_MS: 100, // người chơi khác vẽ trễ 100 ms để nội suy mượt
+  REACH_SLACK: 1.5, // dung sai tầm với khi server kiểm tra (trễ mạng)
+  CONTAINER_RANGE: 8, // đi xa rương / lò quá khoảng này thì tự đóng
+  FURNACE_SYNC_TICKS: 5, // gửi tiến độ lò cho người đang mở mỗi 5 tick
 } as const;
 
 // 2.1 Thế giới (vô hạn theo chiều ngang)

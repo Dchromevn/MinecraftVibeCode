@@ -1,6 +1,7 @@
 // Chọn chỗ xuất phát: ngẫu nhiên trên đất liền trong bán kính SPAWN.RANDOM_RADIUS (mặc định),
-// hoặc cố định (đất liền gần gốc nhất, ?spawn=fixed). Giai đoạn 5 server giữ điểm hồi sinh chung.
-import { SPAWN, WORLD, type TerrainSampler } from "../../../shared/src/index.js";
+// hoặc cố định (đất liền gần gốc nhất). Server (Giai đoạn 5) chọn một điểm hồi sinh chung của thế giới.
+import { SPAWN, WORLD } from "./constants.js";
+import type { TerrainSampler } from "./worldgen/terrainSampler.js";
 
 export interface SpawnPoint {
   x: number;

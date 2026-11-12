@@ -1,7 +1,7 @@
 // Độ thông của một đoạn 16x16x16: đi từ mặt a tới được mặt b qua các ô không che
 // khuất hay không. Dùng để ẩn đoạn khuất (hang dưới lòng đất không thấy từ mặt đất).
 import { BLOCKS } from "../../../shared/src/index.js";
-import { regionIndex } from "../light/regionLight.js";
+import { regionIndex } from "../../../shared/src/index.js";
 
 // Mặt: 0 +X, 1 -X, 2 +Y, 3 -Y, 4 +Z, 5 -Z
 const OPEN = new Uint8Array(256);

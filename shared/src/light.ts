@@ -1,7 +1,9 @@
-// Ánh sáng 16 mức cho một vùng 3x3 chunk (48 x 128 x 48), tính trong worker.
+// Ánh sáng 16 mức cho một vùng 3x3 chunk (48 x 128 x 48): tính trong worker (client) và ở server (random tick).
 // Ánh sáng lan tối đa 14 ô nên chunk giữa của vùng luôn đúng tuyệt đối — không cần
 // lưu ánh sáng xuyên chunk. Mỗi byte: 4 bit cao = trời, 4 bit thấp = block.
-import { B, BLOCKS, CHUNK_HEIGHT, lightEmitOf, type ChunkData } from "../../../shared/src/index.js";
+import { B, BLOCKS } from "./blocks.js";
+import { lightEmitOf } from "./blockMeta.js";
+import { CHUNK_HEIGHT, type ChunkData } from "./chunk.js";
 
 export const RW = 48; // bề rộng vùng (3 chunk)
 export const RH = CHUNK_HEIGHT;

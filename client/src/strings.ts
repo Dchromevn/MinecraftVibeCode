@@ -1,7 +1,7 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 4c — chất lỏng, xô",
+  stage: "Giai đoạn 5a — chơi chung qua server",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
@@ -10,6 +10,18 @@ export const STR = {
     "E túi đồ · Q vứt (Ctrl+Q cả chồng)",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
+  joinName: "Tên người chơi",
+  joinButton: "Vào game",
+  joinHint: "Chữ cái không dấu, số, dấu _ (tối đa 16 ký tự). Thoát rồi vào lại cùng tên thì giữ nguyên túi đồ.",
+  joinConnecting: "Đang kết nối...",
+  joinErrors: {
+    name: "Tên chỉ gồm chữ cái không dấu, số, dấu _.",
+    taken: "Tên này đang có người chơi.",
+    version: "Phiên bản game khác server — tải lại trang.",
+    connect: "Không kết nối được server (đã chạy npm run dev / npm run host chưa?).",
+  } as Record<string, string>,
+  disconnected: "Mất kết nối tới server. Tải lại trang để vào lại.",
+  hudPlayers: "Người chơi",
   hudFps: "FPS",
   hudPos: "Vị trí",
   hudChunk: "Chunk",

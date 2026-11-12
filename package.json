@@ -14,7 +14,9 @@
     "build": "npm run build -w client && npm run build -w server",
     "import-textures": "tsx scripts/import-textures.ts",
     "import-mc": "tsx scripts/import-mc.ts",
-    "test": "tsx tests/run.ts"
+    "test": "tsx tests/run.ts",
+    "host": "npm run build && npm run start -w server",
+    "share": "cloudflared tunnel --url http://localhost:8080"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",

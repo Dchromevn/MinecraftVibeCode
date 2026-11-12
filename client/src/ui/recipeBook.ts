@@ -1,6 +1,6 @@
 // Sổ công thức (nút sách cạnh lưới chế tạo): danh sách bên trái giao diện; đủ nguyên liệu
 // thì sáng, thiếu thì mờ; bấm xếp 1 bộ nguyên liệu vào lưới, Shift xếp nhiều bộ.
-import { RECIPES, canFill, fillFromBook, type Inventory } from "../../../shared/src/index.js";
+import { RECIPES, canFill, type InvAction, type Inventory } from "../../../shared/src/index.js";
 import { STR } from "../strings.js";
 import { iconUrl, itemName } from "./itemIcons.js";
 
@@ -10,7 +10,7 @@ export class RecipeBook {
   private key = "";
   visible = false;
 
-  constructor(private readonly inv: Inventory, private readonly changed: () => void) {
+  constructor(private readonly inv: Inventory, private readonly act: (a: InvAction) => void, private readonly changed: () => void) {
     this.el.className = "book";
     const h = document.createElement("h3");
     h.textContent = STR.recipeBook;
@@ -46,7 +46,7 @@ export class RecipeBook {
       if (can)
         row.addEventListener("mousedown", (e) => {
           e.stopPropagation();
-          fillFromBook(this.inv, x, e.shiftKey);
+          this.act({ t: "book", recipe: x.id, all: e.shiftKey });
           this.changed();
         });
       this.list.appendChild(row);

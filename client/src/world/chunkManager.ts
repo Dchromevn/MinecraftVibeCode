@@ -1,5 +1,6 @@
 // Tải / gỡ chunk theo bán kính tầm nhìn quanh camera. Sinh và dựng mesh trong
-// worker; ưu tiên chunk gần và chunk trước mặt. Chunk đã sửa được giữ lại khi gỡ.
+// worker; ưu tiên chunk gần và chunk trước mặt. Giai đoạn 5a: chunk đã sửa không giữ ở client nữa —
+// server gửi lại danh sách block đã sửa mỗi khi chunk được sinh lại (móc onGenStart / onAdded / onRemoved).
 import { Chunk, WORLD, chunkKey, type ChunkData, type World } from "../../../shared/src/index.js";
 import type { WorkerPool } from "../workers/workerPool.js";
 import type { ChunkMeshes } from "./chunkMeshes.js";
@@ -16,8 +17,12 @@ interface Job {
 
 export class ChunkManager {
   viewDistance: number = WORLD.VIEW_DISTANCE_DEFAULT;
-  /** Dữ liệu của chunk đã sửa nhưng đang bị gỡ khỏi bộ nhớ. */
-  readonly saved = new Map<number, ChunkData>();
+  /** Bắt đầu sinh chunk (đăng ký nhận block đã sửa từ server). */
+  onGenStart: (cx: number, cz: number) => void = () => undefined;
+  /** Chunk vừa vào thế giới (trước khi dựng mesh): áp block đã sửa đang chờ. */
+  onAdded: (chunk: Chunk) => void = () => undefined;
+  /** Chunk bị gỡ (hủy đăng ký). */
+  onRemoved: (cx: number, cz: number) => void = () => undefined;
   private readonly generating = new Set<number>();
   private readonly meshing = new Map<number, number>(); // key -> phiên bản đang dựng
   private readonly version = new Map<number, number>(); // tăng khi block đổi
@@ -62,8 +67,8 @@ export class ChunkManager {
     // 1. gỡ chunk và mesh ra ngoài bán kính + 2
     for (const [key, chunk] of this.world.chunks) {
       if (Math.hypot(chunk.cx - ccx, chunk.cz - ccz) <= unloadR + 0.5) continue;
-      if (chunk.modified) this.saved.set(key, { data: chunk.data, meta: chunk.meta });
       this.world.removeChunk(chunk.cx, chunk.cz);
+      this.onRemoved(chunk.cx, chunk.cz);
       this.meshes.remove(chunk.cx, chunk.cz);
       this.dirty.delete(key);
       this.urgent.delete(key);
@@ -88,15 +93,7 @@ export class ChunkManager {
         const priority = dist * (front ? 1 : 2.5);
         const chunk = this.world.chunks.get(key);
         if (!chunk) {
-          const saved = this.saved.get(key);
-          if (saved) {
-            const c = new Chunk(cx, cz, saved);
-            c.modified = true;
-            this.world.addChunk(c);
-            this.saved.delete(key);
-          } else if (!this.generating.has(key)) {
-            jobs.push({ kind: "gen", cx, cz, priority });
-          }
+          if (!this.generating.has(key)) jobs.push({ kind: "gen", cx, cz, priority });
           continue;
         }
         if (dist > R + 0.5 || this.meshing.has(key)) continue;
@@ -125,11 +122,14 @@ export class ChunkManager {
   private startGen(cx: number, cz: number): void {
     const key = chunkKey(cx, cz);
     this.generating.add(key);
+    this.onGenStart(cx, cz);
     this.pool.run({ type: "gen", cx, cz }, (msg) => {
       this.generating.delete(key);
       if (msg.type !== "gen" || this.world.chunks.has(key)) return;
       // chunk ở xa (camera đã đi khỏi) sẽ bị gỡ ở lần cập nhật sau
-      this.world.addChunk(new Chunk(cx, cz, msg.chunk));
+      const c = new Chunk(cx, cz, msg.chunk);
+      this.world.addChunk(c);
+      this.onAdded(c);
     });
   }
 
@@ -162,9 +162,9 @@ export class ChunkManager {
     );
   }
 
-  /** Số chunk đã sửa (đang tải + đang gỡ), để HUD hiển thị. */
+  /** Số chunk đã sửa đang tải, để HUD hiển thị. */
   modifiedCount(): number {
-    let n = this.saved.size;
+    let n = 0;
     for (const c of this.world.chunks.values()) if (c.modified) n++;
     return n;
   }

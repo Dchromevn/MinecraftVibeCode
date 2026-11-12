@@ -67,7 +67,9 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 | 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | |
 | 4b | Rương, lò nung, cửa, trồng trọt | |
 | 4c | Chất lỏng, xô | |
-| 5 | Mạng nhiều người và lưu thế giới | |
+| 5a | Server làm chủ thế giới, chơi chung qua link | |
+| 5b | Lưu thế giới, đăng nhập | |
+| 5c | Server tính di chuyển, chống gian lận, mạng trễ | |
 | 6 | Chiến đấu PvP và hồi sinh | |
 | 7 | Ngày đêm, động vật, quái vật, giường | |
 | 8 | Làng và dân làng | |
@@ -877,6 +879,41 @@ NGHIỆM THU
 ### Giai đoạn 5 — Mạng nhiều người và lưu thế giới
 
 Giai đoạn khó nhất. Không thêm tính năng gameplay mới.
+
+Người dùng chọn (2026-11-12): chia 3 phần, người dùng chơi thử sau mỗi phần; bạn bè vào
+qua Cloudflare Tunnel (một link công khai, không cần cài gì). Các mục bên dưới gốc của
+Giai đoạn 5 được phân vào:
+
+**5a — Server làm chủ thế giới, chơi chung qua link**
+- Một cổng (8080): server HTTP phục vụ client đã build + WebSocket `/ws`. `npm run dev`
+  vẫn dùng Vite (chuyển tiếp `/ws` sang server). `npm run host` = build rồi chạy server;
+  `npm run share` = mở Cloudflare quick tunnel tới cổng đó (người dùng cài `cloudflared`).
+- Vào game bằng tên (chưa mật khẩu — 5b). Tên đang online thì từ chối.
+- Seed do server cấu hình. Client tự sinh địa hình theo seed (xác định); server gửi danh
+  sách block đã sửa của từng chunk (kèm dữ liệu phụ) khi chunk vào tầm nhìn và phát mọi
+  thay đổi block. Client không tự quyết nội dung chunk.
+- Server mô phỏng các chunk quanh người chơi: random tick, chất lỏng, lò nung, cát rơi,
+  vật phẩm rơi (nhặt, gộp, hút, cháy). Ánh sáng tính ở server (chuyển sang /shared).
+- Mọi hành động là yêu cầu gửi server (đào, đặt, túi đồ, chế tạo, rương, lò, cửa, ăn,
+  trồng trọt, xô); server kiểm tra (tầm với, có đồ, chỗ bám) rồi áp dụng và phát cho người
+  ở gần. Client đoán trước đào / đặt để không thấy trễ; server sửa nếu khác. Túi đồ do
+  server giữ (dùng chung logic /shared).
+- Người chơi khác: model 6 phần + giáp + vật phẩm trên tay + tên trên đầu, nội suy trễ
+  100 ms, tay chân đung đưa, đầu quay theo hướng nhìn.
+- Tạm thời (đến 5c): di chuyển, máu, đói do client tính và báo lên server; thời gian đào
+  chưa kiểm. Chết thì server rải đồ trong túi.
+- Bộ đồ thử 64 món: chỉ khi server bật chế độ thử (cấu hình).
+- NGHIỆM THU 5a: 2–3 tab và bạn bè qua link thấy nhau đi lại; đào / đặt / rương / lò /
+  cửa / nước / cây trồng đồng bộ; nước chảy, cây lớn, lò chạy ở server (một người thoát
+  thì người khác vẫn thấy); đồ rơi ai nhặt trước người đó có.
+
+**5b — Lưu thế giới, đăng nhập**: mục SERVER VÀ LƯU TRỮ (lưu xuống /server/data, tự lưu,
+ghi an toàn, chỉ giữ chunk gần người chơi) và ĐĂNG NHẬP (mật khẩu scrypt, quản trị viên;
+phá tức thì / bay chỉ cho quản trị viên).
+
+**5c — Server tính di chuyển, chống gian lận, mạng trễ**: DI CHUYỂN (dự đoán + hiệu chỉnh,
+server chạy vật lý từ input, kiểm thời gian đào), máu / đói tính ở server, gói nhị phân cho
+gói thường xuyên, DEBUG (F3 mạng, FAKE_LAG_MS, FAKE_LOSS_PCT) và các mục nghiệm thu còn lại.
 
 SERVER VÀ LƯU TRỮ
 - Một thế giới chung, vòng lặp 20 tick/giây.

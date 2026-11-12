@@ -3,7 +3,7 @@
 // Đỉnh theo tọa độ trong chunk (0..16) để giữ chính xác ở xa gốc tọa độ.
 import { B, BLOCKS, CHUNK_HEIGHT, chestHalf, facingDir, furnaceLit, liquidFalling, liquidLevel } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
-import { regionIndex, type Region } from "../light/regionLight.js";
+import { regionIndex, type Region } from "../../../shared/src/index.js";
 import { GeomBuilder, type MeshArrays } from "./geomBuilder.js";
 import { addSpecial, type SpecialUv } from "./specialBlocks.js";
 import { sectionConnectivity } from "./connectivity.js";

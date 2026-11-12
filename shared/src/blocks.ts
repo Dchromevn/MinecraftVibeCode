@@ -131,10 +131,6 @@ export interface BlockDef {
   tex: BlockTextures;
 }
 
-export function blockDef(id: number): BlockDef {
-  return BLOCKS[id] ?? BLOCKS[0]!;
-}
-
 /** Tên mọi texture block mà client cần nạp vào atlas. */
 export function allBlockTextureNames(): string[] {
   const names = new Set<string>();

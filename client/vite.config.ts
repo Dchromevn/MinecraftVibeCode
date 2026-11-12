@@ -32,6 +32,8 @@ export default defineConfig({
   plugins: [mcOverride()],
   server: {
     port: 5173,
+    // chạy dev: client gọi /ws cùng địa chỉ trang, Vite chuyển sang server (cổng 8080)
+    proxy: { "/ws": { target: process.env.WS_TARGET ?? "ws://localhost:8080", ws: true } },
     fs: {
       // cho phép Vite đọc mã nguồn trong /shared
       allow: [".."],

@@ -15,8 +15,10 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
 | 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | xong (người dùng bảo "tiếp 4b", 2026-11-12) |
 | 4b | Rương, lò nung, cửa, trồng trọt | xong (người dùng bảo "làm tiếp 4c", 2026-11-12) |
-| 4c | Chất lỏng, xô | chờ người dùng test |
-| 5 | Mạng nhiều người và lưu thế giới | chưa làm |
+| 4c | Chất lỏng, xô | xong (người dùng chọn làm 5a, 2026-11-12) |
+| 5a | Server làm chủ thế giới, chơi chung qua link | chờ người dùng test |
+| 5b | Lưu thế giới, đăng nhập | chưa làm |
+| 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
 | 7 | Ngày đêm, động vật, quái vật, giường | chưa làm |
 | 8 | Làng và dân làng | chưa làm |
@@ -573,3 +575,42 @@ Trạng thái: chờ người dùng test.
 - Kéo-thả trong túi đồ / rương / lò: nhấc đồ ở ô A, thả chuột ở ô B → đặt vào B (gộp nếu cùng loại), đồ ở B (hoặc phần dư) về A. Thả tại chính ô A thì vẫn giữ trên con trỏ như bấm thường (`ui/inventoryScreen.ts`).
 - Vật phẩm rơi chạm dung nham thì cháy mất (`shared/src/itemEntity.ts`).
 - Kiểm tra: `npm test` 118/118; trình duyệt: kéo gỗ từ túi lên ô rương có kim cương → tráo đúng, kéo than sang ô trống → chuyển sang, thả tại chỗ → giữ trên con trỏ.
+
+## Giai đoạn 5a — Server làm chủ thế giới, chơi chung qua link (2026-11-12)
+
+Trạng thái: chờ người dùng test. Người dùng chọn: chia Giai đoạn 5 thành 5a/5b/5c, bạn bè vào qua Cloudflare Tunnel.
+
+### Cách chạy
+
+- Chơi / thử trên máy: `npm run dev` (server cổng 8080 + Vite 5173), mở http://localhost:5173, nhập tên. Mở thêm tab, nhập tên khác để thấy nhau.
+- Chơi với bạn bè: `npm run host` (build rồi chạy server, mở http://localhost:8080), cửa sổ khác chạy `npm run share` → in ra link https://....trycloudflare.com, gửi link cho bạn bè. Cần cài cloudflared một lần: `winget install --id Cloudflare.cloudflared`. Link đổi mỗi lần chạy lại.
+- Cấu hình: `server/config.json` (seed, cổng, điểm hồi sinh random / fixed, debug = bộ đồ thử + lệnh give). Seed giờ do server quyết (tham số ?seed= của client bỏ).
+
+### File đã tạo / sửa
+
+- `/shared`: `protocol.ts` (mới, mọi gói tin có kiểu), `invActions.ts` (mới, thao tác túi đồ dạng lệnh + ảnh chụp trạng thái), `light.ts` và `spawn.ts` (chuyển từ client để server dùng), `constants.ts` (NET: cổng, bán kính mô phỏng, tần số gửi...).
+- `/server/src`: `index.ts` (HTTP phục vụ client/dist + WebSocket /ws trên một cổng), `config.ts`, `game.ts` (vào game, phân loại gói tin, vòng lặp 20 tick / giây, phát thay đổi), `serverWorld.ts` (sinh chunk quanh người chơi, ghi block đã sửa theo chunk, ánh sáng), `ticker.ts` (random tick, chất lỏng, lò, cát rơi, giẫm ruộng — chuyển từ client), `actions.ts` (đào, chuột phải, xô, ăn, chết), `containers.ts` (rương / lò dùng chung giữa nhiều người), `serverItems.ts` (vật phẩm rơi), `player.ts`; `server/config.json`.
+- `/client/src`: `net/` (mới: `connection.ts`, `joinScreen.ts` màn hình nhập tên, `netClient.ts`, `worldSync.ts` đăng ký chunk + áp block đã sửa, `invSync.ts` đoán trước + sửa theo server, `remotePlayers.ts` người chơi khác); `main.ts`, `game/session.ts`, `interact/interaction.ts` (đoán trước đào / đặt, gửi server), `interact/fallingBlocks.ts` (chỉ vẽ), `items/itemEntities.ts` (chỉ vẽ theo server), `ui/inventoryScreen.ts` + `recipeBook.ts` (thao tác thành lệnh), `world/chunkManager.ts` (móc đăng ký chunk, không tự giữ chunk đã sửa), `player/playerModel.ts`, `strings.ts`, `ui/styles.ts`, `vite.config.ts` (chuyển tiếp /ws). Xóa: `game/worldTicker.ts`, `interact/bucket.ts` (logic lên server).
+- `tests/server.test.ts` (mới, 13 mục); `package.json`: `npm run host`, `npm run share`.
+
+### Đã tự kiểm tra
+
+- `npm run typecheck`, `npm run build`, `npm test` 131/131 (server 13/13: vào game bằng tên, trùng tên bị từ chối, thấy nhau vào / ra, tải chunk + ánh sáng, đào → phát cho người theo dõi, đào ngoài tầm với bị từ chối và sửa lại, đặt block trừ trong túi, lệnh túi đồ có số thứ tự xác nhận, hai người mở cùng rương thấy đồ của nhau, đóng rương đồ còn lại, thoát rồi vào lại giữ túi đồ).
+- Trình duyệt + người chơi giả (bot node): thấy người kia có tên trên đầu, dáng đi, cầm đồ trên tay; block người kia đặt hiện ra; đào thì block mất ngay và server xác nhận; kéo-thả trong túi đồ khớp server; đặt rương rồi mở được (27 ô); đổ xô nước → server cho nước lan (96 ô) và client nhận đủ. `npm run host` phục vụ được trang game và ảnh ở cổng 8080.
+
+### Cần người dùng kiểm tra
+
+- 2–3 tab (tên khác nhau) cùng máy: thấy nhau đi lại mượt, tay chân đung đưa, đầu quay, cầm đồ, giáp; đào / đặt / cửa / rương / lò / xô / cây trồng của người này người kia thấy ngay.
+- Hai người mở cùng một rương / lò: đồ thay đổi thấy ngay ở cả hai.
+- Nước chảy, cây lớn, lò nung vẫn chạy khi một người thoát.
+- Vứt đồ (Q) — người kia nhặt được; ai đứng gần trước thì người đó nhặt.
+- Chơi qua link: `npm run host` + `npm run share`, gửi link cho bạn.
+
+### Ghi chú / còn tạm (đúng phạm vi 5a)
+
+- Chưa lưu xuống đĩa (5b): tắt server là mất thế giới; thoát rồi vào lại khi server còn chạy thì giữ túi đồ + vị trí.
+- Chưa có mật khẩu (5b): ai biết tên đều vào được bằng tên đó (khi người đó đang không online).
+- Di chuyển, máu, đói, sát thương rơi do client tính và báo lên (5c); thời gian đào chưa kiểm (5c). Bay / phá tức thì: mọi người đều dùng được (5b chỉ cho quản trị viên).
+- Gói tin đều là JSON (5c chuyển gói thường xuyên sang nhị phân, thêm F3 mạng, giả lập trễ).
+- Bộ đồ thử: khi `debug: true` mỗi tên mới vào được 1 bộ (kể cả qua link).
+- Thế giới thử ở chế độ dev: Vite 5173 + server 8080; cổng 8080 khi chạy dev có thể phục vụ bản build cũ — dùng 5173.

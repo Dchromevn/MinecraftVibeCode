@@ -60,6 +60,17 @@ const CSS = `
 #death { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
   background: #7a0000aa; z-index: 7; color: #fff; font: bold 32px monospace; gap: 24px; }
 #death button { font: 18px monospace; padding: 8px 28px; cursor: pointer; }
+#join { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #1d2a3a; z-index: 20;
+  font: 15px monospace; color: #404040; }
+#join .panel { background: #c6c6c6; padding: 18px 22px; border: 3px solid; border-color: #fff #555 #555 #fff; width: 340px;
+  box-shadow: 0 0 0 2px #000; display: flex; flex-direction: column; gap: 8px; }
+#join h2 { margin: 0 0 6px; font-size: 20px; }
+#join input { font: 16px monospace; padding: 6px; }
+#join button { font: 16px monospace; padding: 6px; cursor: pointer; }
+#join .err { color: #a00; min-height: 1.2em; }
+#join .tip { font-size: 12px; color: #555; }
+#disconnected { position: fixed; left: 50%; top: 40%; transform: translateX(-50%); background: #000c; color: #fff; z-index: 30;
+  font: 18px monospace; padding: 14px 22px; }
 `;
 
 export function injectStyles(): void {

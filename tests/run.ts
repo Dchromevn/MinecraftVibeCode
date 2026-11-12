@@ -10,6 +10,7 @@ const SUITES: [string, () => Promise<unknown>][] = [
   ["rương, lò, random tick (4b)", () => import("./containers.test.js")],
   ["cây trồng (4b)", () => import("./crops.test.js")],
   ["chất lỏng (4c)", () => import("./liquids.test.js")],
+  ["server (5a)", () => import("./server.test.js")],
   ["sinh thế giới", () => import("./worldgen.test.js")],
 ];
 

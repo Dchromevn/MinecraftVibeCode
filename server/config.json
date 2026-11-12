@@ -1,0 +1,6 @@
+{
+  "seed": "voxel",
+  "port": 8080,
+  "spawn": "random",
+  "debug": true
+}

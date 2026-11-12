@@ -2,9 +2,9 @@
 // như ảnh mẫu (DESIGN.md 2.4). Thao tác như thể loại gốc: bấm trái nhấc/đặt chồng, bấm phải nhấc
 // nửa/đặt 1, Shift+bấm chuyển nhanh, kéo trái chia đều, kéo phải đặt 1 mỗi ô, bấm đúp gom cùng
 // loại, trỏ + phím 1–9 đổi chỗ với hotbar, trỏ + Q vứt, bấm ra ngoài khung vứt chồng đang cầm.
+// Giai đoạn 5a: mọi thao tác là lệnh InvAction (áp dụng ngay trên máy và gửi server qua act).
 import {
-  collectToCursor, dragSpread, dropCursor, gridResult, swapWithHotbar, takeFromSlot, takeResult,
-  type FurnaceEntity, type Inventory, type ItemStack, type SlotArea, type SlotRef,
+  gridResult, type FurnaceEntity, type InvAction, type Inventory, type SlotArea, type SlotRef,
 } from "../../../shared/src/index.js";
 import { chestView, furnaceView, type ContainerView } from "./containerViews.js";
 import { STR } from "../strings.js";
@@ -51,10 +51,10 @@ export class InventoryScreen {
   open = false;
   mode: ScreenMode = "inventory";
 
-  constructor(private readonly inv: Inventory, private readonly drop: (s: ItemStack) => void, private readonly onClose: () => void) {
+  constructor(private readonly inv: Inventory, private readonly act: (a: InvAction) => void, private readonly onClose: () => void) {
     this.root.id = "inv";
     this.cursorEl.id = "cursor";
-    this.book = new RecipeBook(inv, () => this.refresh());
+    this.book = new RecipeBook(inv, act, () => this.refresh());
     const panel = div("panel");
     ARMOR_BG.forEach((p, i) => this.armorCol.appendChild(this.slot("armor", i, `/ui/empty_${p}.png`)));
     this.bookBtn.className = "bookbtn";
@@ -67,7 +67,7 @@ export class InventoryScreen {
     this.resultEl.addEventListener("mousedown", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      takeResult(this.inv, e.shiftKey).forEach(this.drop);
+      this.act({ t: "result", shift: e.shiftKey });
       this.refresh();
     });
     const craftRow = div("craftrow");
@@ -86,8 +86,7 @@ export class InventoryScreen {
     // bấm ra ngoài khung: vứt chồng đang cầm
     this.root.addEventListener("mousedown", (e) => {
       if (e.target !== this.root && e.target !== wrap) return;
-      const s = dropCursor(this.inv, e.button === 2 ? "right" : "left");
-      if (s) this.drop(s);
+      if (this.inv.cursor) this.act({ t: "dropCursor", button: e.button === 2 ? "right" : "left" });
       this.refresh();
     });
     document.addEventListener("mousemove", (e) => {
@@ -106,9 +105,9 @@ export class InventoryScreen {
       e.preventDefault();
       e.stopPropagation();
       const button = e.button === 2 ? "right" : "left";
-      if (e.detail === 2 && button === "left" && this.inv.cursor) collectToCursor(this.inv);
+      if (e.detail === 2 && button === "left" && this.inv.cursor) this.act({ t: "collect" });
       else if (e.shiftKey || !this.inv.cursor) {
-        this.inv.click(area, i, button, e.shiftKey);
+        this.act({ t: "click", area, i, button, shift: e.shiftKey });
         if (!e.shiftKey && button === "left" && this.inv.cursor) this.pickFrom = ref;
         this.sweep = e.shiftKey && button === "left";
       }
@@ -119,7 +118,7 @@ export class InventoryScreen {
       this.hover = ref;
       // giữ Shift + chuột trái rê qua: chuyển nhanh từng ô đi qua
       if (this.sweep && e.shiftKey && e.buttons & 1 && !this.inv.cursor) {
-        this.inv.click(area, i, "left", true);
+        this.act({ t: "click", area, i, button: "left", shift: true });
         this.refresh();
       }
       if (this.drag && !this.drag.refs.some((r) => r.area === area && r.i === i)) {
@@ -140,8 +139,8 @@ export class InventoryScreen {
     this.drag = null;
     for (const s of this.slotEls) s.el.classList.remove("drag");
     const r = d.refs[0]!;
-    if (d.refs.length === 1) this.inv.click(r.area, r.i, d.button, false);
-    else dragSpread(this.inv, d.refs, d.button);
+    if (d.refs.length === 1) this.act({ t: "click", area: r.area, i: r.i, button: d.button, shift: false });
+    else this.act({ t: "spread", refs: d.refs, button: d.button });
     this.refresh();
   }
 
@@ -153,20 +152,19 @@ export class InventoryScreen {
     const from = this.pickFrom, to = this.hover;
     this.pickFrom = null;
     if (!from || !to || !this.inv.cursor || (to.area === from.area && to.i === from.i)) return;
-    this.inv.click(to.area, to.i, "left", false);
-    if (this.inv.cursor) this.inv.click(from.area, from.i, "left", false);
+    this.act({ t: "click", area: to.area, i: to.i, button: "left", shift: false });
+    if (this.inv.cursor) this.act({ t: "click", area: from.area, i: from.i, button: "left", shift: false });
     this.refresh();
   }
 
   private onKey(e: KeyboardEvent): void {
     if (!this.open || !this.hover) return;
     const n = Number(e.key);
-    if (Number.isInteger(n) && n >= 1 && n <= 9) swapWithHotbar(this.inv, this.hover, n - 1);
-    else if (e.code === "KeyF" && !this.inv.cursor) this.inv.click(this.hover.area, this.hover.i, "left", true); // như Shift + bấm
-    else if (e.code === "KeyQ") {
-      const s = takeFromSlot(this.inv, this.hover, e.ctrlKey);
-      if (s) this.drop(s);
-    } else return;
+    const h = this.hover;
+    if (Number.isInteger(n) && n >= 1 && n <= 9) this.act({ t: "hotbar", area: h.area, i: h.i, n: n - 1 });
+    else if (e.code === "KeyF" && !this.inv.cursor) this.act({ t: "click", area: h.area, i: h.i, button: "left", shift: true }); // như Shift + bấm
+    else if (e.code === "KeyQ") this.act({ t: "dropSlot", area: h.area, i: h.i, all: e.ctrlKey });
+    else return;
     e.preventDefault();
     this.refresh();
   }
@@ -192,7 +190,7 @@ export class InventoryScreen {
     this.mode = mode;
     this.container = null;
     const size = mode === "workbench" ? 3 : 2;
-    this.inv.setCraftSize(size).forEach(this.drop);
+    if (this.inv.craftSize !== size) this.act({ t: "craftSize", n: size });
     for (let k = this.slotEls.length - 1; k >= 0; k--) if (this.slotEls[k]!.area === "craft") this.slotEls.splice(k, 1);
     this.gridEl.innerHTML = "";
     this.gridEl.className = `grid g${size}`;
@@ -215,9 +213,7 @@ export class InventoryScreen {
     this.open = false;
     this.drag = null;
     this.root.style.display = "none";
-    const left = this.inv.returnCursor();
-    if (left) this.drop(left);
-    this.inv.returnCraft().forEach(this.drop);
+    this.act({ t: "close" }); // trả con trỏ + lưới chế tạo về túi; server đóng rương / lò
     if (this.containerClose) {
       this.containerClose();
       this.containerClose = null;

@@ -30,7 +30,6 @@ const FALLING = 8;
 const BREAKS = new Set<number>([
   B.TORCH, B.TALLGRASS, B.RAIL, B.SAPLING, B.WHEAT, B.CARROTS, B.POTATOES, B.BEETROOTS, B.MELON_STEM, B.PUMPKIN_STEM,
 ]);
-export const liquidBreaks = (id: number): boolean => BREAKS.has(id);
 export const isLiquidId = (id: number): boolean => FLUIDS.has(id);
 
 const same = (c: number, f: Fluid): boolean => c >= 0 && (c & 255) === f.id;

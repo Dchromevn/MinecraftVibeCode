@@ -1,44 +1,34 @@
-// Vật phẩm nằm trên đất phía client: cập nhật bằng logic /shared/itemEntity.ts, vẽ block
-// thành khối nhỏ, vật phẩm thành tấm icon; xoay và nhấp nhô; gộp chồng; nhặt vào túi.
+// Vẽ vật phẩm nằm trên đất (Giai đoạn 5a: server mô phỏng rơi, trôi, gộp, nhặt; client chỉ nhận vị
+// trí và vẽ). Block vẽ thành khối nhỏ, vật phẩm thành tấm icon; xoay, nhấp nhô, trượt mượt tới vị trí mới.
 import * as THREE from "three";
-import {
-  DROPPED, INVENTORY, canMerge, canPickup, createItemEntity, itemDef, popFromBlock, stepItem, tryMergeItems,
-  type CellReader, type Inventory, type ItemEntity, type ItemStack, type Rng,
-} from "../../../shared/src/index.js";
+import { DROPPED, itemDef, type NetItem } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
 import { blockTiles, setBoxTiles } from "../interact/boxMesh.js";
 import { iconUrl } from "../ui/itemIcons.js";
 
 interface Entry {
-  e: ItemEntity;
+  id: number;
+  item: string;
   obj: THREE.Object3D;
-  key: string; // loại vật phẩm đang vẽ
+  pos: THREE.Vector3; // đang vẽ
+  target: THREE.Vector3; // server gửi
 }
 
-/** Túi chính còn chỗ cho ít nhất 1 món s không. */
-function hasRoom(inv: Inventory, s: ItemStack): boolean {
-  const max = itemDef(s.item)?.maxStack ?? INVENTORY.MAX_STACK;
-  return inv.main.some((m) => !m || (canMerge(m, s) && m.count < max));
-}
+const FOLLOW = 15; // trượt tới vị trí server (1/giây)
 
 export class ItemEntities {
-  private readonly list: Entry[] = [];
+  private readonly map = new Map<number, Entry>();
   private readonly blockMat: THREE.MeshBasicMaterial;
   private readonly iconMats = new Map<string, THREE.MeshBasicMaterial>();
   private readonly plane = new THREE.PlaneGeometry(DROPPED.SIZE * 1.6, DROPPED.SIZE * 1.6);
   private time = 0;
 
-  constructor(
-    private readonly scene: THREE.Scene,
-    private readonly atlas: Atlas,
-    private readonly cell: CellReader,
-    private readonly rng: Rng,
-  ) {
+  constructor(private readonly scene: THREE.Scene, private readonly atlas: Atlas) {
     this.blockMat = new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xdddddd });
   }
 
   get count(): number {
-    return this.list.length;
+    return this.map.size;
   }
 
   private iconMat(key: string): THREE.MeshBasicMaterial {
@@ -64,65 +54,47 @@ export class ItemEntities {
     return new THREE.Mesh(this.plane, this.iconMat(item));
   }
 
-  add(e: ItemEntity): void {
-    const obj = this.makeObject(e.stack.item);
-    this.scene.add(obj);
-    this.list.push({ e, obj, key: e.stack.item });
+  private remove(e: Entry): void {
+    this.scene.remove(e.obj);
+    if (e.obj instanceof THREE.Mesh && e.obj.geometry !== this.plane) e.obj.geometry.dispose();
+    this.map.delete(e.id);
   }
 
-  /** Vật phẩm văng ra từ block ở ô (x, y, z). */
-  pop(stack: ItemStack, x: number, y: number, z: number): void {
-    this.add(popFromBlock(stack, x, y, z, this.rng));
-  }
-
-  /** Vứt từ người chơi theo hướng nhìn (Q). */
-  throw(stack: ItemStack, eye: THREE.Vector3, dir: THREE.Vector3): void {
-    const v = DROPPED.THROW_SPEED;
-    this.add(createItemEntity(stack, eye.x + dir.x * 0.3, eye.y - 0.3, eye.z + dir.z * 0.3, dir.x * v, dir.y * v + 2, dir.z * v, DROPPED.THROW_PICKUP_DELAY_S));
-  }
-
-  /** Văng toàn bộ đồ quanh chỗ chết. */
-  scatter(stacks: ItemStack[], x: number, y: number, z: number): void {
-    for (const s of stacks) {
-      const a = this.rng() * Math.PI * 2, sp = this.rng() * DROPPED.DEATH_SCATTER;
-      this.add(createItemEntity(s, x, y + 0.5, z, Math.cos(a) * sp, 3, Math.sin(a) * sp, DROPPED.THROW_PICKUP_DELAY_S));
+  /** Gói "items" của server: vật phẩm mới / đổi chỗ và vật phẩm đã mất. */
+  apply(up: NetItem[], gone: number[]): void {
+    for (const id of gone) {
+      const e = this.map.get(id);
+      if (e) this.remove(e);
+    }
+    for (const [id, item, , x, y, z] of up) {
+      let e = this.map.get(id);
+      if (e && e.item !== item) {
+        this.remove(e);
+        e = undefined;
+      }
+      if (!e) {
+        const obj = this.makeObject(item);
+        this.scene.add(obj);
+        e = { id, item, obj, pos: new THREE.Vector3(x, y, z), target: new THREE.Vector3(x, y, z) };
+        this.map.set(id, e);
+      }
+      e.target.set(x, y, z);
     }
   }
 
-  private remove(i: number): void {
-    const en = this.list[i]!;
-    this.scene.remove(en.obj);
-    if (en.obj instanceof THREE.Mesh && en.obj.geometry !== this.plane) en.obj.geometry.dispose();
-    this.list.splice(i, 1);
+  /** Mất kết nối / vào lại: xóa hết. */
+  clear(): void {
+    for (const e of [...this.map.values()]) this.remove(e);
   }
 
-  /** player: chân người chơi (null khi chết / đang bay thì vẫn nhặt). */
-  update(dt: number, player: { x: number; y: number; z: number } | null, inv: Inventory): void {
+  update(dt: number): void {
     this.time += dt;
-    for (let i = this.list.length - 1; i >= 0; i--) {
-      const en = this.list[i]!;
-      // chỉ hút về người chơi khi túi còn chỗ cho món này
-      if (!stepItem(en.e, dt, this.cell, player && hasRoom(inv, en.e.stack) ? player : null)) {
-        this.remove(i);
-        continue;
-      }
-      if (player && canPickup(en.e, player)) {
-        const left = inv.add(en.e.stack);
-        if (!left) {
-          this.remove(i);
-          continue;
-        }
-        en.e.stack = left;
-      }
-    }
-    // gộp các đống cùng loại nằm gần nhau
-    for (let i = 0; i < this.list.length; i++)
-      for (let j = this.list.length - 1; j > i; j--)
-        if (tryMergeItems(this.list[i]!.e, this.list[j]!.e)) this.remove(j);
-    for (const en of this.list) {
-      const bob = Math.sin(this.time * 2.5 + en.e.id) * 0.04;
-      en.obj.position.set(en.e.x, en.e.y + DROPPED.SIZE / 2 + 0.05 + bob, en.e.z);
-      en.obj.rotation.y = this.time * 1.5 + en.e.id;
+    const k = Math.min(1, FOLLOW * dt);
+    for (const e of this.map.values()) {
+      e.pos.lerp(e.target, k);
+      const bob = Math.sin(this.time * 2.5 + e.id) * 0.04;
+      e.obj.position.set(e.pos.x, e.pos.y + DROPPED.SIZE / 2 + 0.05 + bob, e.pos.z);
+      e.obj.rotation.y = this.time * 1.5 + e.id;
     }
   }
 }

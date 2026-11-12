@@ -1,38 +1,43 @@
-// Đào / đặt / ăn / vứt (Giai đoạn 3b–4a): giữ chuột trái đào theo công thức MECHANICS mục 4
-// với công cụ đang cầm (đang bay thì phá ngay), vết nứt 5 mức, rơi ra vật phẩm thật, công cụ
-// mất độ bền; chuột phải đặt block từ ô đang cầm (kiểm tra chỗ bám, không chồng lên người) hoặc
-// giữ để ăn; Q vứt đồ. Phím 1–9 / lăn chuột chọn ô hotbar.
+// Đào / đặt / ăn / vứt (Giai đoạn 3b–4c; 5a: server quyết định). Giữ chuột trái đào theo công thức
+// MECHANICS mục 4 (đang bay thì phá ngay), vết nứt 5 mức; đào xong thì đoán trước trên máy (block mất
+// ngay) và báo server. Chuột phải: mở bàn chế tạo / rương / lò, cửa, cuốc đất, xô, đặt block (đoán
+// trước) hoặc giữ để ăn — đều gửi server kiểm tra. Q vứt đồ; phím 1–9 / lăn chuột chọn ô hotbar.
 import * as THREE from "three";
 import {
-  DIGGING, HUNGER, PLAYER, addExhaustion, blockDrops, breakAt, canEat, canPlace, digRate, eat, isReplaceable,
-  itemDef, mergeChest, placeCells, placementCells, playerBox, raycast, selectionBoxes, toolWear, B,
-  type BlockAccess, type BlockEntities, type BlockId, type Dropped, type HeldTool, type Inventory, type RayHit, type Rng,
-  type World,
+  B, DIGGING, HUNGER, PLAYER, addExhaustion, breakAt, canEat, canPlace, digRate, eat, isLiquidId, isReplaceable, itemDef,
+  mergeChest, placeCells, placementCells, playerBox, raycast, selectionBoxes,
+  type BlockAccess, type BlockId, type HeldTool, type InvAction, type Inventory, type NetHit, type RayHit, type World,
 } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
-import type { ItemEntities } from "../items/itemEntities.js";
 import type { PlayerController } from "../player/playerController.js";
-import { useBucket } from "./bucket.js";
 import { CrackOverlay } from "./crackOverlay.js";
 import { FallingBlocks } from "./fallingBlocks.js";
 import { BlockOutline } from "./outline.js";
 
 const REACH_FLY = 12; // khi bay (debug) với xa hơn cho tiện
+/** Chuột phải vào các block này (không giữ Shift) thì dùng block thay vì đặt / ăn. */
+const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE, B.DOOR]);
+
+/** Gửi hành động lên server. */
+export interface InteractNet {
+  dig(x: number, y: number, z: number): void;
+  use(hit: NetHit | null, src: { x: number; y: number; z: number } | null, sneaking: boolean, yaw: number): void;
+  eat(): void;
+  act(a: InvAction): void;
+}
 
 export interface InteractView {
   camera: THREE.Camera;
   player: PlayerController;
   inv: Inventory;
-  items: ItemEntities;
-  rng: Rng;
   locked: () => boolean;
   yaw: () => number;
   swing: () => void;
-  /** Chuột phải vào block có chức năng (bàn chế tạo, rương, lò, cửa): true nếu đã xử lý. */
-  useBlock: (t: RayHit) => boolean;
-  entities: BlockEntities;
   sneaking: () => boolean;
+  net: InteractNet;
 }
+
+const netHit = (t: RayHit): NetHit => ({ x: t.x, y: t.y, z: t.z, nx: t.nx, ny: t.ny, nz: t.nz });
 
 export class Interaction {
   private target: RayHit | null = null;
@@ -45,8 +50,10 @@ export class Interaction {
   eating = 0;
   private readonly outline: BlockOutline;
   private readonly dir = new THREE.Vector3();
+  /** Ghi thẳng vào thế giới trên máy (đoán trước); server gửi lại giá trị thật sau. */
   private readonly acc: BlockAccess;
   private readonly crack: CrackOverlay;
+  /** Cát / sỏi đang rơi (server báo, chỉ để vẽ). */
   readonly falling: FallingBlocks;
 
   constructor(
@@ -61,7 +68,7 @@ export class Interaction {
       },
     };
     this.crack = new CrackOverlay(scene, atlas);
-    this.falling = new FallingBlocks(scene, atlas, this.acc, (d) => this.spawnDrops(d, null));
+    this.falling = new FallingBlocks(scene, atlas, (x, y, z) => world.getCell(x, y, z));
     document.addEventListener("mousedown", (e) => {
       if (!this.view.locked()) return;
       if (e.button === 0) this.left = true;
@@ -76,13 +83,15 @@ export class Interaction {
     document.addEventListener("keydown", (e) => {
       if (!this.view.locked()) return;
       const n = Number(e.key);
-      if (Number.isInteger(n) && n >= 1 && n <= 9) this.view.inv.selected = n - 1;
-      if (e.code === "KeyQ") this.throwHeld(e.ctrlKey);
+      if (Number.isInteger(n) && n >= 1 && n <= 9) this.view.net.act({ t: "select", n: n - 1 });
+      if (e.code === "KeyQ" && this.view.inv.held) {
+        this.view.net.act({ t: "throwHeld", all: e.ctrlKey });
+        this.view.swing();
+      }
     });
     document.addEventListener("wheel", (e) => {
       if (!this.view.locked()) return;
-      const inv = this.view.inv;
-      inv.selected = (inv.selected + (e.deltaY > 0 ? 1 : -1) + 9) % 9;
+      this.view.net.act({ t: "select", n: (this.view.inv.selected + (e.deltaY > 0 ? 1 : -1) + 9) % 9 });
     });
   }
 
@@ -96,20 +105,6 @@ export class Interaction {
     const s = this.view.inv.held;
     const t = s ? itemDef(s.item)?.tool : undefined;
     return t ? { kind: t.kind, tier: t.tier } : null;
-  }
-
-  private spawnDrops(list: Dropped[], tool: HeldTool | null): void {
-    for (const d of list)
-      for (const s of blockDrops(d.id, d.meta, d.forced ? null : tool, this.view.rng, d.forced)) this.view.items.pop(s, d.x, d.y, d.z);
-  }
-
-  private throwHeld(all: boolean): void {
-    const inv = this.view.inv;
-    const s = inv.takeHeld(all ? (inv.held?.count ?? 1) : 1);
-    if (!s) return;
-    this.view.camera.getWorldDirection(this.dir);
-    this.view.items.throw(s, this.view.camera.position, this.dir);
-    this.view.swing();
   }
 
   update(dt: number): void {
@@ -127,63 +122,54 @@ export class Interaction {
     this.updateUse(dt, flying);
   }
 
-  /** Chuột phải: cầm thức ăn thì giữ để ăn, cầm block thì đặt (giữ để đặt lặp lại). */
+  /** Chuột phải: dùng block, cuốc, xô, ăn (giữ), đặt block (giữ để đặt lặp lại). */
   private updateUse(dt: number, flying: boolean): void {
     const held = this.view.inv.held;
-    const food = held ? itemDef(held.item)?.food : undefined;
+    const def = held ? itemDef(held.item) : undefined;
     const s = this.view.player.state;
     if (!this.right) {
       this.placeCooldown = 0;
       this.eating = 0;
       return;
     }
-    // chuột phải vào bàn chế tạo (không giữ Shift): mở giao diện thay vì đặt / ăn
-    const t = this.target;
-    if (t && !this.view.sneaking() && this.view.useBlock(t)) {
+    const t = this.target, sneaking = this.view.sneaking(), yaw = this.view.yaw();
+    const once = (): void => {
       this.right = false;
-      return;
+      this.view.swing();
+    };
+    if (t && !sneaking && USABLE.has(t.cell & 255)) {
+      this.view.net.use(netHit(t), null, sneaking, yaw);
+      return once();
     }
-    // cuốc đất: đất / cỏ có ô trống phía trên → đất cày
-    const tool = held ? itemDef(held.item)?.tool : undefined;
-    if (tool?.kind === "hoe" && t) {
-      const id = t.cell & 255;
-      if ((id === B.DIRT || id === B.GRASS) && this.world.getBlock(t.x, t.y + 1, t.z) === B.AIR) {
-        this.acc.setCell(t.x, t.y, t.z, B.FARMLAND, 0);
-        this.view.inv.damageSlot("main", this.view.inv.selected, 1);
-        this.view.swing();
+    if (def?.tool?.kind === "hoe") {
+      if (t) {
+        const id = t.cell & 255;
+        if ((id === B.DIRT || id === B.GRASS) && this.world.getBlock(t.x, t.y + 1, t.z) === B.AIR) this.acc.setCell(t.x, t.y, t.z, B.FARMLAND, 0);
+        this.view.net.use(netHit(t), null, sneaking, yaw);
       }
-      this.right = false;
-      return;
+      return once();
+    }
+    if (held?.item === "bucket") {
+      // múc: tia nhắm cả nguồn chất lỏng
+      const p = this.view.camera.position, d = this.dir;
+      const src = raycast((x, y, z) => this.world.getCell(x, y, z), p.x, p.y, p.z, d.x, d.y, d.z, flying ? REACH_FLY : PLAYER.REACH, true);
+      if (src && isLiquidId(src.cell & 255)) this.view.net.use(null, { x: src.x, y: src.y, z: src.z }, sneaking, yaw);
+      return once();
+    }
+    if (def?.liquid !== undefined) {
+      if (t) this.view.net.use(netHit(t), null, sneaking, yaw);
+      return once();
     }
     // cà rốt / khoai tây: chuột phải lên mặt trên đất cày thì trồng, chỗ khác thì ăn
-    const plants = food && held && itemDef(held.item)?.places !== undefined && t && (t.cell & 255) === B.FARMLAND && t.ny === 1;
-    // xô: múc nguồn chất lỏng / đổ ra
-    if (held && (held.item === "bucket" || itemDef(held.item)?.liquid !== undefined)) {
-      const ok = useBucket(held.item, {
-        world: this.world, acc: this.acc, view: this.view, dir: this.dir, target: this.target,
-        reach: flying ? REACH_FLY : PLAYER.REACH, spawnDrops: (d) => this.spawnDrops(d, null),
-      });
-      if (ok) this.view.swing();
-      this.right = false;
-      return;
-    }
-    if (food && !plants) {
-      if (!canEat(s, food)) return;
+    const plants = def?.places !== undefined && t && (t.cell & 255) === B.FARMLAND && t.ny === 1;
+    if (def?.food && !plants) {
+      if (!canEat(s, def.food)) return;
       this.eating += dt;
       this.view.swing();
       if (this.eating >= PLAYER.EAT_TIME_S) {
-        eat(s, food);
-        this.view.inv.takeHeld(1);
+        eat(s, def.food); // đói / no tính ở client đến 5c
+        this.view.net.eat();
         this.eating = 0;
-        // súp: trả lại bát (vào tay nếu tay trống, không thì vào túi, đầy túi thì rơi ra)
-        if (food.returns) {
-          const inv = this.view.inv, bowl = { item: food.returns, count: 1, damage: 0 };
-          if (!inv.held) inv.main[inv.selected] = bowl;
-          else {
-            const left = inv.add(bowl);
-            if (left) this.view.items.throw(left, this.view.camera.position, this.dir);
-          }
-        }
       }
       return;
     }
@@ -211,14 +197,14 @@ export class Interaction {
     if (rate === Infinity) {
       // phá ngay; khi bay thì lặp lại sau 5 tick để không quét sạch một vùng
       if (flying && this.cooldown > 0) return;
-      this.breakTarget(t, tool);
+      this.breakTarget(t);
       if (flying) this.cooldown = DIGGING.COOLDOWN_S;
       return;
     }
     if (this.cooldown > 0) return;
     this.dig.progress += rate * dt;
     if (this.dig.progress >= 1) {
-      this.breakTarget(t, tool);
+      this.breakTarget(t);
       this.cooldown = DIGGING.COOLDOWN_S;
       this.crack.hide();
       return;
@@ -226,20 +212,16 @@ export class Interaction {
     this.crack.show(t.x, t.y, t.z, selectionBoxes(t.cell, t.x, t.y, t.z, (x, y, z) => this.world.getBlock(x, y, z)), this.dig.progress);
   }
 
-  private breakTarget(t: RayHit, tool: HeldTool | null): void {
-    const id = t.cell & 255;
-    // rương / lò: đồ bên trong rơi ra
-    if (id === B.CHEST || id === B.FURNACE)
-      for (const s of this.view.entities.remove(t.x, t.y, t.z, id)) this.view.items.pop(s, t.x, t.y, t.z);
-    this.spawnDrops(breakAt(this.acc, t.x, t.y, t.z, this.falling.start), tool);
-    const inv = this.view.inv;
-    const wear = toolWear(id, tool);
-    if (wear > 0) inv.damageSlot("main", inv.selected, wear);
+  /** Đào xong: block mất ngay trên máy (đoán trước), server phá thật, rơi đồ, trừ độ bền. */
+  private breakTarget(t: RayHit): void {
+    breakAt(this.acc, t.x, t.y, t.z, () => undefined);
+    this.view.net.dig(t.x, t.y, t.z);
     if (!this.view.player.flying) addExhaustion(this.view.player.state, HUNGER.DIG);
     this.dig = null;
     this.target = null;
   }
 
+  /** Đặt block đang cầm: đoán trước nếu hợp lệ, server kiểm tra lại và trừ trong túi. */
   private place(flying: boolean): void {
     const t = this.target;
     const held = this.view.inv.held;
@@ -252,12 +234,10 @@ export class Interaction {
     if (!cells) return;
     const box = flying ? null : playerBox(this.view.player.state);
     if (!canPlace(cells, (a, b, c) => this.world.getCell(a, b, c), box)) return;
-    this.spawnDrops(placeCells(this.acc, cells, this.falling.start), null);
-    for (const c of cells) this.view.entities.placed(c.x, c.y, c.z, c.id);
-    // rương cạnh rương đơn cùng hướng: ghép thành rương đôi (giữ Shift thì không ghép)
+    placeCells(this.acc, cells, () => undefined);
     if (places === B.CHEST && !this.view.sneaking())
       for (const m of mergeChest(cells[0]!, (a, b, c) => this.world.getCell(a, b, c))) this.acc.setCell(m.x, m.y, m.z, m.id, m.meta);
-    this.view.inv.takeHeld(1);
+    this.view.net.use(netHit(t), null, this.view.sneaking(), this.view.yaw());
     this.view.swing();
   }
 }

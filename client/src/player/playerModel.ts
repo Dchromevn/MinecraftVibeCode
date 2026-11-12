@@ -1,5 +1,5 @@
 // Mô hình nhân vật 6 phần (đầu, thân, 2 tay, 2 chân) từ skin 64x32 (entities/player.png).
-// Dùng cho hình nhân vật trong túi đồ; Giai đoạn 5 dùng lại để vẽ người chơi khác.
+// Dùng cho hình nhân vật trong túi đồ và người chơi khác (Giai đoạn 5a).
 import * as THREE from "three";
 import { ArmorLayer } from "./armorModel.js";
 
@@ -36,6 +36,10 @@ export interface PlayerModel {
   root: THREE.Group;
   head: THREE.Group;
   body: THREE.Group;
+  rArm: THREE.Group;
+  lArm: THREE.Group;
+  rLeg: THREE.Group;
+  lLeg: THREE.Group;
   armor: ArmorLayer;
 }
 
@@ -57,7 +61,7 @@ export function createPlayerModel(skin: THREE.Texture): PlayerModel {
   lLeg.position.set(2 * PX, 12 * PX, 0);
   root.add(head, body, rArm, lArm, rLeg, lLeg);
   const armor = new ArmorLayer({ head, body, rArm, lArm, rLeg, lLeg });
-  return { root, head, body, armor };
+  return { root, head, body, rArm, lArm, rLeg, lLeg, armor };
 }
 
 /** Nạp skin người chơi (lọc điểm ảnh rõ nét). */
