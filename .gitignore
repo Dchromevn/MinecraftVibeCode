@@ -8,3 +8,5 @@ Thumbs.db
 server/data/
 # texture gốc Minecraft nhập từ client.jar (© Mojang): chỉ dùng trên máy, không commit
 client/public_mc/
+# cloudflared tải tay (npm run share) — không commit
+cloudflared.exe
