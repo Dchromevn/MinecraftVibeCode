@@ -69,7 +69,8 @@ export function heldModel(key: string, atlas: Atlas): Promise<THREE.Object3D> {
       return m;
     }
     const url = icon?.type === "icon" ? `/icons/${icon.name}.png` : icon?.type === "tex" ? `/textures/${icon.name}.png` : "";
-    const px = url ? await loadPixels(url) : null;
+    // ưu tiên icon minecraft.wiki nếu người dùng đã tải (npm run wiki-icons)
+    const px = (await loadPixels(`/icons_wiki/${key}.png`)) ?? (url ? await loadPixels(url) : null);
     const m: THREE.Object3D = px ? extrude(px) : new THREE.Object3D();
     m.userData.kind = "flat";
     return m;
