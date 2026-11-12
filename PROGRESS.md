@@ -10,7 +10,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 0 | Dựng khung | xong |
 | 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
 | 2a | Thế giới vô hạn và biome | xong (người dùng bảo "tiếp" sau khi sửa lỗi, 2026-11-11) |
-| 2b | Hang động, hầm mỏ, ánh sáng, block mới | chờ người dùng test |
+| 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
 | 3 | Người chơi và tương tác block | chưa làm |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
