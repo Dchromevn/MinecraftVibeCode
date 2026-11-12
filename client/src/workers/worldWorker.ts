@@ -36,7 +36,11 @@ ctx.onmessage = (e) => {
       const center = centerLight(light); // ánh sáng chunk giữa cho random tick ở luồng chính
       const transfer: ArrayBuffer[] = [center.buffer as ArrayBuffer];
       for (const s of sections) transfer.push(...meshTransferables(s.solid), ...meshTransferables(s.water));
-      ctx.postMessage({ type: "mesh", id: msg.id, cx: msg.cx, cz: msg.cz, sections, light: center, ms: performance.now() - t0 }, transfer);
+      for (const c of msg.chunks) if (c) transfer.push(c.data.buffer as ArrayBuffer, c.meta.buffer as ArrayBuffer);
+      ctx.postMessage(
+        { type: "mesh", id: msg.id, cx: msg.cx, cz: msg.cz, sections, light: center, chunks: msg.chunks, ms: performance.now() - t0 },
+        transfer,
+      );
     }
   } catch (err) {
     ctx.postMessage({ type: "error", id: "id" in msg ? msg.id : -1, message: String(err) });

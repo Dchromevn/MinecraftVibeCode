@@ -33,10 +33,12 @@ export class NetClient {
   private interact: Interaction | null = null;
 
   constructor(private readonly conn: Connection, private readonly d: NetDeps) {
-    this.sync = new WorldSync(d.world, conn, (x, _y, z) => d.chunks.onBlockChanged(x, z));
+    // thay đổi do server (nước chảy, cây lớn, người khác): việc nền, không chen trước việc tải chunk mới
+    this.sync = new WorldSync(d.world, conn, (x, _y, z, light) => d.chunks.onBlockChanged(x, z, { urgent: false, light }));
     d.chunks.onGenStart = (cx, cz) => this.sync.genStart(cx, cz);
     d.chunks.onAdded = (c) => this.sync.added(c);
     d.chunks.onRemoved = (cx, cz) => this.sync.removed(cx, cz);
+    d.chunks.isReady = (k) => this.sync.ready(k);
     this.remote = new RemotePlayers(d.scene, d.atlas);
     conn.onClose = () => {
       const el = document.createElement("div");

@@ -158,8 +158,8 @@ export class Game {
     for (let i = 0; i + 1 < a.length; i += 2) {
       const cx = a[i]!, cz = a[i + 1]!;
       p.subs.add(chunkKey(cx, cz));
-      const cells = this.w.editsOf(cx, cz);
-      if (cells.length) p.send({ t: "chunk", cx, cz, cells });
+      // luôn trả lời (kể cả rỗng): client chờ gói này rồi mới dựng mesh, khỏi dựng lại khi ô đã sửa tới muộn
+      p.send({ t: "chunk", cx, cz, cells: this.w.editsOf(cx, cz) });
     }
   }
 

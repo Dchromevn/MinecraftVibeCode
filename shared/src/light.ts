@@ -3,6 +3,18 @@
 // lưu ánh sáng xuyên chunk. Mỗi byte: 4 bit cao = trời, 4 bit thấp = block.
 import { B, BLOCKS } from "./blocks.js";
 import { lightEmitOf } from "./blockMeta.js";
+
+/**
+ * Đổi ô a → b có làm ánh sáng đổi đáng kể ra xa không: độ phát sáng khác nhau, hoặc độ cản sáng lệch
+ * quá 1 mức. Lệch đúng 1 mức (không khí ↔ nước / lá: nước chảy) chỉ làm sáng giảm 1 nên client chỉ dựng
+ * lại chunk chứa ô (chunk kề có thể lệch 1 mức tới lần dựng sau). Ô âm (chunk chưa tải) coi như có.
+ */
+export function lightChanges(a: number, b: number): boolean {
+  if (a < 0 || b < 0) return true;
+  const ia = a & 255, ib = b & 255;
+  if (lightEmitOf(ia, a >> 8) !== lightEmitOf(ib, b >> 8)) return true;
+  return Math.abs((BLOCKS[ia]?.lightOpacity ?? 15) - (BLOCKS[ib]?.lightOpacity ?? 15)) > 1;
+}
 import { CHUNK_HEIGHT, type ChunkData } from "./chunk.js";
 
 export const RW = 48; // bề rộng vùng (3 chunk)

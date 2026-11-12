@@ -50,7 +50,7 @@ export type NetItem = [number, string, number, number, number, number];
 export type ServerMsg =
   | { t: "welcome"; id: number; name: string; seed: number; spawn: { x: number; y: number; z: number }; debug: boolean }
   | { t: "reject"; reason: string }
-  | { t: "chunk"; cx: number; cz: number; cells: number[] } // [chỉ số trong chunk, cell, ...]
+  | { t: "chunk"; cx: number; cz: number; cells: number[] } // [chỉ số trong chunk, cell, ...]; gửi cho mọi chunk được đăng ký (có thể rỗng)
   | { t: "blocks"; list: number[] } // [x, y, z, cell, ...]
   | { t: "join"; id: number; name: string }
   | { t: "leave"; id: number }

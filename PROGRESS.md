@@ -17,7 +17,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 4b | Rương, lò nung, cửa, trồng trọt | xong (người dùng xác nhận 2026-11-12) |
 | 4c | Chất lỏng, xô | xong (người dùng xác nhận 2026-11-12) |
 | 5a | Server làm chủ thế giới, chơi chung qua link | xong (người dùng xác nhận 2026-11-13) |
-| 4d | Loài cây mới, hoa, xương rồng | chờ người dùng test |
+| 4d | Loài cây mới, hoa, xương rồng | xong (người dùng xác nhận 2026-11-13) |
 | 4e | Bậc, tấm, tường, 16 màu, đồ sắt | chưa làm (trước 5b) |
 | 5b | Lưu thế giới, đăng nhập | chưa làm |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
@@ -619,7 +619,7 @@ Trạng thái: xong (người dùng xác nhận 2026-11-13). Người dùng ch�
 
 ## Giai đoạn 4d — Loài cây mới, hoa, xương rồng (2026-11-13)
 
-Trạng thái: chờ người dùng test. Người dùng chọn (2026-11-13): thuốc nhuộm lấy từ hoa + xương rồng; làm 4d, 4e trước 5b.
+Trạng thái: xong (người dùng xác nhận 2026-11-13). Người dùng chọn (2026-11-13): thuốc nhuộm lấy từ hoa + xương rồng; làm 4d, 4e trước 5b.
 
 ### File đã tạo / sửa
 
@@ -652,6 +652,21 @@ Trạng thái: chờ người dùng test. Người dùng chọn (2026-11-13): th
 - Hàng rào, cửa vẫn ra loại sồi dù làm từ ván loài nào (theo loài ở 4e). Thuốc nhuộm chưa dùng vào việc gì (đồ có màu ở 4e).
 - Vật phẩm rơi chạm xương rồng không bị hủy (bản gốc có); chưa làm vì không có trong đặc tả.
 
+### Sửa: lag khi di chuyển (2026-11-13, người dùng báo)
+
+Đo bằng trình duyệt không giao diện, bay thẳng 40 giây với tốc độ chạy nhanh (`tools/screenshot.mjs` + đoạn đo trong trang):
+- Nguyên nhân 1 (xác nhận): mỗi ô server đổi (chủ yếu nước chảy khi server tải vùng mới: mạch nước trong hang / vách núi bắt đầu chảy) làm client dựng lại tới 9 chunk và được coi là việc khẩn — vượt giới hạn worker, chen trước việc sinh chunk mới. Đo: 3.367 lần dựng mesh cho 99 chunk mới; worker không kịp sinh chunk (lần tải đầu kẹt, 74 / 113 chunk quanh người chơi không bao giờ có mesh).
+- Nguyên nhân 2 (xác nhận): mỗi việc dựng mesh cấp mới 18 mảng (~576 KB) để chép 3x3 chunk → dọn rác bộ nhớ chen vào luồng chính (có lần một việc mất 68 ms).
+- Không phải nguyên nhân: sinh chunk chậm hơn ~60% sau 4d (1,9 → 3,3 ms trung vị) nhưng vẫn dư sức (cần ~6 chunk / giây khi chạy nhanh).
+- Đã sửa (`client/src/world/chunkManager.ts`, `net/worldSync.ts`, `net/netClient.ts`, `workers/protocol.ts`, `workers/worldWorker.ts`, `shared/src/light.ts`, `server/src/game.ts`):
+  - thay đổi do server là việc nền: không chen trước, mỗi chunk dựng lại tối đa 1 lần / 250 ms, tối đa 4 việc nền cùng lúc (chỗ còn lại dành cho chunk mới); đào / đặt của chính người chơi vẫn dựng lại ngay;
+  - ô server gửi giống hệt ô đang có (server xác nhận điều client đã đoán trước) thì bỏ qua;
+  - thay đổi không đổi ánh sáng đáng kể (mực nước, cây lớn, không khí ↔ nước / lá) chỉ dựng lại chunk chứa ô (và chunk kề nếu ô ở mép) thay vì cả vùng 3x3; chunk kề có thể lệch 1 mức sáng tới lần dựng sau;
+  - server luôn trả lời khi client đăng ký chunk (kể cả danh sách rỗng); client chỉ dựng mesh khi chunk và 8 chunk kề đã nhận trả lời → ô đã sửa ghi vào trước khi có mesh, không phải dựng lại;
+  - mảng chép chunk cho worker được dùng lại (worker trả về), không cấp mới mỗi lần.
+- Kết quả cùng đường bay, cùng server mới: khung có JS > 8 ms 90 / 2.289 → 4 / 1.543, p99 22,7 → 2,8 ms; lần tải đầu: kẹt → đủ mesh sau ~3 giây; khi bay không còn chunk trống quanh người chơi. `npm test` 152/152.
+- Còn lại: nước chảy liên tục vẫn làm worker dựng lại nhiều (nhưng chỉ dùng phần được chia); FPS phần vẽ trên máy thật chưa đo được (headless vẽ bằng CPU).
+
 ## Bàn giao cho phiên sau (2026-11-12)
 
 Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md → PLAN.md → DESIGN.md → PROGRESS.md (mục này trước tiên).
@@ -659,7 +674,7 @@ Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md �
 ### Trạng thái
 
 - Xong: 0 → 4c (người dùng xác nhận 4a, 4b, 4c đều đạt, 2026-11-12).
-- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: chờ người dùng test. Kế tiếp (người dùng chọn 2026-11-13): 4e → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
+- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: xong. Kế tiếp (người dùng chọn 2026-11-13): 4e → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
 - Lựa chọn của người dùng cho 4d / 4e: thuốc nhuộm lấy từ hoa + xương rồng; cửa sắt mở bằng nút / cần gạt đơn giản (không dây redstone); lửa không lan; xô sữa để GĐ 7.
 - Đã chọn (2026-11-12): sát thương rìu = kiếm cùng cấp − 1 (rìu yếu hơn kiếm) — dùng ở Giai đoạn 6.
 
