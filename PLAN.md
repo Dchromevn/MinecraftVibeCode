@@ -299,8 +299,19 @@ Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả k
   lấy (mỗi ô lưới mất 1 nguyên liệu), Shift + bấm thì làm liên tục vào túi đồ. Một số
   công thức không cần hình (thân gỗ → ván, đuốc...). Hình lật ngang cũng được.
 - Đóng giao diện thì nguyên liệu còn trong lưới trả về túi (thừa thì vứt ra).
-- Sổ công thức (danh sách bên phải): đủ nguyên liệu thì sáng, thiếu thì mờ; bấm một
-  công thức thì nguyên liệu tự xếp vào lưới, Shift + bấm xếp nhiều bộ nhất có thể.
+- Sổ công thức: nút sách cạnh lưới chế tạo, bấm để mở/đóng danh sách bên trái giao
+  diện; đủ nguyên liệu thì sáng, thiếu thì mờ; bấm một công thức thì nguyên liệu tự xếp
+  vào lưới, Shift + bấm xếp nhiều bộ nhất có thể.
+- Bố cục (người dùng chọn 2026-11-12, theo ảnh mẫu): túi đồ = cột 4 ô giáp (hình mờ gợi
+  ý) + hình nhân vật (quay theo con trỏ) + "Chế tạo" 2x2 → ô kết quả; bàn chế tạo =
+  "Chế tạo" 3x3 → ô kết quả; bên dưới 27 ô túi và hàng hotbar tách riêng. Không có ô tay
+  trái (chưa có cơ chế cầm tay trái).
+- Thao tác chuột như thể loại gốc: kéo chuột trái qua nhiều ô chia đều chồng đang cầm;
+  kéo chuột phải đặt 1 cái mỗi ô; bấm đúp gom vật phẩm cùng loại lên con trỏ; trỏ vào ô
+  rồi bấm 1–9 đổi chỗ với ô hotbar đó; trỏ vào ô bấm Q vứt 1 (Ctrl+Q cả chồng); bấm ra
+  ngoài khung thì vứt chồng đang cầm (chuột phải: vứt 1).
+- Vật phẩm đang cầm hiện ở tay phải (góc nhìn thứ nhất): block là khối nhỏ, vật phẩm
+  khác là hình nổi khối từ icon; tay trống thì hiện cánh tay; vung khi đào/đặt/ăn.
 - Hình xếp (X = vật liệu, | = que): cuốc XXX / ·|· / ·|·; rìu XX / X| / ·|; xẻng X / | / |;
   kiếm X / X / |; cuốc đất XX / ·| / ·|; mũ XXX / X·X; áo X·X / XXX / XXX; quần XXX / X·X /
   X·X; giày X·X / X·X; que: 2 ván dọc; bàn chế tạo: 2x2 ván; đuốc: than trên que;
@@ -761,7 +772,8 @@ VẬT PHẨM VÀ TÚI ĐỒ
 
 CHẾ TẠO
 - Theo mục 2.4: lưới 2x2 trong túi đồ, chuột phải vào bàn chế tạo mở lưới 3x3, hình
-  xếp đúng thì ra thành phẩm; sổ công thức bên cạnh tự xếp nguyên liệu vào lưới.
+  xếp đúng thì ra thành phẩm; sổ công thức tự xếp nguyên liệu vào lưới; bố cục, thao
+  tác chuột (kéo chia đều / kéo đặt 1, bấm đúp, phím số) và vật phẩm trên tay theo mục 2.4.
 
 SINH TỒN
 - Thanh máu, đói, dưỡng khí, giáp trên hotbar. Đói ba biến, hồi máu, mất máu vì
