@@ -117,6 +117,13 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 35 | quặng vàng | 15 | cuốc sắt+ | vàng thô | nung thành thỏi vàng |
 | 36 | quặng vàng đá sâu | 20 | cuốc sắt+ | vàng thô | bản trong đá sâu (y < 8) |
 | 37 | quặng ngọc lục bảo | 15 | cuốc sắt+ | ngọc lục bảo | chỉ ở núi, từng khối lẻ |
+| 38 | cà rốt (cây) | 0 | – | chín: 2–5 cà rốt; non: 1 | trồng bằng cà rốt trên đất cày, 8 giai đoạn |
+| 39 | khoai tây (cây) | 0 | – | chín: 2–5 khoai tây; non: 1 | trồng bằng khoai tây trên đất cày, 8 giai đoạn |
+| 40 | củ cải đường (cây) | 0 | – | chín: 1 củ cải + 1–4 hạt; non: 1 hạt | 4 giai đoạn |
+| 41 | dưa hấu | 1 | rìu | 3–7 lát dưa | quả, mọc cạnh thân dưa |
+| 42 | bí ngô | 1 | rìu | bí ngô | quả, mọc cạnh thân bí; sinh rải rác trên cỏ |
+| 43 | thân dưa | 0 | – | 1 hạt dưa | 8 giai đoạn, lớn hết thì mọc quả ra ô bên cạnh |
+| 44 | thân bí | 0 | – | 1 hạt bí | như thân dưa |
 
 "Bắt buộc" nghĩa là đào bằng tay vẫn phá được nhưng không rơi gì.
 
@@ -169,6 +176,8 @@ Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X)
 | thang | 0–3 = hướng bức tường mà thang bám vào |
 | cửa | bit 0–1 hướng (tấm cửa nằm sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên |
 | lúa mì | 0–7 = giai đoạn lớn |
+| cà rốt, khoai tây | 0–7 = giai đoạn lớn; củ cải đường: 0–3 |
+| thân dưa, thân bí | 0–7 = tuổi; 8–11 = đã ra quả, quả ở hướng (giá trị − 8) |
 | nước, dung nham | bit 0–2 mức 0–7 (0 = nguồn), bit 3 đang rơi |
 | lò nung | bit 0–1 hướng mặt trước, bit 2 đang cháy (sáng 13) |
 | rương | bit 0–1 hướng mặt trước; bit 2–3: 0 rương đơn, 1 nửa trái, 2 nửa phải của rương đôi (trái/phải nhìn từ phía trước) |
@@ -214,6 +223,14 @@ kèm trong gói tin (chunk và thay đổi block).
   không có thì lá rụng (rơi cây non 5%, que 2%, táo 5%). Lá người chơi đặt không rụng.
 - Cỏ: bị khối đặc che phía trên thì thành đất; ánh sáng phía trên ≥ 9 thì thử 4 lần lan
   sang đất trong phạm vi 3x5x3 (đất đó phải có ánh sáng phía trên ≥ 4 và không bị che).
+- Cà rốt, khoai tây, củ cải đường: như lúa (cùng công thức xác suất, cùng luật ánh sáng);
+  củ cải đường chỉ có 4 giai đoạn. Thân dưa / bí: lớn như lúa tới tuổi 7; ở tuổi 7 mỗi
+  random tick (cùng xác suất) thử mọc quả ra một ô ngang ngẫu nhiên đang trống có đất /
+  cỏ / đất cày bên dưới; mọc được thì thân chuyển sang "đã ra quả" hướng về quả. Quả bị
+  phá thì thân trở lại tuổi 7.
+- Bí ngô sinh rải rác trên cỏ khi sinh thế giới (đồng cỏ, rừng), xác định theo seed.
+  Nguồn giống khác: rương hầm mỏ (hạt củ cải, hạt dưa, hạt bí, cà rốt, khoai tây). Làng
+  (Giai đoạn 8) và sinh vật (Giai đoạn 7) bổ sung sau.
 
 #### Rương và lò nung (Giai đoạn 4b)
 
@@ -232,8 +249,8 @@ kèm trong gói tin (chunk và thay đổi block).
 - Block cần chỗ bám: đuốc (sàn hoặc tường), thang (tường), đường ray (sàn), cửa
   và giường (sàn dưới ô thấp nhất): chỗ bám phải là khối đầy, không trong suốt
   (không tính lá, kính); riêng đuốc trên sàn được cắm trên đầu cột rào (như đuốc
-  trong hầm mỏ). Cỏ cao, cây non: cỏ/đất/đất cày bên dưới. Lúa mì: đất
-  cày bên dưới. Tuyết phủ: khối đầy bên dưới.
+  trong hầm mỏ). Cỏ cao, cây non: cỏ/đất/đất cày bên dưới. Lúa mì, cà rốt,
+  khoai tây, củ cải đường, thân dưa, thân bí: đất cày bên dưới. Tuyết phủ: khối đầy bên dưới.
 - Đặt block cũng phải kiểm tra chỗ bám: không đặt đuốc lên không khí, lá, kính;
   không đặt lúa lên block khác đất cày.
 - Block mất chỗ bám thì rơi ra thành vật phẩm của nó (đường ray, đuốc, thang,
@@ -297,6 +314,8 @@ Cần bàn chế tạo (lưới 3x3; X = ván gỗ / đá cuội / thỏi sắt 
 - xô: 3 thỏi sắt
 - bánh mì: 3 lúa mì
 - táo vàng: 1 táo + 8 thỏi vàng
+- 4 bát: 3 ván gỗ (hình chữ V) · súp củ cải: 6 củ cải + 1 bát (trả lại bát khi ăn)
+- 1 hạt dưa: 1 lát dưa · 4 hạt bí: 1 bí ngô
 - giường: 3 len + 3 ván gỗ
 - sa thạch: 4 cát
 
@@ -332,7 +351,7 @@ Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả k
 
 - 3 ô: nguyên liệu, nhiên liệu, kết quả. Mỗi món nung mất 10 giây.
 - Nhiên liệu: than nung được 8 món; thân gỗ / ván gỗ 1.5 món; que 0.5 món.
-- Công thức nung: sắt thô → thỏi sắt; vàng thô → thỏi vàng; cát → kính; đá cuội → đá;
+- Công thức nung: sắt thô → thỏi sắt; vàng thô → thỏi vàng; cát → kính; đá cuội → đá; khoai tây → khoai nướng;
   thịt bò/lợn/gà sống → chín.
 - Lò tiếp tục chạy khi không có người mở (server xử lý).
 
@@ -355,7 +374,9 @@ Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả k
   Đói 20 và còn độ no: hồi 1 máu mỗi 0.5 giây; đói ≥ 18: hồi 1 máu mỗi 4 giây; đói 0:
   mất 1 máu mỗi 4 giây, dừng khi còn 1 máu. Đói ≤ 6: không chạy nhanh được.
 - Ăn: giữ chuột phải 1.6 giây; không ăn được khi đói 20 (trừ táo vàng). Đói / độ no:
-  táo 4 / 2.4, bánh mì 5 / 6, táo vàng 4 / 9.6 và hồi 4 máu trong 5 giây; thịt (Giai
+  táo 4 / 2.4, bánh mì 5 / 6, cà rốt 3 / 3.6, khoai tây 1 / 0.6, khoai nướng 5 / 6,
+  củ cải đường 1 / 1.2, súp củ cải 6 / 7.2, lát dưa 2 / 1.2,
+  táo vàng 4 / 9.6 và hồi 4 máu trong 5 giây; thịt (Giai
   đoạn 7) theo bảng MECHANICS.md 3.
 - Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
 - Chỗ xuất phát (tới Giai đoạn 5, người dùng chọn 2026-11-12): mỗi lần vào game chọn ngẫu
