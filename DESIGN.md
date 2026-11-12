@@ -86,7 +86,7 @@ Các block id 0–15 đã có từ Giai đoạn 1 được giữ nguyên id. Blo
 | 4 | đá cuội | 10 | cuốc (bắt buộc) | đá cuội | |
 | 5 | cát | 0.75 | xẻng | cát | rơi xuống khi bên dưới trống |
 | 6 | thân gỗ | 3 | rìu | thân gỗ | |
-| 7 | lá | 0.3 | – | 5% táo, 5% cây non, 2% que | tỉ lệ táo: chờ người dùng chọn (MECHANICS 9.4) |
+| 7 | lá | 0.3 | – | 5% táo, 5% cây non, 2% que | táo 5% (người dùng chọn, MECHANICS 9.4) |
 | 8 | ván gỗ | 3 | rìu | ván gỗ | |
 | 9 | quặng than | 15 | cuốc gỗ+ | than | |
 | 10 | quặng sắt | 15 | cuốc đá+ | sắt thô | ĐỔI: không rơi thẳng thỏi nữa, phải nung |
@@ -215,9 +215,17 @@ kèm trong gói tin (chunk và thay đổi block).
   sắt: 2, 6, 5, 2 (tổng 15), độ bền 200;
   vàng: 2, 5, 3, 1 (tổng 11), độ bền 110;
   kim cương: 3, 8, 6, 3 (tổng 20), độ bền 450.
-  Mỗi điểm giáp giảm 4% sát thương.
+  Giảm sát thương theo công thức có độ cứng giáp (MECHANICS.md 5.4, người dùng
+  chọn 2026-11-12):
+  giảm = min(20, max(giáp / 5, giáp − 4 × sát_thương / (độ_cứng + 8))) / 25,
+  sát thương nhận = sát thương × (1 − giảm). Độ cứng: chỉ giáp kim cương, 2 mỗi
+  món. Giáp không giảm sát thương rơi, chết đuối, đói, dung nham (lửa vẫn giảm).
+  Mỗi lần giáp giảm được sát thương, mỗi món đang mặc mất 1 độ bền.
 - Cung: độ bền 384. Tên xếp chồng 64.
 - Xếp chồng: block và nguyên liệu 64, công cụ/vũ khí/giáp/giường/cửa 1.
+- Vật phẩm rơi (MECHANICS.md 11): biến mất sau 5 phút; không nhặt được ngay (đồ đào
+  ra 0.5 giây, đồ vứt bằng Q 2 giây); hai đống cùng loại cách nhau < 0.5 block thì gộp
+  (tối đa 64); hút về người chơi trong 1.5 block; chết thì đồ văng ngẫu nhiên quanh chỗ chết.
 
 ### 2.4 Chế tạo
 
@@ -236,6 +244,7 @@ Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội 
 - rương: 8 ván gỗ · lò nung: 8 đá cuội
 - 3 thang: 7 que · 3 cửa gỗ: 6 ván gỗ · 3 hàng rào: 4 que + 2 ván gỗ
 - 16 đường ray: 6 thỏi sắt + 1 que
+- xô: 3 thỏi sắt
 - bánh mì: 3 lúa mì
 - táo vàng: 1 táo + 8 thỏi vàng
 - giường: 3 len + 3 ván gỗ
@@ -264,10 +273,15 @@ liệu thì sáng, thiếu thì mờ.
 - Tầm với 4.5 block.
 - 20 máu, 20 đói. Sát thương rơi: 1 máu cho mỗi block vượt quá 3
   (rơi vào nước thì không).
-- Đói giảm theo hoạt động. Đói ≥ 18: hồi 1 máu mỗi 4 giây. Đói = 0: mất 1 máu
-  mỗi 4 giây (không chết vì đói khi máu còn 1). Đói ≤ 6: không chạy nhanh được.
-- Ăn: giữ chuột phải 1.6 giây. Táo +4, bánh mì +5, thịt sống +2–3,
-  thịt chín +6–8. Táo vàng: +4 đói và hồi 4 máu trong 5 giây.
+- Đói theo ba biến (MECHANICS.md 3): đói 0–20 (hiển thị), độ no ẩn (0 tới mức
+  đói, lúc mới vào 5), hao sức ẩn 0–4 (đạt 4 thì trừ 4 rồi trừ 1 độ no, hết độ no
+  thì trừ 1 đói). Hao sức: chạy nhanh 0.1/block, nhảy 0.05, chạy + nhảy 0.2, bơi
+  0.01/block, đào xong 1 block 0.005, đánh trúng 0.1, bị trúng đòn 0.1, hồi 1 máu 6.
+  Đói 20 và còn độ no: hồi 1 máu mỗi 0.5 giây; đói ≥ 18: hồi 1 máu mỗi 4 giây; đói 0:
+  mất 1 máu mỗi 4 giây, dừng khi còn 1 máu. Đói ≤ 6: không chạy nhanh được.
+- Ăn: giữ chuột phải 1.6 giây; không ăn được khi đói 20 (trừ táo vàng). Đói / độ no:
+  táo 4 / 2.4, bánh mì 5 / 6, táo vàng 4 / 9.6 và hồi 4 máu trong 5 giây; thịt (Giai
+  đoạn 7) theo bảng MECHANICS.md 3.
 - Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
@@ -332,7 +346,7 @@ và 5.5; người dùng đồng ý 2026-11-12, thay các số tương ứng ở 
 - Miễn sát thương 0.5 giây sau khi trúng đòn.
 - Cung: kéo tối đa 1 giây; sát thương 2–9 theo lực kéo; tốc độ đầu tối đa
   60 block/giây; có trọng lực và lực cản.
-- Sát thương thực = sát thương gốc × (1 − điểm giáp × 4%).
+- Sát thương thực theo công thức giáp ở mục 2.3.
 - PvP: cấu hình server `PVP=on|off`, mặc định on.
 - Vùng an toàn bán kính 16 block quanh điểm hồi sinh thế giới: không PvP,
   không phá/đặt block (trừ quản trị viên).

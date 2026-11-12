@@ -11,9 +11,11 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
 | 2a | Thế giới vô hạn và biome | xong (người dùng bảo "tiếp" sau khi sửa lỗi, 2026-11-11) |
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
-| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | chờ người dùng test (người dùng bảo làm tiếp 3b, test gộp) |
-| 3b | Đào, đặt, chỗ bám, cát rơi | chờ người dùng test (test gộp với 3a) |
-| 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
+| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | xong (người dùng xác nhận 2026-11-12) |
+| 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
+| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | đang làm |
+| 4b | Rương, lò nung, cửa, trồng trọt | chưa làm |
+| 4c | Chất lỏng, xô | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
 | 7 | Ngày đêm, động vật, quái vật, giường | chưa làm |

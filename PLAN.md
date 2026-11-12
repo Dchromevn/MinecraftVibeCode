@@ -62,9 +62,11 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 | 1 | Thế giới voxel cơ bản (bản cố định) | đã xong |
 | 2a | Thế giới vô hạn và biome | đã xong |
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | đã xong |
-| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | |
-| 3b | Đào, đặt, chỗ bám, cát rơi | |
-| 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | |
+| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | đã xong |
+| 3b | Đào, đặt, chỗ bám, cát rơi | đã xong |
+| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | |
+| 4b | Rương, lò nung, cửa, trồng trọt | |
+| 4c | Chất lỏng, xô | |
 | 5 | Mạng nhiều người và lưu thế giới | |
 | 6 | Chiến đấu PvP và hồi sinh | |
 | 7 | Ngày đêm, động vật, quái vật, giường | |
@@ -254,9 +256,17 @@ kèm trong gói tin (chunk và thay đổi block).
   sắt: 2, 6, 5, 2 (tổng 15), độ bền 200;
   vàng: 2, 5, 3, 1 (tổng 11), độ bền 110;
   kim cương: 3, 8, 6, 3 (tổng 20), độ bền 450.
-  Mỗi điểm giáp giảm 4% sát thương.
+  Giảm sát thương theo công thức có độ cứng giáp (MECHANICS.md 5.4, người dùng
+  chọn 2026-11-12):
+  giảm = min(20, max(giáp / 5, giáp − 4 × sát_thương / (độ_cứng + 8))) / 25,
+  sát thương nhận = sát thương × (1 − giảm). Độ cứng: chỉ giáp kim cương, 2 mỗi
+  món. Giáp không giảm sát thương rơi, chết đuối, đói, dung nham (lửa vẫn giảm).
+  Mỗi lần giáp giảm được sát thương, mỗi món đang mặc mất 1 độ bền.
 - Cung: độ bền 384. Tên xếp chồng 64.
 - Xếp chồng: block và nguyên liệu 64, công cụ/vũ khí/giáp/giường/cửa 1.
+- Vật phẩm rơi (MECHANICS.md 11): biến mất sau 5 phút; không nhặt được ngay (đồ đào
+  ra 0.5 giây, đồ vứt bằng Q 2 giây); hai đống cùng loại cách nhau < 0.5 block thì gộp
+  (tối đa 64); hút về người chơi trong 1.5 block; chết thì đồ văng ngẫu nhiên quanh chỗ chết.
 
 ### 2.4 Chế tạo
 
@@ -275,6 +285,7 @@ Cần đứng trong 4 block quanh bàn chế tạo (X = ván gỗ / đá cuội 
 - rương: 8 ván gỗ · lò nung: 8 đá cuội
 - 3 thang: 7 que · 3 cửa gỗ: 6 ván gỗ · 3 hàng rào: 4 que + 2 ván gỗ
 - 16 đường ray: 6 thỏi sắt + 1 que
+- xô: 3 thỏi sắt
 - bánh mì: 3 lúa mì
 - táo vàng: 1 táo + 8 thỏi vàng
 - giường: 3 len + 3 ván gỗ
@@ -303,10 +314,15 @@ liệu thì sáng, thiếu thì mờ.
 - Tầm với 4.5 block.
 - 20 máu, 20 đói. Sát thương rơi: 1 máu cho mỗi block vượt quá 3
   (rơi vào nước thì không).
-- Đói giảm theo hoạt động. Đói ≥ 18: hồi 1 máu mỗi 4 giây. Đói = 0: mất 1 máu
-  mỗi 4 giây (không chết vì đói khi máu còn 1). Đói ≤ 6: không chạy nhanh được.
-- Ăn: giữ chuột phải 1.6 giây. Táo +4, bánh mì +5, thịt sống +2–3,
-  thịt chín +6–8. Táo vàng: +4 đói và hồi 4 máu trong 5 giây.
+- Đói theo ba biến (MECHANICS.md 3): đói 0–20 (hiển thị), độ no ẩn (0 tới mức
+  đói, lúc mới vào 5), hao sức ẩn 0–4 (đạt 4 thì trừ 4 rồi trừ 1 độ no, hết độ no
+  thì trừ 1 đói). Hao sức: chạy nhanh 0.1/block, nhảy 0.05, chạy + nhảy 0.2, bơi
+  0.01/block, đào xong 1 block 0.005, đánh trúng 0.1, bị trúng đòn 0.1, hồi 1 máu 6.
+  Đói 20 và còn độ no: hồi 1 máu mỗi 0.5 giây; đói ≥ 18: hồi 1 máu mỗi 4 giây; đói 0:
+  mất 1 máu mỗi 4 giây, dừng khi còn 1 máu. Đói ≤ 6: không chạy nhanh được.
+- Ăn: giữ chuột phải 1.6 giây; không ăn được khi đói 20 (trừ táo vàng). Đói / độ no:
+  táo 4 / 2.4, bánh mì 5 / 6, táo vàng 4 / 9.6 và hồi 4 máu trong 5 giây; thịt (Giai
+  đoạn 7) theo bảng MECHANICS.md 3.
 - Dung nham: mất 4 máu mỗi giây và bị cháy thêm 4 giây sau khi ra.
 - Chết: rơi toàn bộ đồ tại chỗ (tồn tại 5 phút), hồi sinh ở giường đã ngủ gần
   nhất, nếu không có thì ở điểm hồi sinh của thế giới.
@@ -346,7 +362,7 @@ liệu thì sáng, thiếu thì mờ.
 - Miễn sát thương 0.5 giây sau khi trúng đòn.
 - Cung: kéo tối đa 1 giây; sát thương 2–9 theo lực kéo; tốc độ đầu tối đa
   60 block/giây; có trọng lực và lực cản.
-- Sát thương thực = sát thương gốc × (1 − điểm giáp × 4%).
+- Sát thương thực theo công thức giáp ở mục 2.3.
 - PvP: cấu hình server `PVP=on|off`, mặc định on.
 - Vùng an toàn bán kính 16 block quanh điểm hồi sinh thế giới: không PvP,
   không phá/đặt block (trừ quản trị viên).
@@ -712,41 +728,81 @@ NGHIỆM THU
 
 ### Giai đoạn 4 — Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt (chỉ client)
 
+Chia ba phần 4a, 4b, 4c; người dùng chơi thử sau mỗi phần. Đọc thêm MECHANICS.md
+mục 3 (đói), 4 (công cụ), 9 (random tick), 10 (chất lỏng), 11 (vật phẩm rơi).
+
+### Giai đoạn 4a — Vật phẩm, túi đồ, chế tạo, sinh tồn
+
 VẬT PHẨM VÀ TÚI ĐỒ
-- `/shared/items.ts`, `/shared/recipes.ts`, `/shared/smelting.ts` theo mục 2.3–2.5.
-- 9 ô hotbar + 27 ô túi + 4 ô giáp; logic túi đồ trong `/shared`.
-- Bấm trái nhấc/đặt chồng; bấm phải nhấc nửa/đặt 1; Shift+bấm chuyển nhanh.
-- Vật phẩm rơi: khối nhỏ xoay, có trọng lực, hút về người chơi trong 1.5 block,
-  gộp chồng khi nằm gần nhau, biến mất sau 5 phút.
-- Công cụ: hệ số tốc độ, yêu cầu cấp, độ bền, vỡ khi hết.
+- `/shared/items.ts`, `/shared/recipes.ts` theo mục 2.3–2.4; logic túi đồ trong `/shared`.
+- 9 ô hotbar + 27 ô túi + 4 ô giáp; phím E mở túi đồ. Bấm trái nhấc/đặt chồng; bấm
+  phải nhấc nửa/đặt 1; Shift+bấm chuyển nhanh. Hotbar thay cho chọn block vô hạn;
+  đặt block trừ vào túi đồ.
+- Icon: vật phẩm dùng icon riêng; block vẽ thành khối 3D nhỏ từ texture block.
+- Vật phẩm rơi theo mục 2.3: khối nhỏ xoay, trọng lực, hút về người chơi, gộp chồng,
+  biến mất sau 5 phút; phím Q vứt đồ.
+- Đào ra vật phẩm theo cột "Rơi ra" mục 2.2 (tỉ lệ), chỉ khi đủ cấp công cụ; block
+  mất chỗ bám rơi ra vật phẩm.
+- Công cụ: hệ số tốc độ, yêu cầu cấp, độ bền (MECHANICS.md 4), vỡ khi hết.
 
-BLOCK CÓ CHỨC NĂNG
-- Rương: 27 ô, chuột phải mở; điền đồ cho rương hầm mỏ khi chunk được sinh.
-- Lò nung: giao diện 3 ô, thanh lửa và thanh tiến độ, chạy cả khi đóng.
-- Cửa: chuột phải mở/đóng, đặt theo hướng người chơi.
-- Cây non lớn thành cây sau 5–10 phút.
-
-TRỒNG TRỌT
-- Cuốc đất biến đất/cỏ thành đất cày. Gieo hạt bằng chuột phải.
-- Lúa lớn 8 giai đoạn, nhanh hơn trên đất cày ẩm. Lúa chín rơi lúa + 1–3 hạt.
-- Đứng/nhảy lên đất cày có thể làm nó thành đất.
-
-CHẤT LỎNG
-- Mô phỏng chảy theo mục 2.10, chỉ ở chunk gần người chơi. Mạch nước/dung nham
-  đã sinh sẵn trong thế giới phải tự chảy khi chunk được tải (quét ô chất lỏng hở).
-- Xô (tùy chọn nếu dễ): múc và đổ nước/dung nham.
+CHẾ TẠO
+- Danh sách công thức mục 2.4: đủ nguyên liệu thì sáng, thiếu thì mờ; công thức cần
+  bàn chế tạo chỉ sáng khi đứng trong 4 block quanh bàn.
 
 SINH TỒN
-- Thanh máu, đói, dưỡng khí trên hotbar. Luật theo mục 2.6.
-- Chết: màn hình chết, đồ rơi tại chỗ, nút hồi sinh ở điểm hồi sinh thế giới.
+- Thanh máu, đói, dưỡng khí, giáp trên hotbar. Đói ba biến, hồi máu, mất máu vì
+  đói (mục 2.6).
+- Ăn: giữ chuột phải 1.6 giây (táo, bánh mì, táo vàng).
+- Giáp: mặc vào 4 ô giáp, giảm sát thương theo công thức mục 2.3.
+- Chết: màn hình chết, đồ văng ra tại chỗ, nút hồi sinh ở điểm hồi sinh thế giới,
+  miễn sát thương 3 giây.
+- Debug (?debug=1): hàm lấy đồ để thử nhanh.
 
 NGHIỆM THU
-- Chơi trọn: chặt cây → bàn chế tạo → cuốc gỗ → đá → lò nung → đào sắt thô →
-  nung thỏi sắt → đồ sắt; đặt đuốc trong hang.
+- Chặt cây → ván → bàn chế tạo → que → cuốc gỗ → đào đá → đồ đá → đào được sắt thô
+  (nung ở 4b); đào quặng bằng công cụ cấp thấp không rơi gì.
+- Vật phẩm rơi, hút về người, gộp chồng, vứt bằng Q.
+- Không nhân đôi/mất đồ khi thao tác túi đồ.
+- Công cụ mất độ bền và vỡ.
+- Chạy nhảy làm tụt đói; ăn táo hồi đói; đói cao thì hồi máu; đói 0 mất máu tới 1.
+- Chết rồi hồi sinh, đồ nằm tại chỗ chết.
+
+### Giai đoạn 4b — Rương, lò nung, cửa, trồng trọt
+
+BLOCK CÓ CHỨC NĂNG
+- `/shared/smelting.ts` theo mục 2.5. Nội dung rương/lò lưu theo chunk (giữ lại khi
+  chunk bị gỡ khỏi bộ nhớ).
+- Rương: 27 ô, chuột phải mở; rương hầm mỏ có đồ theo bảng trong `/shared`, xác
+  định theo seed + vị trí; phá rương thì đồ bên trong rơi ra.
+- Lò nung: 3 ô, thanh lửa và thanh tiến độ, chạy cả khi đóng; phát sáng khi cháy.
+- Cửa: chuột phải mở/đóng cả hai nửa.
+
+RANDOM TICK VÀ TRỒNG TRỌT (MECHANICS.md 1, 9)
+- Random tick ở các chunk gần người chơi.
+- Cuốc đất biến đất/cỏ thành đất cày. Gieo hạt bằng chuột phải. Lúa lớn theo random
+  tick, cần ánh sáng; lúa chín rơi lúa + 1–3 hạt. Đất cày ẩm/khô, nhảy lên có thể hỏng.
+- Cây non lớn thành cây (cần ánh sáng, đủ chỗ trống).
+- Cỏ lan sang đất, cỏ bị che thành đất; lá xa thân gỗ tự rụng (lá người đặt không rụng).
+
+NGHIỆM THU
+- Đào sắt thô → nung thỏi sắt → đồ sắt; lò tiếp tục nung khi đóng giao diện; đặt đuốc
+  trong hang.
 - Trồng lúa → bánh mì.
-- Lò nung tiếp tục nung khi đóng giao diện.
-- Không nhân đôi/mất đồ khi thao tác túi và rương.
-- Nước chảy và dừng đúng; nước gặp dung nham tạo đá.
+- Không nhân đôi/mất đồ khi thao tác rương.
+- Chặt thân cây thì lá rụng dần; cây non lớn thành cây.
+
+### Giai đoạn 4c — Chất lỏng, xô
+
+- Mô phỏng chảy theo mục 2.10 và MECHANICS.md 10, chỉ ở chunk gần người chơi. Mạch
+  nước/dung nham đã sinh sẵn tự chảy khi chunk được tải (quét ô chất lỏng hở).
+- Mặt nước dốc theo mức; chất lỏng cuốn trôi đuốc, lúa, ray, cỏ cao, cây non (rơi ra
+  vật phẩm); vật phẩm trôi theo dòng nước.
+- Xô (người dùng chọn làm): múc và đổ nước/dung nham.
+
+NGHIỆM THU
+- Nước chảy và dừng đúng, tìm chỗ trũng; nguồn nước vô hạn; nước gặp dung nham tạo đá.
+- Mạch nước/dung nham sinh sẵn chảy thành dòng/thác.
+- Xô múc và đổ được.
 
 ---
 
