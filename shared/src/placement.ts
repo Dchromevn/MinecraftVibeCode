@@ -47,7 +47,7 @@ export function placementCells(
     case B.CHEST:
       return one(opposite(look)); // mặt trước quay về phía người chơi
     case B.WHEAT:
-      return one(7); // công cụ debug: đặt lúa chín để dễ nhìn (Giai đoạn 4 gieo hạt = 0)
+      return one(0); // gieo hạt: giai đoạn 0
     default:
       return one(0);
   }

@@ -18,7 +18,7 @@ interface MapFile {
   entries: Entry[];
 }
 
-const SRC_TIER: Record<string, string> = { wood: "wood", stone: "stone", iron: "steel", diamond: "diamond" };
+const SRC_TIER: Record<string, string> = { wood: "wood", stone: "stone", iron: "steel", gold: "gold", diamond: "diamond" };
 
 const root = process.cwd();
 const map = JSON.parse(readFileSync(join(root, "scripts/texture-map.json"), "utf8")) as MapFile;

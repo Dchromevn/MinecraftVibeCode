@@ -39,13 +39,26 @@ export class PlayerController {
     });
   }
 
-  /** Đặt chân người chơi tại (x, y, z) (đi bộ). */
+  /** Dời chân người chơi tới (x, y, z), giữ nguyên máu, đói, dưỡng khí. */
   placeAt(x: number, y: number, z: number): void {
-    const health = this.state.health;
-    this.state = createPlayer(x, y, z);
-    this.state.health = health;
+    const s = this.state;
+    s.x = x;
+    s.y = y;
+    s.z = z;
+    s.vx = s.vy = s.vz = 0;
+    s.fallDist = 0;
     this.prev = { x, y, z };
     this.acc = 0;
+  }
+
+  /** Hồi sinh: trạng thái mới (đủ máu, đói), miễn sát thương vài giây. */
+  respawn(x: number, y: number, z: number): void {
+    this.state = createPlayer(x, y, z);
+    this.state.invulnS = PLAYER.RESPAWN_INVULN_S;
+    this.prev = { x, y, z };
+    this.acc = 0;
+    this.flying = false;
+    this.needsSpawnFix = true;
   }
 
   toggleFly(): void {

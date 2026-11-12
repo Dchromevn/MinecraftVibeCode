@@ -13,7 +13,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | xong (người dùng xác nhận 2026-11-12) |
 | 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
-| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | đang làm |
+| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | chờ người dùng test |
 | 4b | Rương, lò nung, cửa, trồng trọt | chưa làm |
 | 4c | Chất lỏng, xô | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
@@ -390,3 +390,45 @@ Trạng thái: chờ người dùng test (người dùng chọn làm tiếp 3b, 
 - Đuốc trên sàn được cắm trên đầu cột rào (ngoại lệ ghi trong DESIGN 2.2) để đuốc hầm mỏ không rơi khi sửa block bên cạnh.
 - Block sinh sẵn thiếu chỗ bám (nếu có) chỉ rơi khi ô bên cạnh thay đổi.
 - Ba mục LỰA CHỌN của MECHANICS vẫn chờ người dùng chọn.
+
+## Giai đoạn 4a — Vật phẩm, túi đồ, chế tạo, sinh tồn (2026-11-12)
+
+Trạng thái: chờ người dùng test. Người dùng chọn: tách 4a/4b/4c, táo từ lá 5%, giáp theo công
+thức có độ cứng, xô làm ở 4c. Mục LỰA CHỌN về rìu (Giai đoạn 6) vẫn chờ.
+
+### File đã tạo / sửa
+
+- `shared/src/survivalConstants.ts` (mới) — đói ba biến, thức ăn, độ cứng giáp, vật phẩm rơi, túi đồ.
+- `shared/src/items.ts` (mới) — 83 vật phẩm: block đặt được, nguyên liệu, thức ăn, công cụ 5 loại x 5 cấp, giáp 4 cấp x 4 món, cung/tên (Giai đoạn 6 dùng).
+- `shared/src/inventory.ts` (mới) — 36 ô + 4 ô giáp + con trỏ; bấm trái/phải, Shift chuyển nhanh, độ bền, vỡ.
+- `shared/src/recipes.ts` (mới) — công thức mục 2.4 (thêm xô ở 4c), cần bàn chế tạo trong 4 block.
+- `shared/src/drops.ts` (mới) — rơi đồ theo cấp công cụ, sỏi/đá lửa, lúa chín/chưa chín, hao mòn công cụ.
+- `shared/src/survival.ts` (mới) — hao sức → độ no → đói, hồi máu, đói thì mất máu, ăn, táo vàng, giáp theo công thức, miễn sát thương, chết.
+- `shared/src/itemEntity.ts` (mới) — vật phẩm trên đất: trọng lực, va chạm, hút về người chơi (đo tới thân người), gộp, hết hạn 5 phút.
+- `shared/src/{physics,blockRules,fallingBlock,placement,gameplay,constants,index}.ts` — hao sức khi chạy/nhảy/bơi, không chạy nhanh khi đói ≤ 6, sát thương có nguồn (giáp không chặn rơi/chết đuối/dung nham), đồ rơi mang dữ liệu phụ, gieo hạt giai đoạn 0.
+- `client/src/game/session.ts` (mới) — túi đồ, vật phẩm rơi, HUD, màn hình túi đồ (E), giáp, chết/hồi sinh, `__game.give()` (debug).
+- `client/src/ui/{styles,itemIcons,survivalHud,inventoryScreen}.ts` (mới) — icon (block vẽ khối 3D), hotbar, thanh máu/đói/giáp/dưỡng khí, túi đồ + danh sách chế tạo, màn hình chết.
+- `client/src/items/itemEntities.ts` (mới); `client/src/interact/{interaction,outline}.ts` — đào bằng công cụ đang cầm, rơi vật phẩm thật, hao mòn công cụ, đặt từ hotbar, giữ chuột phải để ăn, Q vứt; `player/playerController.ts` (hồi sinh, dời chỗ giữ trạng thái), `flyCamera.ts` (khóa chuột an toàn), `main.ts`, `strings.ts` (tên vật phẩm tiếng Việt).
+- `scripts/texture-map.json`, `import-textures.ts` — icon cuốc đất, đồ/giáp vàng, giáp da, nguyên liệu, cửa, giường, thanh máu/đói/bong bóng/giáp, ô vật phẩm.
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng.
+- Kiểm tra 4a 18/18: 20.000 lần bấm ngẫu nhiên vào túi đồ không nhân đôi/mất/vượt giới hạn, giáp chỉ vào đúng ô; thân gỗ → ván → bàn → que → cuốc gỗ (cần bàn); mọi công thức và mọi đồ rơi từ block đều có trong bảng vật phẩm; đá bằng tay không rơi, cuốc gỗ ra đá cuội; sắt cần cuốc đá, kim cương cần cuốc sắt, cuốc vàng không đào được sắt; sỏi ra đá lửa ~10%, lá ra táo ~5%; chạy + nhảy 60 s làm tụt đói; ăn táo +4/+2.4; hồi máu tốn hao sức; đói 0 mất máu dừng ở 1; táo vàng hồi 4 máu; giáp kim cương đủ bộ giảm đòn 10 còn 3, không giảm sát thương rơi; hết máu thì chết. Vật lý 32/32, quy tắc chỗ bám 18/18 vẫn đạt.
+- Trình duyệt headless: hotbar có icon/số lượng, thanh tim và đói; màn hình túi đồ + danh sách chế tạo (công thức tay sáng, cần bàn thì mờ); vật phẩm thả cạnh người được hút và nhặt vào túi; chết → màn hình chết, đồ văng ra; hồi sinh đủ máu/đói.
+
+### Cần người dùng kiểm tra
+
+- Chơi trọn: chặt cây bằng tay → ván → bàn chế tạo → que → cuốc gỗ → đào đá → đồ đá → đào được sắt thô (nung ở 4b); đào quặng bằng cuốc cấp thấp không rơi gì.
+- Túi đồ (E): bấm trái/phải, Shift+bấm, mặc giáp; đóng túi khi đang cầm đồ thì đồ quay về túi; không nhân đôi/mất đồ.
+- Vật phẩm rơi: hút về người, gộp chồng, Q vứt (Ctrl+Q cả chồng), biến mất sau 5 phút.
+- Công cụ mất độ bền (thanh màu dưới icon) và vỡ.
+- Chạy nhảy làm tụt đói; giữ chuột phải ăn táo; đói cao thì hồi máu; rơi từ cao / dung nham / chết đuối mất máu; chết → hồi sinh, đồ nằm tại chỗ chết.
+- Thử nhanh bằng `?debug=1` rồi gõ trong console: `__game.give("iron_pickaxe")`, `__game.give("diamond_chestplate")`.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Lò nung, rương, cửa mở/đóng, trồng trọt là 4b; quặng vàng/sắt chỉ thành thỏi khi có lò (4b). Giường cần len, giáp da cần da, mũi tên cần lông (sinh vật ở Giai đoạn 7).
+- Vật phẩm rơi trong hố sâu ≥ 2 block không tự hút lên (phải xuống nhặt), giống thể loại gốc.
+- Ô giáp trống chưa có hình mờ gợi ý; cánh tay chưa đổi hình theo vật phẩm đang cầm.
+- Chưa lưu được: tải lại trang là mất túi đồ (Giai đoạn 5).

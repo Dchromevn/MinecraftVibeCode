@@ -7,21 +7,51 @@
     "tiers/pieces: nhân bản mục theo cấp và loại giáp; {tier} là tên đích, {srcTier} là tên nguồn (iron -> steel)."
   ],
   "entries": [
-    { "dest": "textures/grass_top.png", "src": "default_mcl_core/soil/default_grass.png" },
+    {
+      "dest": "textures/grass_top.png",
+      "src": "default_mcl_core/soil/default_grass.png"
+    },
     {
       "dest": "textures/grass_side.png",
       "src": "default_mcl_core/soil/default_grass_side.png",
       "base": "default_mcl_core/soil/default_dirt.png"
     },
-    { "dest": "textures/dirt.png", "src": "default_mcl_core/soil/default_dirt.png" },
-    { "dest": "textures/stone.png", "src": "default_mcl_core/stone/default_stone.png" },
-    { "dest": "textures/cobble.png", "src": "default_mcl_core/stone/default_cobble.png" },
-    { "dest": "textures/bedrock.png", "src": "default_mcl_core/stone/mcl_core_bedrock.png" },
-    { "dest": "textures/sand.png", "src": "default_mcl_core/sand/default_sand.png" },
-    { "dest": "textures/log_side.png", "src": "default_mcl_core/trees/default_tree.png" },
-    { "dest": "textures/log_top.png", "src": "default_mcl_core/trees/default_tree_top.png" },
-    { "dest": "textures/leaves.png", "src": "default_mcl_core/trees/default_leaves.png" },
-    { "dest": "textures/planks.png", "src": "default_mcl_core/trees/default_wood.png" },
+    {
+      "dest": "textures/dirt.png",
+      "src": "default_mcl_core/soil/default_dirt.png"
+    },
+    {
+      "dest": "textures/stone.png",
+      "src": "default_mcl_core/stone/default_stone.png"
+    },
+    {
+      "dest": "textures/cobble.png",
+      "src": "default_mcl_core/stone/default_cobble.png"
+    },
+    {
+      "dest": "textures/bedrock.png",
+      "src": "default_mcl_core/stone/mcl_core_bedrock.png"
+    },
+    {
+      "dest": "textures/sand.png",
+      "src": "default_mcl_core/sand/default_sand.png"
+    },
+    {
+      "dest": "textures/log_side.png",
+      "src": "default_mcl_core/trees/default_tree.png"
+    },
+    {
+      "dest": "textures/log_top.png",
+      "src": "default_mcl_core/trees/default_tree_top.png"
+    },
+    {
+      "dest": "textures/leaves.png",
+      "src": "default_mcl_core/trees/default_leaves.png"
+    },
+    {
+      "dest": "textures/planks.png",
+      "src": "default_mcl_core/trees/default_wood.png"
+    },
     {
       "dest": "textures/ore_coal.png",
       "src": "default_mcl_core/minerals_ores/default_mineral_coal.png",
@@ -42,15 +72,42 @@
       "src": "default_mcl_core/minerals_ores/default_mineral_gold.png",
       "base": "default_mcl_core/stone/default_stone.png"
     },
-    { "dest": "textures/ore_gold_deep.png", "src": "mcl_deepslate/mcl_deepslate_gold_ore.png" },
-    { "dest": "textures/ore_emerald.png", "src": "default_mcl_core/minerals_ores/mcl_core_emerald_ore.png" },
-    { "dest": "textures/workbench_top.png", "src": "default_mcl_core/crafting_workbench_top.png" },
-    { "dest": "textures/workbench_side.png", "src": "default_mcl_core/crafting_workbench_side.png" },
-    { "dest": "textures/workbench_front.png", "src": "default_mcl_core/crafting_workbench_front.png" },
-    { "dest": "textures/chest_top.png", "src": "default_mcl_core/default_chest_top.png" },
-    { "dest": "textures/chest_side.png", "src": "default_mcl_core/default_chest_side.png" },
-    { "dest": "textures/chest_front.png", "src": "default_mcl_core/default_chest_front.png" },
-    { "dest": "textures/tallgrass.png", "src": "default_mcl_core/plants/default_grass_3.png" },
+    {
+      "dest": "textures/ore_gold_deep.png",
+      "src": "mcl_deepslate/mcl_deepslate_gold_ore.png"
+    },
+    {
+      "dest": "textures/ore_emerald.png",
+      "src": "default_mcl_core/minerals_ores/mcl_core_emerald_ore.png"
+    },
+    {
+      "dest": "textures/workbench_top.png",
+      "src": "default_mcl_core/crafting_workbench_top.png"
+    },
+    {
+      "dest": "textures/workbench_side.png",
+      "src": "default_mcl_core/crafting_workbench_side.png"
+    },
+    {
+      "dest": "textures/workbench_front.png",
+      "src": "default_mcl_core/crafting_workbench_front.png"
+    },
+    {
+      "dest": "textures/chest_top.png",
+      "src": "default_mcl_core/default_chest_top.png"
+    },
+    {
+      "dest": "textures/chest_side.png",
+      "src": "default_mcl_core/default_chest_side.png"
+    },
+    {
+      "dest": "textures/chest_front.png",
+      "src": "default_mcl_core/default_chest_front.png"
+    },
+    {
+      "dest": "textures/tallgrass.png",
+      "src": "default_mcl_core/plants/default_grass_3.png"
+    },
     {
       "dest": "textures/crack_{i}.png",
       "src": "default_mcl_core/gui_hud/crack_anylength.png",
@@ -59,51 +116,171 @@
         "tile": 16
       }
     },
-    { "dest": "textures/gravel.png", "src": "default_mcl_core/stone/default_gravel.png" },
-    { "dest": "textures/mossy_cobble.png", "src": "default_mcl_core/stone/default_mossycobble.png" },
-    { "dest": "textures/water.png", "src": "default_mcl_core/default_water.png" },
-    { "dest": "textures/lava.png", "src": "default_mcl_core/default_lava.png" },
-    { "dest": "textures/fence.png", "src": "default_mcl_core/fences/default_fence_wood.png" },
-    { "dest": "textures/rail.png", "src": "carts_mcl_minecarts/default_rail.png" },
-    { "dest": "textures/cobweb.png", "src": "default_mcl_core/mcl_core_web.png" },
-    { "dest": "textures/torch.png", "src": "default_mcl_core/default_torch_on_floor.png" },
-    { "dest": "textures/sandstone.png", "src": "default_mcl_core/sand/default_sandstone.png" },
-    { "dest": "textures/snow.png", "src": "default_mcl_core/soil/default_snow.png" },
+    {
+      "dest": "textures/gravel.png",
+      "src": "default_mcl_core/stone/default_gravel.png"
+    },
+    {
+      "dest": "textures/mossy_cobble.png",
+      "src": "default_mcl_core/stone/default_mossycobble.png"
+    },
+    {
+      "dest": "textures/water.png",
+      "src": "default_mcl_core/default_water.png"
+    },
+    {
+      "dest": "textures/lava.png",
+      "src": "default_mcl_core/default_lava.png"
+    },
+    {
+      "dest": "textures/fence.png",
+      "src": "default_mcl_core/fences/default_fence_wood.png"
+    },
+    {
+      "dest": "textures/rail.png",
+      "src": "carts_mcl_minecarts/default_rail.png"
+    },
+    {
+      "dest": "textures/cobweb.png",
+      "src": "default_mcl_core/mcl_core_web.png"
+    },
+    {
+      "dest": "textures/torch.png",
+      "src": "default_mcl_core/default_torch_on_floor.png"
+    },
+    {
+      "dest": "textures/sandstone.png",
+      "src": "default_mcl_core/sand/default_sandstone.png"
+    },
+    {
+      "dest": "textures/snow.png",
+      "src": "default_mcl_core/soil/default_snow.png"
+    },
     {
       "dest": "textures/snow_side.png",
       "src": "default_mcl_core/soil/default_snow_side.png",
       "base": "default_mcl_core/soil/default_dirt.png"
     },
-    { "dest": "textures/deepslate.png", "src": "mcl_deepslate/mcl_deepslate.png" },
-    { "dest": "textures/deepslate_top.png", "src": "mcl_deepslate/mcl_deepslate_top.png" },
-    { "dest": "textures/sapling.png", "src": "default_mcl_core/trees/default_sapling.png" },
-    { "dest": "textures/rail_curved.png", "src": "carts_mcl_minecarts/default_rail_curved.png" },
-    { "dest": "textures/rail_t.png", "src": "carts_mcl_minecarts/default_rail_t_junction.png" },
-    { "dest": "textures/rail_cross.png", "src": "carts_mcl_minecarts/default_rail_crossing.png" },
-    { "dest": "textures/furnace_front.png", "src": "default_mcl_core/default_furnace_front.png" },
-    { "dest": "textures/furnace_front_on.png", "src": "default_mcl_core/default_furnace_front_active.png" },
-    { "dest": "textures/furnace_side.png", "src": "default_mcl_core/default_furnace_side.png" },
-    { "dest": "textures/furnace_top.png", "src": "default_mcl_core/default_furnace_top.png" },
-    { "dest": "textures/glass.png", "src": "default_mcl_core/glass/default_glass.png" },
-    { "dest": "textures/ladder.png", "src": "default_mcl_core/default_ladder_wood.png" },
-    { "dest": "textures/door_lower.png", "src": "doors_mcl_doors/mcl_doors_door_wood_lower.png" },
-    { "dest": "textures/door_upper.png", "src": "doors_mcl_doors/mcl_doors_door_wood_upper.png" },
-    { "dest": "textures/farmland.png", "src": "farming_mcl_farming/farming_soil.png" },
-    { "dest": "textures/farmland_wet.png", "src": "farming_mcl_farming/farming_soil_wet.png" },
-    { "dest": "textures/wheat_0.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_0.png" },
-    { "dest": "textures/wheat_1.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_1.png" },
-    { "dest": "textures/wheat_2.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_2.png" },
-    { "dest": "textures/wheat_3.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_3.png" },
-    { "dest": "textures/wheat_4.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_4.png" },
-    { "dest": "textures/wheat_5.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_5.png" },
-    { "dest": "textures/wheat_6.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_6.png" },
-    { "dest": "textures/wheat_7.png", "src": "farming_mcl_farming/mcl_farming_wheat_stage_7.png" },
-    { "dest": "textures/bed_head_top.png", "src": "beds_mcl_beds/mcl_beds_bed_top_top_red.png" },
-    { "dest": "textures/bed_foot_top.png", "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_red.png" },
-    { "dest": "textures/bed_head_side.png", "src": "beds_mcl_beds/mcl_beds_bed_side_top_red.png" },
-    { "dest": "textures/bed_foot_side.png", "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_red.png" },
-    { "dest": "textures/obsidian.png", "src": "default_mcl_core/stone/default_obsidian.png" },
-    { "dest": "textures/player.png", "src": "HUD/character.png" },
+    {
+      "dest": "textures/deepslate.png",
+      "src": "mcl_deepslate/mcl_deepslate.png"
+    },
+    {
+      "dest": "textures/deepslate_top.png",
+      "src": "mcl_deepslate/mcl_deepslate_top.png"
+    },
+    {
+      "dest": "textures/sapling.png",
+      "src": "default_mcl_core/trees/default_sapling.png"
+    },
+    {
+      "dest": "textures/rail_curved.png",
+      "src": "carts_mcl_minecarts/default_rail_curved.png"
+    },
+    {
+      "dest": "textures/rail_t.png",
+      "src": "carts_mcl_minecarts/default_rail_t_junction.png"
+    },
+    {
+      "dest": "textures/rail_cross.png",
+      "src": "carts_mcl_minecarts/default_rail_crossing.png"
+    },
+    {
+      "dest": "textures/furnace_front.png",
+      "src": "default_mcl_core/default_furnace_front.png"
+    },
+    {
+      "dest": "textures/furnace_front_on.png",
+      "src": "default_mcl_core/default_furnace_front_active.png"
+    },
+    {
+      "dest": "textures/furnace_side.png",
+      "src": "default_mcl_core/default_furnace_side.png"
+    },
+    {
+      "dest": "textures/furnace_top.png",
+      "src": "default_mcl_core/default_furnace_top.png"
+    },
+    {
+      "dest": "textures/glass.png",
+      "src": "default_mcl_core/glass/default_glass.png"
+    },
+    {
+      "dest": "textures/ladder.png",
+      "src": "default_mcl_core/default_ladder_wood.png"
+    },
+    {
+      "dest": "textures/door_lower.png",
+      "src": "doors_mcl_doors/mcl_doors_door_wood_lower.png"
+    },
+    {
+      "dest": "textures/door_upper.png",
+      "src": "doors_mcl_doors/mcl_doors_door_wood_upper.png"
+    },
+    {
+      "dest": "textures/farmland.png",
+      "src": "farming_mcl_farming/farming_soil.png"
+    },
+    {
+      "dest": "textures/farmland_wet.png",
+      "src": "farming_mcl_farming/farming_soil_wet.png"
+    },
+    {
+      "dest": "textures/wheat_0.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_0.png"
+    },
+    {
+      "dest": "textures/wheat_1.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_1.png"
+    },
+    {
+      "dest": "textures/wheat_2.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_2.png"
+    },
+    {
+      "dest": "textures/wheat_3.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_3.png"
+    },
+    {
+      "dest": "textures/wheat_4.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_4.png"
+    },
+    {
+      "dest": "textures/wheat_5.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_5.png"
+    },
+    {
+      "dest": "textures/wheat_6.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_6.png"
+    },
+    {
+      "dest": "textures/wheat_7.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_stage_7.png"
+    },
+    {
+      "dest": "textures/bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_red.png"
+    },
+    {
+      "dest": "textures/bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_red.png"
+    },
+    {
+      "dest": "textures/bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_red.png"
+    },
+    {
+      "dest": "textures/bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_red.png"
+    },
+    {
+      "dest": "textures/obsidian.png",
+      "src": "default_mcl_core/stone/default_obsidian.png"
+    },
+    {
+      "dest": "textures/player.png",
+      "src": "HUD/character.png"
+    },
     {
       "dest": "icons/{tier}_pickaxe.png",
       "src": "default_mcl_core/tools/default_tool_{srcTier}pick.png",
@@ -111,6 +288,7 @@
         "wood",
         "stone",
         "iron",
+        "gold",
         "diamond"
       ]
     },
@@ -121,6 +299,7 @@
         "wood",
         "stone",
         "iron",
+        "gold",
         "diamond"
       ]
     },
@@ -131,6 +310,7 @@
         "wood",
         "stone",
         "iron",
+        "gold",
         "diamond"
       ]
     },
@@ -141,21 +321,45 @@
         "wood",
         "stone",
         "iron",
+        "gold",
         "diamond"
       ]
     },
-    { "dest": "icons/stick.png", "src": "default_mcl_core/default_stick.png" },
-    { "dest": "icons/coal.png", "src": "default_mcl_core/minerals_ores/default_coal_lump.png" },
-    { "dest": "icons/iron_ingot.png", "src": "default_mcl_core/minerals_ores/default_steel_ingot.png" },
-    { "dest": "icons/diamond.png", "src": "default_mcl_core/minerals_ores/default_diamond.png" },
-    { "dest": "icons/apple.png", "src": "default_mcl_core/plants/default_apple.png" },
-    { "dest": "icons/bread.png", "src": "farming_mcl_farming/farming_bread.png" },
-    { "dest": "icons/seeds.png", "src": "farming_mcl_farming/mcl_farming_wheat_seeds.png" },
+    {
+      "dest": "icons/stick.png",
+      "src": "default_mcl_core/default_stick.png"
+    },
+    {
+      "dest": "icons/coal.png",
+      "src": "default_mcl_core/minerals_ores/default_coal_lump.png"
+    },
+    {
+      "dest": "icons/iron_ingot.png",
+      "src": "default_mcl_core/minerals_ores/default_steel_ingot.png"
+    },
+    {
+      "dest": "icons/diamond.png",
+      "src": "default_mcl_core/minerals_ores/default_diamond.png"
+    },
+    {
+      "dest": "icons/apple.png",
+      "src": "default_mcl_core/plants/default_apple.png"
+    },
+    {
+      "dest": "icons/bread.png",
+      "src": "farming_mcl_farming/farming_bread.png"
+    },
+    {
+      "dest": "icons/seeds.png",
+      "src": "farming_mcl_farming/mcl_farming_wheat_seeds.png"
+    },
     {
       "dest": "icons/{tier}_{piece}.png",
       "src": "mcl_armor/mcl_armor_inv_{piece}_{tier}.png",
       "tiers": [
+        "leather",
         "iron",
+        "gold",
         "diamond"
       ],
       "pieces": [
@@ -165,13 +369,132 @@
         "boots"
       ]
     },
-    { "dest": "icons/bow.png", "src": "mcl_bows/mcl_bows_bow.png" },
-    { "dest": "icons/bow_pull_0.png", "src": "mcl_bows/mcl_bows_bow_0.png" },
-    { "dest": "icons/bow_pull_1.png", "src": "mcl_bows/mcl_bows_bow_1.png" },
-    { "dest": "icons/bow_pull_2.png", "src": "mcl_bows/mcl_bows_bow_2.png" },
-    { "dest": "icons/arrow.png", "src": "mcl_bows/mcl_bows_arrow_inv.png" },
-    { "dest": "ui/hotbar.png", "src": "default_mcl_core/gui_hud/gui_hotbar.png" },
-    { "dest": "ui/hotbar_selected.png", "src": "default_mcl_core/gui_hud/gui_hotbar_selected.png" },
-    { "dest": "entities/player.png", "src": "HUD/character.png" }
+    {
+      "dest": "icons/bow.png",
+      "src": "mcl_bows/mcl_bows_bow.png"
+    },
+    {
+      "dest": "icons/bow_pull_0.png",
+      "src": "mcl_bows/mcl_bows_bow_0.png"
+    },
+    {
+      "dest": "icons/bow_pull_1.png",
+      "src": "mcl_bows/mcl_bows_bow_1.png"
+    },
+    {
+      "dest": "icons/bow_pull_2.png",
+      "src": "mcl_bows/mcl_bows_bow_2.png"
+    },
+    {
+      "dest": "icons/arrow.png",
+      "src": "mcl_bows/mcl_bows_arrow_inv.png"
+    },
+    {
+      "dest": "ui/hotbar.png",
+      "src": "default_mcl_core/gui_hud/gui_hotbar.png"
+    },
+    {
+      "dest": "ui/hotbar_selected.png",
+      "src": "default_mcl_core/gui_hud/gui_hotbar_selected.png"
+    },
+    {
+      "dest": "entities/player.png",
+      "src": "HUD/character.png"
+    },
+    {
+      "dest": "icons/{tier}_hoe.png",
+      "src": "farming_mcl_farming/farming_tool_{srcTier}hoe.png",
+      "tiers": [
+        "wood",
+        "stone",
+        "iron",
+        "gold",
+        "diamond"
+      ]
+    },
+    {
+      "dest": "icons/raw_iron.png",
+      "src": "default_mcl_core/minerals_ores/mcl_raw_ores_raw_iron.png"
+    },
+    {
+      "dest": "icons/raw_gold.png",
+      "src": "default_mcl_core/minerals_ores/mcl_raw_ores_raw_gold.png"
+    },
+    {
+      "dest": "icons/gold_ingot.png",
+      "src": "default_mcl_core/minerals_ores/default_gold_ingot.png"
+    },
+    {
+      "dest": "icons/emerald.png",
+      "src": "default_mcl_core/minerals_ores/mcl_core_emerald.png"
+    },
+    {
+      "dest": "icons/golden_apple.png",
+      "src": "default_mcl_core/plants/mcl_core_apple_golden.png"
+    },
+    {
+      "dest": "icons/wheat.png",
+      "src": "farming_mcl_farming/farming_wheat.png"
+    },
+    {
+      "dest": "icons/flint.png",
+      "src": "default_mcl_core/stone/default_flint.png"
+    },
+    {
+      "dest": "icons/string.png",
+      "src": "mcl_mobitems/mcl_mobitems_string.png"
+    },
+    {
+      "dest": "icons/feather.png",
+      "src": "mcl_mobitems/mcl_mobitems_feather.png"
+    },
+    {
+      "dest": "icons/leather.png",
+      "src": "mcl_mobitems/mcl_mobitems_leather.png"
+    },
+    {
+      "dest": "icons/wool.png",
+      "src": "wool_mcl_wool/wool_white.png"
+    },
+    {
+      "dest": "icons/door.png",
+      "src": "doors_mcl_doors/doors_item_wood.png"
+    },
+    {
+      "dest": "icons/bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_red_inv.png"
+    },
+    {
+      "dest": "ui/heart.png",
+      "src": "default_mcl_core/gui_hud/heart.png"
+    },
+    {
+      "dest": "ui/heart_gone.png",
+      "src": "default_mcl_core/gui_hud/heart_gone.png"
+    },
+    {
+      "dest": "ui/hunger.png",
+      "src": "HUD/hbhunger_icon.png"
+    },
+    {
+      "dest": "ui/hunger_gone.png",
+      "src": "HUD/hbhunger_bgicon.png"
+    },
+    {
+      "dest": "ui/bubble.png",
+      "src": "default_mcl_core/gui_hud/bubble.png"
+    },
+    {
+      "dest": "ui/armor.png",
+      "src": "HUD/hbarmor_icon.png"
+    },
+    {
+      "dest": "ui/armor_gone.png",
+      "src": "HUD/hbarmor_bgicon.png"
+    },
+    {
+      "dest": "ui/slot.png",
+      "src": "mcl_inventory/mcl_formspec_itemslot.png"
+    }
   ]
 }

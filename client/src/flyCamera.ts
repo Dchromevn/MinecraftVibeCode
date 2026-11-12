@@ -7,6 +7,16 @@ const SENSITIVITY = 0.002;
 const SPEED = PLAYER.FLY_SPEED; // block/giây
 const FAST_MULT = 3; // giữ Ctrl
 
+/** Khóa chuột; bỏ qua lỗi (trình duyệt từ chối khi chưa có thao tác người dùng / headless). */
+export function lockPointer(el: HTMLElement): void {
+  try {
+    const r = el.requestPointerLock() as unknown as Promise<void> | undefined;
+    r?.catch?.(() => undefined);
+  } catch {
+    /* bỏ qua */
+  }
+}
+
 export class FlyCamera {
   yaw = 0;
   pitch = 0;
@@ -18,7 +28,7 @@ export class FlyCamera {
     private readonly dom: HTMLElement,
   ) {
     dom.addEventListener("click", () => {
-      if (!this.locked) dom.requestPointerLock();
+      if (!this.locked) lockPointer(dom);
     });
     document.addEventListener("mousemove", (e) => {
       if (!this.locked) return;

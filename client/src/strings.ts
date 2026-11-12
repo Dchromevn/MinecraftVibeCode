@@ -1,12 +1,12 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 3b — đào, đặt, chỗ bám, cát rơi",
+  stage: "Giai đoạn 4a — vật phẩm, túi đồ, chế tạo, sinh tồn",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
     "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
-    "Giữ chuột trái đào · chuột phải đặt · 1–9 / lăn chuột chọn block (bay: phá ngay)",
+    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn · 1–9 / lăn chuột chọn ô · E túi đồ · Q vứt (Ctrl+Q cả chồng)",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
   hudFps: "FPS",
@@ -45,6 +45,24 @@ export const STR = {
   stateSneaking: "ngồi",
   hudAir: "Dưỡng khí",
   hudDropped: "Rơi ra",
+  hudHunger: "Đói",
+  inventoryTitle: "Túi đồ",
+  craftingTitle: "Chế tạo",
+  needWorkbench: "cần bàn chế tạo",
+  nearWorkbench: "Đang ở gần bàn chế tạo",
+  craftHint: "Bấm để chế tạo · Shift+bấm: chế tạo nhiều nhất có thể",
+  youDied: "Bạn đã chết",
+  respawn: "Hồi sinh",
+  durability: "Độ bền",
+  items: {
+    stick: "Que", coal: "Than", raw_iron: "Sắt thô", iron_ingot: "Thỏi sắt", raw_gold: "Vàng thô",
+    gold_ingot: "Thỏi vàng", diamond: "Kim cương", emerald: "Ngọc lục bảo", flint: "Đá lửa", string: "Sợi tơ",
+    feather: "Lông gà", leather: "Da", wool: "Len", wheat: "Lúa mì", arrow: "Mũi tên", bow: "Cung",
+    seeds: "Hạt lúa", door: "Cửa gỗ", bed: "Giường", apple: "Táo", bread: "Bánh mì", golden_apple: "Táo vàng",
+  } as Record<string, string>,
+  toolKinds: { pickaxe: "Cuốc", axe: "Rìu", shovel: "Xẻng", sword: "Kiếm", hoe: "Cuốc đất" } as Record<string, string>,
+  armorPieces: { helmet: "Mũ", chestplate: "Áo giáp", leggings: "Quần giáp", boots: "Giày" } as Record<string, string>,
+  tiers: { wood: "gỗ", stone: "đá", iron: "sắt", gold: "vàng", diamond: "kim cương", leather: "da" } as Record<string, string>,
   hudMissingTextures: "Texture vẽ tạm",
   biomes: ["Đồng cỏ", "Rừng", "Sa mạc", "Đồng tuyết", "Núi", "Đại dương"],
   blocks: {

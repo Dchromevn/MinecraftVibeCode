@@ -1,9 +1,9 @@
-// Giai đoạn 3b: người chơi đi bộ có vật lý, đào (vết nứt) / đặt block có chỗ bám, cát rơi,
-// cánh tay; chế độ bay debug (F); thế giới vô hạn sinh/ánh sáng/dựng mesh trong Web Worker.
+// Giai đoạn 4a: vật phẩm, túi đồ (E), chế tạo, đói/máu/giáp, chết và hồi sinh; đào/đặt có chỗ
+// bám, vật lý người chơi; chế độ bay debug (F); thế giới sinh/ánh sáng/dựng mesh trong Web Worker.
 // Tham số URL: ?seed= ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
 // ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
-import { BLOCKS, PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
+import { PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
@@ -17,6 +17,9 @@ import { Interaction } from "./interact/interaction.js";
 import { FirstPersonArm } from "./player/arm.js";
 import { PlayerController } from "./player/playerController.js";
 import { ViewEffects } from "./player/viewEffects.js";
+import { Session } from "./game/session.js";
+import { preloadIcons } from "./ui/itemIcons.js";
+import { injectStyles } from "./ui/styles.js";
 
 const EXTRA_TEXTURES = [
   "crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side",
@@ -52,18 +55,7 @@ function playerLine(p: PlayerController): string {
     s.inLava && STR.stateLava, s.onLadder && STR.stateLadder, s.inWeb && STR.stateWeb, s.burnS > 0 && STR.stateBurning,
     s.sneaking && STR.stateSneaking,
   ].filter(Boolean);
-  return `${STR.hudMode}: ${STR.modeWalking} (F) · ${flags.join(", ") || STR.stateAir} · ${STR.hudHealth}: ${s.health.toFixed(1)}/${PLAYER.MAX_HEALTH} · ${STR.hudAir}: ${s.air.toFixed(1)} s`;
-}
-
-/** Dòng HUD: block vừa rơi ra (Giai đoạn 4 mới thành vật phẩm). */
-function dropLine(it: Interaction): string {
-  if (it.lastDrops.length === 0 || performance.now() - it.lastDropTime > 4000) return "";
-  const count = new Map<string, number>();
-  for (const d of it.lastDrops) {
-    const k = BLOCKS[d.id]!.key;
-    count.set(k, (count.get(k) ?? 0) + 1);
-  }
-  return `${STR.hudDropped}: ${[...count].map(([k, n]) => `${STR.blocks[k] ?? k} ×${n}`).join(", ")}`;
+  return `${STR.hudMode}: ${STR.modeWalking} (F) · ${flags.join(", ") || STR.stateAir} · ${STR.hudHealth}: ${s.health.toFixed(1)}/${PLAYER.MAX_HEALTH} · ${STR.hudHunger}: ${s.hunger} (${s.saturation.toFixed(1)}) · ${STR.hudAir}: ${s.air.toFixed(1)} s`;
 }
 
 function heapMb(): string {
@@ -80,6 +72,8 @@ async function main(): Promise<void> {
 
   hud.setCenter(STR.loadingTextures);
   const atlas = await buildAtlas([...allBlockTextureNames(), ...EXTRA_TEXTURES]);
+  injectStyles();
+  await preloadIcons();
 
   const renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.autoClear = false; // vẽ thế giới rồi vẽ cánh tay đè lên
@@ -126,9 +120,17 @@ async function main(): Promise<void> {
   fly.applyRotation();
 
   const arm = new FirstPersonArm(PLAYER.FOV, window.innerWidth / window.innerHeight);
+  const session = new Session(
+    scene, atlas, world, player, fly, renderer.domElement, camera,
+    { x: spawn.x + 0.5, y: spawn.h + 1, z: spawn.z + 0.5 },
+  );
   const interact = new Interaction(
     scene, world, atlas,
-    { camera, player, locked: () => fly.locked || player.debugInput, yaw: () => fly.yaw, swing: () => arm.swing() },
+    {
+      camera, player, inv: session.inv, items: session.items, rng: session.rng,
+      locked: () => (fly.locked || player.debugInput) && !session.screen.open,
+      yaw: () => fly.yaw, swing: () => arm.swing(),
+    },
     (x, _y, z) => chunks.onBlockChanged(x, z),
   );
   // debug: cho script kiểm tra điều khiển camera / sửa block từ ngoài (?debug=1);
@@ -136,7 +138,8 @@ async function main(): Promise<void> {
   const autopilot = { vx: 0, vz: 0 };
   if (params.get("debug") === "1") {
     player.debugInput = true;
-    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly, interact };
+    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly, interact, session,
+      give: (k: string, n?: number) => session.give(k, n) };
   }
 
   if (params.get("nv") === "1") meshes.uniforms.uMinLight.value = NIGHT_VISION;
@@ -178,6 +181,7 @@ async function main(): Promise<void> {
     camera.getWorldDirection(dir);
     chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
     interact.update(dt);
+    session.update(dt);
     sky.follow(camera);
     meshes.update(now / 1000, camera, chunks.viewDistance, world);
     renderer.info.reset();
@@ -191,7 +195,6 @@ async function main(): Promise<void> {
       firstFrame = false;
       const p = camera.position;
       const col = sampler.column(Math.floor(p.x), Math.floor(p.z));
-      const sel = BLOCKS[interact.selectedBlock]!;
       hud.setInfo([
         `${STR.title} — ${STR.stage}`,
         `${STR.hudFps}: ${fps.fps}`,
@@ -203,8 +206,6 @@ async function main(): Promise<void> {
         `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls} · ${STR.hudMemory}: ${heapMb()}`,
         `${STR.hudSeed}: ${seedText} (${seed})`,
         playerLine(player),
-        dropLine(interact),
-        `${STR.hudSelected}: ${STR.blocks[sel.key] ?? sel.key}`,
         atlas.missing.length ? `${STR.hudMissingTextures}: ${atlas.missing.join(", ")}` : "",
       ]);
       hud.setCenter(fly.locked || hideMsg ? null : STR.clickToControl);

@@ -174,3 +174,4 @@ export const MOVE = {
 
 // Thông số lối chơi (mục 2.3–2.10) tách sang gameplay.ts cho file ngắn gọn.
 export * from "./gameplay.js";
+export * from "./survivalConstants.js";

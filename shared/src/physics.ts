@@ -1,11 +1,13 @@
 // Vật lý người chơi (DESIGN.md 2.6, MECHANICS.md mục 2 và 5.5): hàm bước thuần túy, xác
 // định, bước cố định 1/PHYSICS_HZ giây — client chạy để dự đoán, server (Giai đoạn 5)
-// chạy lại để kiểm tra. Sát thương môi trường chỉ trừ vào health (chưa hiển thị/chết).
+// chạy lại để kiểm tra. Sinh tồn (đói, hồi máu, giáp, chết) trong survival.ts.
 import { B } from "./blocks.js";
-import { COMBAT, MOVE, PLAYER } from "./constants.js";
+import { MOVE, PLAYER } from "./constants.js";
 import { boxBlocked, moveBox, type CellReader } from "./collide.js";
+import { HUNGER } from "./survivalConstants.js";
+import { createSurvival, hurt, tickSurvival, type SurvivalState } from "./survival.js";
 
-export interface PlayerState {
+export interface PlayerState extends SurvivalState {
   x: number; // giữa chân
   y: number;
   z: number;
@@ -21,12 +23,9 @@ export interface PlayerState {
   headInWater: boolean;
   collidedH: boolean;
   frozen: boolean; // chunk dưới chân chưa tải: đứng yên
-  health: number;
   air: number; // dưỡng khí còn lại (giây)
   fallDist: number; // quãng đang rơi (block)
   burnS: number; // còn cháy bao lâu
-  invulnS: number; // còn miễn sát thương bao lâu
-  lastHurt: number; // sát thương của đòn gần nhất (trong lúc miễn)
   fireTimer: number; // đếm giây cho cháy / chết đuối
   drownTimer: number;
 }
@@ -50,8 +49,8 @@ export function createPlayer(x: number, y: number, z: number): PlayerState {
     x, y, z, vx: 0, vy: 0, vz: 0,
     onGround: false, sneaking: false, inWater: false, inLava: false, onLadder: false, inWeb: false,
     headInWater: false, collidedH: false, frozen: false,
-    health: PLAYER.MAX_HEALTH, air: PLAYER.AIR_S, fallDist: 0, burnS: 0, invulnS: 0, lastHurt: 0,
-    fireTimer: 0, drownTimer: 0,
+    air: PLAYER.AIR_S, fallDist: 0, burnS: 0, fireTimer: 0, drownTimer: 0,
+    ...createSurvival(),
   };
 }
 
@@ -63,19 +62,6 @@ export function playerBox(s: { x: number; y: number; z: number; sneaking?: boole
   return [s.x - HW, s.y, s.z - HW, s.x + HW, s.y + h, s.z + HW];
 }
 
-/** Nhận sát thương, có miễn sát thương 0.5 giây (đòn mạnh hơn chỉ gây phần chênh lệch). */
-export function hurt(s: PlayerState, amount: number): void {
-  if (amount <= 0) return;
-  if (s.invulnS > 0) {
-    if (amount <= s.lastHurt) return;
-    s.health -= amount - s.lastHurt;
-  } else {
-    s.health -= amount;
-    s.invulnS = COMBAT.INVULN_S;
-  }
-  s.lastHurt = amount;
-  s.health = Math.max(0, s.health);
-}
 
 /** Người chơi đang chạm block gì (nước, dung nham, thang, mạng nhện). */
 function scanEnvironment(s: PlayerState, cell: CellReader): void {
@@ -104,7 +90,7 @@ function horizontal(s: PlayerState, inp: PlayerInput, liquid: boolean, dt: numbe
     f /= len;
     st /= len;
   }
-  const sprint = inp.sprint && f > 0 && !s.sneaking;
+  const sprint = inp.sprint && f > 0 && !s.sneaking && s.hunger >= PLAYER.SPRINT_HUNGER_MIN;
   let speed = s.sneaking ? PLAYER.SNEAK_SPEED : sprint ? PLAYER.SPRINT_SPEED : PLAYER.WALK_SPEED;
   if (s.inWater) speed *= PLAYER.WATER_SPEED_FACTOR;
   if (s.inLava) speed *= PLAYER.LAVA_SPEED_FACTOR;
@@ -117,6 +103,7 @@ function horizontal(s: PlayerState, inp: PlayerInput, liquid: boolean, dt: numbe
   const k = Math.min(1, accel * dt);
   s.vx += (tvx - s.vx) * k;
   s.vz += (tvz - s.vz) * k;
+  if (inp.jump && s.onGround && !liquid && !s.onLadder) s.exhaustion += sprint ? HUNGER.SPRINT_JUMP : HUNGER.JUMP;
   if (sprint && inp.jump && s.onGround && !liquid && !s.onLadder) {
     s.vx -= sin * PLAYER.SPRINT_JUMP_BOOST;
     s.vz -= cos * PLAYER.SPRINT_JUMP_BOOST;
@@ -125,9 +112,8 @@ function horizontal(s: PlayerState, inp: PlayerInput, liquid: boolean, dt: numbe
 
 /** Dung nham, cháy, chết đuối (MECHANICS.md 5.5). */
 function environmentDamage(s: PlayerState, dt: number): void {
-  s.invulnS = Math.max(0, s.invulnS - dt);
   if (s.inLava) {
-    hurt(s, PLAYER.LAVA_DAMAGE);
+    hurt(s, PLAYER.LAVA_DAMAGE, "lava");
     s.burnS = PLAYER.LAVA_BURN_S;
   } else if (s.inWater) {
     s.burnS = 0;
@@ -137,7 +123,7 @@ function environmentDamage(s: PlayerState, dt: number): void {
     s.fireTimer += dt;
     if (s.fireTimer >= 1) {
       s.fireTimer -= 1;
-      hurt(s, PLAYER.FIRE_DAMAGE);
+      hurt(s, PLAYER.FIRE_DAMAGE, "fire");
     }
   } else if (s.burnS === 0) s.fireTimer = 0;
 
@@ -147,7 +133,7 @@ function environmentDamage(s: PlayerState, dt: number): void {
       s.drownTimer += dt;
       if (s.drownTimer >= 1) {
         s.drownTimer -= 1;
-        hurt(s, PLAYER.DROWN_DAMAGE);
+        hurt(s, PLAYER.DROWN_DAMAGE, "drown");
       }
     }
   } else {
@@ -159,6 +145,10 @@ function environmentDamage(s: PlayerState, dt: number): void {
 /** Tiến một bước 1/PHYSICS_HZ giây. Sửa trực tiếp s. */
 export function stepPlayer(s: PlayerState, inp: PlayerInput, cell: CellReader): void {
   const dt = PHYSICS_DT;
+  if (s.dead) {
+    s.vx = s.vy = s.vz = 0;
+    return;
+  }
   if (cell(Math.floor(s.x), Math.max(0, Math.min(127, Math.floor(s.y))), Math.floor(s.z)) < 0) {
     s.vx = s.vy = s.vz = 0;
     s.frozen = true;
@@ -208,14 +198,19 @@ export function stepPlayer(s: PlayerState, inp: PlayerInput, cell: CellReader): 
   if (r.landed || r.hitCeiling) s.vy = 0;
   s.onGround = r.landed;
   s.collidedH = r.hitX || r.hitZ;
+  // hao sức: chạy nhanh / bơi theo quãng ngang đi được
+  const moved = Math.hypot(r.dx, r.dz);
+  if (s.inWater) s.exhaustion += moved * HUNGER.SWIM_PER_BLOCK;
+  else if (inp.sprint && inp.forward > 0 && !s.sneaking && s.hunger >= PLAYER.SPRINT_HUNGER_MIN) s.exhaustion += moved * HUNGER.SPRINT_PER_BLOCK;
 
   // --- sát thương rơi: floor(quãng rơi − 3); nước, thang, mạng nhện tính lại từ đầu ---
   if (s.inWater || s.onLadder || s.inWeb) s.fallDist = 0;
   else if (r.dy < 0) s.fallDist -= r.dy;
   if (r.landed) {
-    hurt(s, Math.floor(s.fallDist - PLAYER.FALL_SAFE_BLOCKS + 1e-6)); // dung sai cộng dồn số thực
+    hurt(s, Math.floor(s.fallDist - PLAYER.FALL_SAFE_BLOCKS + 1e-6), "fall"); // dung sai cộng dồn số thực
     s.fallDist = 0;
   }
 
   environmentDamage(s, dt);
+  tickSurvival(s, dt);
 }

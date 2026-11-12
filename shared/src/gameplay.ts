@@ -111,28 +111,7 @@ export const PLAYER = {
   VIEW_BOB: 0.06, // biên độ lắc camera khi đi (block)
 } as const;
 
-/** Điểm đói hồi lại. Thịt sống 2–3, thịt chín 6–8 (Giai đoạn 4 chốt từng loại). */
-export const FOOD = {
-  apple: 4,
-  bread: 5,
-  RAW_MEAT_MIN: 2,
-  RAW_MEAT_MAX: 3,
-  COOKED_MEAT_MIN: 6,
-  COOKED_MEAT_MAX: 8,
-} as const;
-
-/** Táo vàng (1 táo + 8 thỏi vàng): +4 đói, hồi 4 máu rải đều trong 5 giây. */
-export const GOLDEN_APPLE = {
-  HUNGER: 4,
-  HEAL: 4,
-  HEAL_TIME_S: 5,
-  GOLD_INGOTS: 8,
-} as const;
-
-export const ITEMS = {
-  DROPPED_LIFETIME_S: 300,
-  PICKUP_RADIUS: 1.5,
-} as const;
+// Thức ăn, đói, giáp, vật phẩm rơi: xem survivalConstants.ts
 
 // 2.7 Ngày đêm, sinh vật, giường
 export const DAY_CYCLE = {

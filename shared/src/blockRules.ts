@@ -15,6 +15,8 @@ export interface BlockAccess {
 /** Block rơi ra (Giai đoạn 4 tạo vật phẩm; 3b chỉ ghi lại). */
 export interface Dropped {
   id: number;
+  meta: number; // dữ liệu phụ lúc rơi (lúa chín hay chưa)
+  forced: boolean; // rơi vì mất chỗ bám / bị đè: không cần công cụ
   x: number;
   y: number;
   z: number;
@@ -128,7 +130,7 @@ export function settle(
         acc.setCell(other.x, other.y, other.z, B.AIR, 0);
         push(other.x, other.y, other.z);
       }
-      drops.push({ id, x, y, z });
+      drops.push({ id, meta: cell >> 8, forced: true, x, y, z });
       if (id === B.RAIL) updateRailsAround(x, y, z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
       push(x, y, z);
     } else if (BLOCKS[id]!.falls && canFallInto(idAt(x, y - 1, z))) {
@@ -157,7 +159,7 @@ export function breakAt(
   }
   const idAt: IdAt = (a, b, c) => Math.max(0, acc.getCell(a, b, c)) & 255;
   if (id === B.RAIL) updateRailsAround(x, y, z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
-  return [{ id, x, y, z }, ...settle(acc, changed, startFalling)];
+  return [{ id, meta: cell >> 8, forced: false, x, y, z }, ...settle(acc, changed, startFalling)];
 }
 
 /** Đặt các ô (đã kiểm canPlace), cập nhật ray, xử lý dây chuyền (cát đặt lơ lửng thì rơi). */

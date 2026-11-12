@@ -50,7 +50,7 @@ export class FallingBlocks {
       e.mesh.geometry.dispose();
       this.list.splice(i--, 1);
       if (r.kind === "lost") {
-        this.onDrop([{ id: e.f.id, x: e.f.x, y: Math.floor(e.f.y), z: e.f.z }]);
+        this.onDrop([{ id: e.f.id, meta: e.f.meta, forced: true, x: e.f.x, y: Math.floor(e.f.y), z: e.f.z }]);
         continue;
       }
       // block đè lên (đuốc...) rơi ra; ô vừa đáp có thể làm block khác mất chỗ bám

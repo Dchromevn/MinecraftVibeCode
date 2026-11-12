@@ -35,7 +35,7 @@ export function stepFalling(f: FallingBlock, dt: number, acc: BlockAccess): Fall
     const here = idAt(cy);
     if (here < 0 || !canFallInto(here)) return { kind: "lost" };
     const dropped: Dropped[] = [];
-    if (here > 0 && here !== B.WATER && here !== B.LAVA) dropped.push({ id: here, x: f.x, y: cy, z: f.z });
+    if (here > 0 && here !== B.WATER && here !== B.LAVA) dropped.push({ id: here, meta: 0, forced: true, x: f.x, y: cy, z: f.z });
     acc.setCell(f.x, cy, f.z, f.id, f.meta);
     f.y = cy;
     return { kind: "landed", y: cy, dropped };
