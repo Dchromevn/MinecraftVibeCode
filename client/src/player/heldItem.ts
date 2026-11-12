@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { itemDef } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
 import { blockTiles, setBoxTiles } from "../interact/boxMesh.js";
+import { WIKI_BUST } from "../ui/itemIcons.js";
 
 const RES = 16;
 const cache = new Map<string, Promise<THREE.Object3D>>();
@@ -70,7 +71,7 @@ export function heldModel(key: string, atlas: Atlas): Promise<THREE.Object3D> {
     }
     const url = icon?.type === "icon" ? `/icons/${icon.name}.png` : icon?.type === "tex" ? `/textures/${icon.name}.png` : "";
     // ưu tiên icon minecraft.wiki nếu người dùng đã tải (npm run wiki-icons)
-    const px = (await loadPixels(`/icons_wiki/${key}.png`)) ?? (url ? await loadPixels(url) : null);
+    const px = (await loadPixels(`/icons_wiki/${key}.png${WIKI_BUST}`)) ?? (url ? await loadPixels(url) : null);
     const m: THREE.Object3D = px ? extrude(px) : new THREE.Object3D();
     m.userData.kind = "flat";
     return m;

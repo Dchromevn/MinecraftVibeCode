@@ -5,6 +5,8 @@ import { BLOCKS, allItems, itemDef } from "../../../shared/src/index.js";
 import { STR } from "../strings.js";
 
 const SIZE = 32;
+/** Chống bộ nhớ đệm trình duyệt cho icon wiki (thư mục có thể được thêm sau khi trang đã mở). */
+export const WIKI_BUST = `?t=${Date.now()}`;
 const urls = new Map<string, string>();
 
 function loadImage(url: string): Promise<HTMLImageElement | null> {
@@ -52,7 +54,7 @@ async function render(key: string): Promise<string> {
   const ctx = c.getContext("2d")!;
   ctx.imageSmoothingEnabled = false;
   let ok = false;
-  const wiki = await loadImage(`/icons_wiki/${key}.png`);
+  const wiki = await loadImage(`/icons_wiki/${key}.png${WIKI_BUST}`);
   if (wiki && wiki.width > 0) {
     ctx.imageSmoothingEnabled = wiki.width > SIZE * 2; // ảnh lớn (khối 3D) thu nhỏ mượt, ảnh điểm ảnh giữ nét
     ctx.imageSmoothingQuality = "high";
