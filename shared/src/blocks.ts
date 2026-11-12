@@ -57,6 +57,26 @@ export type RenderKind =
   | "none" | "cube" | "cross" | "liquid" | "layer" | "fence" | "rail"
   | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland";
 
+/**
+ * Dữ liệu phụ: 1 byte mỗi block, song song với id (DESIGN.md 2.2). Block có kiểu
+ * "none" luôn có dữ liệu phụ 0. Hướng ngang: 0 Nam (+Z), 1 Tây (−X), 2 Bắc (−Z), 3 Đông (+X).
+ * - torch:  0 = cắm trên sàn; 1..4 = gắn tường ở hướng (giá trị − 1), nghiêng ra ngoài
+ * - ladder: 0..3 = hướng bức tường mà thang bám vào
+ * - door:   bit 0–1 hướng (tấm cửa sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên
+ * - crop:   0..7 = giai đoạn lớn (lúa mì)
+ * - liquid: bit 0–2 mức 0..7 (0 = nguồn), bit 3 đang rơi (nước, dung nham)
+ * - facing: bit 0–1 hướng mặt trước; bit 2 đang cháy (lò nung; rương không dùng)
+ * - rail:   bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư)
+ * - bed:    bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường
+ * Hàm giải mã / mã hóa nằm trong blockMeta.ts.
+ */
+export type MetaKind = "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed";
+
+/** Các bit được dùng của từng kiểu (bit khác luôn 0). */
+export const META_MASK: Readonly<Record<MetaKind, number>> = {
+  none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 7,
+};
+
 export interface BlockTextures {
   top: string;
   bottom: string;
@@ -90,6 +110,7 @@ export interface BlockDef {
   lightEmit: number; // 0..15
   lightOpacity: number; // ánh sáng mất thêm khi đi qua block (15 = chặn hẳn)
   render: RenderKind;
+  meta: MetaKind; // ý nghĩa byte dữ liệu phụ
   tex: BlockTextures;
 }
 

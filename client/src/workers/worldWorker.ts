@@ -24,9 +24,10 @@ ctx.onmessage = (e) => {
     }
     const t0 = performance.now();
     if (msg.type === "gen") {
-      const data = gen!.generate(msg.cx, msg.cz);
-      ctx.postMessage({ type: "gen", id: msg.id, cx: msg.cx, cz: msg.cz, data, ms: performance.now() - t0 }, [
-        data.buffer,
+      const chunk = gen!.generate(msg.cx, msg.cz);
+      ctx.postMessage({ type: "gen", id: msg.id, cx: msg.cx, cz: msg.cz, chunk, ms: performance.now() - t0 }, [
+        chunk.data.buffer,
+        chunk.meta.buffer,
       ]);
     } else {
       const region = buildRegion(msg.chunks);

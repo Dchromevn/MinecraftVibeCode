@@ -1,11 +1,12 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 2b — hang động, hầm mỏ, ánh sáng",
+  stage: "Giai đoạn 3a — người chơi, vật lý, dữ liệu phụ của block",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
-    "WASD di chuyển · Space lên · Shift xuống · Ctrl bay nhanh · Esc thả chuột\n" +
-    "Chuột trái phá · Chuột phải đặt · 1–9 / lăn chuột chọn block · [ ] tầm nhìn · N nhìn đêm",
+    "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
+    "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
+    "Công cụ debug: chuột trái phá · chuột phải đặt · 1–9 / lăn chuột chọn block",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
   hudFps: "FPS",
@@ -29,6 +30,18 @@ export const STR = {
   hudMemory: "Bộ nhớ JS",
   hudSeed: "Seed",
   hudSelected: "Block đặt (1–9, lăn chuột)",
+  hudMode: "Chế độ",
+  modeWalking: "đi bộ",
+  modeFlying: "bay",
+  hudHealth: "Máu",
+  stateFrozen: "chờ tải chunk",
+  stateGround: "trên đất",
+  stateAir: "trên không",
+  stateWater: "trong nước",
+  stateLava: "trong dung nham",
+  stateLadder: "trên thang",
+  stateWeb: "mạng nhện",
+  stateBurning: "đang cháy",
   hudMissingTextures: "Texture vẽ tạm",
   biomes: ["Đồng cỏ", "Rừng", "Sa mạc", "Đồng tuyết", "Núi", "Đại dương"],
   blocks: {

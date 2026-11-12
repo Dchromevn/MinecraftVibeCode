@@ -1,0 +1,84 @@
+// Hình dạng block theo id + dữ liệu phụ: hộp va chạm (vật lý) và hộp nhắm (raycast,
+// khung viền). Đơn vị block, tọa độ trong ô [x0, y0, z0, x1, y1, z1]; có thể cao quá 1
+// (hàng rào va chạm cao 1.5).
+import { B, BLOCKS, type BlockBox } from "./blocks.js";
+import { HDX, HDZ, cellId, cellMeta, doorSide, rotXZ, torchWall } from "./blockMeta.js";
+
+export type Box = BlockBox;
+/** Đọc id block tại tọa độ thế giới (dùng cho hàng rào nối nhau). */
+export type IdAt = (x: number, y: number, z: number) => number;
+
+const FULL: Box = [0, 0, 0, 1, 1, 1];
+const px = (n: number): number => n / 16;
+
+/** Xoay hộp vẽ cho hướng 0 (Nam, +Z) sang hướng d. */
+function rotBox(b: Box, d: number): Box {
+  const [ax, az] = rotXZ(b[0], b[2], d);
+  const [bx, bz] = rotXZ(b[3], b[5], d);
+  return [Math.min(ax, bx), b[1], Math.min(az, bz), Math.max(ax, bx), b[4], Math.max(az, bz)];
+}
+
+/** Tấm mỏng sát cạnh d của ô (dày t), cao h. */
+function sidePanel(d: number, t: number, h = 1): Box {
+  return rotBox([0, 0, 1 - t, 1, h, 1], d);
+}
+
+function fenceJoins(id: number): boolean {
+  return id === B.FENCE || (BLOCKS[id]?.opaque ?? false);
+}
+
+/** Cột rào + thanh nối tới rào / khối đặc kề, cao h. */
+function fenceBoxes(x: number, y: number, z: number, idAt: IdAt, h: number): Box[] {
+  const out: Box[] = [[px(6), 0, px(6), px(10), h, px(10)]];
+  for (let d = 0; d < 4; d++) {
+    if (!fenceJoins(idAt(x + HDX[d]!, y, z + HDZ[d]!))) continue;
+    out.push(rotBox([px(6), 0, px(10), px(10), h, 1], d));
+  }
+  return out;
+}
+
+const COLLISION_CACHE = new Map<number, Box[]>();
+
+/** Hộp va chạm của ô (x, y, z) có giá trị cell (id | meta << 8). Rỗng = đi xuyên được. */
+export function collisionBoxes(cell: number, x: number, y: number, z: number, idAt: IdAt): readonly Box[] {
+  const id = cellId(cell);
+  const def = BLOCKS[id];
+  if (!def || !def.solid || def.liquid) return [];
+  if (def.render === "fence") return fenceBoxes(x, y, z, idAt, 1.5); // cao 1.5: không nhảy qua được
+  if (def.render === "door") {
+    let hit = COLLISION_CACHE.get(cell);
+    if (!hit) COLLISION_CACHE.set(cell, (hit = [sidePanel(doorSide(cellMeta(cell)), px(3))]));
+    return hit;
+  }
+  if (def.box) return [def.box];
+  return [FULL];
+}
+
+/** Hộp nhắm của ô (để raycast trúng đúng hình và vẽ khung viền). Rỗng = không nhắm được. */
+export function selectionBoxes(cell: number, x: number, y: number, z: number, idAt: IdAt): Box[] {
+  const id = cellId(cell);
+  const meta = cellMeta(cell);
+  const def = BLOCKS[id];
+  if (!def || def.render === "none" || def.liquid) return [];
+  switch (def.render) {
+    case "fence":
+      return fenceBoxes(x, y, z, idAt, 1);
+    case "door":
+      return [sidePanel(doorSide(meta), px(3))];
+    case "torch": {
+      const wall = torchWall(meta);
+      if (wall === null) return [[px(6), 0, px(6), px(10), px(10), px(10)]];
+      return [rotBox([px(5.5), px(3), px(11), px(10.5), px(13), 1], wall)];
+    }
+    case "ladder":
+      return [sidePanel(meta & 3, px(2))];
+    case "rail":
+      return [[0, 0, 0, 1, px(2), 1]];
+    case "cross":
+      return id === B.COBWEB ? [FULL] : [[px(2), 0, px(2), px(14), px(13), px(14)]];
+    case "crop":
+      return [[0, 0, 0, 1, px(2 + 2 * (meta & 7)), 1]];
+    default:
+      return [def.box ?? FULL];
+  }
+}

@@ -1,4 +1,5 @@
-// Camera bay tự do để xem thế giới: WASD, Space lên, Shift xuống, chuột nhìn (pointer lock).
+// Camera bay tự do (chế độ bay debug, phím F): WASD, Space lên, Shift xuống, Ctrl bay nhanh.
+// Cũng giữ chuột nhìn (pointer lock) và trạng thái phím cho bộ điều khiển người chơi.
 import * as THREE from "three";
 
 const SENSITIVITY = 0.002;
@@ -8,7 +9,7 @@ const FAST_MULT = 3; // giữ Ctrl
 export class FlyCamera {
   yaw = 0;
   pitch = 0;
-  private readonly keys = new Set<string>();
+  readonly keys = new Set<string>();
   private readonly dir = new THREE.Vector3();
 
   constructor(
@@ -37,12 +38,18 @@ export class FlyCamera {
     return document.pointerLockElement === this.dom;
   }
 
-  update(dt: number): void {
+  /** Áp yaw/pitch lên camera (dùng cả khi đi bộ). */
+  applyRotation(): void {
     const cam = this.camera;
     cam.rotation.set(0, 0, 0, "YXZ");
     cam.rotation.y = this.yaw;
     cam.rotation.x = this.pitch;
+  }
 
+  /** Bay: xoay + di chuyển camera xuyên block. */
+  update(dt: number): void {
+    const cam = this.camera;
+    this.applyRotation();
     if (!this.locked) return;
     const k = this.keys;
     const forward = (k.has("KeyW") ? 1 : 0) - (k.has("KeyS") ? 1 : 0);

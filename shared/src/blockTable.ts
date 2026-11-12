@@ -19,6 +19,7 @@ const BASE: Omit<BlockDef, "id" | "key" | "hardness" | "tool" | "drops" | "tex">
   lightEmit: 0,
   lightOpacity: 15,
   render: "cube",
+  meta: "none",
 };
 
 function def(
@@ -65,18 +66,19 @@ const TABLE: BlockDef[] = [
     bottom: "chest_top",
     side: "chest_side",
     front: "chest_front",
-  }),
+  }, { meta: "facing" }),
   def(14, "bedrock", Infinity, "none", [], same("bedrock")),
   def(15, "tallgrass", 0, "none", [drop("seeds", 0.1)], same("tallgrass"), { ...OPEN, render: "cross" }),
   // sỏi: 10% rơi đá lửa thay cho sỏi (Giai đoạn 4 xử lý)
   def(16, "gravel", 0.9, "shovel", [drop("gravel", 0.9), drop("flint", 0.1)], same("gravel"), { falls: true }),
-  def(17, "water", Infinity, "none", [], same("water"), { ...OPEN, liquid: true, lightOpacity: 2, render: "liquid" }),
+  def(17, "water", Infinity, "none", [], same("water"), { ...OPEN, liquid: true, lightOpacity: 2, render: "liquid", meta: "liquid" }),
   def(18, "lava", Infinity, "none", [], same("lava"), {
     ...OPEN,
     liquid: true,
     lightEmit: LIGHT.LAVA,
     lightOpacity: 15,
     render: "liquid",
+    meta: "liquid",
   }),
   def(19, "mossy_cobble", 10, "pickaxe", [drop("mossy_cobble")], same("mossy_cobble"), PICK_ONLY),
   def(20, "sandstone", 4, "pickaxe", [drop("sandstone")], same("sandstone"), PICK_ONLY),
@@ -91,26 +93,27 @@ const TABLE: BlockDef[] = [
     box: [0.375, 0, 0.375, 0.625, 1.5, 0.625], // cao 1.5 để không nhảy qua được
     render: "fence",
   }),
-  def(23, "rail", 1, "pickaxe", [drop("rail")], same("rail"), { ...OPEN, render: "rail" }),
+  def(23, "rail", 1, "pickaxe", [drop("rail")], same("rail"), { ...OPEN, render: "rail", meta: "rail" }),
   def(24, "cobweb", 6, "sword", [drop("string")], same("cobweb"), {
     ...OPEN,
     lightOpacity: 1,
     moveFactor: MOVE.COBWEB_FACTOR,
     render: "cross",
   }),
-  def(25, "torch", 0, "none", [drop("torch")], same("torch"), { ...OPEN, lightEmit: LIGHT.TORCH, render: "torch" }),
+  def(25, "torch", 0, "none", [drop("torch")], same("torch"), { ...OPEN, lightEmit: LIGHT.TORCH, render: "torch", meta: "torch" }),
   def(26, "furnace", 5, "pickaxe", [drop("furnace")], {
     top: "furnace_top",
     bottom: "furnace_top",
     side: "furnace_side",
     front: "furnace_front",
-  }, PICK_ONLY),
+  }, { ...PICK_ONLY, meta: "facing" }),
   def(27, "glass", 0.45, "none", [], same("glass"), { transparent: true, opaque: false, lightOpacity: 0 }),
-  def(28, "ladder", 0.6, "axe", [drop("ladder")], same("ladder"), { ...OPEN, render: "ladder" }),
+  def(28, "ladder", 0.6, "axe", [drop("ladder")], same("ladder"), { ...OPEN, render: "ladder", meta: "ladder" }),
   def(29, "door", 4.5, "axe", [drop("door")], { top: "door_upper", bottom: "door_lower", side: "door_lower" }, {
     ...OPEN,
     solid: true,
     render: "door",
+    meta: "door",
   }),
   def(30, "farmland", 0.9, "shovel", [drop("dirt")], { top: "farmland", bottom: "dirt", side: "dirt" }, {
     transparent: true,
@@ -118,14 +121,14 @@ const TABLE: BlockDef[] = [
     box: [0, 0, 0, 1, 15 / 16, 1],
     render: "farmland",
   }),
-  def(31, "wheat", 0, "none", [drop("wheat"), drop("seeds")], same("wheat_7"), { ...OPEN, render: "crop" }),
+  def(31, "wheat", 0, "none", [drop("wheat"), drop("seeds")], same("wheat_7"), { ...OPEN, render: "crop", meta: "crop" }),
   def(32, "sapling", 0, "none", [drop("sapling")], same("sapling"), { ...OPEN, render: "cross" }),
   def(33, "bed", 0.3, "none", [drop("bed")], {
     top: "bed_head_top",
     bottom: "planks",
     side: "bed_head_side",
     front: "bed_foot_top", // dùng làm mặt trên nửa chân giường
-  }, { transparent: true, opaque: false, lightOpacity: 0, box: [0, 0, 0, 1, 9 / 16, 1], render: "bed" }),
+  }, { transparent: true, opaque: false, lightOpacity: 0, box: [0, 0, 0, 1, 9 / 16, 1], render: "bed", meta: "bed" }),
   def(34, "deepslate", 12, "pickaxe", [drop("deepslate")], {
     top: "deepslate_top",
     bottom: "deepslate_top",

@@ -65,6 +65,25 @@ export const PLAYER = {
   LAVA_DAMAGE_PER_S: 4,
   LAVA_BURN_AFTER_S: 4,
   DROPPED_ON_DEATH_LIFETIME_S: 300,
+  // Thông số di chuyển bổ sung (DESIGN.md 2.6, Giai đoạn 3)
+  STEP_HEIGHT: 0.6, // tự bước lên bậc thấp hơn mức này
+  TERMINAL_VELOCITY: 60, // block/giây
+  LADDER_UP: 2.4,
+  LADDER_DOWN: 3,
+  SWIM_UP: 3,
+  SWIM_SINK: 2,
+  WATER_SPEED_FACTOR: 0.5, // đi ngang trong nước
+  LAVA_SPEED_FACTOR: 0.3, // đi ngang trong dung nham
+  LAVA_VERTICAL_FACTOR: 0.5, // nổi/chìm trong dung nham so với nước
+  FIRE_DAMAGE_PER_S: 1, // bị cháy sau khi ra khỏi dung nham
+  // độ "bám" vận tốc ngang về vận tốc mong muốn (1/giây): trên đất, trên không, trong chất lỏng
+  ACCEL_GROUND: 20,
+  ACCEL_AIR: 5,
+  ACCEL_LIQUID: 8,
+  SWIM_ACCEL: 6, // tốc độ đổi vận tốc dọc khi bơi (1/giây)
+  FOV: 70, // độ, góc nhìn dọc
+  SPRINT_FOV_FACTOR: 1.1, // chạy nhanh: FOV rộng thêm 10%
+  VIEW_BOB: 0.06, // biên độ lắc camera khi đi (block)
 } as const;
 
 /** Điểm đói hồi lại. Thịt sống 2–3, thịt chín 6–8 (Giai đoạn 4 chốt từng loại). */

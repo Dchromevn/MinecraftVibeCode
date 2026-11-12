@@ -1,9 +1,12 @@
-// Vẽ block hình dạng đặc biệt, chọn hình theo các ô kề (rào nối, ray xoay, thang
-// bám tường, cửa, giường đầu/chân, đất cày).
-import { B, BLOCKS } from "../../../shared/src/index.js";
+// Vẽ block hình dạng đặc biệt theo dữ liệu phụ (DESIGN.md 2.2): đuốc sàn/tường, thang,
+// cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), lúa theo
+// giai đoạn. Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
+import {
+  B, BLOCKS, bedHead, doorSide, doorUpper, railKind, railRot, torchWall,
+} from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
-import { addBox, addCrop, addCross, addFence, addLadder, addRail, addTorch } from "./shapes.js";
+import { addBox, addCrop, addCross, addFence, addLadder, addRail, addTorch, addTorchWall } from "./shapes.js";
 
 export interface SpecialUv {
   blocks: TileUV[][]; // [id][top, bottom, side, front]
@@ -11,6 +14,7 @@ export interface SpecialUv {
   railT: TileUV;
   railCross: TileUV;
   bedFootSide: TileUV;
+  wheat: TileUV[]; // giai đoạn 0..7
 }
 
 const OPAQUE = new Uint8Array(256);
@@ -18,27 +22,17 @@ for (const b of BLOCKS) OPAQUE[b.id] = b.opaque ? 1 : 0;
 
 type At = (x: number, y: number, z: number) => number;
 
-// Ray: bit 1 Bắc (-Z), 2 Đông (+X), 4 Nam (+Z), 8 Tây (-X). Hình gốc (rot 0):
-// thẳng = Bắc+Nam, cong = Nam+Đông, ngã ba = Bắc+Nam+Đông. Xoay 90° theo chiều kim đồng hồ.
-const rotMask = (m: number): number => ((m << 1) | (m >> 3)) & 15;
-function railShape(mask: number): { kind: "straight" | "curve" | "t" | "cross"; rot: number } {
-  const n = [1, 2, 4, 8].filter((b) => mask & b).length;
-  if (n >= 4) return { kind: "cross", rot: 0 };
-  if (n <= 1) return { kind: "straight", rot: mask & (2 | 8) ? 1 : 0 };
-  const bases = n === 3 ? [["t", 1 | 4 | 2]] : [["straight", 1 | 4], ["curve", 4 | 2]];
-  for (const [kind, base] of bases as [string, number][]) {
-    let m = base;
-    for (let rot = 0; rot < 4; rot++) {
-      if (m === mask) return { kind: kind as "straight" | "curve" | "t", rot };
-      m = rotMask(m);
-    }
-  }
-  return { kind: "straight", rot: 0 };
-}
+/** Hướng (0 Nam +Z, 1 Tây −X, 2 Bắc −Z, 3 Đông +X) → tham số side của addLadder (0 +X, 1 −X, 2 +Z, 3 −Z). */
+const LADDER_SIDE = [2, 1, 3, 0] as const;
+/** Tấm dày 3 điểm ảnh sát cạnh theo hướng: [x0, x1, z0, z1]. */
+const PANEL: readonly (readonly [number, number, number, number])[] = [
+  [0, 16, 13, 16], [0, 3, 0, 16], [0, 16, 0, 3], [13, 16, 0, 16],
+];
 
 /** Vẽ block đặc biệt tại (x, y, z) trong chunk; at() đọc block theo tọa độ trong chunk (cho phép -1..16). */
 export function addSpecial(
-  b: GeomBuilder, id: number, x: number, y: number, z: number, at: At, uv: SpecialUv, light: readonly number[],
+  b: GeomBuilder, id: number, meta: number, x: number, y: number, z: number, at: At, uv: SpecialUv,
+  light: readonly number[],
 ): boolean {
   const t = uv.blocks[id]!;
   const def = BLOCKS[id]!;
@@ -47,11 +41,14 @@ export function addSpecial(
       addCross(b, x, y, z, t[2]!, light);
       return true;
     case "crop":
-      addCrop(b, x, y, z, t[2]!, light);
+      addCrop(b, x, y, z, id === B.WHEAT ? uv.wheat[meta & 7]! : t[2]!, light);
       return true;
-    case "torch":
-      addTorch(b, x, y, z, t[2]!, light);
+    case "torch": {
+      const wall = torchWall(meta);
+      if (wall === null) addTorch(b, x, y, z, t[2]!, light);
+      else addTorchWall(b, x, y, z, t[2]!, light, wall);
       return true;
+    }
     case "fence": {
       const joins = (n: number): boolean => n === B.FENCE || OPAQUE[n] === 1;
       const conn = (joins(at(x + 1, y, z)) ? 1 : 0) | (joins(at(x - 1, y, z)) ? 2 : 0)
@@ -60,33 +57,22 @@ export function addSpecial(
       return true;
     }
     case "rail": {
-      const r = (dx: number, dz: number): boolean => at(x + dx, y, z + dz) === B.RAIL;
-      const mask = (r(0, -1) ? 1 : 0) | (r(1, 0) ? 2 : 0) | (r(0, 1) ? 4 : 0) | (r(-1, 0) ? 8 : 0);
-      const s = railShape(mask);
-      const tex = s.kind === "curve" ? uv.railCurved : s.kind === "t" ? uv.railT : s.kind === "cross" ? uv.railCross : t[2]!;
-      addRail(b, x, y, z, tex, light, s.rot);
+      const kind = railKind(meta);
+      const tex = kind === "curve" ? uv.railCurved : kind === "t" ? uv.railT : kind === "cross" ? uv.railCross : t[2]!;
+      addRail(b, x, y, z, tex, light, railRot(meta));
       return true;
     }
-    case "ladder": {
-      // bám vào khối đặc đầu tiên tìm thấy: +X, -X, +Z, -Z
-      const sides: [number, number][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-      const side = Math.max(0, sides.findIndex(([dx, dz]) => OPAQUE[at(x + dx, y, z + dz)] === 1));
-      addLadder(b, x, y, z, t[2]!, light, side);
+    case "ladder":
+      addLadder(b, x, y, z, t[2]!, light, LADDER_SIDE[meta & 3]!);
       return true;
-    }
     case "door": {
-      const upper = at(x, y - 1, z) === B.DOOR;
-      const tex = upper ? t[0]! : t[1]!;
-      // tấm cửa nằm dọc theo bức tường: tường theo trục X thì cửa dày theo Z
-      const wallX = OPAQUE[at(x - 1, y, z)] === 1 || OPAQUE[at(x + 1, y, z)] === 1;
-      const box = { side: tex, top: tex, bottom: tex };
-      if (wallX) addBox(b, x, y, z, 0, 16, 0, 16, 0, 3, box, light);
-      else addBox(b, x, y, z, 0, 3, 0, 16, 0, 16, box, light);
+      const tex = doorUpper(meta) ? t[0]! : t[1]!;
+      const [x0, x1, z0, z1] = PANEL[doorSide(meta)]!;
+      addBox(b, x, y, z, x0, x1, 0, 16, z0, z1, { side: tex, top: tex, bottom: tex }, light);
       return true;
     }
     case "bed": {
-      // cặp giường theo một trục: ô có giường kề ở phía +X/+Z là chân, ô còn lại là đầu
-      const foot = at(x + 1, y, z) === B.BED || at(x, y, z + 1) === B.BED;
+      const foot = !bedHead(meta);
       const top = foot ? t[3]! : t[0]!;
       addBox(b, x, y, z, 0, 16, 0, 9, 0, 16, { top, side: foot ? uv.bedFootSide : t[2]!, bottom: t[1]! }, light);
       return true;

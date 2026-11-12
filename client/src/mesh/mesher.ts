@@ -1,9 +1,9 @@
 // Dựng mesh cho chunk giữa của một vùng 3x3 chunk (đã có ánh sáng), chia thành 8 đoạn
 // 16 block. Chỉ vẽ mặt lộ; AO + ánh sáng mượt theo đỉnh; nước hạ 1/8, tối dần theo độ sâu.
 // Đỉnh theo tọa độ trong chunk (0..16) để giữ chính xác ở xa gốc tọa độ.
-import { B, BLOCKS, CHUNK_HEIGHT } from "../../../shared/src/index.js";
+import { B, BLOCKS, CHUNK_HEIGHT, facingDir, furnaceLit, liquidFalling, liquidLevel } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
-import { regionIndex } from "../light/regionLight.js";
+import { regionIndex, type Region } from "../light/regionLight.js";
 import { GeomBuilder, type MeshArrays } from "./geomBuilder.js";
 import { addSpecial, type SpecialUv } from "./specialBlocks.js";
 import { sectionConnectivity } from "./connectivity.js";
@@ -22,6 +22,8 @@ const FACES: readonly FaceDef[] = [
   { n: [0, 0, 1], u: [1, 0, 0], v: [0, 1, 0], shade: 0.8, slot: 3 },
   { n: [0, 0, -1], u: [-1, 0, 0], v: [0, 1, 0], shade: 0.8, slot: 2 },
 ];
+/** Mặt (chỉ số trong FACES) quay về hướng d: 0 Nam (+Z), 1 Tây (−X), 2 Bắc (−Z), 3 Đông (+X). */
+const FACE_OF_DIR = [4, 1, 5, 0] as const;
 const CORNERS: ReadonlyArray<readonly [number, number]> = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
 const AO_LEVELS = [0.5, 0.68, 0.84, 1.0] as const;
 const LIQUID_TOP = 14 / 16;
@@ -40,6 +42,7 @@ for (const b of BLOCKS) {
 
 export interface UvTable extends SpecialUv {
   snowSide: TileUV;
+  furnaceOn: TileUV;
 }
 
 export function buildUvTable(uv: (name: string) => TileUV): UvTable {
@@ -50,6 +53,8 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     railT: uv("rail_t"),
     railCross: uv("rail_cross"),
     bedFootSide: uv("bed_foot_side"),
+    furnaceOn: uv("furnace_front_on"),
+    wheat: Array.from({ length: 8 }, (_, i) => uv(`wheat_${i}`)),
   };
 }
 
@@ -70,13 +75,22 @@ function underwaterTint(depth: number): readonly [number, number, number] {
   return [0.18 + 0.82 * k, 0.28 + 0.72 * k, 0.5 + 0.5 * k];
 }
 
-/** region: block của vùng 3x3 chunk; light: ánh sáng cùng chỉ số. Trả về 8 đoạn của chunk giữa. */
-export function meshRegion(region: Uint8Array, light: Uint8Array, uvt: UvTable): SectionMesh[] {
+/** Mặt trên chất lỏng theo mức trong dữ liệu phụ (nguồn 14/16, mức càng cao càng thấp). */
+function liquidTop(meta: number): number {
+  if (liquidFalling(meta)) return LIQUID_TOP;
+  return (LIQUID_TOP * (8 - liquidLevel(meta))) / 8;
+}
+
+/** region: block + dữ liệu phụ của vùng 3x3 chunk; light: ánh sáng cùng chỉ số. Trả về 8 đoạn của chunk giữa. */
+export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): SectionMesh[] {
+  const blocks = region.blocks, metas = region.meta;
   const at = (x: number, y: number, z: number): number => {
     if (y >= CHUNK_HEIGHT) return B.AIR;
     if (y < 0) return B.BEDROCK;
-    return region[regionIndex(x + 16, y, z + 16)]!;
+    return blocks[regionIndex(x + 16, y, z + 16)]!;
   };
+  const mt = (x: number, y: number, z: number): number =>
+    y >= CHUNK_HEIGHT || y < 0 ? 0 : metas[regionIndex(x + 16, y, z + 16)]!;
   const sky = (x: number, y: number, z: number): number =>
     y >= CHUNK_HEIGHT ? 15 : y < 0 ? 0 : light[regionIndex(x + 16, y, z + 16)]! >> 4;
   const blk = (x: number, y: number, z: number): number =>
@@ -95,16 +109,20 @@ export function meshRegion(region: Uint8Array, light: Uint8Array, uvt: UvTable):
           const def = BLOCKS[id]!;
           if (def.render === "none") continue;
           const cellLight = [sky(x, y, z) / 15, blk(x, y, z) / 15];
-          if (addSpecial(solid, id, x, y, z, at, uvt, cellLight)) continue;
+          const meta = mt(x, y, z);
+          if (addSpecial(solid, id, meta, x, y, z, at, uvt, cellLight)) continue;
 
           const isWater = id === B.WATER;
           const isLiquid = def.render === "liquid";
           const isLayer = def.render === "layer";
           const builder = isWater ? water : solid;
-          const top = isLiquid ? (at(x, y + 1, z) === id ? 1 : LIQUID_TOP) : isLayer ? LAYER_TOP : 1;
+          const top = isLiquid ? (at(x, y + 1, z) === id ? 1 : liquidTop(meta)) : isLayer ? LAYER_TOP : 1;
+          // block có hướng (lò, rương): mặt trước quay theo dữ liệu phụ
+          const frontFace: number = def.meta === "facing" ? FACE_OF_DIR[facingDir(meta)]! : -1;
           const snowAbove = id === B.GRASS && at(x, y + 1, z) === B.SNOW_LAYER;
 
-          for (const f of FACES) {
+          for (let fi = 0; fi < 6; fi++) {
+            const f = FACES[fi]!;
             const nx = x + f.n[0], ny = y + f.n[1], nz = z + f.n[2];
             if (ny < 0) continue;
             const nid = at(nx, ny, nz);
@@ -116,7 +134,8 @@ export function meshRegion(region: Uint8Array, light: Uint8Array, uvt: UvTable):
 
             const depth = !isWater && nid === B.WATER ? waterDepth(at, nx, ny, nz) : 0;
             const tint = isWater ? WATER_TINT : depth > 0 ? underwaterTint(depth) : NO_TINT;
-            let uv = uvt.blocks[id]![f.slot]!;
+            let uv = uvt.blocks[id]![frontFace < 0 || f.n[1] !== 0 ? f.slot : fi === frontFace ? 3 : 2]!;
+            if (fi === frontFace && id === B.FURNACE && furnaceLit(meta)) uv = uvt.furnaceOn;
             if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
             const vTop = f.n[1] === 0 ? uv.v0 + (uv.v1 - uv.v0) * top : uv.v1;
             const nSky = sky(nx, ny, nz), nBlk = blk(nx, ny, nz);
@@ -161,7 +180,7 @@ export function meshRegion(region: Uint8Array, light: Uint8Array, uvt: UvTable):
         }
       }
     }
-    out.push({ solid: solid.build(), water: water.build(), conn: sectionConnectivity(region, sy, SECTION_H) });
+    out.push({ solid: solid.build(), water: water.build(), conn: sectionConnectivity(blocks, sy, SECTION_H) });
   }
   return out;
 }

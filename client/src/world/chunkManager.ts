@@ -1,6 +1,6 @@
 // Tải / gỡ chunk theo bán kính tầm nhìn quanh camera. Sinh và dựng mesh trong
 // worker; ưu tiên chunk gần và chunk trước mặt. Chunk đã sửa được giữ lại khi gỡ.
-import { Chunk, WORLD, chunkKey, type World } from "../../../shared/src/index.js";
+import { Chunk, WORLD, chunkKey, type ChunkData, type World } from "../../../shared/src/index.js";
 import type { WorkerPool } from "../workers/workerPool.js";
 import type { ChunkMeshes } from "./chunkMeshes.js";
 
@@ -17,7 +17,7 @@ interface Job {
 export class ChunkManager {
   viewDistance: number = WORLD.VIEW_DISTANCE_DEFAULT;
   /** Dữ liệu của chunk đã sửa nhưng đang bị gỡ khỏi bộ nhớ. */
-  readonly saved = new Map<number, Uint8Array>();
+  readonly saved = new Map<number, ChunkData>();
   private readonly generating = new Set<number>();
   private readonly meshing = new Map<number, number>(); // key -> phiên bản đang dựng
   private readonly version = new Map<number, number>(); // tăng khi block đổi
@@ -62,7 +62,7 @@ export class ChunkManager {
     // 1. gỡ chunk và mesh ra ngoài bán kính + 2
     for (const [key, chunk] of this.world.chunks) {
       if (Math.hypot(chunk.cx - ccx, chunk.cz - ccz) <= unloadR + 0.5) continue;
-      if (chunk.modified) this.saved.set(key, chunk.data);
+      if (chunk.modified) this.saved.set(key, { data: chunk.data, meta: chunk.meta });
       this.world.removeChunk(chunk.cx, chunk.cz);
       this.meshes.remove(chunk.cx, chunk.cz);
       this.dirty.delete(key);
@@ -129,7 +129,7 @@ export class ChunkManager {
       this.generating.delete(key);
       if (msg.type !== "gen" || this.world.chunks.has(key)) return;
       // chunk ở xa (camera đã đi khỏi) sẽ bị gỡ ở lần cập nhật sau
-      this.world.addChunk(new Chunk(cx, cz, msg.data));
+      this.world.addChunk(new Chunk(cx, cz, msg.chunk));
     });
   }
 
@@ -140,10 +140,14 @@ export class ChunkManager {
     this.dirty.delete(key);
     this.urgent.delete(key);
     // bản sao 3x3 chunk (worker tính ánh sáng cả vùng rồi dựng chunk giữa)
-    const chunks: (Uint8Array | null)[] = [];
+    const chunks: (ChunkData | null)[] = [];
     for (let dz = -1; dz <= 1; dz++)
-      for (let dx = -1; dx <= 1; dx++) chunks.push(this.world.getChunk(cx + dx, cz + dz)?.data.slice() ?? null);
-    const transfer = chunks.filter((c): c is Uint8Array => c !== null).map((c) => c.buffer as ArrayBuffer);
+      for (let dx = -1; dx <= 1; dx++) {
+        const c = this.world.getChunk(cx + dx, cz + dz);
+        chunks.push(c ? { data: c.data.slice(), meta: c.meta.slice() } : null);
+      }
+    const transfer: ArrayBuffer[] = [];
+    for (const c of chunks) if (c) transfer.push(c.data.buffer as ArrayBuffer, c.meta.buffer as ArrayBuffer);
     this.pool.run(
       { type: "mesh", cx, cz, chunks },
       (msg) => {

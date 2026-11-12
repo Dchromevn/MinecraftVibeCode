@@ -2,7 +2,7 @@
 // nên mọi chunk sinh ra đều khớp nhau ở ranh giới.
 import { TERRAIN, WORLD } from "../constants.js";
 import { B, type BlockId } from "../blocks.js";
-import { CHUNK_HEIGHT, CHUNK_VOLUME, blockIndex } from "../chunk.js";
+import { CHUNK_HEIGHT, blockIndex, emptyChunkData, type ChunkData } from "../chunk.js";
 import { BIOME, TerrainSampler, hasGrassSurface, type Column } from "./terrainSampler.js";
 import { placeTallGrass, placeTrees } from "./trees.js";
 import { placeSprings } from "./springs.js";
@@ -29,8 +29,9 @@ export class ChunkGenerator {
     this.mineshafts = new MineshaftPlanner(this);
   }
 
-  generate(cx: number, cz: number): Uint8Array {
-    const data = new Uint8Array(CHUNK_VOLUME);
+  /** id block + dữ liệu phụ của chunk (cx, cz). */
+  generate(cx: number, cz: number): ChunkData {
+    const { data, meta } = emptyChunkData();
     const cols: Column[] = [];
     for (let lz = 0; lz < 16; lz++)
       for (let lx = 0; lx < 16; lx++) {
@@ -41,12 +42,12 @@ export class ChunkGenerator {
     placeOres(this.seed, data, cx, cz); // trước khi đục hang để quặng lộ ra trên vách
     placeEmeralds(this.sampler, data, cx, cz);
     carveChunk(this, data, cx, cz, cols);
-    this.mineshafts.apply(data, cx, cz);
+    this.mineshafts.apply(data, meta, cx, cz); // ray, đuốc ghi dữ liệu phụ ngay khi sinh
     placeTrees(this, data, cx, cz);
     placeTallGrass(this, data, cx, cz, cols);
     placeSprings(this.sampler, data, cx, cz, cols);
     placeCaveSprings(this.seed, data, cx, cz, cols);
-    return data;
+    return { data, meta };
   }
 
   private fillColumn(data: Uint8Array, lx: number, lz: number, col: Column, wx: number, wz: number): void {

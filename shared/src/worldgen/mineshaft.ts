@@ -3,13 +3,14 @@
 import { MINESHAFT as M } from "../constants.js";
 import { B } from "../blocks.js";
 import { blockIndex, chunkKey } from "../chunk.js";
+import { railMetaFromNeighbors } from "../blockMeta.js";
 import { hashInts, mulberry32, randInt } from "../rng.js";
 import type { ChunkGenerator } from "./chunkGen.js";
 import { mineshaftCenter } from "./mineshaftCenter.js";
 import { naturalBlock } from "./natural.js";
 import { DX, DZ, carveAir, ensureFloor, putCorridorSlice, type Ctx, type Piece } from "./mineshaftParts.js";
 
-/** Thay đổi theo chunk: mỗi số = chỉ số trong chunk * 256 + id block. */
+/** Thay đổi theo chunk: mỗi số = (chỉ số trong chunk << 16) | (dữ liệu phụ << 8) | id block. */
 type Plan = Map<number, number[]>;
 
 function genRoom(ctx: Ctx, x: number, y: number, z: number): void {
@@ -76,12 +77,17 @@ function genCrossing(ctx: Ctx, p: Piece): void {
       ensureFloor(ctx, cx + ox, p.y, cz + oz, B.PLANKS, false);
       if (rng() < M.WEB_CHANCE_JUNCTION) ctx.set(cx + ox, p.y + tall - 1, cz + oz, B.COBWEB);
     }
-  // ray ở giữa ngã rẽ để vẽ thành ngã ba / ngã tư
-  if (rng() < M.RAIL_CHANCE) ctx.set(cx, p.y, cz, B.RAIL);
+  // ray giữa ngã rẽ nối với hành lang đi tới và từng nhánh mới → thẳng / cong / ngã ba / ngã tư
+  const rail = rng() < M.RAIL_CHANCE;
+  if (rail) {
+    ctx.set(cx, p.y, cz, B.RAIL);
+    ctx.set(cx - DX[p.dir]!, p.y, cz - DZ[p.dir]!, B.RAIL);
+  }
   let spawned = 0;
   for (const d of [p.dir, (p.dir + 1) & 3, (p.dir + 3) & 3]) {
     if (rng() > 0.65 || ctx.pieces + ctx.queue.length >= M.MAX_PIECES) continue;
     ctx.queue.push({ kind: "corridor", x: cx + DX[d]! * 2, y: p.y, z: cz + DZ[d]! * 2, dir: d, depth: p.depth + 1 });
+    if (rail) ctx.set(cx + DX[d]!, p.y, cz + DZ[d]!, B.RAIL);
     spawned++;
   }
   if (spawned === 0) deadEnd(ctx, cx, p.y, cz);
@@ -116,15 +122,18 @@ export class MineshaftPlanner {
 
   constructor(private readonly gen: ChunkGenerator) {}
 
-  /** Đặt các block hầm mỏ thuộc chunk (cx, cz) vào data. */
-  apply(data: Uint8Array, cx: number, cz: number): void {
+  /** Đặt các block hầm mỏ thuộc chunk (cx, cz) vào data / meta. */
+  apply(data: Uint8Array, meta: Uint8Array, cx: number, cz: number): void {
     const R = M.REGION, reach = M.MAX_RADIUS + 8;
     const key = chunkKey(cx, cz);
     for (let rz = Math.floor((cz * 16 - reach) / R); rz <= Math.floor((cz * 16 + 16 + reach) / R); rz++)
       for (let rx = Math.floor((cx * 16 - reach) / R); rx <= Math.floor((cx * 16 + 16 + reach) / R); rx++) {
         const ops = this.plan(rx, rz).get(key);
         if (!ops) continue;
-        for (const op of ops) data[op >> 8] = op & 255;
+        for (const op of ops) {
+          data[op >>> 16] = op & 255;
+          meta[op >>> 16] = (op >> 8) & 255;
+        }
       }
   }
 
@@ -169,13 +178,16 @@ export class MineshaftPlanner {
       else if (p.kind === "crossing") genCrossing(ctx, p);
       else genStairs(ctx, p);
     }
+    // ray: chọn thẳng/cong/ngã rẽ ngay lúc sinh theo các ray kề trong kế hoạch
+    const isRail = (x: number, y: number, z: number): boolean => overlay.get(`${x},${y},${z}`) === B.RAIL;
     for (const [k, id] of overlay) {
       const [x, y, z] = k.split(",").map(Number) as [number, number, number];
       if (y < 0 || y > 127) continue;
       const ck = chunkKey(x >> 4, z >> 4);
       let list = plan.get(ck);
       if (!list) plan.set(ck, (list = []));
-      list.push((blockIndex(x & 15, y, z & 15) << 8) | id);
+      const meta = id === B.RAIL ? railMetaFromNeighbors((dx, dz) => isRail(x + dx, y, z + dz)) : 0;
+      list.push((blockIndex(x & 15, y, z & 15) << 16) | (meta << 8) | id);
     }
     return plan;
   }

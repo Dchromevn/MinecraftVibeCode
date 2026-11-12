@@ -1,8 +1,9 @@
-// Giai đoạn 2a/2b: thế giới vô hạn có biome, hang động, hầm mỏ, ánh sáng; tải chunk theo
-// tầm nhìn, sinh/ánh sáng/dựng mesh trong Web Worker; camera bay + phá/đặt block để debug.
-// Tham số URL: ?seed= ?pos=x,y,z ?look=yaw,pitch ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
+// Giai đoạn 3a: người chơi đi bộ có vật lý (bơi, thang, mạng nhện), chế độ bay debug (F),
+// dữ liệu phụ của block; thế giới vô hạn sinh/ánh sáng/dựng mesh trong Web Worker.
+// Tham số URL: ?seed= ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
+// ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
-import { BLOCKS, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
+import { BLOCKS, PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
@@ -13,10 +14,13 @@ import { WorkerPool } from "./workers/workerPool.js";
 import { ChunkMeshes } from "./world/chunkMeshes.js";
 import { ChunkManager } from "./world/chunkManager.js";
 import { BlockEditor } from "./debug/blockEditor.js";
+import { PlayerController } from "./player/playerController.js";
+import { ViewEffects } from "./player/viewEffects.js";
 
 const EXTRA_TEXTURES = [
   "crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side",
-  "rail_curved", "rail_t", "rail_cross", "bed_foot_side",
+  "rail_curved", "rail_t", "rail_cross", "bed_foot_side", "furnace_front_on",
+  "wheat_0", "wheat_1", "wheat_2", "wheat_3", "wheat_4", "wheat_5", "wheat_6",
 ];
 const NIGHT_VISION = 0.45; // độ sáng tối thiểu khi bật nhìn đêm (debug)
 
@@ -36,6 +40,17 @@ function findSpawn(sampler: TerrainSampler): { x: number; z: number; h: number }
     }
   }
   return { x: 0, z: 0, h: WORLD.SEA_LEVEL };
+}
+
+/** Dòng HUD về người chơi: chế độ, trạng thái vật lý, máu. */
+function playerLine(p: PlayerController): string {
+  if (p.flying) return `${STR.hudMode}: ${STR.modeFlying} (F)`;
+  const s = p.state;
+  const flags = [
+    s.frozen && STR.stateFrozen, s.onGround && STR.stateGround, s.inWater && STR.stateWater,
+    s.inLava && STR.stateLava, s.onLadder && STR.stateLadder, s.inWeb && STR.stateWeb, s.burnS > 0 && STR.stateBurning,
+  ].filter(Boolean);
+  return `${STR.hudMode}: ${STR.modeWalking} (F) · ${flags.join(", ") || STR.stateAir} · ${STR.hudHealth}: ${s.health.toFixed(1)}/${PLAYER.MAX_HEALTH}`;
 }
 
 function heapMb(): string {
@@ -59,7 +74,7 @@ async function main(): Promise<void> {
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 2000);
+  const camera = new THREE.PerspectiveCamera(PLAYER.FOV, window.innerWidth / window.innerHeight, 0.1, 2000);
   const sky = createSky(1000);
   scene.add(sky.mesh);
 
@@ -73,15 +88,17 @@ async function main(): Promise<void> {
   if (Number.isFinite(vd) && vd > 0) {
     chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, vd));
   }
+  const effects = new ViewEffects(scene, camera, world);
   const applyViewDistance = (): void => {
     scene.fog = createFog(chunks.viewDistance * 16);
+    effects.fogChanged();
   };
   applyViewDistance();
 
+  // mặc định đi bộ từ mặt đất gần gốc; ?pos= bắt đầu ở chế độ bay (để chụp/kiểm tra)
   const spawn = findSpawn(sampler);
-  camera.position.set(spawn.x + 0.5, spawn.h + 12, spawn.z + 0.5);
+  camera.position.set(spawn.x + 0.5, spawn.h + 1 + PLAYER.EYE_HEIGHT, spawn.z + 0.5);
   const fly = new FlyCamera(camera, renderer.domElement);
-  fly.pitch = -0.35;
   const pos = readVec(params, "pos", 3);
   if (pos) camera.position.set(pos[0]!, pos[1]!, pos[2]!);
   const look = readVec(params, "look", 2);
@@ -89,13 +106,21 @@ async function main(): Promise<void> {
     fly.yaw = look[0]!;
     fly.pitch = look[1]!;
   }
+  const startFlying = params.get("fly") === "1" || (!!pos && params.get("walk") !== "1");
+  const player = new PlayerController(world, fly, camera, startFlying);
+  fly.applyRotation();
 
-  const editor = new BlockEditor(scene, world, camera, () => fly.locked, (x, _y, z) => chunks.onBlockChanged(x, z));
+  const editor = new BlockEditor(
+    scene, world,
+    { camera, yaw: () => fly.yaw, locked: () => fly.locked, flying: () => player.flying },
+    (x, _y, z) => chunks.onBlockChanged(x, z),
+  );
   // debug: cho script kiểm tra điều khiển camera / sửa block từ ngoài (?debug=1);
   // autopilot = vận tốc tự bay (block/giây), áp trong vòng lặp khung hình
   const autopilot = { vx: 0, vz: 0 };
   if (params.get("debug") === "1") {
-    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot };
+    player.debugInput = true;
+    (window as unknown as Record<string, unknown>).__game = { camera, chunks, world, meshes, renderer, autopilot, player, fly };
   }
 
   if (params.get("nv") === "1") meshes.uniforms.uMinLight.value = NIGHT_VISION;
@@ -126,9 +151,12 @@ async function main(): Promise<void> {
   function frame(now: number): void {
     const dt = Math.min(0.1, (now - prev) / 1000);
     prev = now;
-    fly.update(dt);
-    camera.position.x += autopilot.vx * dt;
-    camera.position.z += autopilot.vz * dt;
+    player.update(dt);
+    if (player.flying) {
+      camera.position.x += autopilot.vx * dt;
+      camera.position.z += autopilot.vz * dt;
+    }
+    effects.update(dt, player.sprinting);
     camera.updateMatrixWorld();
     camera.getWorldDirection(dir);
     chunks.update(camera.position.x, camera.position.z, dir.x, dir.z);
@@ -152,6 +180,7 @@ async function main(): Promise<void> {
         `${STR.hudViewDistance}: ${chunks.viewDistance} chunk ([ ]) · ${STR.hudCulling}: ${meshes.culling ? STR.on : STR.off} (F4) · ${STR.hudNightVision}: ${meshes.uniforms.uMinLight.value > 0 ? STR.on : STR.off} (N)`,
         `${STR.hudTriangles}: ${renderer.info.render.triangles} · ${STR.hudDrawCalls}: ${renderer.info.render.calls} · ${STR.hudMemory}: ${heapMb()}`,
         `${STR.hudSeed}: ${seedText} (${seed})`,
+        playerLine(player),
         `${STR.hudSelected}: ${STR.blocks[sel.key] ?? sel.key}`,
         atlas.missing.length ? `${STR.hudMissingTextures}: ${atlas.missing.join(", ")}` : "",
       ]);

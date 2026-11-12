@@ -1,4 +1,5 @@
-// Chunk 16 x 128 x 16, mỗi block 1 byte. Nhận diện bằng (cx, cz).
+// Chunk 16 x 128 x 16: mỗi block 1 byte id + 1 byte dữ liệu phụ (hai mảng song song).
+// Nhận diện bằng (cx, cz).
 import { WORLD } from "./constants.js";
 import type { BlockId } from "./blocks.js";
 
@@ -20,23 +21,41 @@ export function keyToCoord(key: number): { cx: number; cz: number } {
   return { cx: Math.floor(key / 0x10000) - 0x8000, cz: (key % 0x10000) - 0x8000 };
 }
 
-export class Chunk {
+/** Dữ liệu thô của một chunk: id block và dữ liệu phụ cùng chỉ số. */
+export interface ChunkData {
+  data: Uint8Array;
+  meta: Uint8Array;
+}
+
+export function emptyChunkData(): ChunkData {
+  return { data: new Uint8Array(CHUNK_VOLUME), meta: new Uint8Array(CHUNK_VOLUME) };
+}
+
+export class Chunk implements ChunkData {
   /** Đã bị sửa so với bản sinh gốc (phải giữ lại khi gỡ khỏi bộ nhớ). */
   modified = false;
+  readonly data: Uint8Array;
+  readonly meta: Uint8Array;
 
-  constructor(
-    readonly cx: number,
-    readonly cz: number,
-    readonly data: Uint8Array = new Uint8Array(CHUNK_VOLUME),
-  ) {}
+  constructor(readonly cx: number, readonly cz: number, src: ChunkData = emptyChunkData()) {
+    this.data = src.data;
+    this.meta = src.meta;
+  }
 
   /** Tọa độ cục bộ 0..15, 0..127. Không kiểm tra biên. */
   get(x: number, y: number, z: number): BlockId {
     return this.data[blockIndex(x, y, z)] as BlockId;
   }
 
-  set(x: number, y: number, z: number, id: BlockId): void {
-    this.data[blockIndex(x, y, z)] = id;
+  getMeta(x: number, y: number, z: number): number {
+    return this.meta[blockIndex(x, y, z)]!;
+  }
+
+  /** Ghi id + dữ liệu phụ (dữ liệu phụ đã được làm sạch ở World.setBlock). */
+  set(x: number, y: number, z: number, id: BlockId, meta = 0): void {
+    const i = blockIndex(x, y, z);
+    this.data[i] = id;
+    this.meta[i] = meta;
   }
 
   get key(): number {

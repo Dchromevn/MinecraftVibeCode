@@ -1,5 +1,6 @@
 // Hình dạng không phải khối đầy: chữ X, #, hộp nhỏ (rào, đuốc, cửa, giường, đất cày),
 // tấm sát sàn (ray), tấm sát tường (thang). Ánh sáng lấy từ chính ô đó.
+import { rotXZ } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
 
@@ -146,4 +147,29 @@ export function addLadder(b: GeomBuilder, x: number, y: number, z: number, uv: T
   face(b, p, u0, v0, u1, v1);
   // mặt sau (đảo thứ tự đỉnh)
   face(b, [p[3]!, p[4]!, p[5]!, p[0]!, p[1]!, p[2]!, p[9]!, p[10]!, p[11]!, p[6]!, p[7]!, p[8]!], u1, v0, u0, v1);
+}
+
+/**
+ * Đuốc gắn tường ở hướng wall (0 Nam +Z, 1 Tây −X, 2 Bắc −Z, 3 Đông +X): chân sát tường,
+ * cao hơn sàn 3 điểm ảnh, nghiêng ra ngoài ~22°. Dựng cho tường phía +Z rồi xoay theo hướng.
+ */
+export function addTorchWall(
+  b: GeomBuilder, x: number, y: number, z: number, uv: TileUV, light: readonly number[], wall: number,
+): void {
+  const th = 0.38, c = Math.cos(th), s = Math.sin(th);
+  const bx = 0.5, by = 3 / 16, bz = 1 - 1.2 / 16;
+  // (u ngang, h dọc thân đuốc, w dày) → tọa độ thế giới
+  const P = (u: number, h: number, w: number): number[] => {
+    const [rx, rz] = rotXZ(bx + u, bz - h * s + w * c, wall);
+    return [x + rx, y + by + h * c + w * s, z + rz];
+  };
+  const a = 1 / 16, H = 10 / 16;
+  const [su0, sv0, su1, sv1] = sub(uv, 7, 0, 9, 10);
+  const [tu0, tv0, tu1, tv1] = sub(uv, 7, 8, 9, 10);
+  setLight([light[0]!, 1], 0.9);
+  face(b, [...P(-a, H, a), ...P(a, H, a), ...P(a, H, -a), ...P(-a, H, -a)], tu0, tv0, tu1, tv1);
+  face(b, [...P(a, 0, a), ...P(a, 0, -a), ...P(a, H, -a), ...P(a, H, a)], su0, sv0, su1, sv1);
+  face(b, [...P(-a, 0, -a), ...P(-a, 0, a), ...P(-a, H, a), ...P(-a, H, -a)], su0, sv0, su1, sv1);
+  face(b, [...P(-a, 0, a), ...P(a, 0, a), ...P(a, H, a), ...P(-a, H, a)], su0, sv0, su1, sv1);
+  face(b, [...P(a, 0, -a), ...P(-a, 0, -a), ...P(-a, H, -a), ...P(a, H, -a)], su0, sv0, su1, sv1);
 }

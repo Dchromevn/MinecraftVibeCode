@@ -1,6 +1,8 @@
 // World vô hạn: bảng băm chunk theo (cx, cz). Chunk chưa tải coi như không khí.
+// Mỗi ô có id + dữ liệu phụ; getCell trả cả hai trong một số (xem blockMeta.ts).
 import { B, type BlockId } from "./blocks.js";
-import { Chunk, CHUNK_HEIGHT, chunkKey } from "./chunk.js";
+import { Chunk, CHUNK_HEIGHT, chunkKey, blockIndex } from "./chunk.js";
+import { makeCell, sanitizeMeta } from "./blockMeta.js";
 
 export interface ChunkCoord {
   cx: number;
@@ -34,16 +36,35 @@ export class World {
     return c ? c.get(x & 15, y, z & 15) : B.AIR;
   }
 
+  /** Dữ liệu phụ; ngoài chiều cao hoặc chunk chưa tải: 0. */
+  getMeta(x: number, y: number, z: number): number {
+    if (y < 0 || y >= CHUNK_HEIGHT) return 0;
+    const c = this.chunks.get(chunkKey(x >> 4, z >> 4));
+    return c ? c.getMeta(x & 15, y, z & 15) : 0;
+  }
+
+  /** id | dữ liệu phụ << 8 (cellId / cellMeta để tách). Chunk chưa tải: -1. */
+  getCell(x: number, y: number, z: number): number {
+    if (y < 0 || y >= CHUNK_HEIGHT) return B.AIR;
+    const c = this.chunks.get(chunkKey(x >> 4, z >> 4));
+    if (!c) return -1;
+    const i = blockIndex(x & 15, y, z & 15);
+    return makeCell(c.data[i]!, c.meta[i]!);
+  }
+
   isLoaded(x: number, z: number): boolean {
     return this.chunks.has(chunkKey(x >> 4, z >> 4));
   }
 
-  /** Trả về false nếu ngoài chiều cao hoặc chunk chưa tải. Đánh dấu chunk đã sửa. */
-  setBlock(x: number, y: number, z: number, id: BlockId): boolean {
+  /**
+   * Ghi id + dữ liệu phụ (bit không dùng bị bỏ; block không có dữ liệu phụ luôn 0).
+   * Trả về false nếu ngoài chiều cao hoặc chunk chưa tải. Đánh dấu chunk đã sửa.
+   */
+  setBlock(x: number, y: number, z: number, id: BlockId, meta = 0): boolean {
     if (y < 0 || y >= CHUNK_HEIGHT) return false;
     const c = this.chunks.get(chunkKey(x >> 4, z >> 4));
     if (!c) return false;
-    c.set(x & 15, y, z & 15, id);
+    c.set(x & 15, y, z & 15, id, sanitizeMeta(id, meta));
     c.modified = true;
     return true;
   }

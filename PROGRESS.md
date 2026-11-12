@@ -11,7 +11,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 1 | Thế giới voxel cơ bản (bản cố định) | xong (theo PLAN.md mới) |
 | 2a | Thế giới vô hạn và biome | xong (người dùng bảo "tiếp" sau khi sửa lỗi, 2026-11-11) |
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
-| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | đang làm |
+| 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | chờ người dùng test |
 | 3b | Đào, đặt, chỗ bám, cát rơi | chưa làm |
 | 4 | Vật phẩm, chế tạo, lò nung, sinh tồn, trồng trọt | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
@@ -289,3 +289,47 @@ Số đo (seed voxel / abc, cùng script trước và sau):
 - Ảnh chụp: quặng vàng trong hang ở `?seed=voxel&pos=23.5,22.6,6.5&look=-3.14,-0.29&nv=1`, ngọc lục bảo ở `?seed=voxel&pos=35.5,31.6,53.5&look=-1.57,0.24&nv=1`.
 - Vấn đề: không hầm mỏ nào chạm giới hạn 70 đoạn (trung bình ~19, lớn nhất 47) vì nhánh tự tắt (giới hạn độ sâu 10, nhánh cụt, ngã rẽ bỏ nhánh 35%), nên mỗi hầm mỏ chỉ ~15 chunk, không lớn hơn trước. Muốn hầm mỏ to hơn thì phải chỉnh xác suất rẽ nhánh.
 - Thế giới cũ của cùng seed đổi theo (quặng, hầm mỏ, hồ ngầm). Chưa có dữ liệu lưu trên server nên không cần chuyển đổi.
+
+## Giai đoạn 3a — Dữ liệu phụ, vật lý người chơi, hình dạng block (2026-11-12)
+
+Trạng thái: chờ người dùng test. Người dùng chọn: lớp dữ liệu phụ (phương án A), bỏ
+giai đoạn 2c (nước chảy ở Giai đoạn 4), phá tức thì chỉ khi bay (3b), quy tắc chỗ bám (3b),
+thông số di chuyển ghi trong DESIGN.md 2.6.
+
+### File đã tạo / sửa
+
+- `shared/src/blocks.ts` (MetaKind, META_MASK — ý nghĩa byte dữ liệu phụ), `blockTable.ts` (gán kiểu).
+- `shared/src/blockMeta.ts` (mới) — ô = id | dữ liệu phụ << 8, hướng ngang, mã hóa/giải mã từng kiểu, hình ray (chuyển từ client), ánh sáng lò đang cháy.
+- `shared/src/chunk.ts`, `world.ts` — mảng dữ liệu phụ song song; `getCell`, `getMeta`, `setBlock(x, y, z, id, meta)` (làm sạch bit không dùng).
+- `shared/src/blockShapes.ts` (mới) — hộp va chạm (rào nối cao 1.5, cửa theo hướng/mở, đất cày, giường) và hộp nhắm (đuốc sàn/tường, thang, ray, cây, lúa theo giai đoạn).
+- `shared/src/raycast.ts` — trúng đúng hộp nhắm, trả về cả ô (id + dữ liệu phụ).
+- `shared/src/collide.ts`, `physics.ts` (mới) — va chạm từng trục, bước lên 0.6, ngồi không rơi mép, nhảy, bơi, thang, mạng nhện, dung nham/cháy, đứng yên khi chunk chưa tải.
+- `shared/src/placement.ts` (mới) — dữ liệu phụ khi đặt (đuốc/thang theo mặt bấm, cửa/giường 2 ô, lò/rương quay về người chơi), ray tự nối, ô còn lại của cửa/giường.
+- `shared/src/gameplay.ts` — thông số di chuyển mới; `worldgen/chunkGen.ts` (trả id + dữ liệu phụ), `worldgen/mineshaft.ts` (ray ghi dạng ngay khi sinh; ngã rẽ nối ray với hành lang nên có ray cong/ngã ba/ngã tư).
+- `client/src/player/playerController.ts`, `viewEffects.ts` (mới) — bước vật lý 60 Hz + nội suy, lắc camera, phím F bay, FOV khi chạy, ám màu/sương dưới nước và dung nham.
+- `client/src/mesh/{mesher,specialBlocks,shapes}.ts` — vẽ theo dữ liệu phụ (đuốc tường nghiêng, thang, cửa, ray, giường, lúa theo giai đoạn, mặt trước lò/rương, lò cháy, mặt nước theo mức).
+- `client/src/light/regionLight.ts`, `workers/*`, `world/chunkManager.ts` — gửi/nhận dữ liệu phụ, lò đang cháy phát sáng 13.
+- `client/src/debug/blockEditor.ts` — khung viền đúng hình, ghi dữ liệu phụ khi đặt, phá cửa/giường mất cả hai nửa; `flyCamera.ts`, `main.ts`, `strings.ts`, `index.html` (tâm ngắm, lớp ám màu).
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng.
+- Kiểm tra vật lý tự động 25/25 đạt: đỉnh nhảy 1.25; nhảy lên block cao 1 được, cao 2 không; không qua được dãy rào, không lách giữa cột rào; áp tường không rung (dao động 0), vào góc không xuyên và ra được; rơi 120 block không xuyên; từ đất cày bước lên đá, tự bước lên giường; ngồi dừng ở mép; leo thang 2.4 b/s, Shift đứng yên, tụt ≤ 3 b/s; chìm 2 b/s, Space nổi lên, bơi lên bờ cao 1; mạng nhện ~25%; dung nham 4 máu/giây; chunk chưa tải thì đứng yên; cửa đóng chặn, cửa mở đi qua.
+- Sinh thế giới xác định cả id lẫn dữ liệu phụ (2 seed); 0 ô nước hở / thủng. Ray trong 40x40 chunk: 1.116 thẳng, 5 cong, 6 ngã ba, 6 ngã tư; đuốc hầm mỏ dữ liệu phụ 0 (cắm trên cột). Tốc độ sinh chunk không đổi so với trước.
+- Trình duyệt headless: bắt đầu đi bộ trên đất; chạy + nhảy 3 giây đi ~16 block, FOV tăng; rơi xuống biển thì ám xanh; tường thử: đuốc tường nghiêng, đuốc sàn, thang, cửa 2 ô, lò đang cháy, rương quay đúng hướng; khung viền ray là tấm mỏng.
+
+### Cần người dùng kiểm tra
+
+- Đi, chạy (Ctrl), nhảy, áp tường, vào góc: không xuyên, không kẹt, không rung.
+- Nhảy lên block cao 1 được, cao 2 không, không qua hàng rào; ngồi (Shift) ở mép không rơi.
+- Bơi (Space nổi lên, lên bờ), leo thang (W áp vào thang hoặc Space; Shift đứng yên), đi qua mạng nhện.
+- Đặt đuốc lên tường (nghiêng) và lên sàn; đặt thang, cửa, giường, lò, rương, ray (tự nối, cong); hầm mỏ có ray cong/ngã rẽ.
+- Phím F bật/tắt bay; tâm ngắm; camera lắc khi đi; màn hình ám xanh dưới nước.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Ray cong/ngã rẽ trong hầm mỏ vẫn hiếm (~1,5% số ray) vì phần lớn hệ thống là hành lang thẳng.
+- Mặt trên giường chưa xoay theo hướng (gối luôn cùng một phía); mặt nước theo mức chỉ phẳng từng ô (dốc mượt làm ở Giai đoạn 4 cùng nước chảy).
+- Công cụ debug vẫn phá tức thì, chưa kiểm tra chỗ bám, đặt lúa ở giai đoạn chín: Giai đoạn 3b thay bằng đào/đặt thật.
+- Chưa có sát thương rơi (Giai đoạn 4 cùng thanh máu); ngồi chưa hạ camera.
+- Thêm `?walk=1` / `?fly=1`; `?pos=` mặc định bắt đầu ở chế độ bay. `?debug=1` cho script nhấn phím không cần khóa chuột.

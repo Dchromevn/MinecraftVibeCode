@@ -1,7 +1,7 @@
 // Ánh sáng 16 mức cho một vùng 3x3 chunk (48 x 128 x 48), tính trong worker.
 // Ánh sáng lan tối đa 14 ô nên chunk giữa của vùng luôn đúng tuyệt đối — không cần
 // lưu ánh sáng xuyên chunk. Mỗi byte: 4 bit cao = trời, 4 bit thấp = block.
-import { BLOCKS, CHUNK_HEIGHT } from "../../../shared/src/index.js";
+import { B, BLOCKS, CHUNK_HEIGHT, lightEmitOf, type ChunkData } from "../../../shared/src/index.js";
 
 export const RW = 48; // bề rộng vùng (3 chunk)
 export const RH = CHUNK_HEIGHT;
@@ -39,8 +39,14 @@ class IntQueue {
   }
 }
 
-/** blocks: id block của vùng (regionIndex). Trả về ánh sáng cùng chỉ số. */
-export function computeRegionLight(blocks: Uint8Array): Uint8Array {
+/** Vùng 3x3 chunk: id block và dữ liệu phụ theo regionIndex. */
+export interface Region {
+  blocks: Uint8Array;
+  meta: Uint8Array;
+}
+
+/** Trả về ánh sáng cùng chỉ số với vùng. */
+export function computeRegionLight({ blocks, meta }: Region): Uint8Array {
   const light = new Uint8Array(blocks.length);
   const skyQ = new IntQueue();
   const blockQ = new IntQueue();
@@ -54,7 +60,7 @@ export function computeRegionLight(blocks: Uint8Array): Uint8Array {
         const id = blocks[i]!;
         const op = OPACITY[id]!;
         level = op >= 15 ? 0 : Math.max(0, level - op);
-        const emit = EMIT[id]!;
+        const emit = id === B.FURNACE ? lightEmitOf(id, meta[i]!) : EMIT[id]!; // lò chỉ sáng khi cháy
         light[i] = (level << 4) | emit;
         if (emit > 1) blockQ.push(i);
       }
@@ -110,8 +116,9 @@ function flood(blocks: Uint8Array, light: Uint8Array, q: IntQueue, shift: number
 }
 
 /** Ghép 3x3 chunk (thứ tự dz rồi dx, từ -1 tới 1) thành một vùng. Thiếu chunk = không khí. */
-export function buildRegion(chunks: (Uint8Array | null)[]): Uint8Array {
-  const out = new Uint8Array(RW * RW * RH);
+export function buildRegion(chunks: (ChunkData | null)[]): Region {
+  const blocks = new Uint8Array(RW * RW * RH);
+  const meta = new Uint8Array(RW * RW * RH);
   for (let dz = 0; dz < 3; dz++)
     for (let dx = 0; dx < 3; dx++) {
       const c = chunks[dz * 3 + dx];
@@ -120,8 +127,9 @@ export function buildRegion(chunks: (Uint8Array | null)[]): Uint8Array {
         for (let lz = 0; lz < 16; lz++) {
           const src = (y * 16 + lz) * 16;
           const dst = regionIndex(dx * 16, y, dz * 16 + lz);
-          out.set(c.subarray(src, src + 16), dst);
+          blocks.set(c.data.subarray(src, src + 16), dst);
+          meta.set(c.meta.subarray(src, src + 16), dst);
         }
     }
-  return out;
+  return { blocks, meta };
 }
