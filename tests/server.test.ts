@@ -79,6 +79,26 @@ send(a, { t: "inv", seq: 9, a: { t: "close" } });
 const ent = game.entities.get(chx, chy, chz) as { slots: ({ item: string } | null)[] } | undefined;
 check("đóng rương: đồ nằm lại trong rương", !!ent?.slots.some((s) => s?.item === "cobble"));
 
+// nhảy cột: server kiểm tra chỗ đặt theo vị trí người chơi mà client gửi ngay trước lệnh đặt
+{
+  const py = Math.floor(sp.y) + 3, px = gx + 6, pz = gz;
+  const pp = game.online().find((p) => p.name === "Binh")!;
+  game.w.setCell(px, py - 1, pz, B.STONE, 0);
+  for (let y = py; y <= py + 4; y++) game.w.setCell(px, y, pz, B.AIR, 0); // cột trống (chỗ thử có thể nằm trong đồi)
+  pp.inv.main[6] = { item: "cobble", count: 5, damage: 0 };
+  send(b, { t: "inv", seq: 2, a: { t: "select", n: 6 } });
+  const mv = (y: number): void => send(b, { t: "move", x: px + 0.5, y, z: pz + 0.5, yaw: 0, pitch: -1.5, flying: false, sneaking: false, swing: 0, health: 20, dead: false });
+  const place = (): void => send(b, { t: "use", hit: { x: px, y: py - 1, z: pz, nx: 0, ny: 1, nz: 0 }, src: null, sneaking: false, yaw: 0 });
+  mv(py);
+  place(); // server còn thấy đứng trong ô → từ chối (đúng: không đặt block vào người)
+  const rejected = (game.w.getCell(px, py, pz) & 255) !== B.COBBLE;
+  mv(py + 1.2); // client gửi vị trí mới ngay trước lệnh (đã nhảy lên)
+  place();
+  check("nhảy cột: đứng trong ô thì không đặt được; gửi vị trí đã nhảy lên trước lệnh đặt thì đặt được",
+    rejected && (game.w.getCell(px, py, pz) & 255) === B.COBBLE,
+    `đầu: ${rejected ? "từ chối" : "đặt luôn"}, sau: ô ${game.w.getCell(px, py, pz) & 255}, nền ${game.w.getCell(px, py - 1, pz) & 255}, cầm ${pp.inv.held?.item}`);
+}
+
 // ngắt kết nối rồi vào lại: túi đồ còn
 const count = pa.inv.count("planks");
 game.disconnect(a.conn);

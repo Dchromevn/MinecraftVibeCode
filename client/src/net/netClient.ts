@@ -57,8 +57,16 @@ export class NetClient {
   /** Hành động đào / chuột phải / ăn / túi đồ gửi lên server. */
   actions(): InteractNet {
     return {
-      dig: (x, y, z) => this.conn.send({ t: "dig", x, y, z }),
-      use: (hit, src, sneaking, yaw) => this.conn.send({ t: "use", hit, src, sneaking, yaw }),
+      // gửi vị trí mới nhất ngay trước lệnh: server kiểm tra tầm với / chỗ đặt theo đúng chỗ đang đứng
+      // (vd nhảy rồi đặt block dưới chân — vị trí gửi định kỳ có thể còn là lúc chưa nhảy)
+      dig: (x, y, z) => {
+        this.sendMove();
+        this.conn.send({ t: "dig", x, y, z });
+      },
+      use: (hit, src, sneaking, yaw) => {
+        this.sendMove();
+        this.conn.send({ t: "use", hit, src, sneaking, yaw });
+      },
       eat: () => this.conn.send({ t: "eat" }),
       act: (a) => this.session?.invSync.act(a),
     };
@@ -96,7 +104,11 @@ export class NetClient {
     this.sync.flush();
     this.remote.update(dt);
     this.moveT += dt;
-    if (this.moveT < 1 / NET.MOVE_HZ) return;
+    if (this.moveT >= 1 / NET.MOVE_HZ) this.sendMove();
+  }
+
+  /** Gửi vị trí / hướng nhìn / trạng thái hiện tại (định kỳ 20 lần / giây và ngay trước đào / đặt). */
+  private sendMove(): void {
     this.moveT = 0;
     const p = this.d.player, s = p.state, cam = this.d.camera.position;
     // đang bay: vị trí theo camera (chân = mắt − chiều cao mắt)
