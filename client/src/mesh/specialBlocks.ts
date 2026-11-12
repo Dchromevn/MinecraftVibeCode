@@ -15,6 +15,7 @@ export interface SpecialUv {
   railCross: TileUV;
   bedFootSide: TileUV;
   wheat: TileUV[]; // giai đoạn 0..7
+  farmlandWet: TileUV;
 }
 
 const OPAQUE = new Uint8Array(256);
@@ -79,7 +80,7 @@ export function addSpecial(
     }
     case "farmland": {
       const up = OPAQUE[at(x, y + 1, z)] === 1;
-      addBox(b, x, y, z, 0, 16, 0, 15, 0, 16, { top: t[0]!, side: t[2]!, bottom: t[1]! }, light, up ? 62 : 63);
+      addBox(b, x, y, z, 0, 16, 0, 15, 0, 16, { top: meta & 1 ? uv.farmlandWet : t[0]!, side: t[2]!, bottom: t[1]! }, light, up ? 62 : 63);
       return true;
     }
     default:

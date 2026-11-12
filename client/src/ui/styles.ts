@@ -42,6 +42,13 @@ const CSS = `
 #inv .bookbtn img { width: 32px; height: 32px; image-rendering: pixelated; }
 #inv.workbench .bookbtn { margin-top: 48px; }
 #inv .book { width: 300px; color: #303030; }
+#inv .container { min-width: 378px; }
+#inv .furnace { display: flex; align-items: center; gap: 22px; margin-left: 70px; }
+#inv .fcol { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#inv .fire { position: relative; width: 28px; height: 28px; }
+#inv .fire img { position: absolute; inset: 0; width: 28px; height: 28px; image-rendering: pixelated; }
+#inv .progress { width: 48px; height: 16px; background: #8b8b8b; border: 2px solid; border-color: #373737 #fff #fff #373737; }
+#inv .progress .fill { height: 100%; width: 0; background: #e8e8e8; }
 #inv h3 { margin: 0 0 6px; font-size: 14px; }
 #inv .recipes { max-height: 380px; overflow-y: auto; background: #8b8b8b; border: 2px solid; border-color: #373737 #fff #fff #373737; }
 #inv .rec { display: flex; align-items: center; gap: 6px; padding: 2px 4px; cursor: pointer; border-bottom: 1px solid #0003; color: #fff; }

@@ -14,7 +14,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | xong (người dùng xác nhận 2026-11-12) |
 | 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
 | 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | xong (người dùng bảo "tiếp 4b", 2026-11-12) |
-| 4b | Rương, lò nung, cửa, trồng trọt | đang làm |
+| 4b | Rương, lò nung, cửa, trồng trọt | chờ người dùng test |
 | 4c | Chất lỏng, xô | chưa làm |
 | 5 | Mạng nhiều người và lưu thế giới | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
@@ -449,3 +449,37 @@ thức có độ cứng, xô làm ở 4c. Mục LỰA CHỌN về rìu (Giai đo
 - File: `shared/src/inventoryOps.ts` (mới), `inventory.ts` (`slots()` công khai); `client/src/player/{playerModel,heldItem}.ts` (mới), `player/arm.ts`; `client/src/ui/{recipeBook,playerPreview}.ts` (mới), `ui/inventoryScreen.ts` (viết lại), `ui/styles.ts`, `strings.ts`, `main.ts`; `scripts/texture-map.json` (nút sách, hình mờ ô giáp).
 - Kiểm tra 24/24 (thêm: kéo trái chia đều, kéo phải đặt 1, bấm đúp gom, phím số đổi chỗ và ô giáp chỉ nhận đúng món, Q vứt 1, bấm phải ra ngoài vứt 1). Ảnh chụp: túi đồ và bàn chế tạo giống bố cục mẫu, sổ công thức mở bên trái; cầm cuốc / khối ván / đuốc hiện đúng ở tay phải.
 - Ghi chú: hình nhân vật dùng thêm một ngữ cảnh WebGL nhỏ (chỉ vẽ khi túi đồ mở); vật phẩm trên tay chưa tối theo ánh sáng hang.
+
+## Giai đoạn 4b — Rương, lò nung, cửa, trồng trọt (2026-11-12)
+
+Trạng thái: chờ người dùng test.
+
+### File đã tạo / sửa
+
+- `shared/src/blockEntities.ts` (mới) — dữ liệu rương / lò theo vị trí (giữ cả khi chunk gỡ), đồ rương hầm mỏ theo seed + vị trí (sinh lần đầu mở / phá), lò nung chạy cả khi đóng.
+- `shared/src/smelting.ts`, `containers.ts`, `tickConstants.ts`, `randomTick.ts` (mới) — công thức nung + nhiên liệu; luật ô rương / lò (ô nhiên liệu chỉ nhận đồ đốt được, ô thành phẩm chỉ lấy ra, Shift chuyển đúng ô); random tick: lúa, đất cày, cây non → cây, lá rụng, cỏ lan / chết.
+- `shared/src/{blocks,blockTable,blockMeta,placement,blockRules,inventory,inventoryOps,chunk,world,physics,index}.ts` — dữ liệu phụ rương (rương đôi), đất cày ẩm, cây non, lá người đặt; ghép / tách rương đôi; vùng ô "ext" trong túi đồ; `World.lightAt`; quãng rơi khi chạm đất (giẫm đất cày). `worldgen/trees.ts`: tách hàm tán lá dùng chung cho cây non lớn lên.
+- `client/src/game/worldTicker.ts` (mới) — random tick 20 lần / giây trong bán kính 6 chunk, lò nung, giẫm đất cày.
+- `client/src/ui/containerViews.ts` (mới), `ui/inventoryScreen.ts`, `ui/styles.ts` — giao diện rương (27 / 54 ô) và lò nung (lửa, tiến độ).
+- `client/src/game/session.ts` (mở rương / rương đôi / lò, mở-đóng cửa), `interact/interaction.ts` (cuốc đất, ghép rương khi đặt, phá rương / lò rơi đồ bên trong), `mesh/{mesher,specialBlocks}.ts` (mặt trước rương đôi, đất cày ẩm), `light/regionLight.ts` + `workers/*` + `world/chunkManager.ts` (worker trả ánh sáng chunk để random tick dùng), `main.ts`, `strings.ts`; `scripts/texture-map.json` (rương đôi, lửa lò).
+
+### Đã tự kiểm tra bằng lệnh
+
+- `npm run typecheck`, `npm run build` thành công; không file nào quá 300 dòng; sinh thế giới vẫn xác định.
+- Kiểm tra 4b 12/12: lò nung 10 s mỗi món (3 sắt thô + 1 than → 3 thỏi); Shift chuyển đá cuội vào ô nguyên liệu, ván vào ô nhiên liệu, đất không vào; ô nhiên liệu không nhận đất; đồ rương hầm mỏ xác định theo seed + vị trí (3–6 món), rương đặt tay rỗng; rương đôi ghép đúng, rương thứ ba / phía trước không ghép, phá một nửa thì nửa kia thành rương đơn; lúa trên đất cày ẩm chín sau ~21 random tick (~24 phút), thiếu sáng thì bật ra; đất cày ẩm / khô / thành đất; cây non lớn thành cây, cỏ gốc thành đất; chặt thân thì lá rụng hết, lá người đặt còn; cỏ lan sang đất, bị che thì thành đất. Các bộ cũ: vật lý 32/32, túi đồ 24/24, chỗ bám 18/18.
+- Trình duyệt headless: lò nung 2 sắt thô + than → 2 thỏi sắt khi đã đóng giao diện, mặt lò sáng; rương đôi vẽ liền, mở ra 54 ô; cửa mở / đóng cả hai nửa; ruộng lúa lớn dần (tăng tốc random tick để thử).
+
+### Cần người dùng kiểm tra
+
+- Lò nung: bỏ sắt thô / vàng thô / cát / đá cuội + than hoặc gỗ, đóng giao diện đi chỗ khác rồi quay lại lấy thành phẩm; đặt đuốc trong hang; làm đồ sắt.
+- Rương: đặt hai rương cạnh nhau cùng hướng → rương đôi 54 ô; giữ Shift khi đặt thì không ghép; phá một nửa → đồ nửa đó rơi ra, nửa kia còn; rương hầm mỏ có đồ (có thể có vàng, ngọc lục bảo, kim cương).
+- Cửa: chuột phải mở / đóng.
+- Trồng trọt: cuốc đất cạnh nước, gieo hạt, chờ lúa chín (~20–30 phút; thử nhanh bằng `__game.session.ticker.speed = 300` khi chạy `?debug=1`), 3 lúa → bánh mì; nhảy lên đất cày có thể làm hỏng.
+- Cây non: trồng trên cỏ / đất đủ sáng, lớn thành cây; chặt thân cây thì lá rụng dần.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Nước chưa chảy (4c) nên đất cày chỉ ẩm cạnh nước có sẵn.
+- Rương sinh sẵn chỉ có ở hầm mỏ; mọi rương chưa từng mở được coi là rương sinh sẵn (rương người chơi đặt luôn tạo dữ liệu rỗng ngay khi đặt).
+- Mặt trên / sau rương đôi dùng texture rương thường (REFI không đủ bộ texture rương lớn).
+- Chưa lưu được: tải lại trang là mất (Giai đoạn 5).

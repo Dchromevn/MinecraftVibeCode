@@ -50,6 +50,7 @@ const TABLE: BlockDef[] = [
     transparent: true,
     opaque: false,
     lightOpacity: 1,
+    meta: "leaves",
   }),
   def(8, "planks", 2, "axe", [drop("planks")], same("planks")),
   def(9, "ore_coal", 3, "pickaxe", [drop("coal")], same("ore_coal"), { ...PICK_ONLY, minTier: "wood" }),
@@ -66,7 +67,7 @@ const TABLE: BlockDef[] = [
     bottom: "chest_top",
     side: "chest_side",
     front: "chest_front",
-  }, { meta: "facing" }),
+  }, { meta: "chest" }),
   def(14, "bedrock", Infinity, "none", [], same("bedrock")),
   def(15, "tallgrass", 0, "none", [drop("seeds", 0.1)], same("tallgrass"), { ...OPEN, render: "cross" }),
   // sỏi: 10% rơi đá lửa thay cho sỏi (Giai đoạn 4 xử lý)
@@ -121,9 +122,10 @@ const TABLE: BlockDef[] = [
     opaque: false,
     box: [0, 0, 0, 1, 15 / 16, 1],
     render: "farmland",
+    meta: "farmland",
   }),
   def(31, "wheat", 0, "none", [drop("wheat"), drop("seeds")], same("wheat_7"), { ...OPEN, render: "crop", meta: "crop" }),
-  def(32, "sapling", 0, "none", [drop("sapling")], same("sapling"), { ...OPEN, render: "cross" }),
+  def(32, "sapling", 0, "none", [drop("sapling")], same("sapling"), { ...OPEN, render: "cross", meta: "sapling" }),
   def(33, "bed", 0.2, "none", [drop("bed")], {
     top: "bed_head_top",
     bottom: "planks",

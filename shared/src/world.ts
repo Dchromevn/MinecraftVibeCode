@@ -52,6 +52,16 @@ export class World {
     return makeCell(c.data[i]!, c.meta[i]!);
   }
 
+  /** Ánh sáng 0..15 tại ô = max(trời, block); -1 nếu chưa có bảng ánh sáng. Trên trời: 15. */
+  lightAt(x: number, y: number, z: number): number {
+    if (y >= CHUNK_HEIGHT) return 15;
+    if (y < 0) return 0;
+    const c = this.chunks.get(chunkKey(x >> 4, z >> 4));
+    if (!c?.light) return -1;
+    const v = c.light[blockIndex(x & 15, y, z & 15)]!;
+    return Math.max(v >> 4, v & 15);
+  }
+
   isLoaded(x: number, z: number): boolean {
     return this.chunks.has(chunkKey(x >> 4, z >> 4));
   }

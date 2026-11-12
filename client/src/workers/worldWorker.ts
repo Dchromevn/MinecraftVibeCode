@@ -2,7 +2,7 @@
 import { ChunkGenerator } from "../../../shared/src/index.js";
 import { meshRegion, type UvTable } from "../mesh/mesher.js";
 import { meshTransferables } from "../mesh/geomBuilder.js";
-import { buildRegion, computeRegionLight } from "../light/regionLight.js";
+import { buildRegion, centerLight, computeRegionLight } from "../light/regionLight.js";
 import type { FromWorker, ToWorker } from "./protocol.js";
 
 interface WorkerScope {
@@ -33,9 +33,10 @@ ctx.onmessage = (e) => {
       const region = buildRegion(msg.chunks);
       const light = computeRegionLight(region);
       const sections = meshRegion(region, light, uvt!);
-      const transfer: ArrayBuffer[] = [];
+      const center = centerLight(light); // ánh sáng chunk giữa cho random tick ở luồng chính
+      const transfer: ArrayBuffer[] = [center.buffer as ArrayBuffer];
       for (const s of sections) transfer.push(...meshTransferables(s.solid), ...meshTransferables(s.water));
-      ctx.postMessage({ type: "mesh", id: msg.id, cx: msg.cx, cz: msg.cz, sections, ms: performance.now() - t0 }, transfer);
+      ctx.postMessage({ type: "mesh", id: msg.id, cx: msg.cx, cz: msg.cz, sections, light: center, ms: performance.now() - t0 }, transfer);
     }
   } catch (err) {
     ctx.postMessage({ type: "error", id: "id" in msg ? msg.id : -1, message: String(err) });

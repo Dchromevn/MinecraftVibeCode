@@ -34,6 +34,8 @@ export function emptyChunkData(): ChunkData {
 export class Chunk implements ChunkData {
   /** Đã bị sửa so với bản sinh gốc (phải giữ lại khi gỡ khỏi bộ nhớ). */
   modified = false;
+  /** Ánh sáng (4 bit trời | 4 bit block) worker trả về khi dựng mesh; null = chưa có. */
+  light: Uint8Array | null = null;
   readonly data: Uint8Array;
   readonly meta: Uint8Array;
 

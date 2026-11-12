@@ -11,7 +11,15 @@ export interface ItemStack {
 }
 
 export type Slot = ItemStack | null;
-export type SlotArea = "main" | "armor" | "craft";
+export type SlotArea = "main" | "armor" | "craft" | "ext";
+
+/** Luật của ô chứa ngoài (rương, lò nung) đang mở. */
+export interface ExtRules {
+  /** Ô i nhận chồng s không (lò: ô nhiên liệu chỉ nhận đồ đốt được, ô thành phẩm không nhận). */
+  accepts(i: number, s: ItemStack): boolean;
+  /** Shift+bấm từ túi: các ô đích theo thứ tự ưu tiên (rỗng = không chuyển vào). */
+  quickTargets(s: ItemStack): number[];
+}
 
 export const stack = (item: string, count = 1, damage = 0): ItemStack => ({ item, count, damage });
 const maxOf = (item: string): number => itemDef(item)?.maxStack ?? INVENTORY.MAX_STACK;
@@ -27,6 +35,9 @@ export class Inventory {
   /** Lưới chế tạo đang mở (2x2 túi đồ hoặc 3x3 bàn chế tạo), theo hàng. */
   craft: Slot[] = new Array<Slot>(4).fill(null);
   craftSize = 2;
+  /** Ô của rương / lò đang mở (tham chiếu thẳng tới dữ liệu block), và luật của nó. */
+  ext: Slot[] = [];
+  extRules: ExtRules | null = null;
 
   get held(): Slot {
     return this.main[this.selected]!;
@@ -34,7 +45,7 @@ export class Inventory {
 
   /** Mảng ô của một vùng. */
   slots(a: SlotArea): Slot[] {
-    return a === "main" ? this.main : a === "armor" ? this.armor : this.craft;
+    return a === "main" ? this.main : a === "armor" ? this.armor : a === "craft" ? this.craft : this.ext;
   }
 
   /** Đổi cỡ lưới chế tạo; đồ trong lưới cũ trả về túi. Trả về phần không vừa (vứt ra). */
@@ -123,13 +134,27 @@ export class Inventory {
     return itemDef(s.item)?.armor?.piece === ARMOR_PIECES[i];
   }
 
+  /** Ô (area, i) có nhận chồng s đặt vào không. */
+  accepts(area: SlotArea, i: number, s: ItemStack): boolean {
+    if (area === "armor") return Inventory.fitsArmor(i, s);
+    if (area === "ext" && this.extRules) return this.extRules.accepts(i, s);
+    return true;
+  }
+
   /** Bấm chuột lên một ô (giao diện túi đồ). */
   click(area: SlotArea, i: number, button: "left" | "right", shift: boolean): void {
     const slots = this.slots(area);
     if (shift) return this.quickMove(area, i);
     const s = slots[i] ?? null;
     const c = this.cursor;
-    if (area === "armor" && c && !Inventory.fitsArmor(i, c)) return;
+    if (c && !this.accepts(area, i, c)) {
+      // ô chỉ lấy ra (thành phẩm lò): cùng loại thì gom lên con trỏ
+      if (s && canMerge(c, s) && c.count + s.count <= maxOf(c.item)) {
+        c.count += s.count;
+        slots[i] = null;
+      }
+      return;
+    }
     if (button === "left") {
       if (c && s && canMerge(c, s)) {
         const n = Math.min(c.count, maxOf(s.item) - s.count);
@@ -168,9 +193,32 @@ export class Inventory {
     const slots = this.slots(area);
     const s = slots[i];
     if (!s) return;
-    if (area === "craft") {
-      slots[i] = this.add(s); // về túi; không vừa thì giữ lại trong lưới
+    if (area === "craft" || area === "ext") {
+      slots[i] = this.add(s); // về túi; không vừa thì giữ lại
       return;
+    }
+    if (area === "main" && this.extRules) {
+      // đang mở rương / lò: chuyển vào ô chứa
+      let left = s.count;
+      const targets = this.extRules.quickTargets(s);
+      for (const pass of [0, 1])
+        for (const k of targets) {
+          if (left === 0) break;
+          const t = this.ext[k];
+          if (pass === 0 && t && canMerge(t, s) && t.count < maxOf(t.item)) {
+            const n = Math.min(left, maxOf(t.item) - t.count);
+            t.count += n;
+            left -= n;
+          } else if (pass === 1 && !t) {
+            this.ext[k] = { ...s, count: Math.min(left, maxOf(s.item)) };
+            left -= this.ext[k]!.count;
+          }
+        }
+      if (targets.length) {
+        if (left === 0) slots[i] = null;
+        else s.count = left;
+        return;
+      }
     }
     if (area === "main") {
       const piece = ARMOR_PIECES.indexOf(itemDef(s.item)?.armor?.piece ?? ("" as never));

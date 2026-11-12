@@ -1,7 +1,7 @@
 // Dựng mesh cho chunk giữa của một vùng 3x3 chunk (đã có ánh sáng), chia thành 8 đoạn
 // 16 block. Chỉ vẽ mặt lộ; AO + ánh sáng mượt theo đỉnh; nước hạ 1/8, tối dần theo độ sâu.
 // Đỉnh theo tọa độ trong chunk (0..16) để giữ chính xác ở xa gốc tọa độ.
-import { B, BLOCKS, CHUNK_HEIGHT, facingDir, furnaceLit, liquidFalling, liquidLevel } from "../../../shared/src/index.js";
+import { B, BLOCKS, CHUNK_HEIGHT, chestHalf, facingDir, furnaceLit, liquidFalling, liquidLevel } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import { regionIndex, type Region } from "../light/regionLight.js";
 import { GeomBuilder, type MeshArrays } from "./geomBuilder.js";
@@ -43,6 +43,7 @@ for (const b of BLOCKS) {
 export interface UvTable extends SpecialUv {
   snowSide: TileUV;
   furnaceOn: TileUV;
+  chestFront: [TileUV, TileUV]; // hai nửa mặt trước rương đôi (nửa A, nửa B)
 }
 
 export function buildUvTable(uv: (name: string) => TileUV): UvTable {
@@ -54,6 +55,8 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     railCross: uv("rail_cross"),
     bedFootSide: uv("bed_foot_side"),
     furnaceOn: uv("furnace_front_on"),
+    chestFront: [uv("chest_front_a"), uv("chest_front_b")],
+    farmlandWet: uv("farmland_wet"),
     wheat: Array.from({ length: 8 }, (_, i) => uv(`wheat_${i}`)),
   };
 }
@@ -118,7 +121,7 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
           const builder = isWater ? water : solid;
           const top = isLiquid ? (at(x, y + 1, z) === id ? 1 : liquidTop(meta)) : isLayer ? LAYER_TOP : 1;
           // block có hướng (lò, rương): mặt trước quay theo dữ liệu phụ
-          const frontFace: number = def.meta === "facing" ? FACE_OF_DIR[facingDir(meta)]! : -1;
+          const frontFace: number = def.meta === "facing" || def.meta === "chest" ? FACE_OF_DIR[facingDir(meta)]! : -1;
           const snowAbove = id === B.GRASS && at(x, y + 1, z) === B.SNOW_LAYER;
 
           for (let fi = 0; fi < 6; fi++) {
@@ -136,6 +139,7 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
             const tint = isWater ? WATER_TINT : depth > 0 ? underwaterTint(depth) : NO_TINT;
             let uv = uvt.blocks[id]![frontFace < 0 || f.n[1] !== 0 ? f.slot : fi === frontFace ? 3 : 2]!;
             if (fi === frontFace && id === B.FURNACE && furnaceLit(meta)) uv = uvt.furnaceOn;
+            if (fi === frontFace && id === B.CHEST && chestHalf(meta) > 0) uv = uvt.chestFront[chestHalf(meta) - 1]!;
             if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
             const vTop = f.n[1] === 0 ? uv.v0 + (uv.v1 - uv.v0) * top : uv.v1;
             const nSky = sky(nx, ny, nz), nBlk = blk(nx, ny, nz);

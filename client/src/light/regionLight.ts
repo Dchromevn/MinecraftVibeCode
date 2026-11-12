@@ -115,6 +115,17 @@ function flood(blocks: Uint8Array, light: Uint8Array, q: IntQueue, shift: number
   }
 }
 
+/** Cắt ánh sáng của chunk giữa (chỉ số như trong chunk: (y*16+z)*16+x). */
+export function centerLight(light: Uint8Array): Uint8Array {
+  const out = new Uint8Array(16 * RH * 16);
+  for (let y = 0; y < RH; y++)
+    for (let z = 0; z < 16; z++) {
+      const src = regionIndex(16, y, 16 + z);
+      out.set(light.subarray(src, src + 16), (y * 16 + z) * 16);
+    }
+  return out;
+}
+
 /** Ghép 3x3 chunk (thứ tự dz rồi dx, từ -1 tới 1) thành một vùng. Thiếu chunk = không khí. */
 export function buildRegion(chunks: (ChunkData | null)[]): Region {
   const blocks = new Uint8Array(RW * RW * RH);

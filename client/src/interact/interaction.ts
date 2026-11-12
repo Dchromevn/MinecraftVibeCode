@@ -5,8 +5,9 @@
 import * as THREE from "three";
 import {
   DIGGING, HUNGER, PLAYER, addExhaustion, blockDrops, breakAt, canEat, canPlace, digRate, eat, isReplaceable,
-  itemDef, placeCells, placementCells, playerBox, raycast, selectionBoxes, toolWear,
-  type BlockAccess, type BlockId, type Dropped, type HeldTool, type Inventory, type RayHit, type Rng, type World,
+  itemDef, mergeChest, placeCells, placementCells, playerBox, raycast, selectionBoxes, toolWear, B,
+  type BlockAccess, type BlockEntities, type BlockId, type Dropped, type HeldTool, type Inventory, type RayHit, type Rng,
+  type World,
 } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
 import type { ItemEntities } from "../items/itemEntities.js";
@@ -26,8 +27,9 @@ export interface InteractView {
   locked: () => boolean;
   yaw: () => number;
   swing: () => void;
-  /** Chuột phải vào block có chức năng (bàn chế tạo...): true nếu đã xử lý. */
-  useBlock: (id: number) => boolean;
+  /** Chuột phải vào block có chức năng (bàn chế tạo, rương, lò, cửa): true nếu đã xử lý. */
+  useBlock: (t: RayHit) => boolean;
+  entities: BlockEntities;
   sneaking: () => boolean;
 }
 
@@ -136,7 +138,19 @@ export class Interaction {
     }
     // chuột phải vào bàn chế tạo (không giữ Shift): mở giao diện thay vì đặt / ăn
     const t = this.target;
-    if (t && !this.view.sneaking() && this.view.useBlock(t.cell & 255)) {
+    if (t && !this.view.sneaking() && this.view.useBlock(t)) {
+      this.right = false;
+      return;
+    }
+    // cuốc đất: đất / cỏ có ô trống phía trên → đất cày
+    const tool = held ? itemDef(held.item)?.tool : undefined;
+    if (tool?.kind === "hoe" && t) {
+      const id = t.cell & 255;
+      if ((id === B.DIRT || id === B.GRASS) && this.world.getBlock(t.x, t.y + 1, t.z) === B.AIR) {
+        this.acc.setCell(t.x, t.y, t.z, B.FARMLAND, 0);
+        this.view.inv.damageSlot("main", this.view.inv.selected, 1);
+        this.view.swing();
+      }
       this.right = false;
       return;
     }
@@ -192,6 +206,9 @@ export class Interaction {
 
   private breakTarget(t: RayHit, tool: HeldTool | null): void {
     const id = t.cell & 255;
+    // rương / lò: đồ bên trong rơi ra
+    if (id === B.CHEST || id === B.FURNACE)
+      for (const s of this.view.entities.remove(t.x, t.y, t.z, id)) this.view.items.pop(s, t.x, t.y, t.z);
     this.spawnDrops(breakAt(this.acc, t.x, t.y, t.z, this.falling.start), tool);
     const inv = this.view.inv;
     const wear = toolWear(id, tool);
@@ -214,6 +231,10 @@ export class Interaction {
     const box = flying ? null : playerBox(this.view.player.state);
     if (!canPlace(cells, (a, b, c) => this.world.getCell(a, b, c), box)) return;
     this.spawnDrops(placeCells(this.acc, cells, this.falling.start), null);
+    for (const c of cells) this.view.entities.placed(c.x, c.y, c.z, c.id);
+    // rương cạnh rương đơn cùng hướng: ghép thành rương đôi (giữ Shift thì không ghép)
+    if (places === B.CHEST && !this.view.sneaking())
+      for (const m of mergeChest(cells[0]!, (a, b, c) => this.world.getCell(a, b, c))) this.acc.setCell(m.x, m.y, m.z, m.id, m.meta);
     this.view.inv.takeHeld(1);
     this.view.swing();
   }

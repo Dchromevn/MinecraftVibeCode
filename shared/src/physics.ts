@@ -25,6 +25,7 @@ export interface PlayerState extends SurvivalState {
   frozen: boolean; // chunk dưới chân chưa tải: đứng yên
   air: number; // dưỡng khí còn lại (giây)
   fallDist: number; // quãng đang rơi (block)
+  landFall: number; // quãng rơi ở lần chạm đất vừa rồi (0 nếu bước này không chạm đất) — giẫm đất cày
   burnS: number; // còn cháy bao lâu
   fireTimer: number; // đếm giây cho cháy / chết đuối
   drownTimer: number;
@@ -49,7 +50,7 @@ export function createPlayer(x: number, y: number, z: number): PlayerState {
     x, y, z, vx: 0, vy: 0, vz: 0,
     onGround: false, sneaking: false, inWater: false, inLava: false, onLadder: false, inWeb: false,
     headInWater: false, collidedH: false, frozen: false,
-    air: PLAYER.AIR_S, fallDist: 0, burnS: 0, fireTimer: 0, drownTimer: 0,
+    air: PLAYER.AIR_S, fallDist: 0, landFall: 0, burnS: 0, fireTimer: 0, drownTimer: 0,
     ...createSurvival(),
   };
 }
@@ -206,6 +207,7 @@ export function stepPlayer(s: PlayerState, inp: PlayerInput, cell: CellReader): 
   // --- sát thương rơi: floor(quãng rơi − 3); nước, thang, mạng nhện tính lại từ đầu ---
   if (s.inWater || s.onLadder || s.inWeb) s.fallDist = 0;
   else if (r.dy < 0) s.fallDist -= r.dy;
+  s.landFall = r.landed ? s.fallDist : 0;
   if (r.landed) {
     hurt(s, Math.floor(s.fallDist - PLAYER.FALL_SAFE_BLOCKS + 1e-6), "fall"); // dung sai cộng dồn số thực
     s.fallDist = 0;

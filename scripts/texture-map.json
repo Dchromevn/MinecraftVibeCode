@@ -515,6 +515,22 @@
     {
       "dest": "ui/empty_boots.png",
       "src": "mcl_inventory/mcl_inventory_empty_armor_slot_boots.png"
+    },
+    {
+      "dest": "textures/chest_front_a.png",
+      "src": "mcl_chests/mcl_chests_big_front_leftside.png"
+    },
+    {
+      "dest": "textures/chest_front_b.png",
+      "src": "mcl_chests/mcl_chests_big_front_rightside.png"
+    },
+    {
+      "dest": "icons/furnace_fire.png",
+      "src": "default_mcl_core/gui_hud/default_furnace_fire_fg.png"
+    },
+    {
+      "dest": "icons/furnace_fire_bg.png",
+      "src": "default_mcl_core/gui_hud/default_furnace_fire_bg.png"
     }
   ]
 }

@@ -23,4 +23,8 @@ export * from "./inventoryOps.js";
 export * from "./drops.js";
 export * from "./survival.js";
 export * from "./itemEntity.js";
+export * from "./smelting.js";
+export * from "./blockEntities.js";
+export * from "./randomTick.js";
+export * from "./containers.js";
 export * from "./worldgen/index.js";

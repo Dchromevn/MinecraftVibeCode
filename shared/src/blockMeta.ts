@@ -56,6 +56,11 @@ export const liquidLevel = (m: number): number => m & 7;
 export const liquidFalling = (m: number): boolean => (m & 8) !== 0;
 
 export const facingDir = (m: number): number => m & 3;
+/** Rương: 0 đơn, 1 nửa A, 2 nửa B (nửa A có nửa kia ở hướng (mặt trước + 1)). */
+export const chestHalf = (m: number): number => (m >> 2) & 3;
+export const chestMeta = (facing: number, half: number): number => (facing & 3) | ((half & 3) << 2);
+export const farmlandWet = (m: number): boolean => (m & 1) !== 0;
+export const leavesPersistent = (m: number): boolean => (m & 1) !== 0;
 export const furnaceLit = (m: number): boolean => (m & 4) !== 0;
 
 export const bedMeta = (dir: number, head: boolean): number => (dir & 3) | (head ? 4 : 0);

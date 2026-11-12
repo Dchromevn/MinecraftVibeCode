@@ -3,7 +3,8 @@
 import { B, BLOCKS } from "./blocks.js";
 import { HDX, HDZ, cellId, cellMeta, doorUpper, torchWall } from "./blockMeta.js";
 import { collisionBoxes } from "./blockShapes.js";
-import { linkedCell, updateRailsAround, type PlacedCell } from "./placement.js";
+import { chestPartner, linkedCell, updateRailsAround, type PlacedCell } from "./placement.js";
+import { chestMeta, facingDir } from "./blockMeta.js";
 
 export interface BlockAccess {
   /** id | dữ liệu phụ << 8; âm = chunk chưa tải. */
@@ -159,6 +160,9 @@ export function breakAt(
   }
   const idAt: IdAt = (a, b, c) => Math.max(0, acc.getCell(a, b, c)) & 255;
   if (id === B.RAIL) updateRailsAround(x, y, z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
+  // phá một nửa rương đôi: nửa kia trở lại rương đơn (giữ đồ của nó)
+  const p = chestPartner(cell, x, y, z);
+  if (p && idAt(p.x, p.y, p.z) === B.CHEST) acc.setCell(p.x, p.y, p.z, B.CHEST, chestMeta(facingDir(cell >> 8), 0));
   return [{ id, meta: cell >> 8, forced: false, x, y, z }, ...settle(acc, changed, startFalling)];
 }
 

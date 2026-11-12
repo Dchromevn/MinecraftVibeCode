@@ -41,6 +41,27 @@ function treesNear(gen: ChunkGenerator, cx: number, cz: number): Tree[] {
   return out;
 }
 
+/** Tán lá của một cây có thân ở cột (x, z), ngọn ở top (dùng chung cho cây sinh sẵn và cây non lớn lên). */
+export function treeCanopy(x: number, z: number, top: number, rng: Rng, leaf: (x: number, y: number, z: number) => void): void {
+  for (let dy = -2; dy <= -1; dy++)
+    for (let dx = -R; dx <= R; dx++)
+      for (let dz = -R; dz <= R; dz++) {
+        const corner = Math.abs(dx) === R && Math.abs(dz) === R;
+        if (corner && rng() < 0.6) continue;
+        leaf(x + dx, top + dy, z + dz);
+      }
+  for (let dx = -1; dx <= 1; dx++)
+    for (let dz = -1; dz <= 1; dz++) {
+      if (Math.abs(dx) === 1 && Math.abs(dz) === 1 && rng() < 0.5) continue;
+      leaf(x + dx, top, z + dz);
+    }
+  leaf(x, top + 1, z);
+  leaf(x + 1, top + 1, z);
+  leaf(x - 1, top + 1, z);
+  leaf(x, top + 1, z + 1);
+  leaf(x, top + 1, z - 1);
+}
+
 export function placeTrees(gen: ChunkGenerator, data: Uint8Array, cx: number, cz: number): void {
   const x0 = cx * 16, z0 = cz * 16;
   const inside = (x: number, z: number): boolean => x >= x0 && z >= z0 && x < x0 + 16 && z < z0 + 16;
@@ -53,26 +74,7 @@ export function placeTrees(gen: ChunkGenerator, data: Uint8Array, cx: number, cz
   const trees = treesNear(gen, cx, cz);
 
   // lượt 1: lá của mọi cây; lượt 2: thân (đè lên lá) — kết quả không phụ thuộc thứ tự chunk
-  for (const t of trees) {
-    const top = t.base + t.trunk - 1;
-    for (let dy = -2; dy <= -1; dy++)
-      for (let dx = -R; dx <= R; dx++)
-        for (let dz = -R; dz <= R; dz++) {
-          const corner = Math.abs(dx) === R && Math.abs(dz) === R;
-          if (corner && t.rng() < 0.6) continue;
-          leaf(t.x + dx, top + dy, t.z + dz);
-        }
-    for (let dx = -1; dx <= 1; dx++)
-      for (let dz = -1; dz <= 1; dz++) {
-        if (Math.abs(dx) === 1 && Math.abs(dz) === 1 && t.rng() < 0.5) continue;
-        leaf(t.x + dx, top, t.z + dz);
-      }
-    leaf(t.x, top + 1, t.z);
-    leaf(t.x + 1, top + 1, t.z);
-    leaf(t.x - 1, top + 1, t.z);
-    leaf(t.x, top + 1, t.z + 1);
-    leaf(t.x, top + 1, t.z - 1);
-  }
+  for (const t of trees) treeCanopy(t.x, t.z, t.base + t.trunk - 1, t.rng, leaf);
   for (const t of trees) {
     if (!inside(t.x, t.z)) continue;
     for (let dy = 0; dy < t.trunk; dy++) data[blockIndex(t.x - x0, t.base + dy, t.z - z0)] = B.LOG;

@@ -4,14 +4,23 @@
 // loại, trỏ + phím 1–9 đổi chỗ với hotbar, trỏ + Q vứt, bấm ra ngoài khung vứt chồng đang cầm.
 import {
   collectToCursor, dragSpread, dropCursor, gridResult, swapWithHotbar, takeFromSlot, takeResult,
-  type Inventory, type ItemStack, type SlotArea, type SlotRef,
+  type FurnaceEntity, type Inventory, type ItemStack, type SlotArea, type SlotRef,
 } from "../../../shared/src/index.js";
+import { chestView, furnaceView, type ContainerView } from "./containerViews.js";
 import { STR } from "../strings.js";
 import { PlayerPreview } from "./playerPreview.js";
 import { RecipeBook } from "./recipeBook.js";
 import { renderSlot } from "./survivalHud.js";
 
-export type ScreenMode = "inventory" | "workbench";
+export type ScreenMode = "inventory" | "workbench" | "chest" | "furnace";
+
+/** Khi mở rương / lò: tiêu đề, số ô, lò (để vẽ thanh lửa / tiến độ), việc cần làm khi đóng. */
+export interface ContainerOpts {
+  title: string;
+  size: number;
+  furnace?: FurnaceEntity;
+  onClose: () => void;
+}
 const ARMOR_BG = ["helmet", "chestplate", "leggings", "boots"];
 const div = (cls: string, text = ""): HTMLDivElement => {
   const d = document.createElement("div");
@@ -35,6 +44,8 @@ export class InventoryScreen {
   private readonly bookBtn = document.createElement("button");
   private drag: { button: "left" | "right"; refs: SlotRef[] } | null = null;
   private hover: SlotRef | null = null;
+  private container: ContainerView | null = null;
+  private containerClose: (() => void) | null = null;
   open = false;
   mode: ScreenMode = "inventory";
 
@@ -133,9 +144,26 @@ export class InventoryScreen {
     this.refresh();
   }
 
-  /** Mở túi đồ (lưới 2x2) hoặc bàn chế tạo (lưới 3x3). */
-  show(mode: ScreenMode): void {
+  /** Mở rương / lò nung (ô của nó đã gắn vào inv.ext trước khi gọi). */
+  showContainer(mode: "chest" | "furnace", o: ContainerOpts): void {
     this.mode = mode;
+    for (let k = this.slotEls.length - 1; k >= 0; k--) if (this.slotEls[k]!.area === "ext") this.slotEls.splice(k, 1);
+    const slot = (i: number): HTMLDivElement => this.slot("ext", i);
+    this.container = mode === "furnace" && o.furnace ? furnaceView(o.title, o.furnace, slot) : chestView(o.title, o.size, slot);
+    this.containerClose = o.onClose;
+    this.top.innerHTML = "";
+    this.top.append(this.container.el);
+    this.bagLabel.style.display = "";
+    this.root.className = mode;
+    this.open = true;
+    this.root.style.display = "flex";
+    this.refresh();
+  }
+
+  /** Mở túi đồ (lưới 2x2) hoặc bàn chế tạo (lưới 3x3). */
+  show(mode: "inventory" | "workbench"): void {
+    this.mode = mode;
+    this.container = null;
     const size = mode === "workbench" ? 3 : 2;
     this.inv.setCraftSize(size).forEach(this.drop);
     for (let k = this.slotEls.length - 1; k >= 0; k--) if (this.slotEls[k]!.area === "craft") this.slotEls.splice(k, 1);
@@ -163,6 +191,11 @@ export class InventoryScreen {
     const left = this.inv.returnCursor();
     if (left) this.drop(left);
     this.inv.returnCraft().forEach(this.drop);
+    if (this.containerClose) {
+      this.containerClose();
+      this.containerClose = null;
+      this.container = null;
+    }
     this.refresh();
     this.onClose();
   }
@@ -177,5 +210,6 @@ export class InventoryScreen {
     renderSlot(this.resultEl, r ? { item: r.out.item, count: r.out.count, damage: 0 } : null);
     this.book.refresh();
     if (this.mode === "inventory") this.preview.render();
+    this.container?.update();
   }
 }

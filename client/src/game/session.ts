@@ -1,7 +1,12 @@
 // Phiên chơi sinh tồn (Giai đoạn 4a): túi đồ, vật phẩm rơi, hotbar + thanh sinh tồn, màn hình
 // túi đồ (E), giáp (độ bền), chết → văng đồ → hồi sinh. Lệnh debug lấy đồ khi ?debug=1.
 import * as THREE from "three";
-import { Inventory, PLAYER, itemDef, mulberry32, stack, type Rng, type World } from "../../../shared/src/index.js";
+import {
+  B, BlockEntities, FURNACE_RULES, Inventory, PLAYER, chestHalf, chestPartner, chestRules, doorUpper, itemDef, joinChest,
+  mulberry32, splitChest, stack, type ChestEntity, type FurnaceEntity, type RayHit, type Rng, type World,
+} from "../../../shared/src/index.js";
+import { STR } from "../strings.js";
+import { WorldTicker } from "./worldTicker.js";
 import type { Atlas } from "../atlas.js";
 import { ItemEntities } from "../items/itemEntities.js";
 import type { PlayerController } from "../player/playerController.js";
@@ -15,6 +20,8 @@ export class Session {
   readonly items: ItemEntities;
   readonly hud: SurvivalHud;
   readonly screen: InventoryScreen;
+  readonly entities: BlockEntities;
+  readonly ticker: WorldTicker;
   private deathShown = false;
   private readonly dir = new THREE.Vector3();
 
@@ -22,8 +29,11 @@ export class Session {
     scene: THREE.Scene, atlas: Atlas, private readonly world: World, private readonly player: PlayerController,
     private readonly fly: FlyCamera, private readonly canvas: HTMLCanvasElement, private readonly camera: THREE.Camera,
     private readonly spawn: { x: number; y: number; z: number },
+    private readonly onChange: (x: number, y: number, z: number) => void,
   ) {
+    this.entities = new BlockEntities(world.seed);
     this.items = new ItemEntities(scene, atlas, (x, y, z) => world.getCell(x, y, z), this.rng);
+    this.ticker = new WorldTicker(world, this.entities, this.rng, onChange, (s, x, y, z) => this.items.pop(s, x, y, z));
     this.hud = new SurvivalHud(() => this.respawn());
     this.screen = new InventoryScreen(
       this.inv,
@@ -48,6 +58,60 @@ export class Session {
     if (this.player.state.dead || this.screen.open) return;
     document.exitPointerLock();
     this.screen.show(mode);
+  }
+
+  /** Chuột phải vào block có chức năng: bàn chế tạo, rương, lò nung, cửa. true nếu đã xử lý. */
+  useBlock(t: RayHit): boolean {
+    const id = t.cell & 255, meta = t.cell >> 8;
+    if (id === B.WORKBENCH) this.openScreen("workbench");
+    else if (id === B.CHEST) this.openChest(t.x, t.y, t.z, t.cell);
+    else if (id === B.FURNACE) this.openFurnace(t.x, t.y, t.z);
+    else if (id === B.DOOR) {
+      // mở / đóng cả hai nửa
+      const lowerY = doorUpper(meta) ? t.y - 1 : t.y;
+      for (const y of [lowerY, lowerY + 1]) {
+        const m = this.world.getMeta(t.x, y, t.z);
+        if (this.world.getBlock(t.x, y, t.z) === B.DOOR && this.world.setBlock(t.x, y, t.z, B.DOOR, m ^ 4)) this.onChange(t.x, y, t.z);
+      }
+    } else return false;
+    return true;
+  }
+
+  private openContainer(mode: "chest" | "furnace", title: string, size: number, furnace: FurnaceEntity | undefined, onClose: () => void): void {
+    if (this.player.state.dead || this.screen.open) return;
+    document.exitPointerLock();
+    this.screen.showContainer(mode, {
+      title, size, furnace,
+      onClose: () => {
+        onClose();
+        this.inv.ext = [];
+        this.inv.extRules = null;
+      },
+    });
+  }
+
+  private openChest(x: number, y: number, z: number, cell: number): void {
+    const e = this.entities.obtain(x, y, z, B.CHEST) as ChestEntity;
+    const p = chestPartner(cell, x, y, z);
+    if (p && this.world.getBlock(p.x, p.y, p.z) === B.CHEST) {
+      const pe = this.entities.obtain(p.x, p.y, p.z, B.CHEST) as ChestEntity;
+      const [a, b] = chestHalf(cell >> 8) === 1 ? [e, pe] : [pe, e];
+      const all = joinChest(a.slots, b.slots);
+      this.inv.ext = all;
+      this.inv.extRules = chestRules(all.length);
+      this.openContainer("chest", STR.chestLarge, all.length, undefined, () => splitChest(all, a.slots, b.slots));
+      return;
+    }
+    this.inv.ext = e.slots;
+    this.inv.extRules = chestRules(e.slots.length);
+    this.openContainer("chest", STR.blocks.chest ?? "", e.slots.length, undefined, () => undefined);
+  }
+
+  private openFurnace(x: number, y: number, z: number): void {
+    const e = this.entities.obtain(x, y, z, B.FURNACE) as FurnaceEntity;
+    this.inv.ext = e.slots;
+    this.inv.extRules = FURNACE_RULES;
+    this.openContainer("furnace", STR.blocks.furnace ?? "", 3, e, () => undefined);
   }
 
   /** Debug (?debug=1): thêm vật phẩm vào túi. */
@@ -86,6 +150,8 @@ export class Session {
       ? { x: this.camera.position.x, y: this.camera.position.y - PLAYER.EYE_HEIGHT, z: this.camera.position.z }
       : s;
     this.items.update(dt, s.dead ? null : p, this.inv);
+    if (!this.player.flying) this.ticker.trample(s);
+    this.ticker.update(dt, p.x, p.z);
     this.hud.update(this.inv, s);
     if (this.screen.open) this.screen.refresh();
   }

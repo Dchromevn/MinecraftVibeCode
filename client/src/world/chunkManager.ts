@@ -154,6 +154,7 @@ export class ChunkManager {
         this.meshing.delete(key);
         if (msg.type !== "mesh" || !this.world.chunks.has(key)) return;
         this.meshes.set(cx, cz, msg.sections);
+        this.world.getChunk(cx, cz)!.light = msg.light;
         // block đổi trong lúc đang dựng: dựng lại
         if ((this.version.get(key) ?? 0) !== ver) this.dirty.add(key);
       },

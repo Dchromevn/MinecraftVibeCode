@@ -1,12 +1,12 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 4a — vật phẩm, túi đồ, chế tạo, sinh tồn",
+  stage: "Giai đoạn 4b — rương, lò nung, cửa, trồng trọt",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
     "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
-    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn / mở bàn chế tạo (Shift: đặt) · 1–9 / lăn chuột chọn ô\n" +
+    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn / cuốc đất / mở bàn, rương, lò, cửa (Shift: đặt) · 1–9 / lăn chuột chọn ô\n" +
     "E túi đồ · Q vứt (Ctrl+Q cả chồng)",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
@@ -50,6 +50,7 @@ export const STR = {
   inventoryTitle: "Túi đồ",
   craftingTitle: "Chế tạo",
   recipeBook: "Sổ công thức",
+  chestLarge: "Rương lớn",
   needWorkbench: "cần bàn chế tạo",
   craftHint: "Sổ công thức: bấm để xếp nguyên liệu vào lưới (Shift: nhiều bộ)\nÔ kết quả: bấm để lấy (Shift: làm liên tục)",
   youDied: "Bạn đã chết",

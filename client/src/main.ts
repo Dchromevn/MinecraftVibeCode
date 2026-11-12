@@ -3,7 +3,7 @@
 // Tham số URL: ?seed= ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
 // ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
-import { B, PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
+import { PLAYER, World, WORLD, allBlockTextureNames, seedFromString, TerrainSampler } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera } from "./flyCamera.js";
@@ -25,6 +25,7 @@ const EXTRA_TEXTURES = [
   "crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side",
   "rail_curved", "rail_t", "rail_cross", "bed_foot_side", "furnace_front_on",
   "wheat_0", "wheat_1", "wheat_2", "wheat_3", "wheat_4", "wheat_5", "wheat_6",
+  "chest_front_a", "chest_front_b", "farmland_wet",
 ];
 const NIGHT_VISION = 0.45; // độ sáng tối thiểu khi bật nhìn đêm (debug)
 
@@ -123,6 +124,7 @@ async function main(): Promise<void> {
   const session = new Session(
     scene, atlas, world, player, fly, renderer.domElement, camera,
     { x: spawn.x + 0.5, y: spawn.h + 1, z: spawn.z + 0.5 },
+    (x, _y, z) => chunks.onBlockChanged(x, z),
   );
   const interact = new Interaction(
     scene, world, atlas,
@@ -131,11 +133,8 @@ async function main(): Promise<void> {
       locked: () => (fly.locked || player.debugInput) && !session.screen.open,
       yaw: () => fly.yaw, swing: () => arm.swing(),
       sneaking: () => player.state.sneaking || fly.keys.has("ShiftLeft") || fly.keys.has("ShiftRight"),
-      useBlock: (id) => {
-        if (id !== B.WORKBENCH) return false;
-        session.openScreen("workbench");
-        return true;
-      },
+      useBlock: (t) => session.useBlock(t),
+      entities: session.entities,
     },
     (x, _y, z) => chunks.onBlockChanged(x, z),
   );

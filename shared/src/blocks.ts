@@ -65,16 +65,23 @@ export type RenderKind =
  * - door:   bit 0–1 hướng (tấm cửa sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên
  * - crop:   0..7 = giai đoạn lớn (lúa mì)
  * - liquid: bit 0–2 mức 0..7 (0 = nguồn), bit 3 đang rơi (nước, dung nham)
- * - facing: bit 0–1 hướng mặt trước; bit 2 đang cháy (lò nung; rương không dùng)
+ * - facing: bit 0–1 hướng mặt trước; bit 2 đang cháy (lò nung)
+ * - chest:  bit 0–1 hướng mặt trước; bit 2–3: 0 rương đơn, 1 nửa A, 2 nửa B của rương đôi
+ * - farmland: bit 0 = ẩm
+ * - sapling: bit 0 = giai đoạn ẩn (0–1)
+ * - leaves: bit 0 = do người chơi đặt (không rụng)
  * - rail:   bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư)
  * - bed:    bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường
  * Hàm giải mã / mã hóa nằm trong blockMeta.ts.
  */
-export type MetaKind = "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed";
+export type MetaKind =
+  | "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed"
+  | "chest" | "farmland" | "sapling" | "leaves";
 
 /** Các bit được dùng của từng kiểu (bit khác luôn 0). */
 export const META_MASK: Readonly<Record<MetaKind, number>> = {
   none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 7,
+  chest: 15, farmland: 1, sapling: 1, leaves: 1,
 };
 
 export interface BlockTextures {

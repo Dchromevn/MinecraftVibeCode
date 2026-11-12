@@ -10,5 +10,5 @@ export type ToWorker =
 
 export type FromWorker =
   | { type: "gen"; id: number; cx: number; cz: number; chunk: ChunkData; ms: number }
-  | { type: "mesh"; id: number; cx: number; cz: number; sections: SectionMesh[]; ms: number }
+  | { type: "mesh"; id: number; cx: number; cz: number; sections: SectionMesh[]; light: Uint8Array; ms: number }
   | { type: "error"; id: number; message: string };

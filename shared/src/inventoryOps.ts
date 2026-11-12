@@ -13,7 +13,7 @@ const maxOf = (item: string): number => itemDef(item)?.maxStack ?? INVENTORY.MAX
 
 /** Ô có nhận thêm chồng c không (trống hoặc cùng loại còn chỗ; ô giáp đúng món). */
 function accepts(inv: Inventory, r: SlotRef, c: ItemStack): boolean {
-  if (r.area === "armor" && !Inventory.fitsArmor(r.i, c)) return false;
+  if (!inv.accepts(r.area, r.i, c)) return false;
   const s = inv.slots(r.area)[r.i];
   return !s || (canMerge(s, c) && s.count < maxOf(s.item));
 }
@@ -49,7 +49,7 @@ export function dragSpread(inv: Inventory, targets: readonly SlotRef[], button: 
 export function collectToCursor(inv: Inventory): void {
   const c = inv.cursor;
   if (!c || maxOf(c.item) <= 1) return;
-  for (const area of ["craft", "main"] as SlotArea[]) {
+  for (const area of ["craft", "ext", "main"] as SlotArea[]) {
     const slots = inv.slots(area);
     for (let i = 0; i < slots.length && c.count < maxOf(c.item); i++) {
       const s = slots[i];
@@ -67,7 +67,7 @@ export function swapWithHotbar(inv: Inventory, r: SlotRef, hot: number): void {
   if (r.area === "main" && r.i === hot) return;
   const slots = inv.slots(r.area);
   const a = slots[r.i] ?? null, b = inv.main[hot] ?? null;
-  if (r.area === "armor" && b && !Inventory.fitsArmor(r.i, b)) return;
+  if (b && !inv.accepts(r.area, r.i, b)) return;
   slots[r.i] = b;
   inv.main[hot] = a;
 }
