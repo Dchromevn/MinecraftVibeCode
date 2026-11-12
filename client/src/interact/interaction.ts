@@ -15,7 +15,7 @@ import { FallingBlocks } from "./fallingBlocks.js";
 import { BlockOutline } from "./outline.js";
 
 const REACH_FLY = 12; // khi bay (debug) với xa hơn cho tiện
-/** Chuột phải vào các block này (không giữ Shift) thì dùng block thay vì đặt / ăn. */
+/** Chuột phải vào các block này (không ngồi — phím C) thì dùng block thay vì đặt / ăn. */
 const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE, B.DOOR]);
 
 /** Gửi hành động lên server. */
@@ -85,7 +85,7 @@ export class Interaction {
       const n = Number(e.key);
       if (Number.isInteger(n) && n >= 1 && n <= 9) this.view.net.act({ t: "select", n: n - 1 });
       if (e.code === "KeyQ" && this.view.inv.held) {
-        this.view.net.act({ t: "throwHeld", all: e.ctrlKey });
+        this.view.net.act({ t: "throwHeld", all: e.shiftKey });
         this.view.swing();
       }
     });

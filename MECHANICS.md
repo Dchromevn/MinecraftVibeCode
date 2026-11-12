@@ -155,6 +155,7 @@ kiếm mất 2 khi dùng để đào.
 
 LỰA CHỌN cho người dùng: rìu kiểu trên (đòn nặng, chậm, phong cách PvP hiện đại)
 hay rìu = kiếm − 1 như PLAN (đơn giản hơn).
+ĐÃ CHỌN (người dùng, 2026-11-12): rìu = kiếm cùng cấp − 1.
 
 ### 5.2 Chí mạng và knockback
 

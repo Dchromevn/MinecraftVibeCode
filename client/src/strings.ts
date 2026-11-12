@@ -4,10 +4,10 @@ export const STR = {
   stage: "Giai đoạn 5a — chơi chung qua server",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
-    "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · Ctrl chạy nhanh\n" +
+    "WASD đi · Space nhảy / bơi lên / leo thang · C ngồi (khi bay: xuống) · Shift hoặc nhấn đúp W chạy nhanh (khi bay: bay nhanh)\n" +
     "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
-    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn / cuốc đất / mở bàn, rương, lò, cửa (Shift: đặt) · 1–9 / lăn chuột chọn ô\n" +
-    "E túi đồ · Q vứt (Ctrl+Q cả chồng)",
+    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn / cuốc đất / mở bàn, rương, lò, cửa (C: đặt) · 1–9 / lăn chuột chọn ô\n" +
+    "E túi đồ · Q vứt (Shift+Q cả chồng)",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
   joinName: "Tên người chơi",

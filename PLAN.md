@@ -64,9 +64,9 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | đã xong |
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | đã xong |
 | 3b | Đào, đặt, chỗ bám, cát rơi | đã xong |
-| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | |
-| 4b | Rương, lò nung, cửa, trồng trọt | |
-| 4c | Chất lỏng, xô | |
+| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | đã xong |
+| 4b | Rương, lò nung, cửa, trồng trọt | đã xong |
+| 4c | Chất lỏng, xô | đã xong |
 | 5a | Server làm chủ thế giới, chơi chung qua link | |
 | 5b | Lưu thế giới, đăng nhập | |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | |
@@ -238,7 +238,7 @@ kèm trong gói tin (chunk và thay đổi block).
 
 - Đặt một rương đơn sát cạnh một rương đơn khác, cùng hướng mặt trước, nằm cạnh nhau theo
   chiều ngang (vuông góc với hướng mặt trước) thì hai rương tự ghép thành rương đôi. Giữ
-  Shift khi đặt thì không ghép. Tối đa 2 rương: rương thứ ba cạnh rương đôi là rương đơn.
+  C (ngồi) khi đặt thì không ghép. Tối đa 2 rương: rương thứ ba cạnh rương đôi là rương đơn.
 - Rương đôi chứa 54 ô (6 hàng); mở bên nào cũng ra cùng giao diện: 27 ô của nửa trái ở
   trên, 27 ô của nửa phải ở dưới. Mỗi nửa vẫn lưu 27 ô của riêng nó.
 - Phá một nửa: đồ trong nửa đó rơi ra (kèm 1 rương), nửa kia trở lại rương đơn, giữ đồ.
@@ -277,7 +277,7 @@ kèm trong gói tin (chunk và thay đổi block).
 - Loại công cụ: cuốc (đá, quặng), rìu (gỗ), xẻng (đất, cát, sỏi), kiếm,
   cuốc đất (biến đất/cỏ thành đất cày).
 - Hệ số tốc độ chỉ áp dụng khi dùng đúng loại công cụ.
-- Tay không: sát thương 1. Rìu: sát thương bằng kiếm cùng cấp trừ 1.
+- Tay không: sát thương 1. Rìu: sát thương bằng kiếm cùng cấp trừ 1 (người dùng chọn 2026-11-12: rìu yếu hơn kiếm).
 - Giáp 4 món, cấp da, sắt, vàng, kim cương:
   da: mũ 1, áo 3, quần 2, giày 1 (tổng 7), độ bền 80;
   sắt: 2, 6, 5, 2 (tổng 15), độ bền 200;
@@ -322,7 +322,7 @@ Cần bàn chế tạo (lưới 3x3; X = ván gỗ / đá cuội / thỏi sắt 
 
 Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả kèm sổ công thức.
 - Túi đồ (phím E) có lưới 2x2; chuột phải vào bàn chế tạo mở màn hình bàn chế tạo có
-  lưới 3x3 (giữ Shift + chuột phải thì vẫn đặt block lên bàn). Công thức "làm được
+  lưới 3x3 (giữ C + chuột phải thì vẫn đặt block lên bàn). Công thức "làm được
   mọi lúc" làm được ở cả hai lưới; công thức cần bàn chế tạo chỉ làm được ở lưới 3x3.
 - Xếp nguyên liệu vào lưới đúng hình thì ô kết quả hiện thành phẩm; bấm ô kết quả để
   lấy (mỗi ô lưới mất 1 nguyên liệu), Shift + bấm thì làm liên tục vào túi đồ. Một số
@@ -337,7 +337,7 @@ Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả k
   trái (chưa có cơ chế cầm tay trái).
 - Thao tác chuột như thể loại gốc: kéo chuột trái qua nhiều ô chia đều chồng đang cầm;
   kéo chuột phải đặt 1 cái mỗi ô; bấm đúp gom vật phẩm cùng loại lên con trỏ; trỏ vào ô
-  rồi bấm 1–9 đổi chỗ với ô hotbar đó; trỏ vào ô bấm Q vứt 1 (Ctrl+Q cả chồng); bấm ra
+  rồi bấm 1–9 đổi chỗ với ô hotbar đó; trỏ vào ô bấm Q vứt 1 (Shift+Q cả chồng); bấm ra
   ngoài khung thì vứt chồng đang cầm (chuột phải: vứt 1).
 - Vật phẩm đang cầm hiện ở tay phải (góc nhìn thứ nhất): block là khối nhỏ, vật phẩm
   khác là hình nổi khối từ icon; tay trống thì hiện cánh tay; vung khi đào/đặt/ăn.
@@ -472,8 +472,8 @@ Giao diện chế tạo (người dùng chọn 2026-11-12): lưới kéo thả k
 |---|---|
 | W A S D | di chuyển |
 | Space | nhảy / bơi lên |
-| Shift (giữ) | chạy nhanh |
-| Ctrl (giữ) | ngồi |
+| Shift (giữ) hoặc nhấn đúp W | chạy nhanh |
+| C (giữ) | ngồi — không dùng Ctrl vì Ctrl+W / Ctrl+D là phím tắt trình duyệt (người dùng chọn 2026-11-12) |
 | Chuột | nhìn (pointer lock) |
 | Chuột trái | đào (giữ) / đánh |
 | Chuột phải | đặt block / dùng (rương, lò, cửa, giường, dân làng) / ăn / kéo cung |
@@ -747,7 +747,7 @@ VẬT LÝ
   để server dùng lại.
 - Va chạm AABB từng trục; hộp va chạm theo hình dạng thật (hàng rào nối nhau
   cao 1.5, đất cày, giường, cửa theo hướng và trạng thái mở).
-- Tự bước lên bậc thấp; ngồi (Shift) không rơi khỏi mép.
+- Tự bước lên bậc thấp; ngồi (C) không rơi khỏi mép.
 - Bơi trong nước, leo thang, chậm lại trong mạng nhện, dung nham gây sát
   thương (chỉ lưu số máu, chưa hiển thị).
 - Chunk chưa tải xong thì giữ người chơi đứng yên, không rơi xuyên đất.

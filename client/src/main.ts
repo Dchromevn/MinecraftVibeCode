@@ -123,7 +123,7 @@ async function main(): Promise<void> {
         arm.swing();
         net.swings++;
       },
-      sneaking: () => player.state.sneaking || fly.keys.has("ShiftLeft") || fly.keys.has("ShiftRight"),
+      sneaking: () => player.state.sneaking || fly.keys.has("KeyC"),
     },
     (x, _y, z) => chunks.onBlockChanged(x, z),
   );

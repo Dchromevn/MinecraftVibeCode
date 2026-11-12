@@ -1,5 +1,6 @@
 // Người chơi ở client (Giai đoạn 3a): đọc phím, chạy hàm vật lý /shared với bước cố định
 // 60 Hz, nội suy vị trí cho camera, lắc camera khi đi. Phím F bật/tắt bay (debug).
+// Phím: Shift giữ hoặc nhấn đúp W = chạy nhanh, C = ngồi.
 import * as THREE from "three";
 import {
   PHYSICS_DT, PLAYER, boxBlocked, createPlayer, eyeHeight, playerBox, stepPlayer,
@@ -21,6 +22,8 @@ export class PlayerController {
   private bobAmount = 0; // 0..1, mờ dần khi đứng yên / trên không
   private eye: number = PLAYER.EYE_HEIGHT; // hạ dần khi ngồi
   private needsSpawnFix = true; // khi chunk tải xong: đẩy lên nếu đang kẹt trong block
+  private lastW = -1; // lúc nhấn W gần nhất (giây), để nhận nhấn đúp
+  private sprintLatch = false; // đang chạy nhanh do nhấn đúp W
   private readonly cell: CellReader;
 
   constructor(
@@ -36,7 +39,17 @@ export class PlayerController {
     this.prev = { x: this.state.x, y: this.state.y, z: this.state.z };
     document.addEventListener("keydown", (e) => {
       if (e.code === "KeyF" && this.fly.locked) this.toggleFly();
+      // nhấn đúp W: chạy nhanh tới khi nhả W (e.repeat = phím đang giữ tự lặp, bỏ qua)
+      if (e.code === "KeyW" && !e.repeat) {
+        const now = performance.now() / 1000;
+        if (now - this.lastW <= PLAYER.SPRINT_DOUBLE_TAP_S) this.sprintLatch = true;
+        this.lastW = now;
+      }
     });
+    document.addEventListener("keyup", (e) => {
+      if (e.code === "KeyW") this.sprintLatch = false;
+    });
+    window.addEventListener("blur", () => (this.sprintLatch = false));
   }
 
   /** Dời chân người chơi tới (x, y, z), giữ nguyên máu, đói, dưỡng khí. */
@@ -83,8 +96,9 @@ export class PlayerController {
       forward: (key("KeyW") ? 1 : 0) - (key("KeyS") ? 1 : 0),
       strafe: (key("KeyD") ? 1 : 0) - (key("KeyA") ? 1 : 0),
       jump: key("Space"),
-      sneak: key("ShiftLeft") || key("ShiftRight"),
-      sprint: key("ControlLeft") || key("ControlRight"),
+      // không dùng Ctrl: Ctrl+W / Ctrl+D là phím tắt trình duyệt (đóng tab, bookmark)
+      sneak: key("KeyC"),
+      sprint: key("ShiftLeft") || key("ShiftRight") || (on && this.sprintLatch),
       yaw: this.fly.yaw,
     };
   }

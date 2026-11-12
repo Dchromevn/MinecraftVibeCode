@@ -89,7 +89,8 @@ export const PLAYER = {
   SPRINT_JUMP_BOOST: 2.8, // nhảy lúc chạy nhanh: đẩy thêm về phía trước (block/giây) → chạy+nhảy ≈ 7.1
   AIR_DRAG: 2, // trên không mà nhanh hơn vận tốc mong muốn: giảm dần theo hệ số này (1/giây)
   AIR_SPEED_FACTOR: 0.85, // vận tốc mong muốn khi ở trên không so với trên đất
-  FLY_SPEED: 10.9, // bay debug; giữ Ctrl nhanh gấp 3
+  FLY_SPEED: 10.9, // bay debug; giữ Shift nhanh gấp 3
+  SPRINT_DOUBLE_TAP_S: 0.3, // nhấn đúp W trong khoảng này thì chạy nhanh (đến khi nhả W)
   LADDER_UP: 2.4,
   LADDER_DOWN: 3,
   SWIM_UP: 3,

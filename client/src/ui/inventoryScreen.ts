@@ -163,7 +163,7 @@ export class InventoryScreen {
     const h = this.hover;
     if (Number.isInteger(n) && n >= 1 && n <= 9) this.act({ t: "hotbar", area: h.area, i: h.i, n: n - 1 });
     else if (e.code === "KeyF" && !this.inv.cursor) this.act({ t: "click", area: h.area, i: h.i, button: "left", shift: true }); // như Shift + bấm
-    else if (e.code === "KeyQ") this.act({ t: "dropSlot", area: h.area, i: h.i, all: e.ctrlKey });
+    else if (e.code === "KeyQ") this.act({ t: "dropSlot", area: h.area, i: h.i, all: e.shiftKey });
     else return;
     e.preventDefault();
     this.refresh();

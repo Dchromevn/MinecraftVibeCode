@@ -1,11 +1,11 @@
-// Camera bay tự do (chế độ bay debug, phím F): WASD, Space lên, Shift xuống, Ctrl bay nhanh.
+// Camera bay tự do (chế độ bay debug, phím F): WASD, Space lên, C xuống, Shift bay nhanh.
 // Cũng giữ chuột nhìn (pointer lock) và trạng thái phím cho bộ điều khiển người chơi.
 import * as THREE from "three";
 import { PLAYER } from "../../shared/src/index.js";
 
 const SENSITIVITY = 0.002;
 const SPEED = PLAYER.FLY_SPEED; // block/giây
-const FAST_MULT = 3; // giữ Ctrl
+const FAST_MULT = 3; // giữ Shift
 
 /** Khóa chuột; bỏ qua lỗi (trình duyệt từ chối khi chưa có thao tác người dùng / headless). */
 export function lockPointer(el: HTMLElement): void {
@@ -65,7 +65,7 @@ export class FlyCamera {
     const k = this.keys;
     const forward = (k.has("KeyW") ? 1 : 0) - (k.has("KeyS") ? 1 : 0);
     const strafe = (k.has("KeyD") ? 1 : 0) - (k.has("KeyA") ? 1 : 0);
-    const up = (k.has("Space") ? 1 : 0) - (k.has("ShiftLeft") || k.has("ShiftRight") ? 1 : 0);
+    const up = (k.has("Space") ? 1 : 0) - (k.has("KeyC") ? 1 : 0);
 
     const sin = Math.sin(this.yaw);
     const cos = Math.cos(this.yaw);
@@ -73,7 +73,7 @@ export class FlyCamera {
     this.dir.set(-sin * forward + cos * strafe, up, -cos * forward - sin * strafe);
     if (this.dir.lengthSq() === 0) return;
     this.dir.normalize();
-    const speed = SPEED * (k.has("ControlLeft") ? FAST_MULT : 1);
+    const speed = SPEED * (k.has("ShiftLeft") || k.has("ShiftRight") ? FAST_MULT : 1);
     cam.position.addScaledVector(this.dir, speed * dt);
   }
 }

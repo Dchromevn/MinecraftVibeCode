@@ -13,9 +13,9 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 2b | Hang động, hầm mỏ, ánh sáng, block mới | xong (người dùng xác nhận 2026-11-12) |
 | 3a | Dữ liệu phụ của block, vật lý người chơi, hình dạng block | xong (người dùng xác nhận 2026-11-12) |
 | 3b | Đào, đặt, chỗ bám, cát rơi | xong (người dùng xác nhận 2026-11-12) |
-| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | xong (người dùng bảo "tiếp 4b", 2026-11-12) |
-| 4b | Rương, lò nung, cửa, trồng trọt | xong (người dùng bảo "làm tiếp 4c", 2026-11-12) |
-| 4c | Chất lỏng, xô | xong (người dùng chọn làm 5a, 2026-11-12) |
+| 4a | Vật phẩm, túi đồ, chế tạo, sinh tồn | xong (người dùng xác nhận 2026-11-12) |
+| 4b | Rương, lò nung, cửa, trồng trọt | xong (người dùng xác nhận 2026-11-12) |
+| 4c | Chất lỏng, xô | xong (người dùng xác nhận 2026-11-12) |
 | 5a | Server làm chủ thế giới, chơi chung qua link | chờ người dùng test |
 | 5b | Lưu thế giới, đăng nhập | chưa làm |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
@@ -621,9 +621,13 @@ Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md �
 
 ### Trạng thái
 
-- Xong: 0 → 4c. Lưu ý: 4a, 4b, 4c được đánh dấu "xong" theo kiểu người dùng bảo "làm tiếp" giai đoạn sau, chưa xác nhận từng mục nghiệm thu.
+- Xong: 0 → 4c (người dùng xác nhận 4a, 4b, 4c đều đạt, 2026-11-12).
 - 5a: chờ người dùng test (hướng dẫn test đã gửi: 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí). Kế tiếp: 5b (lưu thế giới + đăng nhập), rồi 5c — xem PLAN.md Giai đoạn 5.
-- Còn chờ người dùng chọn: mục LỰA CHỌN sát thương rìu (MECHANICS.md, Giai đoạn 6): kiểu Java hay "kiếm − 1" (DESIGN.md hiện ghi "kiếm cùng cấp trừ 1").
+- Đã chọn (2026-11-12): sát thương rìu = kiếm cùng cấp − 1 (rìu yếu hơn kiếm) — dùng ở Giai đoạn 6.
+
+### Sửa sau bàn giao (2026-11-12)
+
+- Ctrl + W/A/S/D khi chạy nhanh làm trình duyệt đóng tab (Ctrl+W) / lưu bookmark (Ctrl+D): trang web không chặn được Ctrl+W. Người dùng chọn bỏ hẳn Ctrl: chạy nhanh = giữ Shift hoặc nhấn đúp W (chạy tới khi nhả W, `PLAYER.SPRINT_DOUBLE_TAP_S`), ngồi = C (cũng là phím "đặt block thay vì mở rương / cửa", "không ghép rương", đứng yên trên thang), khi bay: Shift bay nhanh, C bay xuống; vứt cả chồng = Shift+Q. Đã cập nhật DESIGN / PLAN mục 2.12 và chữ hướng dẫn trong game.
 
 ### Thói quen / lựa chọn của người dùng đã chốt
 
