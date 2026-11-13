@@ -3,6 +3,7 @@
 // (hàng rào va chạm cao 1.5).
 import { B, BLOCKS, type BlockBox } from "./blocks.js";
 import { HDX, HDZ, cellId, cellMeta, doorSide, rotXZ, torchWall } from "./blockMeta.js";
+import { isFence, slabBox, stairBoxes, wallBoxes } from "./building.js";
 
 export type Box = BlockBox;
 /** Đọc id block tại tọa độ thế giới (dùng cho hàng rào nối nhau). */
@@ -24,7 +25,7 @@ function sidePanel(d: number, t: number, h = 1): Box {
 }
 
 function fenceJoins(id: number): boolean {
-  return id === B.FENCE || (BLOCKS[id]?.opaque ?? false);
+  return isFence(id) || (BLOCKS[id]?.opaque ?? false); // rào mọi loài gỗ nối với nhau
 }
 
 /** Cột rào + thanh nối tới rào / khối đặc kề, cao h. */
@@ -45,6 +46,12 @@ export function collisionBoxes(cell: number, x: number, y: number, z: number, id
   const def = BLOCKS[id];
   if (!def || !def.solid || def.liquid) return [];
   if (def.render === "fence") return fenceBoxes(x, y, z, idAt, 1.5); // cao 1.5: không nhảy qua được
+  if (def.render === "wall") return wallBoxes(x, y, z, idAt, 1.5, 1.5);
+  if (def.render === "stairs" || def.render === "slab") {
+    let hit = COLLISION_CACHE.get(cell);
+    if (!hit) COLLISION_CACHE.set(cell, (hit = def.render === "stairs" ? stairBoxes(cellMeta(cell)) : [slabBox(cellMeta(cell))]));
+    return hit;
+  }
   if (def.render === "door") {
     let hit = COLLISION_CACHE.get(cell);
     if (!hit) COLLISION_CACHE.set(cell, (hit = [sidePanel(doorSide(cellMeta(cell)), px(3))]));
@@ -63,6 +70,12 @@ export function selectionBoxes(cell: number, x: number, y: number, z: number, id
   switch (def.render) {
     case "fence":
       return fenceBoxes(x, y, z, idAt, 1);
+    case "wall":
+      return wallBoxes(x, y, z, idAt, 1, 14 / 16);
+    case "stairs":
+      return stairBoxes(meta);
+    case "slab":
+      return [slabBox(meta)];
     case "door":
       return [sidePanel(doorSide(meta), px(3))];
     case "torch": {

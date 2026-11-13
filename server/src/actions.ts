@@ -2,7 +2,7 @@
 // rương / lò, cửa, cuốc đất, xô, đặt block), ăn, giáp mòn, chết. Từ chối thì gửi lại ô thật để
 // client bỏ phần đã đoán trước.
 import {
-  B, BLOCKS, PLAYER, breakAt, canPlace, doorUpper, isLiquidId, isReplaceable, itemDef, mergeChest, placeCells, placementCells,
+  B, BLOCKS, PLAYER, breakAt, canPlace, doorUpper, isDoor, isLiquidId, isReplaceable, itemDef, mergeChest, placeCells, planPlace,
   playerBox, stack, toolWear, type NetHit, type BlockEntities,
 } from "../../shared/src/index.js";
 import type { Containers } from "./containers.js";
@@ -12,7 +12,8 @@ import type { ServerTicker } from "./ticker.js";
 import type { ServerWorld } from "./serverWorld.js";
 
 const REACH_FLY = 12; // như client khi bay (Giai đoạn 5b: chỉ quản trị viên)
-const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE, B.DOOR]);
+const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE]);
+const usable = (id: number): boolean => USABLE.has(id) || isDoor(id); // cửa mọi loài gỗ
 
 export class Actions {
   constructor(
@@ -67,7 +68,7 @@ export class Actions {
     if (!hit || !this.inReach(p, hit.x, hit.y, hit.z)) return;
     const cell = this.w.getCell(hit.x, hit.y, hit.z), id = cell & 255;
     if (cell < 0) return;
-    if (!sneaking && USABLE.has(id)) return this.useBlock(p, hit.x, hit.y, hit.z, cell);
+    if (!sneaking && usable(id)) return this.useBlock(p, hit.x, hit.y, hit.z, cell);
     if (def?.tool?.kind === "hoe") {
       if ((id === B.DIRT || id === B.GRASS) && this.w.getCell(hit.x, hit.y + 1, hit.z) === B.AIR) {
         this.ticker.acc.setCell(hit.x, hit.y, hit.z, B.FARMLAND, 0);
@@ -90,11 +91,11 @@ export class Actions {
       p.invDirty = true;
       p.send({ t: "open", kind: "workbench", size: 9 });
     } else if (id === B.CHEST || id === B.FURNACE) this.containers.open(p, x, y, z);
-    else if (id === B.DOOR) {
+    else if (isDoor(id)) {
       const lowerY = doorUpper(cell >> 8) ? y - 1 : y;
       for (const yy of [lowerY, lowerY + 1]) {
         const c = this.w.getCell(x, yy, z);
-        if ((c & 255) === B.DOOR) this.ticker.acc.setCell(x, yy, z, B.DOOR, (c >> 8) ^ 4);
+        if ((c & 255) === id) this.ticker.acc.setCell(x, yy, z, id, (c >> 8) ^ 4);
       }
     }
   }
@@ -104,8 +105,9 @@ export class Actions {
     const places = held ? itemDef(held.item)?.places : undefined;
     const into = isReplaceable(cell & 255);
     const x = into ? t.x : t.x + t.nx, y = into ? t.y : t.y + t.ny, z = into ? t.z : t.z + t.nz;
-    const cells = places === undefined ? null : placementCells(places, x, y, z, t.nx, t.ny, t.nz, yaw);
     const get = (a: number, b: number, c: number): number => this.w.getCell(a, b, c);
+    const fy = typeof t.fy === "number" && Number.isFinite(t.fy) ? t.fy : 0;
+    const cells = places === undefined ? null : planPlace(places, { ...t, fy }, yaw, get);
     if (!cells || !canPlace(cells, get, p.flying ? null : playerBox(p))) {
       this.correct(p, [t, { x, y, z }, { x, y: y + 1, z }]);
       return;

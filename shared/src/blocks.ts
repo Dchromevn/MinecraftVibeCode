@@ -68,6 +68,39 @@ export const B = {
   CORNFLOWER: 60,
   LILY_OF_THE_VALLEY: 61,
   CACTUS: 62,
+  // Giai đoạn 4e: gạch đá; bậc, tấm (10 vật liệu); tường (5); hàng rào, cửa theo loài gỗ
+  STONE_BRICKS: 63,
+  STONE_STAIRS: 64,
+  COBBLE_STAIRS: 65,
+  MOSSY_COBBLE_STAIRS: 66,
+  SANDSTONE_STAIRS: 67,
+  DEEPSLATE_STAIRS: 68,
+  STONE_BRICK_STAIRS: 69,
+  OAK_STAIRS: 70,
+  SPRUCE_STAIRS: 71,
+  BIRCH_STAIRS: 72,
+  ACACIA_STAIRS: 73,
+  STONE_SLAB: 74,
+  COBBLE_SLAB: 75,
+  MOSSY_COBBLE_SLAB: 76,
+  SANDSTONE_SLAB: 77,
+  DEEPSLATE_SLAB: 78,
+  STONE_BRICK_SLAB: 79,
+  OAK_SLAB: 80,
+  SPRUCE_SLAB: 81,
+  BIRCH_SLAB: 82,
+  ACACIA_SLAB: 83,
+  COBBLE_WALL: 84,
+  MOSSY_COBBLE_WALL: 85,
+  SANDSTONE_WALL: 86,
+  DEEPSLATE_WALL: 87,
+  STONE_BRICK_WALL: 88,
+  SPRUCE_FENCE: 89,
+  BIRCH_FENCE: 90,
+  ACACIA_FENCE: 91,
+  SPRUCE_DOOR: 92,
+  BIRCH_DOOR: 93,
+  ACACIA_DOOR: 94,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 
@@ -79,11 +112,12 @@ export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
  * rail = tấm sát sàn tự chọn thẳng/cong; torch = que nhỏ; ladder = tấm sát tường;
  * door = tấm mỏng; crop = dạng #; bed = cao 9/16; farmland = thấp hơn 1/16;
  * stem = thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả);
- * cactus = khối thu vào 1/16 ở bốn mặt bên.
+ * cactus = khối thu vào 1/16 ở bốn mặt bên; stairs = bậc (nửa dưới + phần trên theo hướng / góc);
+ * slab = tấm nửa dưới / nửa trên / đôi; wall = tường (cột + tay nối, như hàng rào).
  */
 export type RenderKind =
   | "none" | "cube" | "cross" | "liquid" | "layer" | "fence" | "rail"
-  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem" | "cactus";
+  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem" | "cactus" | "stairs" | "slab" | "wall";
 
 /**
  * Dữ liệu phụ: 1 byte mỗi block, song song với id (DESIGN.md 2.2). Block có kiểu
@@ -102,16 +136,19 @@ export type RenderKind =
  * - rail:   bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư)
  * - bed:    bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường
  * - cactus: 0..15 = tuổi (đủ tuổi thì mọc thêm một khúc)
+ * - stairs: bit 0–1 hướng phía cao, bit 2 lật ngược, bit 3–5 dạng (0 thẳng, 1 góc trong trái, 2 góc trong
+ *           phải, 3 góc ngoài trái, 4 góc ngoài phải; "trái" = hướng quay ngược chiều kim đồng hồ từ phía cao)
+ * - slab:   0 nửa dưới, 1 nửa trên, 2 tấm đôi
  * Hàm giải mã / mã hóa nằm trong blockMeta.ts.
  */
 export type MetaKind =
   | "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed"
-  | "chest" | "farmland" | "sapling" | "leaves" | "stem" | "cactus";
+  | "chest" | "farmland" | "sapling" | "leaves" | "stem" | "cactus" | "stairs" | "slab";
 
 /** Các bit được dùng của từng kiểu (bit khác luôn 0). */
 export const META_MASK: Readonly<Record<MetaKind, number>> = {
   none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 7,
-  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15, cactus: 15,
+  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15, cactus: 15, stairs: 63, slab: 3,
 };
 
 export interface BlockTextures {

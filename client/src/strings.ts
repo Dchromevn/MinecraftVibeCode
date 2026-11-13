@@ -1,7 +1,7 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 4d — loài cây, hoa, xương rồng",
+  stage: "Giai đoạn 4e — bậc, tấm, tường, gỗ theo loài",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · C ngồi (khi bay: xuống) · Shift hoặc nhấn đúp W chạy nhanh (khi bay: bay nhanh)\n" +
@@ -72,7 +72,7 @@ export const STR = {
     stick: "Que", coal: "Than", raw_iron: "Sắt thô", iron_ingot: "Thỏi sắt", raw_gold: "Vàng thô",
     gold_ingot: "Thỏi vàng", diamond: "Kim cương", emerald: "Ngọc lục bảo", flint: "Đá lửa", string: "Sợi tơ",
     feather: "Lông gà", leather: "Da", wool: "Len", wheat: "Lúa mì", arrow: "Mũi tên", bow: "Cung",
-    seeds: "Hạt lúa", door: "Cửa gỗ", bed: "Giường", apple: "Táo", bread: "Bánh mì", golden_apple: "Táo vàng",
+    seeds: "Hạt lúa", door: "Cửa gỗ sồi", bed: "Giường", apple: "Táo", bread: "Bánh mì", golden_apple: "Táo vàng",
     carrot: "Cà rốt", potato: "Khoai tây", baked_potato: "Khoai tây nướng", beetroot: "Củ cải đường",
     beetroot_seeds: "Hạt củ cải đường", beetroot_soup: "Súp củ cải đường", melon_slice: "Lát dưa hấu",
     melon_seeds: "Hạt dưa hấu", pumpkin_seeds: "Hạt bí ngô", bowl: "Bát gỗ",
@@ -100,12 +100,12 @@ export const STR = {
     sapling: "Cây sồi non",
     torch: "Đuốc",
     glass: "Kính",
-    fence: "Hàng rào",
+    fence: "Hàng rào gỗ sồi",
     rail: "Đường ray",
     ladder: "Thang",
     cobweb: "Mạng nhện",
     furnace: "Lò nung",
-    door: "Cửa gỗ",
+    door: "Cửa gỗ sồi",
     bed: "Giường",
     farmland: "Đất cày",
     wheat: "Lúa mì",
@@ -137,8 +137,24 @@ export const STR = {
     acacia_log: "Thân gỗ keo", acacia_planks: "Ván gỗ keo", acacia_leaves: "Lá keo", acacia_sapling: "Cây keo non",
     dandelion: "Bồ công anh", poppy: "Anh túc", cornflower: "Hoa ngô xanh", lily_of_the_valley: "Linh lan",
     cactus: "Xương rồng",
+    stone_bricks: "Gạch đá",
   } as Record<string, string>,
   serverConnecting: "Server: đang kết nối...",
   serverConnected: "Server: đã kết nối",
   serverDisconnected: "Server: mất kết nối",
 } as const;
+
+// Giai đoạn 4e: tên bậc / tấm / tường ghép theo vật liệu; hàng rào, cửa theo loài gỗ.
+const MATERIAL_NAMES: Record<string, string> = {
+  stone: "đá", cobble: "đá cuội", mossy_cobble: "đá cuội rêu", sandstone: "sa thạch", deepslate: "đá sâu",
+  stone_brick: "gạch đá", oak: "gỗ sồi", spruce: "gỗ thông", birch: "gỗ bạch dương", acacia: "gỗ keo",
+};
+for (const [m, n] of Object.entries(MATERIAL_NAMES)) {
+  STR.blocks[`${m}_stairs`] = `Bậc ${n}`;
+  STR.blocks[`${m}_slab`] = `Tấm ${n}`;
+  STR.blocks[`${m}_wall`] = `Tường ${n}`;
+}
+for (const w of ["spruce", "birch", "acacia"]) {
+  STR.blocks[`${w}_fence`] = `Hàng rào ${MATERIAL_NAMES[w]}`;
+  STR.blocks[`${w}_door`] = `Cửa ${MATERIAL_NAMES[w]}`;
+}

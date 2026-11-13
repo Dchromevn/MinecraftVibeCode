@@ -10,6 +10,7 @@ export interface NetHit {
   nx: number;
   ny: number;
   nz: number;
+  fy?: number; // độ cao điểm chạm trong ô (chọn nửa trên / dưới khi đặt bậc, tấm)
 }
 
 export type ClientMsg =

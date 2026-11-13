@@ -3,6 +3,7 @@
 import { B, BLOCKS } from "./blocks.js";
 import { cropMax } from "./crops.js";
 import { CROP_DROPS } from "./tickConstants.js";
+import { SLAB_DOUBLE, isSlab } from "./building.js";
 import { canHarvest, type HeldTool } from "./digging.js";
 import type { ItemStack } from "./inventory.js";
 import type { Rng } from "./rng.js";
@@ -18,6 +19,10 @@ export function blockDrops(id: number, meta: number, tool: HeldTool | null, rng:
   const give = (item: string, count = 1): void => void out.push({ item, count, damage: 0 });
   const between = (r: readonly [number, number]): number => r[0] + Math.floor(rng() * (r[1] - r[0] + 1));
   const ripe = (meta & 7) >= cropMax(id);
+  if (isSlab(id) && (meta & 3) === SLAB_DOUBLE) { // tấm đôi rơi ra 2 tấm
+    give(d.key, 2);
+    return out;
+  }
   switch (id) {
     case B.GRAVEL: // 10% đá lửa thay cho sỏi
       give(rng() < 0.1 ? "flint" : "gravel");

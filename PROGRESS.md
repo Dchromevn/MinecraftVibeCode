@@ -18,7 +18,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 4c | Chất lỏng, xô | xong (người dùng xác nhận 2026-11-12) |
 | 5a | Server làm chủ thế giới, chơi chung qua link | xong (người dùng xác nhận 2026-11-13) |
 | 4d | Loài cây mới, hoa, xương rồng | xong (người dùng xác nhận 2026-11-13) |
-| 4e | Bậc, tấm, tường, gỗ theo loài | đang làm |
+| 4e | Bậc, tấm, tường, gỗ theo loài | chờ người dùng test |
 | 4f | 16 màu, đồ sắt | chưa làm (trước 5b) |
 | 5b | Lưu thế giới, đăng nhập | chưa làm |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
@@ -668,6 +668,39 @@ Trạng thái: xong (người dùng xác nhận 2026-11-13). Người dùng ch�
 - Kết quả cùng đường bay, cùng server mới: khung có JS > 8 ms 90 / 2.289 → 4 / 1.543, p99 22,7 → 2,8 ms; lần tải đầu: kẹt → đủ mesh sau ~3 giây; khi bay không còn chunk trống quanh người chơi. `npm test` 152/152.
 - Còn lại: nước chảy liên tục vẫn làm worker dựng lại nhiều (nhưng chỉ dùng phần được chia); FPS phần vẽ trên máy thật chưa đo được (headless vẽ bằng CPU).
 
+## Giai đoạn 4e — Bậc, tấm, tường, gỗ theo loài (2026-11-13)
+
+Trạng thái: chờ người dùng test. Người dùng chọn (2026-11-13): chia "4e" cũ thành 4e (phần này) và 4f (16 màu, đồ sắt).
+
+### File đã tạo / sửa
+
+- `/shared` mới: `building.ts` (nhận diện bậc / tấm / tường / rào / cửa theo kiểu vẽ, dữ liệu phụ, hộp hình dạng, dạng góc của bậc tự tính theo bậc kề).
+- `/shared` sửa: `blocks.ts` + `blockTable.ts` (id 63–94, kiểu vẽ stairs / slab / wall, bảng vật liệu), `blockShapes.ts` (va chạm, hộp nhắm; rào mọi loài nối nhau), `blockRules.ts` (cửa mọi loài, đuốc trên đầu tường, ghép tấm đôi trong canPlace, tính lại dạng bậc khi đặt / phá), `placement.ts` (`planPlace` dùng chung client + server: đặt thay ô thay được, ghép tấm đôi, bậc lật ngược / tấm nửa trên theo điểm chạm), `raycast.ts` + `protocol.ts` (độ cao điểm chạm `fy`), `drops.ts` (tấm đôi rơi 2), `items.ts` (icon kiểu "shape"), `recipes.ts`, `index.ts`.
+- `/server/src/actions.ts`: đặt bằng `planPlace`, cửa mọi loài mở được.
+- `/client`: `mesh/specialBlocks.ts` (vẽ bậc / tấm / tường, bỏ mặt áp khối đặc), `ui/itemIcons.ts` (icon vẽ đúng hình), `interact/boxMesh.ts` (mô hình hình đặc biệt), `player/heldItem.ts`, `items/itemEntities.ts` (cầm trên tay / rơi trên đất đúng hình), `interact/interaction.ts`, `strings.ts`, `fallbackTextures.ts`.
+- `scripts/texture-map.json`, `scripts/mc-texture-map.json` (gạch đá, cửa 3 loài, icon cửa / rào; icon rào ghép như rào sồi), ảnh REFI mới trong `client/public`.
+- `tests/building.test.ts` (mới, 15 mục), `tests/run.ts`.
+
+### Đã tự kiểm tra
+
+- `npm run typecheck`, `npm run build`, `npm test` 167/167 (4e 15/15: bậc theo hướng nhìn, lật ngược khi bấm nửa trên; góc ngoài / góc trong, đặt bậc kề sau vẫn tự nối, phá bậc kề thì thẳng lại; tấm nửa dưới / trên, ghép đôi hai cách, khác loại không ghép, tấm đôi rơi 2; đi lên cầu thang 2 bậc + khối không cần nhảy, bước lên tấm; tường thẳng không cột, đầu tường có cột, không nhảy qua; rào thông nối rào sồi; cửa bạch dương 2 ô, phá nửa trên mất cả cửa, rơi đúng loài; công thức rào / cửa theo loài, bậc ×4, tấm ×6, tường ×6, gạch đá ×4).
+- Trình duyệt (server thử, người chơi giả đặt block qua gói tin như người thật): bậc có mặt cắt chữ L đúng hướng, góc ngoài / trong, bậc lật ngược, tấm dưới / trên / đôi, tường gạch đá có góc, hàng rào sồi – thông – bạch dương – keo nối liền, cửa thông / bạch dương / keo; sổ công thức có icon bậc / tấm / tường đúng hình.
+
+### Cần người dùng kiểm tra
+
+- Làm bậc / tấm / tường (bàn chế tạo), xây cầu thang: đi lên không cần nhảy; đặt hai bậc vuông góc thành góc trong / ngoài; đặt bậc vào nửa trên mặt tường (hoặc dưới trần) → bậc lật ngược.
+- Tấm: đặt lên sàn (nửa dưới), vào nửa trên mặt tường (nửa trên); bấm lại vào mặt trên tấm → tấm đôi; phá tấm đôi ra 2 tấm.
+- Tường: nối nhau, đứng cạnh không nhảy qua được, cắm đuốc trên đầu tường.
+- Ván thông / bạch dương / keo → hàng rào, cửa đúng loài; rào khác loài nối nhau; cửa mở / đóng.
+- Hai người chơi thấy cùng một thứ (đặt bậc, ghép tấm).
+- Lấy nhanh (`?debug=1`, vứt bớt đồ trước vì bộ đồ thử đã đầy): `__game.give("oak_stairs", 64)`, `__game.give("stone_slab", 64)`, `__game.give("cobble_wall", 64)`, `__game.give("spruce_door", 1)`.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Bậc / tấm / tường chưa có bóng đổ góc (AO) như khối đầy nên trông phẳng hơn một chút.
+- Tường không nối với hàng rào (như bản gốc); hàng rào không nối với bậc / tấm (không phải khối đặc).
+- Gói tin "use" thêm trường `fy` (client cũ không gửi thì coi như 0: đặt nửa dưới).
+
 ## Bàn giao cho phiên sau (2026-11-12)
 
 Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md → PLAN.md → DESIGN.md → PROGRESS.md (mục này trước tiên).
@@ -675,7 +708,7 @@ Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md �
 ### Trạng thái
 
 - Xong: 0 → 4c (người dùng xác nhận 4a, 4b, 4c đều đạt, 2026-11-12).
-- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: xong. Kế tiếp (người dùng chọn 2026-11-13; 4e chia thành 4e + 4f): 4e → 4f → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
+- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: xong. 4e: chờ người dùng test. Kế tiếp (người dùng chọn 2026-11-13; 4e chia thành 4e + 4f): 4f → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
 - Lựa chọn của người dùng cho 4d / 4e: thuốc nhuộm lấy từ hoa + xương rồng; cửa sắt mở bằng nút / cần gạt đơn giản (không dây redstone); lửa không lan; xô sữa để GĐ 7.
 - Đã chọn (2026-11-12): sát thương rìu = kiếm cùng cấp − 1 (rìu yếu hơn kiếm) — dùng ở Giai đoạn 6.
 

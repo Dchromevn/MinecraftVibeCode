@@ -3,6 +3,8 @@
 // Giai đoạn 3b thêm kiểm tra chỗ bám, Giai đoạn 5 server dùng lại.
 import { B } from "./blocks.js";
 import { isLeaves } from "./woods.js";
+import { SLAB_BOTTOM, SLAB_DOUBLE, SLAB_TOP, isDoor, isSlab, isStairs, stairsMeta } from "./building.js";
+import { isReplaceable } from "./blockRules.js";
 import {
   HDX, HDZ, bedDir, bedHead, bedMeta, cellId, cellMeta, chestHalf, chestMeta, dirFromYaw, dirOf, doorMeta, doorUpper,
   facingDir, opposite, railMetaFromNeighbors, torchMeta,
@@ -16,15 +18,55 @@ export interface PlacedCell {
   meta: number;
 }
 
+/** Ô đang nhắm: tọa độ, pháp tuyến mặt bấm, fy = độ cao điểm chạm trong ô (0..1, để chọn nửa trên / dưới). */
+export interface PlaceHit {
+  x: number;
+  y: number;
+  z: number;
+  nx: number;
+  ny: number;
+  nz: number;
+  fy?: number;
+}
+
+/**
+ * Các ô cần ghi khi đặt block id lên ô đang nhắm (client đoán trước và server dùng chung): đặt thay ô
+ * thay được (cỏ cao...), ghép tấm cùng loại thành tấm đôi, còn lại đặt vào ô kề theo pháp tuyến.
+ */
+export function planPlace(id: number, t: PlaceHit, yaw: number, getCell: (x: number, y: number, z: number) => number): PlacedCell[] | null {
+  const tc = getCell(t.x, t.y, t.z);
+  if (tc < 0) return null;
+  if (isSlab(id) && (tc & 255) === id) {
+    // bấm vào mặt trong của tấm cùng loại: thành tấm đôi tại chỗ
+    const h = tc >> 8;
+    if ((h === SLAB_BOTTOM && t.ny === 1) || (h === SLAB_TOP && t.ny === -1)) return [{ x: t.x, y: t.y, z: t.z, id, meta: SLAB_DOUBLE }];
+  }
+  const into = isReplaceable(tc & 255);
+  const x = into ? t.x : t.x + t.nx, y = into ? t.y : t.y + t.ny, z = into ? t.z : t.z + t.nz;
+  if (isSlab(id)) {
+    const cur = getCell(x, y, z);
+    if ((cur & 255) === id && cur >> 8 !== SLAB_DOUBLE) return [{ x, y, z, id, meta: SLAB_DOUBLE }];
+  }
+  return placementCells(id, x, y, z, t.nx, t.ny, t.nz, yaw, t.fy ?? 0);
+}
+
+/** Đặt vào nửa trên: bấm mặt dưới, hoặc mặt bên ở nửa trên của ô. */
+const upperHalf = (ny: number, fy: number): boolean => ny === -1 || (ny === 0 && fy > 0.5);
+
 /**
  * Các ô cần ghi khi đặt block id vào ô (x, y, z) qua mặt có pháp tuyến (nx, ny, nz)
  * (từ block bị bấm hướng ra ô mới), người chơi nhìn theo yaw. null = không đặt được.
  */
 export function placementCells(
-  id: number, x: number, y: number, z: number, nx: number, ny: number, nz: number, yaw: number,
+  id: number, x: number, y: number, z: number, nx: number, ny: number, nz: number, yaw: number, fy = 0,
 ): PlacedCell[] | null {
   const look = dirFromYaw(yaw);
   const one = (meta: number): PlacedCell[] => [{ x, y, z, id, meta }];
+  // bậc: phía cao quay theo hướng nhìn (đi lên khi bước tới); dạng góc tính lại khi đặt (placeCells)
+  if (isStairs(id)) return one(stairsMeta(look, upperHalf(ny, fy)));
+  if (isSlab(id)) return one(upperHalf(ny, fy) ? SLAB_TOP : SLAB_BOTTOM);
+  if (isDoor(id)) // tấm cửa nằm ở cạnh xa người chơi; hai nửa cùng hướng
+    return [{ x, y, z, id, meta: doorMeta(look, false, false) }, { x, y: y + 1, z, id, meta: doorMeta(look, false, true) }];
   switch (id) {
     case B.TORCH: {
       if (ny < 0) return null; // không cắm dưới trần
@@ -35,9 +77,6 @@ export function placementCells(
       const wall = dirOf(-nx, -nz);
       return wall === null ? null : one(wall);
     }
-    case B.DOOR:
-      // tấm cửa nằm ở cạnh xa người chơi; hai nửa cùng hướng
-      return [{ x, y, z, id, meta: doorMeta(look, false, false) }, { x, y: y + 1, z, id, meta: doorMeta(look, false, true) }];
     case B.BED:
       // chân ở ô được bấm, đầu kéo dài theo hướng nhìn
       return [
@@ -80,7 +119,7 @@ export function mergeChest(c: PlacedCell, getCell: (x: number, y: number, z: num
 /** Ô còn lại của block 2 ô (cửa, giường), hoặc null. */
 export function linkedCell(cell: number, x: number, y: number, z: number): { x: number; y: number; z: number } | null {
   const id = cellId(cell), m = cellMeta(cell);
-  if (id === B.DOOR) return { x, y: doorUpper(m) ? y - 1 : y + 1, z };
+  if (isDoor(id)) return { x, y: doorUpper(m) ? y - 1 : y + 1, z };
   if (id === B.BED) {
     const d = bedHead(m) ? opposite(bedDir(m)) : bedDir(m);
     return { x: x + HDX[d]!, y, z: z + HDZ[d]! };

@@ -5,7 +5,7 @@
 import * as THREE from "three";
 import {
   B, DIGGING, HUNGER, PLAYER, addExhaustion, breakAt, canEat, canPlace, digRate, eat, isLiquidId, isReplaceable, itemDef,
-  mergeChest, placeCells, placementCells, playerBox, raycast, selectionBoxes,
+  isDoor, mergeChest, placeCells, planPlace, playerBox, raycast, selectionBoxes,
   type BlockAccess, type BlockId, type HeldTool, type InvAction, type Inventory, type NetHit, type RayHit, type World,
 } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
@@ -16,7 +16,8 @@ import { BlockOutline } from "./outline.js";
 
 const REACH_FLY = 12; // khi bay (debug) với xa hơn cho tiện
 /** Chuột phải vào các block này (không ngồi — phím C) thì dùng block thay vì đặt / ăn. */
-const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE, B.DOOR]);
+const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE]);
+const usable = (id: number): boolean => USABLE.has(id) || isDoor(id); // cửa mọi loài gỗ
 
 /** Gửi hành động lên server. */
 export interface InteractNet {
@@ -37,7 +38,7 @@ export interface InteractView {
   net: InteractNet;
 }
 
-const netHit = (t: RayHit): NetHit => ({ x: t.x, y: t.y, z: t.z, nx: t.nx, ny: t.ny, nz: t.nz });
+const netHit = (t: RayHit): NetHit => ({ x: t.x, y: t.y, z: t.z, nx: t.nx, ny: t.ny, nz: t.nz, fy: Math.round(t.fy * 1000) / 1000 });
 
 export class Interaction {
   private target: RayHit | null = null;
@@ -137,7 +138,7 @@ export class Interaction {
       this.right = false;
       this.view.swing();
     };
-    if (t && !sneaking && USABLE.has(t.cell & 255)) {
+    if (t && !sneaking && usable(t.cell & 255)) {
       this.view.net.use(netHit(t), null, sneaking, yaw);
       return once();
     }
@@ -227,10 +228,8 @@ export class Interaction {
     const held = this.view.inv.held;
     const places = held ? itemDef(held.item)?.places : undefined;
     if (!t || places === undefined) return;
-    // nhắm vào cỏ cao / tuyết phủ: đặt thay luôn ô đó
-    const into = isReplaceable(t.cell & 255);
-    const x = into ? t.x : t.x + t.nx, y = into ? t.y : t.y + t.ny, z = into ? t.z : t.z + t.nz;
-    const cells = placementCells(places, x, y, z, t.nx, t.ny, t.nz, this.view.yaw());
+    // nhắm vào cỏ cao / tuyết phủ: đặt thay luôn ô đó; tấm cùng loại: ghép thành tấm đôi
+    const cells = planPlace(places, t, this.view.yaw(), (a, b, c) => this.world.getCell(a, b, c));
     if (!cells) return;
     const box = flying ? null : playerBox(this.view.player.state);
     if (!canPlace(cells, (a, b, c) => this.world.getCell(a, b, c), box)) return;

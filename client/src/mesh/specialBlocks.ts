@@ -2,12 +2,13 @@
 // cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), cây trồng theo
 // giai đoạn, thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả). Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
 import {
-  B, BLOCKS, STEM_RIPE, bedDir, bedHead, doorSide, doorUpper, railKind, railRot, stemAttachedDir, torchWall,
+  BLOCKS, STEM_RIPE, bedDir, bedHead, doorSide, doorUpper, isFence, railKind, railRot, slabBox, stairBoxes, stemAttachedDir,
+  torchWall, wallBoxes, type BlockBox,
 } from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
 import {
-  addBed, addBox, addCactus, addCrop, addCross, addFence, addLadder, addRail, addStem, addStemAttached, addTorch, addTorchWall,
+  addBed, addBox, addCactus, addCrop, addCross, type BoxTex, addFence, addLadder, addRail, addStem, addStemAttached, addTorch, addTorchWall,
 } from "./shapes.js";
 
 export interface SpecialUv {
@@ -34,6 +35,21 @@ const LADDER_SIDE = [2, 1, 3, 0] as const;
 const PANEL: readonly (readonly [number, number, number, number])[] = [
   [0, 16, 13, 16], [0, 3, 0, 16], [0, 16, 0, 3], [13, 16, 0, 16],
 ];
+
+/** Hộp (0..1) → điểm ảnh; bỏ mặt nằm sát mép ô mà ô bên kia là khối che khuất. */
+function addBoxes(b: GeomBuilder, x: number, y: number, z: number, boxes: readonly BlockBox[], tex: BoxTex, light: readonly number[], at: At): void {
+  const covered = (dx: number, dy: number, dz: number): boolean => OPAQUE[at(x + dx, y + dy, z + dz)] === 1;
+  for (const bx of boxes) {
+    let faces = 63;
+    if (bx[4] >= 1 && covered(0, 1, 0)) faces &= ~1;
+    if (bx[1] <= 0 && covered(0, -1, 0)) faces &= ~2;
+    if (bx[3] >= 1 && covered(1, 0, 0)) faces &= ~4;
+    if (bx[0] <= 0 && covered(-1, 0, 0)) faces &= ~8;
+    if (bx[5] >= 1 && covered(0, 0, 1)) faces &= ~16;
+    if (bx[2] <= 0 && covered(0, 0, -1)) faces &= ~32;
+    if (faces) addBox(b, x, y, z, bx[0] * 16, bx[3] * 16, bx[1] * 16, bx[4] * 16, bx[2] * 16, bx[5] * 16, tex, light, faces);
+  }
+}
 
 /** Vẽ block đặc biệt tại (x, y, z) trong chunk; at() đọc block theo tọa độ trong chunk (cho phép -1..16). */
 export function addSpecial(
@@ -62,7 +78,7 @@ export function addSpecial(
       return true;
     }
     case "fence": {
-      const joins = (n: number): boolean => n === B.FENCE || OPAQUE[n] === 1;
+      const joins = (n: number): boolean => isFence(n) || OPAQUE[n] === 1; // rào mọi loài gỗ nối nhau
       const conn = (joins(at(x + 1, y, z)) ? 1 : 0) | (joins(at(x - 1, y, z)) ? 2 : 0)
         | (joins(at(x, y, z + 1)) ? 4 : 0) | (joins(at(x, y, z - 1)) ? 8 : 0);
       addFence(b, x, y, z, t[2]!, light, conn);
@@ -91,6 +107,15 @@ export function addSpecial(
       }, light, bedDir(meta), head);
       return true;
     }
+    case "stairs":
+      addBoxes(b, x, y, z, stairBoxes(meta), { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
+    case "slab":
+      addBoxes(b, x, y, z, [slabBox(meta)], { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
+    case "wall":
+      addBoxes(b, x, y, z, wallBoxes(x, y, z, at, 1, 14 / 16), { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
     case "cactus":
       addCactus(b, x, y, z, { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at(x, y + 1, z) !== id, at(x, y - 1, z) !== id);
       return true;

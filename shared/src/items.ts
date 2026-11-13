@@ -5,13 +5,16 @@ import { B, BLOCKS, type BlockId, type ToolKind } from "./blocks.js";
 import { ARMOR, BOW_DURABILITY, STACK, TOOL_TIERS, type ArmorTier, type ToolTier } from "./constants.js";
 import { ARMOR_FORMULA, FOODS, type FoodDef } from "./survivalConstants.js";
 import { FLOWER_BLOCKS, WOODS } from "./woods.js";
+import { isSlab, isStairs, isWall } from "./building.js";
 
 /** Thuốc nhuộm có từ Giai đoạn 4d (nguồn màu gốc). */
 export const BASE_DYES = ["white_dye", "red_dye", "yellow_dye", "blue_dye", "green_dye"] as const;
 
 export type ArmorPiece = "helmet" | "chestplate" | "leggings" | "boots";
 export const ARMOR_PIECES: readonly ArmorPiece[] = ["helmet", "chestplate", "leggings", "boots"];
-export type ItemIcon = { type: "cube"; block: BlockId } | { type: "tex"; name: string } | { type: "icon"; name: string };
+/** shape = vẽ đúng hình block (bậc, tấm, tường) từ texture block. */
+export type ItemIcon =
+  | { type: "cube"; block: BlockId } | { type: "shape"; block: BlockId } | { type: "tex"; name: string } | { type: "icon"; name: string };
 
 export interface ItemDef {
   key: string;
@@ -34,12 +37,17 @@ const CUBES: BlockId[] = [
   B.SANDSTONE, B.FURNACE, B.GLASS, B.DEEPSLATE, B.LEAVES, B.MELON, B.PUMPKIN, B.OBSIDIAN,
   // Giai đoạn 4d: thân, ván, lá của thông / bạch dương / keo; xương rồng
   ...WOODS.filter((w) => w.kind !== "oak").flatMap((w) => [w.log, w.planks, w.leaves]), B.CACTUS,
+  B.STONE_BRICKS, // Giai đoạn 4e
 ];
 for (const id of CUBES) add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "cube", block: id }, places: id });
 for (const id of [B.TORCH, B.RAIL, B.LADDER, ...WOODS.map((w) => w.sapling), ...FLOWER_BLOCKS] as BlockId[])
   add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "tex", name: BLOCKS[id]!.tex.side }, places: id });
 add({ key: "fence", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "fence" }, places: B.FENCE }); // icon riêng: 2 cột + 2 thanh
 add({ key: "door", maxStack: STACK.SINGLE, icon: { type: "icon", name: "door" }, places: B.DOOR });
+// Giai đoạn 4e: bậc, tấm, tường (icon vẽ đúng hình); hàng rào, cửa theo loài gỗ
+for (const b of BLOCKS) if (isStairs(b.id) || isSlab(b.id) || isWall(b.id)) add({ key: b.key, maxStack: STACK.DEFAULT, icon: { type: "shape", block: b.id }, places: b.id });
+for (const [id, single] of [[B.SPRUCE_FENCE, false], [B.BIRCH_FENCE, false], [B.ACACIA_FENCE, false], [B.SPRUCE_DOOR, true], [B.BIRCH_DOOR, true], [B.ACACIA_DOOR, true]] as const)
+  add({ key: BLOCKS[id]!.key, maxStack: single ? STACK.SINGLE : STACK.DEFAULT, icon: { type: "icon", name: BLOCKS[id]!.key }, places: id });
 add({ key: "bed", maxStack: STACK.SINGLE, icon: { type: "icon", name: "bed" }, places: B.BED });
 add({ key: "seeds", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "seeds" }, places: B.WHEAT });
 for (const [k, id] of [["beetroot_seeds", B.BEETROOTS], ["melon_seeds", B.MELON_STEM], ["pumpkin_seeds", B.PUMPKIN_STEM]] as const)

@@ -15,6 +15,8 @@ export interface RayHit {
   ny: number;
   nz: number;
   dist: number;
+  /** Độ cao điểm chạm tính trong ô (0 = đáy ô, 1 = đỉnh): chọn nửa trên / dưới khi đặt bậc, tấm. */
+  fy: number;
   /** id | dữ liệu phụ << 8 của ô bị trúng. */
   cell: number;
 }
@@ -84,7 +86,7 @@ export function raycast(
       if (best && best.t <= maxDist) {
         const n = [0, 0, 0];
         n[best.axis] = best.sign;
-        return { x, y, z, nx: n[0]!, ny: n[1]!, nz: n[2]!, dist: best.t, cell };
+        return { x, y, z, nx: n[0]!, ny: n[1]!, nz: n[2]!, dist: best.t, fy: oy + dy * best.t - y, cell };
       }
     }
     if (tmx < tmy && tmx < tmz) {

@@ -82,6 +82,10 @@ const PALETTE: Record<string, Palette> = {
   cactus_side: ["#2f8a2a", "#1f6a1f"],
   cactus_top: ["#3a9a32", "#2f8a2a"],
   cactus_bottom: ["#3a9a32", "#2f8a2a"],
+  stone_bricks: ["#8a8a8a", "#666666"],
+  spruce_door_upper: ["#6a4a2a", "#3d2b1a"], spruce_door_lower: ["#6a4a2a", "#3d2b1a"],
+  birch_door_upper: ["#e0d6a8", "#c0ae74"], birch_door_lower: ["#e0d6a8", "#c0ae74"],
+  acacia_door_upper: ["#b05a32", "#8a4426"], acacia_door_lower: ["#b05a32", "#8a4426"],
   missing: ["#ff00ff", "#000000"],
 };
 

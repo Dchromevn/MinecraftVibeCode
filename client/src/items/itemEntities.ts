@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { DROPPED, itemDef, type NetItem } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
-import { blockTiles, setBoxTiles } from "../interact/boxMesh.js";
+import { blockTiles, setBoxTiles, shapeObject } from "../interact/boxMesh.js";
 import { iconUrl } from "../ui/itemIcons.js";
 
 interface Entry {
@@ -51,12 +51,13 @@ export class ItemEntities {
       setBoxTiles(geo, blockTiles(this.atlas, icon.block));
       return new THREE.Mesh(geo, this.blockMat);
     }
+    if (icon?.type === "shape") return shapeObject(this.atlas, icon.block, DROPPED.SIZE, this.blockMat);
     return new THREE.Mesh(this.plane, this.iconMat(item));
   }
 
   private remove(e: Entry): void {
     this.scene.remove(e.obj);
-    if (e.obj instanceof THREE.Mesh && e.obj.geometry !== this.plane) e.obj.geometry.dispose();
+    e.obj.traverse((o) => { if (o instanceof THREE.Mesh && o.geometry !== this.plane) o.geometry.dispose(); });
     this.map.delete(e.id);
   }
 

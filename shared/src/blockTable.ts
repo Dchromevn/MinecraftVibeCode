@@ -1,5 +1,5 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–45 theo bảng 2.2, 46–62 theo mục 2.13 (Giai đoạn 4d).
+// Đủ id 0–45 theo bảng 2.2, 46–62 (4d) và 63–94 (4e) theo mục 2.13.
 import { LEAF_DROPS, LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
@@ -181,6 +181,35 @@ function woodDefs(id: number, w: string): BlockDef[] {
     def(id + 3, `${w}_sapling`, 0, "none", [drop(`${w}_sapling`)], same(`${w}_sapling`), { ...OPEN, render: "cross", meta: "sapling" }),
   ];
 }
+
+
+// Giai đoạn 4e (mục 2.13): gạch đá; bậc, tấm theo 10 vật liệu; tường theo 5; hàng rào, cửa theo loài gỗ.
+// Bậc / tấm / tường lấy độ cứng, công cụ, texture của vật liệu gốc; không chặn sáng (vẽ bằng ánh sáng của
+// chính ô, như đất cày) và không che khuất khối bên cạnh.
+TABLE.push(def(63, "stone_bricks", 1.5, "pickaxe", [drop("stone_bricks")], same("stone_bricks"), PICK_ONLY));
+/** [tên vật liệu, id block gốc] — thứ tự khớp B.*_STAIRS / B.*_SLAB. */
+export const SHAPE_MATERIALS: readonly (readonly [string, number])[] = [
+  ["stone", 3], ["cobble", 4], ["mossy_cobble", 19], ["sandstone", 20], ["deepslate", 34], ["stone_brick", 63],
+  ["oak", 8], ["spruce", 48], ["birch", 52], ["acacia", 56],
+];
+/** Vật liệu có tường — thứ tự khớp B.*_WALL. */
+export const WALL_MATERIALS: readonly string[] = ["cobble", "mossy_cobble", "sandstone", "deepslate", "stone_brick"];
+const SHAPED: Partial<BlockDef> = { transparent: true, opaque: false, lightOpacity: 0 };
+function shapedDef(id: number, key: string, src: number, extra: Partial<BlockDef>): BlockDef {
+  const b = TABLE[src]!;
+  return { ...b, ...SHAPED, id: id as BlockId, key, drops: [drop(key)], box: null, falls: false, ...extra };
+}
+for (const [m, src] of SHAPE_MATERIALS) TABLE.push(shapedDef(TABLE.length, `${m}_stairs`, src, { render: "stairs", meta: "stairs" }));
+for (const [m, src] of SHAPE_MATERIALS) TABLE.push(shapedDef(TABLE.length, `${m}_slab`, src, { render: "slab", meta: "slab" }));
+for (const m of WALL_MATERIALS)
+  TABLE.push(shapedDef(TABLE.length, `${m}_wall`, SHAPE_MATERIALS.find((x) => x[0] === m)![1], { render: "wall", meta: "none" }));
+for (const w of ["spruce", "birch", "acacia"])
+  TABLE.push({ ...TABLE[22]!, id: TABLE.length as BlockId, key: `${w}_fence`, drops: [drop(`${w}_fence`)], tex: same(`${w}_planks`) });
+for (const w of ["spruce", "birch", "acacia"])
+  TABLE.push({
+    ...TABLE[29]!, id: TABLE.length as BlockId, key: `${w}_door`, drops: [drop(`${w}_door`)],
+    tex: { top: `${w}_door_upper`, bottom: `${w}_door_lower`, side: `${w}_door_lower` },
+  });
 
 TABLE.forEach((b, i) => {
   if (b.id !== i) throw new Error(`blockTable: id ${b.id} ở vị trí ${i}`);

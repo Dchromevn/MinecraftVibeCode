@@ -1219,6 +1219,166 @@
   {
    "dest": "icons/green_dye",
    "src": "item/green_dye"
+  },
+  {
+   "dest": "textures/stone_bricks",
+   "src": "block/stone_bricks"
+  },
+  {
+   "dest": "textures/spruce_door_upper",
+   "src": "block/spruce_door_top"
+  },
+  {
+   "dest": "textures/spruce_door_lower",
+   "src": "block/spruce_door_bottom"
+  },
+  {
+   "dest": "icons/spruce_door",
+   "src": "item/spruce_door"
+  },
+  {
+   "dest": "icons/spruce_fence",
+   "src": "block/spruce_planks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/birch_door_upper",
+   "src": "block/birch_door_top"
+  },
+  {
+   "dest": "textures/birch_door_lower",
+   "src": "block/birch_door_bottom"
+  },
+  {
+   "dest": "icons/birch_door",
+   "src": "item/birch_door"
+  },
+  {
+   "dest": "icons/birch_fence",
+   "src": "block/birch_planks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/acacia_door_upper",
+   "src": "block/acacia_door_top"
+  },
+  {
+   "dest": "textures/acacia_door_lower",
+   "src": "block/acacia_door_bottom"
+  },
+  {
+   "dest": "icons/acacia_door",
+   "src": "item/acacia_door"
+  },
+  {
+   "dest": "icons/acacia_fence",
+   "src": "block/acacia_planks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
   }
  ]
 }

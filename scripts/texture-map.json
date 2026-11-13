@@ -792,6 +792,58 @@
     {
       "dest": "icons/green_dye.png",
       "src": "dye_mcl_dye/mcl_dye_dark_green.png"
+    },
+    {
+      "dest": "textures/stone_bricks.png",
+      "src": "default_mcl_core/stone/default_stone_brick.png"
+    },
+    {
+      "dest": "textures/spruce_door_upper.png",
+      "src": "doors_mcl_doors/mcl_doors_door_spruce_upper.png"
+    },
+    {
+      "dest": "textures/spruce_door_lower.png",
+      "src": "doors_mcl_doors/mcl_doors_door_spruce_lower.png"
+    },
+    {
+      "dest": "icons/spruce_door.png",
+      "src": "doors_mcl_doors/mcl_doors_door_spruce.png"
+    },
+    {
+      "dest": "icons/spruce_fence.png",
+      "src": "default_mcl_core/trees/mcl_core_planks_spruce.png"
+    },
+    {
+      "dest": "textures/birch_door_upper.png",
+      "src": "doors_mcl_doors/mcl_doors_door_birch_upper.png"
+    },
+    {
+      "dest": "textures/birch_door_lower.png",
+      "src": "doors_mcl_doors/mcl_doors_door_birch_lower.png"
+    },
+    {
+      "dest": "icons/birch_door.png",
+      "src": "doors_mcl_doors/mcl_doors_door_birch.png"
+    },
+    {
+      "dest": "icons/birch_fence.png",
+      "src": "default_mcl_core/trees/mcl_core_planks_birch.png"
+    },
+    {
+      "dest": "textures/acacia_door_upper.png",
+      "src": "doors_mcl_doors/mcl_doors_door_acacia_upper.png"
+    },
+    {
+      "dest": "textures/acacia_door_lower.png",
+      "src": "doors_mcl_doors/mcl_doors_door_acacia_lower.png"
+    },
+    {
+      "dest": "icons/acacia_door.png",
+      "src": "doors_mcl_doors/mcl_doors_door_acacia.png"
+    },
+    {
+      "dest": "icons/acacia_fence.png",
+      "src": "default_mcl_core/trees/default_acacia_wood.png"
     }
   ]
 }

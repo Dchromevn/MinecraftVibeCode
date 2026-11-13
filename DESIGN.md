@@ -602,6 +602,22 @@ Thông số đã dùng (Giai đoạn 4d, `/shared/src/floraConstants.ts`):
   (rơi ra 2 tấm). Tấm nửa dưới không chặn ánh sáng hoàn toàn.
 - Tường: nối với tường, khối đầy, cổng như hàng rào; va chạm cao 1.5; cột giữa cao hơn khi không thẳng.
 
+Thông số đã dùng (Giai đoạn 4e):
+- Id: 63 gạch đá; 64–73 bậc, 74–83 tấm theo thứ tự đá, đá cuội, đá cuội rêu, sa thạch, đá sâu, gạch
+  đá, gỗ sồi, thông, bạch dương, keo; 84–88 tường (đá cuội, đá cuội rêu, sa thạch, đá sâu, gạch đá);
+  89–91 hàng rào, 92–94 cửa thông / bạch dương / keo. Id 8 bit còn trống 95–255.
+- Bậc / tấm / tường không chặn ánh sáng và không che khuất khối bên cạnh (vẽ bằng ánh sáng của chính
+  ô, như đất cày); tấm đôi cũng vậy. Mặt áp sát khối đặc thì không vẽ.
+- Bậc: phía cao quay theo hướng người chơi nhìn; lật ngược khi bấm mặt dưới hoặc nửa trên mặt bên
+  (client gửi kèm độ cao điểm chạm `fy`). Dạng góc: bậc phía cao vuông góc → góc ngoài, bậc phía thấp
+  vuông góc → góc trong (trái / phải theo hướng của bậc kia), trừ khi bậc bên cạnh cùng hướng "khóa" lại.
+- Tấm: bấm mặt trên tấm dưới / mặt dưới tấm trên cùng loại, hoặc đặt vào ô đang có tấm đơn cùng loại →
+  tấm đôi (tốn 1 tấm). Tấm khác loại không ghép.
+- Tường: cột rộng 8/16 cao 1, tay nối rộng 6/16 cao 14/16; không có cột khi chỉ nối hai hướng đối nhau
+  và trên đầu không có tường. Đuốc cắm được trên đầu tường như trên đầu hàng rào.
+- Hàng rào / cửa theo loài: thông số như bản sồi; mọi loài hàng rào nối với nhau; cửa loài nào mở /
+  đóng như cửa sồi. Công thức hàng rào / cửa theo đúng loài ván (không trộn).
+
 #### Thuốc nhuộm và 16 màu (4f)
 
 - 16 màu: trắng, cam, đỏ tía, xanh nhạt, vàng, vàng chanh, hồng, xám, xám nhạt, lục lam,

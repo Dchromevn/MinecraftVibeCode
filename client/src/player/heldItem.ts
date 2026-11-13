@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { itemDef } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
-import { blockTiles, setBoxTiles } from "../interact/boxMesh.js";
+import { blockTiles, setBoxTiles, shapeObject } from "../interact/boxMesh.js";
 import { loadImage } from "../util/loadImage.js";
 
 const RES = 16;
@@ -64,6 +64,11 @@ export function heldModel(key: string, atlas: Atlas): Promise<THREE.Object3D> {
       const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xdddddd }));
       m.userData.kind = "block";
       return m;
+    }
+    if (icon?.type === "shape") {
+      const g = shapeObject(atlas, icon.block, 1, new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xdddddd }));
+      g.userData.kind = "block";
+      return g;
     }
     const url = icon?.type === "icon" ? `/icons/${icon.name}.png` : icon?.type === "tex" ? `/textures/${icon.name}.png` : "";
     const px = url ? await loadPixels(url) : null;

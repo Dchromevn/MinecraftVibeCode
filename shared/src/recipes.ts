@@ -1,6 +1,7 @@
 // Công thức chế tạo (DESIGN.md 2.4): lưới 2x2 (túi đồ) hoặc 3x3 (bàn chế tạo). Công thức có
 // hình xếp (được lật ngang) hoặc không cần hình. Mỗi ô lưới dùng 1 nguyên liệu mỗi lần làm.
 import { BLOCKS } from "./blocks.js";
+import { SHAPE_MATERIALS, WALL_MATERIALS } from "./blockTable.js";
 import { ARMOR_PIECES, TOOL_KINDS } from "./items.js";
 import { LOG_ITEMS, PLANK_ITEMS, WOODS } from "./woods.js";
 
@@ -69,8 +70,20 @@ shaped("arrow", 4, ["F", "|", "E"], { F: "flint", "|": "stick", E: "feather" });
 shaped("chest", 1, ["PPP", "P P", "PPP"], { P: "#planks" });
 shaped("furnace", 1, ["CCC", "C C", "CCC"], { C: "cobble" });
 shaped("ladder", 3, ["| |", "|||", "| |"], { "|": "stick" });
-shaped("door", 3, ["PP", "PP", "PP"], { P: "#planks" }); // cửa / rào theo loài gỗ: Giai đoạn 4e
-shaped("fence", 3, ["P|P", "P|P"], { P: "#planks", "|": "stick" });
+// cửa, hàng rào theo loài gỗ (Giai đoạn 4e): ván loài nào ra loài đó
+for (const w of WOODS) {
+  const planks = BLOCKS[w.planks]!.key, pre = w.kind === "oak" ? "" : `${w.kind}_`;
+  shaped(`${pre}door`, 3, ["PP", "PP", "PP"], { P: planks });
+  shaped(`${pre}fence`, 3, ["P|P", "P|P"], { P: planks, "|": "stick" });
+}
+// gạch đá; bậc (6 → 4), tấm (3 → 6), tường (6 → 6) theo vật liệu (DESIGN.md 2.13)
+shaped("stone_bricks", 4, ["SS", "SS"], { S: "stone" }, "hand");
+for (const [m, src] of SHAPE_MATERIALS) {
+  const mat = BLOCKS[src]!.key;
+  shaped(`${m}_stairs`, 4, ["X  ", "XX ", "XXX"], { X: mat });
+  shaped(`${m}_slab`, 6, ["XXX"], { X: mat });
+}
+for (const m of WALL_MATERIALS) shaped(`${m}_wall`, 6, ["XXX", "XXX"], { X: BLOCKS[SHAPE_MATERIALS.find((x) => x[0] === m)![1]]!.key });
 shaped("rail", 16, ["I I", "I|I", "I I"], { I: "iron_ingot", "|": "stick" });
 shaped("bread", 1, ["WWW"], { W: "wheat" });
 shaped("bed", 1, ["WWW", "PPP"], { W: "wool", P: "#planks" });

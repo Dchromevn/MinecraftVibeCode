@@ -7,6 +7,7 @@ import { chestPartner, linkedCell, updateRailsAround, type PlacedCell } from "./
 import { chestMeta, facingDir } from "./blockMeta.js";
 import { isFarmPlant, stemDetach } from "./crops.js";
 import { isFlower, isSapling } from "./woods.js";
+import { SLAB_DOUBLE, isDoor, isFence, isSlab, isStairs, isWall, updateStairsAround } from "./building.js";
 
 export interface BlockAccess {
   /** id | dữ liệu phụ << 8; âm = chunk chưa tải. */
@@ -53,13 +54,17 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
   const id = cellId(cell), m = cellMeta(cell);
   const below = idAt(x, y - 1, z);
   if (isSapling(id) || isFlower(id)) return below === B.GRASS || below === B.DIRT || below === B.FARMLAND;
+  if (isDoor(id)) {
+    if (doorUpper(m)) return below === id;
+    return isFullSolid(below) && idAt(x, y + 1, z) === id;
+  }
   switch (id) {
     case B.CACTUS:
       return (below === B.SAND || below === B.CACTUS) && cactusSidesFree(idAt, x, y, z);
     case B.TORCH: {
       const wall = torchWall(m);
       // đuốc trên sàn: khối đầy, hoặc đầu cột rào (như đuốc trong hầm mỏ)
-      if (wall === null) return isFullSolid(below) || below === B.FENCE;
+      if (wall === null) return isFullSolid(below) || isFence(below) || isWall(below);
       return isFullSolid(idAt(x + HDX[wall]!, y, z + HDZ[wall]!));
     }
     case B.LADDER:
@@ -76,10 +81,6 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
     case B.MELON_STEM:
     case B.PUMPKIN_STEM:
       return isFarmPlant(id) && below === B.FARMLAND;
-    case B.DOOR: {
-      if (doorUpper(m)) return below === B.DOOR;
-      return isFullSolid(below) && idAt(x, y + 1, z) === B.DOOR;
-    }
     case B.BED: {
       const o = linkedCell(cell, x, y, z)!;
       return isFullSolid(below) && idAt(o.x, o.y, o.z) === B.BED;
@@ -99,7 +100,8 @@ export function canPlace(cells: readonly PlacedCell[], getCell: (x: number, y: n
   const idAt: IdAt = (x, y, z) => Math.max(0, cellAt(x, y, z)) & 255;
   for (const c of cells) {
     const cur = getCell(c.x, c.y, c.z);
-    if (cur < 0 || c.y < 1 || c.y > 127 || !isReplaceable(cur & 255)) return false;
+    const slabMerge = isSlab(c.id) && c.meta === SLAB_DOUBLE && (cur & 255) === c.id && cur >> 8 !== SLAB_DOUBLE;
+    if (cur < 0 || c.y < 1 || c.y > 127 || (!isReplaceable(cur & 255) && !slabMerge)) return false;
     const cell = c.id | (c.meta << 8);
     if (!hasSupport(cell, c.x, c.y, c.z, idAt)) return false;
     if (!player) continue;
@@ -180,6 +182,7 @@ export function breakAt(
   }
   const idAt: IdAt = (a, b, c) => Math.max(0, acc.getCell(a, b, c)) & 255;
   if (id === B.RAIL) updateRailsAround(x, y, z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
+  updateStairsAround(x, y, z, (a, b, c) => acc.getCell(a, b, c), (a, b, c, i, m) => acc.setCell(a, b, c, i, m));
   // phá một nửa rương đôi: nửa kia trở lại rương đơn (giữ đồ của nó)
   const p = chestPartner(cell, x, y, z);
   if (p && idAt(p.x, p.y, p.z) === B.CHEST) acc.setCell(p.x, p.y, p.z, B.CHEST, chestMeta(facingDir(cell >> 8), 0));
@@ -194,5 +197,7 @@ export function placeCells(
   for (const c of cells) acc.setCell(c.x, c.y, c.z, c.id, c.meta);
   const idAt: IdAt = (a, b, c) => Math.max(0, acc.getCell(a, b, c)) & 255;
   for (const c of cells) if (c.id === B.RAIL) updateRailsAround(c.x, c.y, c.z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
+  for (const c of cells)
+    if (isStairs(c.id)) updateStairsAround(c.x, c.y, c.z, (a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m));
   return settle(acc, cells, startFalling);
 }

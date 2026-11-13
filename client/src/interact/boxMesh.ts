@@ -1,6 +1,6 @@
 // Khối hộp Three.js dùng ô texture trong atlas (vết nứt, block đang rơi).
 import * as THREE from "three";
-import { BLOCKS } from "../../../shared/src/index.js";
+import { BLOCKS, slabBox, stairBoxes, stairsMeta, type BlockBox } from "../../../shared/src/index.js";
 import type { Atlas, TileUV } from "../atlas.js";
 
 /** Góc uv gốc của mỗi mặt BoxGeometry (4 đỉnh): (0,1) (1,1) (0,0) (1,0). */
@@ -15,6 +15,28 @@ export function setBoxTiles(geo: THREE.BoxGeometry, tiles: readonly TileUV[]): v
     for (let k = 0; k < 4; k++) uv.setXY(f * 4 + k, CORNER_U[k] ? t.u1 : t.u0, CORNER_V[k] ? t.v1 : t.v0);
   }
   uv.needsUpdate = true;
+}
+
+/** Hộp để vẽ vật phẩm block hình đặc biệt (bậc thấy mặt cắt chữ L, tấm nửa dưới, tường có tay nối). */
+export function shapeBoxes(blockId: number): readonly BlockBox[] {
+  const r = BLOCKS[blockId]!.render;
+  if (r === "stairs") return stairBoxes(stairsMeta(1, false)); // phía cao ở −X
+  if (r === "slab") return [slabBox(0)];
+  return [[4 / 16, 0, 4 / 16, 12 / 16, 1, 12 / 16], [5 / 16, 0, 0, 11 / 16, 14 / 16, 1]]; // tường
+}
+
+/** Mô hình 3D của vật phẩm hình đặc biệt: các hộp trong khối cạnh size, tâm ở gốc. */
+export function shapeObject(atlas: Atlas, blockId: number, size: number, mat: THREE.Material): THREE.Group {
+  const g = new THREE.Group();
+  const tiles = blockTiles(atlas, blockId);
+  for (const [x0, y0, z0, x1, y1, z1] of shapeBoxes(blockId)) {
+    const geo = new THREE.BoxGeometry((x1 - x0) * size, (y1 - y0) * size, (z1 - z0) * size);
+    setBoxTiles(geo, tiles);
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(((x0 + x1) / 2 - 0.5) * size, ((y0 + y1) / 2 - 0.5) * size, ((z0 + z1) / 2 - 0.5) * size);
+    g.add(m);
+  }
+  return g;
 }
 
 /** 6 ô texture của một block theo bảng block (trên/dưới/bên/trước). */
