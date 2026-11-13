@@ -3,7 +3,7 @@
 import { B, BLOCKS } from "./blocks.js";
 import { HDX, HDZ, cellId, cellMeta, doorUpper, torchWall } from "./blockMeta.js";
 import { collisionBoxes } from "./blockShapes.js";
-import { chestPartner, linkedCell, updateRailsAround, type PlacedCell } from "./placement.js";
+import { chestPartner, linkedCell, pairDoors, updateRailsAround, type PlacedCell } from "./placement.js";
 import { chestMeta, facingDir } from "./blockMeta.js";
 import { isFarmPlant, stemDetach } from "./crops.js";
 import { isFlower, isSapling } from "./woods.js";
@@ -208,6 +208,8 @@ export function placeCells(
   for (const c of cells) acc.setCell(c.x, c.y, c.z, c.id, c.meta);
   const idAt: IdAt = (a, b, c) => Math.max(0, acc.getCell(a, b, c)) & 255;
   for (const c of cells) if (c.id === B.RAIL) updateRailsAround(c.x, c.y, c.z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
+  for (const c of cells)
+    if (isDoor(c.id)) pairDoors(c.x, c.y, c.z, (a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m));
   for (const c of cells)
     if (isSwitch(c.id) || c.id === B.IRON_DOOR) refreshIronDoors((a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m), c.x, c.y, c.z);
   for (const c of cells)

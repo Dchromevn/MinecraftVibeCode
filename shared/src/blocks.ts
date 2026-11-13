@@ -151,7 +151,8 @@ export type RenderKind =
  * "none" luôn có dữ liệu phụ 0. Hướng ngang: 0 Nam (+Z), 1 Tây (−X), 2 Bắc (−Z), 3 Đông (+X).
  * - torch:  0 = cắm trên sàn; 1..4 = gắn tường ở hướng (giá trị − 1), nghiêng ra ngoài
  * - ladder: 0..3 = hướng bức tường mà thang bám vào
- * - door:   bit 0–1 hướng (tấm cửa sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên
+ * - door:   bit 0–1 hướng (tấm cửa sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên, bit 4 bản lề trái
+ *           (mở thì tấm cửa xoay về cạnh bên trái thay vì bên phải, nhìn theo hướng cửa) — cửa đôi
  * - crop:   0..7 = giai đoạn lớn (lúa mì, cà rốt, khoai tây); củ cải đường 0..3
  * - stem:   0..7 = tuổi; 8..11 = đã ra quả, quả ở hướng (giá trị − 8)
  * - liquid: bit 0–2 mức 0..7 (0 = nguồn), bit 3 đang rơi (nước, dung nham)
@@ -177,7 +178,7 @@ export type MetaKind =
 
 /** Các bit được dùng của từng kiểu (bit khác luôn 0). */
 export const META_MASK: Readonly<Record<MetaKind, number>> = {
-  none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 127,
+  none: 0, torch: 7, ladder: 3, door: 31, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 127,
   chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15, cactus: 15, stairs: 63, slab: 3, color: 15, lantern: 1, switch: 15,
 };
 

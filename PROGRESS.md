@@ -750,6 +750,11 @@ Sinh thử vùng 60x60 chunk (2 seed) + đồ rương hầm mỏ, rồi lan theo
 - Khối dưa hấu: phá ra lát dưa, chưa có công thức 9 lát → khối (bản gốc có).
 - Block có trong thế giới nhưng không có dạng vật phẩm (bản gốc cần phù phép "Mềm tay", game không có): khối cỏ, các quặng, lớp tuyết, đất cày, đá nền, nước, dung nham, lửa.
 
+### Sửa: cửa đôi mở chắn lối giữa (2026-11-13, người dùng báo)
+
+- Nguyên nhân: cửa chưa có bản lề trái / phải, cánh nào mở cũng xoay về bên phải nên cánh trái của cửa đôi nằm chắn giữa lối.
+- Sửa: dữ liệu phụ cửa thêm bit 4 "bản lề trái"; đặt cửa sát một cửa cùng hướng thì tự ghép (chỉnh cả cửa cũ): cánh trái mở về bên trái, cánh phải mở về bên phải. Cửa sắt theo nút / cần gạt chỉ đổi bit "đang mở", giữ bản lề. File: `shared/src/blockMeta.ts`, `blocks.ts`, `placement.ts` (`pairDoors`), `blockRules.ts`, `decor.ts`; test `tests/building.test.ts` (đặt theo hai thứ tự). Cửa đã đặt từ trước vẫn mở như cũ cho tới khi đặt lại.
+
 ## Bàn giao cho phiên sau (2026-11-12)
 
 Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md → PLAN.md → DESIGN.md → PROGRESS.md (mục này trước tiên).

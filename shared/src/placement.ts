@@ -129,6 +129,33 @@ export function mergeChest(c: PlacedCell, getCell: (x: number, y: number, z: num
   return [];
 }
 
+/**
+ * Cửa vừa đặt (nửa dưới ở x, y, z): nếu sát bên phải / trái (nhìn theo hướng cửa) có cửa cùng hướng thì
+ * ghép thành cửa đôi — cánh bên trái bản lề trái, cánh bên phải bản lề phải (cả cửa cũ cũng được chỉnh).
+ */
+export function pairDoors(
+  x: number, y: number, z: number, getCell: (x: number, y: number, z: number) => number,
+  setCell: (x: number, y: number, z: number, id: number, meta: number) => void,
+): void {
+  const c = getCell(x, y, z);
+  if (c < 0 || !isDoor(c & 255) || doorUpper(c >> 8)) return;
+  const f = (c >> 8) & 3;
+  const setHinge = (px: number, pz: number, left: boolean): void => {
+    for (const py of [y, y + 1]) {
+      const n = getCell(px, py, pz);
+      if (n >= 0 && isDoor(n & 255)) setCell(px, py, pz, n & 255, left ? (n >> 8) | 16 : (n >> 8) & ~16);
+    }
+  };
+  for (const [side, meLeft] of [[(f + 1) & 3, true], [(f + 3) & 3, false]] as const) {
+    const nx = x + HDX[side]!, nz = z + HDZ[side]!;
+    const n = getCell(nx, y, nz);
+    if (n < 0 || !isDoor(n & 255) || doorUpper(n >> 8) || ((n >> 8) & 3) !== f) continue;
+    setHinge(x, z, meLeft); // cửa mới ở bên trái của cửa kia thì bản lề trái
+    setHinge(nx, nz, !meLeft);
+    return;
+  }
+}
+
 /** Ô còn lại của block 2 ô (cửa, giường), hoặc null. */
 export function linkedCell(cell: number, x: number, y: number, z: number): { x: number; y: number; z: number } | null {
   const id = cellId(cell), m = cellMeta(cell);

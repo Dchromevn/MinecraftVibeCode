@@ -175,7 +175,7 @@ Hướng ngang: 0 = Nam (+Z), 1 = Tây (−X), 2 = Bắc (−Z), 3 = Đông (+X)
 |---|---|
 | đuốc | 0 = cắm trên sàn; 1–4 = gắn tường ở hướng (giá trị − 1), nghiêng ra ngoài |
 | thang | 0–3 = hướng bức tường mà thang bám vào |
-| cửa | bit 0–1 hướng (tấm cửa nằm sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên |
+| cửa | bit 0–1 hướng (tấm cửa nằm sát cạnh đó khi đóng), bit 2 đang mở, bit 3 nửa trên, bit 4 bản lề trái (cửa đôi: đặt hai cửa cùng hướng cạnh nhau thì tự ghép, cánh trái mở về bên trái, cánh phải mở về bên phải) |
 | lúa mì | 0–7 = giai đoạn lớn |
 | cà rốt, khoai tây | 0–7 = giai đoạn lớn; củ cải đường: 0–3 |
 | thân dưa, thân bí | 0–7 = tuổi; 8–11 = đã ra quả, quả ở hướng (giá trị − 8) |

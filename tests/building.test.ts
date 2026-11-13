@@ -2,7 +2,7 @@
 // cầu thang không cần nhảy, tường (nối, cao 1.5), hàng rào / cửa theo loài gỗ, công thức.
 import {
   B, BLOCKS, SLAB_BOTTOM, SLAB_DOUBLE, SLAB_TOP, blockDrops, breakAt, canPlace, collisionBoxes, createPlayer, makeCell,
-  matchGrid, mulberry32, placeCells, planPlace, stairsDir, stairsShape, stairsUpside, stepPlayer, wallBoxes,
+  doorSide, matchGrid, mulberry32, placeCells, planPlace, stairsDir, stairsShape, stairsUpside, stepPlayer, wallBoxes,
   type BlockAccess, type PlaceHit,
 } from "../shared/src/index.js";
 import { check } from "./harness.js";
@@ -134,4 +134,18 @@ const walkInput = { forward: 1, strafe: 0, jump: false, sneak: false, sprint: fa
     st?.item === "cobble_stairs" && st.count === 4 && sl?.item === "stone_slab" && sl.count === 6
     && wl?.item === "stone_brick_wall" && wl.count === 6 && br?.item === "stone_bricks" && br.count === 4);
   check("đủ 32 block mới (id 63–94) có tên kỹ thuật và rơi ra chính nó", BLOCKS.slice(63, 95).length === 32 && BLOCKS.slice(63, 95).every((b) => b.drops[0]?.item === b.key));
+}
+
+{ // 8. cửa đôi: hai cửa cùng hướng cạnh nhau tự thành cặp, mở về hai phía (đặt theo thứ tự nào cũng được)
+  const sides = (first: number, second: number): number[] => {
+    const { w, cell, place } = mkWorld();
+    place(B.IRON_DOOR, floor(first, 0), YAW_N);
+    place(B.DOOR, floor(second, 0), YAW_N);
+    for (const x of [0, 1]) for (const y of [10, 11]) w.setCell(x, y, 0, cell(x, y, 0) & 255, (cell(x, y, 0) >> 8) | 4); // mở cả hai
+    return [0, 1].flatMap((x) => [10, 11].map((y) => doorSide(cell(x, y, 0) >> 8)));
+  };
+  // nhìn về Bắc (hướng 2): cánh trái (x = 0) mở về Tây (1), cánh phải (x = 1) mở về Đông (3)
+  const a = sides(0, 1), b = sides(1, 0);
+  check("cửa đôi: cánh trái mở về bên trái, cánh phải mở về bên phải; đặt cánh nào trước cũng được",
+    a.join() === "1,1,3,3" && b.join() === "1,1,3,3", `${a} / ${b}`);
 }

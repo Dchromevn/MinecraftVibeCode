@@ -1,7 +1,7 @@
 // Đồ trang trí / cơ cấu (DESIGN.md 2.13, Giai đoạn 4f): tấm kính, song sắt, lồng đèn, nút, cần gạt và cửa
 // sắt mở theo nút / cần gạt ở gần (không có dây dẫn). Hộp hình dạng dùng chung cho va chạm, nhắm, vẽ.
 import { B, BLOCKS, type BlockBox } from "./blocks.js";
-import { HDX, HDZ, doorFacing, doorMeta, doorUpper, rotXZ } from "./blockMeta.js";
+import { HDX, HDZ, doorUpper, rotXZ } from "./blockMeta.js";
 import { SWITCHES } from "./constants.js";
 import { isWall } from "./building.js";
 
@@ -94,8 +94,8 @@ export function refreshIronDoors(cellAt: CellAt, setCell: SetCell, x: number, y:
         const open = powered(cellAt, lx, ly, lz) || powered(cellAt, lx, ly + 1, lz);
         const m = c >> 8;
         if (((m & 4) !== 0) === open) continue;
-        const side = doorFacing(m);
-        setCell(lx, ly, lz, B.IRON_DOOR, doorMeta(side, open, false));
-        setCell(lx, ly + 1, lz, B.IRON_DOOR, doorMeta(side, open, true));
+        // chỉ đổi bit "đang mở", giữ hướng / bản lề của từng nửa
+        setCell(lx, ly, lz, B.IRON_DOOR, open ? m | 4 : m & ~4);
+        setCell(lx, ly + 1, lz, B.IRON_DOOR, open ? (up >> 8) | 4 : (up >> 8) & ~4);
       }
 }

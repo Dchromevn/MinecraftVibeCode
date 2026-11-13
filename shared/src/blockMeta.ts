@@ -44,13 +44,18 @@ export function rotXZ(x: number, z: number, d: number): [number, number] {
 export const torchMeta = (wallDir: number | null): number => (wallDir === null ? 0 : wallDir + 1);
 export const torchWall = (meta: number): number | null => (meta === 0 ? null : (meta - 1) & 3);
 
-export const doorMeta = (facing: number, open: boolean, upper: boolean): number =>
-  (facing & 3) | (open ? 4 : 0) | (upper ? 8 : 0);
+export const doorMeta = (facing: number, open: boolean, upper: boolean, hingeLeft = false): number =>
+  (facing & 3) | (open ? 4 : 0) | (upper ? 8 : 0) | (hingeLeft ? 16 : 0);
 export const doorFacing = (m: number): number => m & 3;
 export const doorOpen = (m: number): boolean => (m & 4) !== 0;
 export const doorUpper = (m: number): boolean => (m & 8) !== 0;
-/** Cạnh của ô mà tấm cửa đang nằm sát (mở thì xoay sang cạnh kế bên). */
-export const doorSide = (m: number): number => (doorOpen(m) ? (doorFacing(m) + 1) & 3 : doorFacing(m));
+export const doorHingeLeft = (m: number): boolean => (m & 16) !== 0;
+/**
+ * Cạnh của ô mà tấm cửa đang nằm sát: đóng thì cạnh hướng cửa; mở thì xoay sang cạnh bên phải (hướng + 1),
+ * hoặc bên trái (hướng + 3) nếu bản lề trái — hai cánh cửa đôi mở về hai phía.
+ */
+export const doorSide = (m: number): number =>
+  doorOpen(m) ? (doorFacing(m) + (doorHingeLeft(m) ? 3 : 1)) & 3 : doorFacing(m);
 
 export const liquidLevel = (m: number): number => m & 7;
 export const liquidFalling = (m: number): boolean => (m & 8) !== 0;
