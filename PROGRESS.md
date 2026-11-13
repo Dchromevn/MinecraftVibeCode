@@ -19,7 +19,7 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 5a | Server làm chủ thế giới, chơi chung qua link | xong (người dùng xác nhận 2026-11-13) |
 | 4d | Loài cây mới, hoa, xương rồng | xong (người dùng xác nhận 2026-11-13) |
 | 4e | Bậc, tấm, tường, gỗ theo loài | xong (người dùng xác nhận 2026-11-13) |
-| 4f | 16 màu, đồ sắt | đang làm |
+| 4f | 16 màu, đồ sắt | chờ người dùng test |
 | 5b | Lưu thế giới, đăng nhập | chưa làm |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
@@ -701,6 +701,41 @@ Trạng thái: xong (người dùng xác nhận 2026-11-13). Người dùng ch�
 - Tường không nối với hàng rào (như bản gốc); hàng rào không nối với bậc / tấm (không phải khối đặc).
 - Gói tin "use" thêm trường `fy` (client cũ không gửi thì coi như 0: đặt nửa dưới).
 
+## Giai đoạn 4f — 16 màu, đồ sắt (2026-11-13)
+
+Trạng thái: chờ người dùng test. Người dùng chọn (2026-11-13): cửa sắt mở bằng nút / cần gạt đơn giản (không dây), lửa không lan.
+
+### File đã tạo / sửa
+
+- `/shared` mới: `colors.ts` (16 màu), `decor.ts` (tấm kính / song sắt, lồng đèn, nút / cần gạt, cửa sắt theo nút), `decorConstants.ts`.
+- `/shared` sửa: `blocks.ts` + `blockTable.ts` (id 95–113, kiểu vẽ / dữ liệu phụ mới, block có màu: colorTex / colorItem / translucent, giường có màu), `blockShapes.ts`, `blockRules.ts` (chỗ bám nút / cần gạt / lồng đèn / lửa / thảm; lửa thay được; cập nhật cửa sắt khi đặt / phá), `placement.ts` (màu theo vật phẩm, giường màu, nút / cần gạt theo mặt bấm, lồng đèn treo), `drops.ts` (rơi theo màu, kéo), `digging.ts` (kéo), `physics.ts` (lửa), `liquids.ts` (nước dập lửa, cuốn nút / cần gạt), `randomTick.ts`, `smelting.ts`, `items.ts` (icon dùng ảnh theo màu), `recipes.ts` (nhóm `#wool`, `#bed`; công thức không hình dùng được nhóm), `index.ts`, `survivalConstants.ts`.
+- `/server/src`: `actions.ts` (bật lửa, nút / cần gạt, cửa sắt không mở tay), `ticker.ts` (hẹn giờ: lửa tắt, nút nhả).
+- `/client`: `mesh/mesher.ts` (texture theo màu, lớp vẽ kính bán trong suốt), `mesh/specialBlocks.ts`, `mesh/decorShapes.ts` (mới, lồng đèn), `world/chunkMeshes.ts` + `workers/worldWorker.ts` (lớp kính), `ui/itemIcons.ts`, `interact/boxMesh.ts`, `player/heldItem.ts`, `items/itemEntities.ts`, `interact/interaction.ts`, `strings.ts`, `fallbackTextures.ts`.
+- `scripts/texture-map.json` (+169), `scripts/mc-texture-map.json` (+190): len / kính / mép tấm kính / giường 16 màu, thuốc nhuộm, khối tài nguyên, lửa, lồng đèn, cửa sắt, cần gạt, icon kéo / bật lửa / mảnh sắt.
+- `tests/decor.test.ts` (mới, 16 mục), `tests/flora.test.ts`, `tests/building.test.ts` (khoảng id), `tests/run.ts`.
+
+### Đã tự kiểm tra
+
+- `npm run typecheck`, `npm run build`, `npm test` 183/183 (4f 16/16: 16 thuốc nhuộm, trộn màu; len từ tơ, nhuộm len / giường, thảm, kính màu; đặt / phá đúng màu, giường giữ màu cả hai ô, kính màu không rơi gì; kéo; khối tài nguyên ↔ 9, mảnh sắt, khối than 80 món; lồng đèn sàn / treo; tấm kính nối song sắt, không đi xuyên; lửa: mất máu và cháy; server: bật lửa → lửa tự tắt ≤ 6 giây, cửa sắt không mở bằng tay, cần gạt mở / đóng, nút đá mở rồi tự đóng sau 1 giây).
+- Trình duyệt (người chơi giả dựng mô hình qua gói tin): len 16 màu, thảm, kính màu nhìn xuyên được và ám màu, tấm kính / song sắt nối nhau, giường 4 màu, khối tài nguyên, lồng đèn sàn / treo, cửa sắt mở khi cần gạt bật; sổ công thức có icon / tên đồ màu.
+
+### Cần người dùng kiểm tra
+
+- Hái hoa → thuốc nhuộm, trộn ra đủ 16 màu; nhuộm len, làm thảm, kính màu (nhìn xuyên, ám màu), tấm kính màu, giường màu; nhuộm lại giường.
+- Kéo: cắt lá (lấy được khối lá), mạng nhện (lấy được mạng nhện), cỏ cao.
+- Bật lửa lên mặt trên khối: lửa sáng, tự tắt sau vài giây, đứng vào thì cháy, đổ nước thì tắt, không lan sang gỗ.
+- Khối sắt / vàng / kim cương...; mảnh sắt → lồng đèn (đặt trên sàn, treo dưới trần); song sắt, tấm kính nối nhau.
+- Cửa sắt: chuột phải không mở; đặt nút / cần gạt cạnh cửa (trên sàn, tường): bấm nút mở 1 giây, cần gạt bật / tắt.
+- Hai người chơi thấy cùng một kết quả.
+- Lấy nhanh (`?debug=1`, vứt bớt đồ trước): `__game.give("red_wool", 64)`, `__game.give("blue_stained_glass", 64)`, `__game.give("shears", 1)`, `__game.give("flint_and_steel", 1)`, `__game.give("iron_door", 1)`, `__game.give("lever", 8)`, `__game.give("lantern", 8)`.
+
+### Ghi chú / vấn đề còn tồn tại
+
+- Đổi khóa vật phẩm: "wool" → "white_wool", "bed" → "red_bed" (chưa có dữ liệu lưu nên không cần chuyển đổi; giường đặt trước 4f trong thế giới đang chạy sẽ hiện màu trắng — khởi động lại server là hết).
+- Kính màu bán trong suốt: các mặt kính chồng nhau có thể vẽ sai thứ tự trước / sau ở vài góc nhìn (giới hạn của vẽ trong suốt không sắp xếp từng mặt).
+- Lửa là hình chữ X tĩnh (khung đầu của ảnh động), chưa có hoạt ảnh. Cần gạt là hai hộp đơn giản (tay gạt không xoay nghiêng).
+- REFI không có ảnh mép tấm kính, lồng đèn, cần gạt, mảnh sắt, kéo → vẽ tạm khi chưa nhập client.jar.
+
 ## Bàn giao cho phiên sau (2026-11-12)
 
 Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md → PLAN.md → DESIGN.md → PROGRESS.md (mục này trước tiên).
@@ -708,7 +743,7 @@ Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md �
 ### Trạng thái
 
 - Xong: 0 → 4c (người dùng xác nhận 4a, 4b, 4c đều đạt, 2026-11-12).
-- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d, 4e: xong. Kế tiếp (người dùng chọn 2026-11-13; 4e chia thành 4e + 4f): 4f → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
+- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d, 4e: xong. 4f: chờ người dùng test. Kế tiếp (người dùng chọn 2026-11-13; 4e chia thành 4e + 4f): 4f → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
 - Lựa chọn của người dùng cho 4d / 4e: thuốc nhuộm lấy từ hoa + xương rồng; cửa sắt mở bằng nút / cần gạt đơn giản (không dây redstone); lửa không lan; xô sữa để GĐ 7.
 - Đã chọn (2026-11-12): sát thương rìu = kiếm cùng cấp − 1 (rìu yếu hơn kiếm) — dùng ở Giai đoạn 6.
 

@@ -844,6 +844,682 @@
     {
       "dest": "icons/acacia_fence.png",
       "src": "default_mcl_core/trees/default_acacia_wood.png"
+    },
+    {
+      "dest": "textures/white_wool.png",
+      "src": "wool_mcl_wool/wool_white.png"
+    },
+    {
+      "dest": "textures/white_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_white.png"
+    },
+    {
+      "dest": "textures/white_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_white.png"
+    },
+    {
+      "dest": "textures/white_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_white.png"
+    },
+    {
+      "dest": "textures/white_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_white.png"
+    },
+    {
+      "dest": "textures/white_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_white.png"
+    },
+    {
+      "dest": "textures/white_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_white.png"
+    },
+    {
+      "dest": "textures/white_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_white.png"
+    },
+    {
+      "dest": "icons/white_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_white_inv.png"
+    },
+    {
+      "dest": "textures/orange_wool.png",
+      "src": "wool_mcl_wool/wool_orange.png"
+    },
+    {
+      "dest": "textures/orange_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_orange.png"
+    },
+    {
+      "dest": "textures/orange_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_orange.png"
+    },
+    {
+      "dest": "textures/orange_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_orange.png"
+    },
+    {
+      "dest": "textures/orange_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_orange.png"
+    },
+    {
+      "dest": "textures/orange_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_orange.png"
+    },
+    {
+      "dest": "textures/orange_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_orange.png"
+    },
+    {
+      "dest": "textures/orange_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_orange.png"
+    },
+    {
+      "dest": "icons/orange_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_orange_inv.png"
+    },
+    {
+      "dest": "icons/orange_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_orange.png"
+    },
+    {
+      "dest": "textures/magenta_wool.png",
+      "src": "wool_mcl_wool/wool_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_magenta.png"
+    },
+    {
+      "dest": "textures/magenta_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_magenta.png"
+    },
+    {
+      "dest": "icons/magenta_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_magenta_inv.png"
+    },
+    {
+      "dest": "icons/magenta_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_magenta.png"
+    },
+    {
+      "dest": "textures/light_blue_wool.png",
+      "src": "wool_mcl_wool/mcl_wool_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_light_blue.png"
+    },
+    {
+      "dest": "textures/light_blue_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_light_blue.png"
+    },
+    {
+      "dest": "icons/light_blue_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_light_blue_inv.png"
+    },
+    {
+      "dest": "icons/light_blue_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_lightblue.png"
+    },
+    {
+      "dest": "textures/yellow_wool.png",
+      "src": "wool_mcl_wool/wool_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_yellow.png"
+    },
+    {
+      "dest": "textures/yellow_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_yellow.png"
+    },
+    {
+      "dest": "icons/yellow_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_yellow_inv.png"
+    },
+    {
+      "dest": "textures/lime_wool.png",
+      "src": "wool_mcl_wool/mcl_wool_lime.png"
+    },
+    {
+      "dest": "textures/lime_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_lime.png"
+    },
+    {
+      "dest": "textures/lime_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_lime.png"
+    },
+    {
+      "dest": "textures/lime_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_lime.png"
+    },
+    {
+      "dest": "textures/lime_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_lime.png"
+    },
+    {
+      "dest": "textures/lime_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_lime.png"
+    },
+    {
+      "dest": "textures/lime_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_lime.png"
+    },
+    {
+      "dest": "textures/lime_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_lime.png"
+    },
+    {
+      "dest": "icons/lime_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_lime_inv.png"
+    },
+    {
+      "dest": "icons/lime_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_lime.png"
+    },
+    {
+      "dest": "textures/pink_wool.png",
+      "src": "wool_mcl_wool/wool_pink.png"
+    },
+    {
+      "dest": "textures/pink_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_pink.png"
+    },
+    {
+      "dest": "textures/pink_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_pink.png"
+    },
+    {
+      "dest": "textures/pink_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_pink.png"
+    },
+    {
+      "dest": "textures/pink_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_pink.png"
+    },
+    {
+      "dest": "textures/pink_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_pink.png"
+    },
+    {
+      "dest": "textures/pink_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_pink.png"
+    },
+    {
+      "dest": "textures/pink_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_pink.png"
+    },
+    {
+      "dest": "icons/pink_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_pink_inv.png"
+    },
+    {
+      "dest": "icons/pink_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_pink.png"
+    },
+    {
+      "dest": "textures/gray_wool.png",
+      "src": "wool_mcl_wool/wool_dark_grey.png"
+    },
+    {
+      "dest": "textures/gray_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_gray.png"
+    },
+    {
+      "dest": "textures/gray_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_grey.png"
+    },
+    {
+      "dest": "textures/gray_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_grey.png"
+    },
+    {
+      "dest": "textures/gray_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_grey.png"
+    },
+    {
+      "dest": "textures/gray_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_grey.png"
+    },
+    {
+      "dest": "textures/gray_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_grey.png"
+    },
+    {
+      "dest": "textures/gray_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_grey.png"
+    },
+    {
+      "dest": "icons/gray_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_grey_inv.png"
+    },
+    {
+      "dest": "icons/gray_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_dark_grey.png"
+    },
+    {
+      "dest": "textures/light_gray_wool.png",
+      "src": "wool_mcl_wool/wool_grey.png"
+    },
+    {
+      "dest": "textures/light_gray_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_silver.png"
+    },
+    {
+      "dest": "textures/light_gray_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_silver.png"
+    },
+    {
+      "dest": "textures/light_gray_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_silver.png"
+    },
+    {
+      "dest": "textures/light_gray_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_silver.png"
+    },
+    {
+      "dest": "textures/light_gray_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_silver.png"
+    },
+    {
+      "dest": "textures/light_gray_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_silver.png"
+    },
+    {
+      "dest": "textures/light_gray_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_silver.png"
+    },
+    {
+      "dest": "icons/light_gray_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_silver_inv.png"
+    },
+    {
+      "dest": "icons/light_gray_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_grey.png"
+    },
+    {
+      "dest": "textures/cyan_wool.png",
+      "src": "wool_mcl_wool/wool_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_cyan.png"
+    },
+    {
+      "dest": "textures/cyan_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_cyan.png"
+    },
+    {
+      "dest": "icons/cyan_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_cyan_inv.png"
+    },
+    {
+      "dest": "icons/cyan_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_cyan.png"
+    },
+    {
+      "dest": "textures/purple_wool.png",
+      "src": "wool_mcl_wool/wool_violet.png"
+    },
+    {
+      "dest": "textures/purple_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_purple.png"
+    },
+    {
+      "dest": "textures/purple_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_purple.png"
+    },
+    {
+      "dest": "textures/purple_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_purple.png"
+    },
+    {
+      "dest": "textures/purple_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_purple.png"
+    },
+    {
+      "dest": "textures/purple_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_purple.png"
+    },
+    {
+      "dest": "textures/purple_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_purple.png"
+    },
+    {
+      "dest": "textures/purple_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_purple.png"
+    },
+    {
+      "dest": "icons/purple_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_purple_inv.png"
+    },
+    {
+      "dest": "icons/purple_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_violet.png"
+    },
+    {
+      "dest": "textures/blue_wool.png",
+      "src": "wool_mcl_wool/wool_blue.png"
+    },
+    {
+      "dest": "textures/blue_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_blue.png"
+    },
+    {
+      "dest": "textures/blue_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_blue.png"
+    },
+    {
+      "dest": "textures/blue_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_blue.png"
+    },
+    {
+      "dest": "textures/blue_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_blue.png"
+    },
+    {
+      "dest": "textures/blue_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_blue.png"
+    },
+    {
+      "dest": "textures/blue_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_blue.png"
+    },
+    {
+      "dest": "textures/blue_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_blue.png"
+    },
+    {
+      "dest": "icons/blue_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_blue_inv.png"
+    },
+    {
+      "dest": "textures/brown_wool.png",
+      "src": "wool_mcl_wool/wool_brown.png"
+    },
+    {
+      "dest": "textures/brown_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_brown.png"
+    },
+    {
+      "dest": "textures/brown_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_brown.png"
+    },
+    {
+      "dest": "textures/brown_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_brown.png"
+    },
+    {
+      "dest": "textures/brown_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_brown.png"
+    },
+    {
+      "dest": "textures/brown_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_brown.png"
+    },
+    {
+      "dest": "textures/brown_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_brown.png"
+    },
+    {
+      "dest": "textures/brown_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_brown.png"
+    },
+    {
+      "dest": "icons/brown_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_brown_inv.png"
+    },
+    {
+      "dest": "icons/brown_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_brown.png"
+    },
+    {
+      "dest": "textures/green_wool.png",
+      "src": "wool_mcl_wool/wool_dark_green.png"
+    },
+    {
+      "dest": "textures/green_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_green.png"
+    },
+    {
+      "dest": "textures/green_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_green.png"
+    },
+    {
+      "dest": "textures/green_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_green.png"
+    },
+    {
+      "dest": "textures/green_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_green.png"
+    },
+    {
+      "dest": "textures/green_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_green.png"
+    },
+    {
+      "dest": "textures/green_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_green.png"
+    },
+    {
+      "dest": "textures/green_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_green.png"
+    },
+    {
+      "dest": "icons/green_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_green_inv.png"
+    },
+    {
+      "dest": "textures/red_wool.png",
+      "src": "wool_mcl_wool/wool_red.png"
+    },
+    {
+      "dest": "textures/red_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_red.png"
+    },
+    {
+      "dest": "textures/red_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_red.png"
+    },
+    {
+      "dest": "textures/red_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_red.png"
+    },
+    {
+      "dest": "textures/red_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_red.png"
+    },
+    {
+      "dest": "textures/red_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_red.png"
+    },
+    {
+      "dest": "textures/red_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_red.png"
+    },
+    {
+      "dest": "textures/red_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_red.png"
+    },
+    {
+      "dest": "icons/red_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_red_inv.png"
+    },
+    {
+      "dest": "textures/black_wool.png",
+      "src": "wool_mcl_wool/wool_black.png"
+    },
+    {
+      "dest": "textures/black_stained_glass.png",
+      "src": "default_mcl_core/glass/mcl_core_glass_black.png"
+    },
+    {
+      "dest": "textures/black_bed_head_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_top_black.png"
+    },
+    {
+      "dest": "textures/black_bed_foot_top.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_top_bottom_black.png"
+    },
+    {
+      "dest": "textures/black_bed_head_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_r_black.png"
+    },
+    {
+      "dest": "textures/black_bed_foot_side.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_r_black.png"
+    },
+    {
+      "dest": "textures/black_bed_head_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_top_black.png"
+    },
+    {
+      "dest": "textures/black_bed_foot_end.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_side_bottom_black.png"
+    },
+    {
+      "dest": "icons/black_bed.png",
+      "src": "beds_mcl_beds/mcl_beds_bed_black_inv.png"
+    },
+    {
+      "dest": "icons/black_dye.png",
+      "src": "dye_mcl_dye/mcl_dye_black.png"
+    },
+    {
+      "dest": "textures/coal_block.png",
+      "src": "default_mcl_core/minerals_ores/default_coal_block.png"
+    },
+    {
+      "dest": "textures/iron_block.png",
+      "src": "default_mcl_core/minerals_ores/default_steel_block.png"
+    },
+    {
+      "dest": "textures/gold_block.png",
+      "src": "default_mcl_core/minerals_ores/default_gold_block.png"
+    },
+    {
+      "dest": "textures/diamond_block.png",
+      "src": "default_mcl_core/minerals_ores/default_diamond_block.png"
+    },
+    {
+      "dest": "textures/emerald_block.png",
+      "src": "default_mcl_core/minerals_ores/mcl_core_emerald_block.png"
+    },
+    {
+      "dest": "textures/raw_iron_block.png",
+      "src": "default_mcl_core/minerals_ores/mcl_raw_ores_raw_iron_block.png"
+    },
+    {
+      "dest": "textures/raw_gold_block.png",
+      "src": "default_mcl_core/minerals_ores/mcl_raw_ores_raw_gold_block.png"
+    },
+    {
+      "dest": "textures/fire.png",
+      "src": "fire_mcl_fire/fire_basic_flame.png"
+    },
+    {
+      "dest": "textures/iron_bars.png",
+      "src": "xpanes/xpanes_bar.png"
+    },
+    {
+      "dest": "textures/iron_door_upper.png",
+      "src": "doors_mcl_doors/mcl_doors_door_iron_upper.png"
+    },
+    {
+      "dest": "textures/iron_door_lower.png",
+      "src": "doors_mcl_doors/mcl_doors_door_iron_lower.png"
+    },
+    {
+      "dest": "icons/iron_door.png",
+      "src": "doors_mcl_doors/doors_item_steel.png"
+    },
+    {
+      "dest": "icons/flint_and_steel.png",
+      "src": "fire_mcl_fire/fire_flint_steel.png"
+    },
+    {
+      "dest": "icons/lantern.png",
+      "src": "barrels_lanterns_composters/mcl_lanterns_lantern_inv.png"
     }
   ]
 }

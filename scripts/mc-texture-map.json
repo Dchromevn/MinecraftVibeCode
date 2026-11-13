@@ -1379,6 +1379,1134 @@
      }
     ]
    }
+  },
+  {
+   "dest": "textures/white_wool",
+   "src": "block/white_wool"
+  },
+  {
+   "dest": "textures/white_stained_glass",
+   "src": "block/white_stained_glass"
+  },
+  {
+   "dest": "textures/white_stained_glass_pane_top",
+   "src": "block/white_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/white_bed_head_top",
+   "src": "block/white_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/white_bed_foot_top",
+   "src": "block/white_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/white_bed_head_side",
+   "src": "block/white_bed_head_east"
+  },
+  {
+   "dest": "textures/white_bed_foot_side",
+   "src": "block/white_bed_foot_east"
+  },
+  {
+   "dest": "textures/white_bed_foot_end",
+   "src": "block/white_bed_foot_south"
+  },
+  {
+   "dest": "textures/white_bed_head_end",
+   "src": [
+    "block/white_bed_head_north",
+    "block/white_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/white_bed",
+   "src": "block/white_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/white_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/orange_wool",
+   "src": "block/orange_wool"
+  },
+  {
+   "dest": "textures/orange_stained_glass",
+   "src": "block/orange_stained_glass"
+  },
+  {
+   "dest": "textures/orange_stained_glass_pane_top",
+   "src": "block/orange_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/orange_bed_head_top",
+   "src": "block/orange_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/orange_bed_foot_top",
+   "src": "block/orange_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/orange_bed_head_side",
+   "src": "block/orange_bed_head_east"
+  },
+  {
+   "dest": "textures/orange_bed_foot_side",
+   "src": "block/orange_bed_foot_east"
+  },
+  {
+   "dest": "textures/orange_bed_foot_end",
+   "src": "block/orange_bed_foot_south"
+  },
+  {
+   "dest": "textures/orange_bed_head_end",
+   "src": [
+    "block/orange_bed_head_north",
+    "block/orange_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/orange_dye",
+   "src": "item/orange_dye"
+  },
+  {
+   "dest": "icons/orange_bed",
+   "src": "block/orange_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/orange_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/magenta_wool",
+   "src": "block/magenta_wool"
+  },
+  {
+   "dest": "textures/magenta_stained_glass",
+   "src": "block/magenta_stained_glass"
+  },
+  {
+   "dest": "textures/magenta_stained_glass_pane_top",
+   "src": "block/magenta_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/magenta_bed_head_top",
+   "src": "block/magenta_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/magenta_bed_foot_top",
+   "src": "block/magenta_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/magenta_bed_head_side",
+   "src": "block/magenta_bed_head_east"
+  },
+  {
+   "dest": "textures/magenta_bed_foot_side",
+   "src": "block/magenta_bed_foot_east"
+  },
+  {
+   "dest": "textures/magenta_bed_foot_end",
+   "src": "block/magenta_bed_foot_south"
+  },
+  {
+   "dest": "textures/magenta_bed_head_end",
+   "src": [
+    "block/magenta_bed_head_north",
+    "block/magenta_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/magenta_dye",
+   "src": "item/magenta_dye"
+  },
+  {
+   "dest": "icons/magenta_bed",
+   "src": "block/magenta_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/magenta_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/light_blue_wool",
+   "src": "block/light_blue_wool"
+  },
+  {
+   "dest": "textures/light_blue_stained_glass",
+   "src": "block/light_blue_stained_glass"
+  },
+  {
+   "dest": "textures/light_blue_stained_glass_pane_top",
+   "src": "block/light_blue_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/light_blue_bed_head_top",
+   "src": "block/light_blue_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/light_blue_bed_foot_top",
+   "src": "block/light_blue_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/light_blue_bed_head_side",
+   "src": "block/light_blue_bed_head_east"
+  },
+  {
+   "dest": "textures/light_blue_bed_foot_side",
+   "src": "block/light_blue_bed_foot_east"
+  },
+  {
+   "dest": "textures/light_blue_bed_foot_end",
+   "src": "block/light_blue_bed_foot_south"
+  },
+  {
+   "dest": "textures/light_blue_bed_head_end",
+   "src": [
+    "block/light_blue_bed_head_north",
+    "block/light_blue_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/light_blue_dye",
+   "src": "item/light_blue_dye"
+  },
+  {
+   "dest": "icons/light_blue_bed",
+   "src": "block/light_blue_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/light_blue_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/yellow_wool",
+   "src": "block/yellow_wool"
+  },
+  {
+   "dest": "textures/yellow_stained_glass",
+   "src": "block/yellow_stained_glass"
+  },
+  {
+   "dest": "textures/yellow_stained_glass_pane_top",
+   "src": "block/yellow_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/yellow_bed_head_top",
+   "src": "block/yellow_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/yellow_bed_foot_top",
+   "src": "block/yellow_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/yellow_bed_head_side",
+   "src": "block/yellow_bed_head_east"
+  },
+  {
+   "dest": "textures/yellow_bed_foot_side",
+   "src": "block/yellow_bed_foot_east"
+  },
+  {
+   "dest": "textures/yellow_bed_foot_end",
+   "src": "block/yellow_bed_foot_south"
+  },
+  {
+   "dest": "textures/yellow_bed_head_end",
+   "src": [
+    "block/yellow_bed_head_north",
+    "block/yellow_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/yellow_bed",
+   "src": "block/yellow_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/yellow_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/lime_wool",
+   "src": "block/lime_wool"
+  },
+  {
+   "dest": "textures/lime_stained_glass",
+   "src": "block/lime_stained_glass"
+  },
+  {
+   "dest": "textures/lime_stained_glass_pane_top",
+   "src": "block/lime_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/lime_bed_head_top",
+   "src": "block/lime_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/lime_bed_foot_top",
+   "src": "block/lime_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/lime_bed_head_side",
+   "src": "block/lime_bed_head_east"
+  },
+  {
+   "dest": "textures/lime_bed_foot_side",
+   "src": "block/lime_bed_foot_east"
+  },
+  {
+   "dest": "textures/lime_bed_foot_end",
+   "src": "block/lime_bed_foot_south"
+  },
+  {
+   "dest": "textures/lime_bed_head_end",
+   "src": [
+    "block/lime_bed_head_north",
+    "block/lime_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/lime_dye",
+   "src": "item/lime_dye"
+  },
+  {
+   "dest": "icons/lime_bed",
+   "src": "block/lime_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/lime_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/pink_wool",
+   "src": "block/pink_wool"
+  },
+  {
+   "dest": "textures/pink_stained_glass",
+   "src": "block/pink_stained_glass"
+  },
+  {
+   "dest": "textures/pink_stained_glass_pane_top",
+   "src": "block/pink_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/pink_bed_head_top",
+   "src": "block/pink_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/pink_bed_foot_top",
+   "src": "block/pink_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/pink_bed_head_side",
+   "src": "block/pink_bed_head_east"
+  },
+  {
+   "dest": "textures/pink_bed_foot_side",
+   "src": "block/pink_bed_foot_east"
+  },
+  {
+   "dest": "textures/pink_bed_foot_end",
+   "src": "block/pink_bed_foot_south"
+  },
+  {
+   "dest": "textures/pink_bed_head_end",
+   "src": [
+    "block/pink_bed_head_north",
+    "block/pink_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/pink_dye",
+   "src": "item/pink_dye"
+  },
+  {
+   "dest": "icons/pink_bed",
+   "src": "block/pink_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/pink_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/gray_wool",
+   "src": "block/gray_wool"
+  },
+  {
+   "dest": "textures/gray_stained_glass",
+   "src": "block/gray_stained_glass"
+  },
+  {
+   "dest": "textures/gray_stained_glass_pane_top",
+   "src": "block/gray_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/gray_bed_head_top",
+   "src": "block/gray_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/gray_bed_foot_top",
+   "src": "block/gray_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/gray_bed_head_side",
+   "src": "block/gray_bed_head_east"
+  },
+  {
+   "dest": "textures/gray_bed_foot_side",
+   "src": "block/gray_bed_foot_east"
+  },
+  {
+   "dest": "textures/gray_bed_foot_end",
+   "src": "block/gray_bed_foot_south"
+  },
+  {
+   "dest": "textures/gray_bed_head_end",
+   "src": [
+    "block/gray_bed_head_north",
+    "block/gray_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/gray_dye",
+   "src": "item/gray_dye"
+  },
+  {
+   "dest": "icons/gray_bed",
+   "src": "block/gray_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/gray_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/light_gray_wool",
+   "src": "block/light_gray_wool"
+  },
+  {
+   "dest": "textures/light_gray_stained_glass",
+   "src": "block/light_gray_stained_glass"
+  },
+  {
+   "dest": "textures/light_gray_stained_glass_pane_top",
+   "src": "block/light_gray_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/light_gray_bed_head_top",
+   "src": "block/light_gray_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/light_gray_bed_foot_top",
+   "src": "block/light_gray_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/light_gray_bed_head_side",
+   "src": "block/light_gray_bed_head_east"
+  },
+  {
+   "dest": "textures/light_gray_bed_foot_side",
+   "src": "block/light_gray_bed_foot_east"
+  },
+  {
+   "dest": "textures/light_gray_bed_foot_end",
+   "src": "block/light_gray_bed_foot_south"
+  },
+  {
+   "dest": "textures/light_gray_bed_head_end",
+   "src": [
+    "block/light_gray_bed_head_north",
+    "block/light_gray_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/light_gray_dye",
+   "src": "item/light_gray_dye"
+  },
+  {
+   "dest": "icons/light_gray_bed",
+   "src": "block/light_gray_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/light_gray_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/cyan_wool",
+   "src": "block/cyan_wool"
+  },
+  {
+   "dest": "textures/cyan_stained_glass",
+   "src": "block/cyan_stained_glass"
+  },
+  {
+   "dest": "textures/cyan_stained_glass_pane_top",
+   "src": "block/cyan_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/cyan_bed_head_top",
+   "src": "block/cyan_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/cyan_bed_foot_top",
+   "src": "block/cyan_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/cyan_bed_head_side",
+   "src": "block/cyan_bed_head_east"
+  },
+  {
+   "dest": "textures/cyan_bed_foot_side",
+   "src": "block/cyan_bed_foot_east"
+  },
+  {
+   "dest": "textures/cyan_bed_foot_end",
+   "src": "block/cyan_bed_foot_south"
+  },
+  {
+   "dest": "textures/cyan_bed_head_end",
+   "src": [
+    "block/cyan_bed_head_north",
+    "block/cyan_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/cyan_dye",
+   "src": "item/cyan_dye"
+  },
+  {
+   "dest": "icons/cyan_bed",
+   "src": "block/cyan_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/cyan_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/purple_wool",
+   "src": "block/purple_wool"
+  },
+  {
+   "dest": "textures/purple_stained_glass",
+   "src": "block/purple_stained_glass"
+  },
+  {
+   "dest": "textures/purple_stained_glass_pane_top",
+   "src": "block/purple_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/purple_bed_head_top",
+   "src": "block/purple_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/purple_bed_foot_top",
+   "src": "block/purple_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/purple_bed_head_side",
+   "src": "block/purple_bed_head_east"
+  },
+  {
+   "dest": "textures/purple_bed_foot_side",
+   "src": "block/purple_bed_foot_east"
+  },
+  {
+   "dest": "textures/purple_bed_foot_end",
+   "src": "block/purple_bed_foot_south"
+  },
+  {
+   "dest": "textures/purple_bed_head_end",
+   "src": [
+    "block/purple_bed_head_north",
+    "block/purple_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/purple_dye",
+   "src": "item/purple_dye"
+  },
+  {
+   "dest": "icons/purple_bed",
+   "src": "block/purple_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/purple_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/blue_wool",
+   "src": "block/blue_wool"
+  },
+  {
+   "dest": "textures/blue_stained_glass",
+   "src": "block/blue_stained_glass"
+  },
+  {
+   "dest": "textures/blue_stained_glass_pane_top",
+   "src": "block/blue_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/blue_bed_head_top",
+   "src": "block/blue_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/blue_bed_foot_top",
+   "src": "block/blue_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/blue_bed_head_side",
+   "src": "block/blue_bed_head_east"
+  },
+  {
+   "dest": "textures/blue_bed_foot_side",
+   "src": "block/blue_bed_foot_east"
+  },
+  {
+   "dest": "textures/blue_bed_foot_end",
+   "src": "block/blue_bed_foot_south"
+  },
+  {
+   "dest": "textures/blue_bed_head_end",
+   "src": [
+    "block/blue_bed_head_north",
+    "block/blue_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/blue_bed",
+   "src": "block/blue_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/blue_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/brown_wool",
+   "src": "block/brown_wool"
+  },
+  {
+   "dest": "textures/brown_stained_glass",
+   "src": "block/brown_stained_glass"
+  },
+  {
+   "dest": "textures/brown_stained_glass_pane_top",
+   "src": "block/brown_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/brown_bed_head_top",
+   "src": "block/brown_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/brown_bed_foot_top",
+   "src": "block/brown_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/brown_bed_head_side",
+   "src": "block/brown_bed_head_east"
+  },
+  {
+   "dest": "textures/brown_bed_foot_side",
+   "src": "block/brown_bed_foot_east"
+  },
+  {
+   "dest": "textures/brown_bed_foot_end",
+   "src": "block/brown_bed_foot_south"
+  },
+  {
+   "dest": "textures/brown_bed_head_end",
+   "src": [
+    "block/brown_bed_head_north",
+    "block/brown_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/brown_dye",
+   "src": "item/brown_dye"
+  },
+  {
+   "dest": "icons/brown_bed",
+   "src": "block/brown_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/brown_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/green_wool",
+   "src": "block/green_wool"
+  },
+  {
+   "dest": "textures/green_stained_glass",
+   "src": "block/green_stained_glass"
+  },
+  {
+   "dest": "textures/green_stained_glass_pane_top",
+   "src": "block/green_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/green_bed_head_top",
+   "src": "block/green_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/green_bed_foot_top",
+   "src": "block/green_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/green_bed_head_side",
+   "src": "block/green_bed_head_east"
+  },
+  {
+   "dest": "textures/green_bed_foot_side",
+   "src": "block/green_bed_foot_east"
+  },
+  {
+   "dest": "textures/green_bed_foot_end",
+   "src": "block/green_bed_foot_south"
+  },
+  {
+   "dest": "textures/green_bed_head_end",
+   "src": [
+    "block/green_bed_head_north",
+    "block/green_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/green_bed",
+   "src": "block/green_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/green_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/red_wool",
+   "src": "block/red_wool"
+  },
+  {
+   "dest": "textures/red_stained_glass",
+   "src": "block/red_stained_glass"
+  },
+  {
+   "dest": "textures/red_stained_glass_pane_top",
+   "src": "block/red_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/red_bed_head_top",
+   "src": "block/red_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/red_bed_foot_top",
+   "src": "block/red_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/red_bed_head_side",
+   "src": "block/red_bed_head_east"
+  },
+  {
+   "dest": "textures/red_bed_foot_side",
+   "src": "block/red_bed_foot_east"
+  },
+  {
+   "dest": "textures/red_bed_foot_end",
+   "src": "block/red_bed_foot_south"
+  },
+  {
+   "dest": "textures/red_bed_head_end",
+   "src": [
+    "block/red_bed_head_north",
+    "block/red_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/red_bed",
+   "src": "block/red_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/red_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/black_wool",
+   "src": "block/black_wool"
+  },
+  {
+   "dest": "textures/black_stained_glass",
+   "src": "block/black_stained_glass"
+  },
+  {
+   "dest": "textures/black_stained_glass_pane_top",
+   "src": "block/black_stained_glass_pane_top"
+  },
+  {
+   "dest": "textures/black_bed_head_top",
+   "src": "block/black_bed_head_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/black_bed_foot_top",
+   "src": "block/black_bed_foot_up",
+   "rotate": 1
+  },
+  {
+   "dest": "textures/black_bed_head_side",
+   "src": "block/black_bed_head_east"
+  },
+  {
+   "dest": "textures/black_bed_foot_side",
+   "src": "block/black_bed_foot_east"
+  },
+  {
+   "dest": "textures/black_bed_foot_end",
+   "src": "block/black_bed_foot_south"
+  },
+  {
+   "dest": "textures/black_bed_head_end",
+   "src": [
+    "block/black_bed_head_north",
+    "block/black_bed_foot_south"
+   ]
+  },
+  {
+   "dest": "icons/black_dye",
+   "src": "item/black_dye"
+  },
+  {
+   "dest": "icons/black_bed",
+   "src": "block/black_bed_foot_east",
+   "compose": {
+    "w": 32,
+    "h": 32,
+    "parts": [
+     {
+      "y": 7,
+      "h": 9,
+      "dy": 12
+     },
+     {
+      "from": "block/black_bed_head_east",
+      "y": 7,
+      "h": 9,
+      "dx": 16,
+      "dy": 12
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/glass_pane_top",
+   "src": "block/glass_pane_top"
+  },
+  {
+   "dest": "textures/iron_bars",
+   "src": "block/iron_bars"
+  },
+  {
+   "dest": "textures/coal_block",
+   "src": "block/coal_block"
+  },
+  {
+   "dest": "textures/iron_block",
+   "src": "block/iron_block"
+  },
+  {
+   "dest": "textures/gold_block",
+   "src": "block/gold_block"
+  },
+  {
+   "dest": "textures/diamond_block",
+   "src": "block/diamond_block"
+  },
+  {
+   "dest": "textures/emerald_block",
+   "src": "block/emerald_block"
+  },
+  {
+   "dest": "textures/raw_iron_block",
+   "src": "block/raw_iron_block"
+  },
+  {
+   "dest": "textures/raw_gold_block",
+   "src": "block/raw_gold_block"
+  },
+  {
+   "dest": "textures/lantern",
+   "src": "block/lantern"
+  },
+  {
+   "dest": "textures/lever",
+   "src": "block/lever"
+  },
+  {
+   "dest": "textures/fire",
+   "src": "block/fire_0"
+  },
+  {
+   "dest": "textures/iron_door_upper",
+   "src": "block/iron_door_top"
+  },
+  {
+   "dest": "textures/iron_door_lower",
+   "src": "block/iron_door_bottom"
+  },
+  {
+   "dest": "icons/iron_nugget",
+   "src": "item/iron_nugget"
+  },
+  {
+   "dest": "icons/shears",
+   "src": "item/shears"
+  },
+  {
+   "dest": "icons/flint_and_steel",
+   "src": "item/flint_and_steel"
+  },
+  {
+   "dest": "icons/lantern",
+   "src": "item/lantern"
+  },
+  {
+   "dest": "icons/iron_door",
+   "src": "item/iron_door"
   }
  ]
 }

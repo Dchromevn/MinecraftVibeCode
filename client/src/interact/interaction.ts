@@ -5,7 +5,7 @@
 import * as THREE from "three";
 import {
   B, DIGGING, HUNGER, PLAYER, addExhaustion, breakAt, canEat, canPlace, digRate, eat, isLiquidId, isReplaceable, itemDef,
-  isDoor, mergeChest, placeCells, planPlace, playerBox, raycast, selectionBoxes,
+  isDoor, isSwitch, mergeChest, placeCells, planPlace, playerBox, raycast, selectionBoxes,
   type BlockAccess, type BlockId, type HeldTool, type InvAction, type Inventory, type NetHit, type RayHit, type World,
 } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
@@ -17,7 +17,8 @@ import { BlockOutline } from "./outline.js";
 const REACH_FLY = 12; // khi bay (debug) với xa hơn cho tiện
 /** Chuột phải vào các block này (không ngồi — phím C) thì dùng block thay vì đặt / ăn. */
 const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE]);
-const usable = (id: number): boolean => USABLE.has(id) || isDoor(id); // cửa mọi loài gỗ
+/** Chuột phải dùng được: bàn, rương, lò, cửa gỗ mọi loài (cửa sắt chỉ mở bằng nút / cần gạt), nút, cần gạt. */
+const usable = (id: number): boolean => USABLE.has(id) || (isDoor(id) && id !== B.IRON_DOOR) || isSwitch(id);
 
 /** Gửi hành động lên server. */
 export interface InteractNet {
@@ -157,6 +158,10 @@ export class Interaction {
       if (src && isLiquidId(src.cell & 255)) this.view.net.use(null, { x: src.x, y: src.y, z: src.z }, sneaking, yaw);
       return once();
     }
+    if (held?.item === "flint_and_steel") { // bật lửa: server đốt lửa (không đoán trước)
+      if (t) this.view.net.use(netHit(t), null, sneaking, yaw);
+      return once();
+    }
     if (def?.liquid !== undefined) {
       if (t) this.view.net.use(netHit(t), null, sneaking, yaw);
       return once();
@@ -229,7 +234,7 @@ export class Interaction {
     const places = held ? itemDef(held.item)?.places : undefined;
     if (!t || places === undefined) return;
     // nhắm vào cỏ cao / tuyết phủ: đặt thay luôn ô đó; tấm cùng loại: ghép thành tấm đôi
-    const cells = planPlace(places, t, this.view.yaw(), (a, b, c) => this.world.getCell(a, b, c));
+    const cells = planPlace(places, t, this.view.yaw(), (a, b, c) => this.world.getCell(a, b, c), held ? itemDef(held.item)?.meta : undefined);
     if (!cells) return;
     const box = flying ? null : playerBox(this.view.player.state);
     if (!canPlace(cells, (a, b, c) => this.world.getCell(a, b, c), box)) return;

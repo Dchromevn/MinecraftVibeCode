@@ -1,7 +1,9 @@
 // Dựng mesh cho chunk giữa của một vùng 3x3 chunk (đã có ánh sáng), chia thành 8 đoạn
 // 16 block. Chỉ vẽ mặt lộ; AO + ánh sáng mượt theo đỉnh; nước hạ 1/8, tối dần theo độ sâu.
 // Đỉnh theo tọa độ trong chunk (0..16) để giữ chính xác ở xa gốc tọa độ.
-import { B, BLOCKS, CHUNK_HEIGHT, chestHalf, facingDir, furnaceLit, liquidFalling, liquidLevel } from "../../../shared/src/index.js";
+import {
+  BED_PARTS, B, BLOCKS, CHUNK_HEIGHT, COLORS, chestHalf, facingDir, furnaceLit, liquidFalling, liquidLevel, withColor,
+} from "../../../shared/src/index.js";
 import type { TileUV } from "../atlas.js";
 import { regionIndex, type Region } from "../../../shared/src/index.js";
 import { GeomBuilder, type MeshArrays } from "./geomBuilder.js";
@@ -73,6 +75,12 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     chestFront: [uv("chest_front_b"), uv("chest_front_a")], // nửa A nằm bên phải khi nhìn mặt trước
     farmlandWet: uv("farmland_wet"),
     crops: BLOCKS.map((b) => CROP_TEX[b.id]?.map(uv)),
+    // block có màu (Giai đoạn 4f): [id][màu][trên, dưới, bên, trước]
+    colored: BLOCKS.map((b) => b.colorTex && COLORS.map((_, c) => {
+      const t = b.colorTex!;
+      return [uv(withColor(t.top, c)), uv(withColor(t.bottom, c)), uv(withColor(t.side, c)), uv(withColor(t.side, c))];
+    })),
+    beds: COLORS.map((c) => Object.fromEntries(BED_PARTS.map((p) => [p, uv(`${c}_bed_${p}`)])) as Record<(typeof BED_PARTS)[number], TileUV>),
     stemAttached: BLOCKS.map((b) => (STEM_ATTACHED_TEX[b.id] ? uv(STEM_ATTACHED_TEX[b.id]!) : undefined)),
   };
 }
@@ -80,6 +88,7 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
 export interface SectionMesh {
   solid: MeshArrays | null; // khối + cắt alpha (lá, cỏ, kính, ray...) + dung nham
   water: MeshArrays | null; // nước bán trong suốt
+  glass: MeshArrays | null; // kính màu, tấm kính màu (bán trong suốt, pha trộn) — Giai đoạn 4f
   conn: Uint8Array; // độ thông giữa 6 mặt của đoạn (ẩn hang khuất)
 }
 
@@ -136,6 +145,7 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
   for (let sy = 0; sy < SECTIONS; sy++) {
     const solid = new GeomBuilder();
     const water = new GeomBuilder();
+    const glass = new GeomBuilder();
     for (let y = sy * SECTION_H; y < (sy + 1) * SECTION_H; y++) {
       for (let z = 0; z < 16; z++) {
         for (let x = 0; x < 16; x++) {
@@ -145,12 +155,12 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
           if (def.render === "none") continue;
           const cellLight = [sky(x, y, z) / 15, blk(x, y, z) / 15];
           const meta = mt(x, y, z);
-          if (addSpecial(solid, id, meta, x, y, z, at, uvt, cellLight)) continue;
+          if (addSpecial(def.translucent ? glass : solid, id, meta, x, y, z, at, uvt, cellLight)) continue;
 
           const isWater = id === B.WATER;
           const isLiquid = def.render === "liquid";
           const isLayer = def.render === "layer";
-          const builder = isWater ? water : solid;
+          const builder = isWater ? water : def.translucent ? glass : solid;
           const top = isLiquid ? (at(x, y + 1, z) === id ? 1 : liquidTop(meta)) : isLayer ? LAYER_TOP : 1;
           // block có hướng (lò, rương): mặt trước quay theo dữ liệu phụ
           const frontFace: number = def.meta === "facing" || def.meta === "chest" ? FACE_OF_DIR[facingDir(meta)]! : -1;
@@ -169,7 +179,8 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
 
             const depth = !isWater && nid === B.WATER ? waterDepth(at, nx, ny, nz) : 0;
             const tint = isWater ? WATER_TINT : depth > 0 ? underwaterTint(depth) : NO_TINT;
-            let uv = uvt.blocks[id]![frontFace < 0 || f.n[1] !== 0 ? f.slot : fi === frontFace ? 3 : 2]!;
+            const slot = frontFace < 0 || f.n[1] !== 0 ? f.slot : fi === frontFace ? 3 : 2;
+            let uv = def.colorTex ? uvt.colored[id]![meta & 15]![slot]! : uvt.blocks[id]![slot]!;
             if (fi === frontFace && id === B.FURNACE && furnaceLit(meta)) uv = uvt.furnaceOn;
             if (fi === frontFace && id === B.CHEST && chestHalf(meta) > 0) uv = uvt.chestFront[chestHalf(meta) - 1]!;
             if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
@@ -216,7 +227,7 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
         }
       }
     }
-    out.push({ solid: solid.build(), water: water.build(), conn: sectionConnectivity(blocks, sy, SECTION_H) });
+    out.push({ solid: solid.build(), water: water.build(), glass: glass.build(), conn: sectionConnectivity(blocks, sy, SECTION_H) });
   }
   return out;
 }

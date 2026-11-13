@@ -2,25 +2,27 @@
 // dùng chung khóa với block (stone, torch...). Icon: "cube" = vẽ khối 3D từ texture block,
 // "tex" = texture block phẳng (/textures), "icon" = file trong /icons.
 import { B, BLOCKS, type BlockId, type ToolKind } from "./blocks.js";
-import { ARMOR, BOW_DURABILITY, STACK, TOOL_TIERS, type ArmorTier, type ToolTier } from "./constants.js";
+import { ARMOR, BOW_DURABILITY, FIRE, SHEARS, STACK, TOOL_TIERS, type ArmorTier, type ToolTier } from "./constants.js";
+import { COLORS } from "./colors.js";
 import { ARMOR_FORMULA, FOODS, type FoodDef } from "./survivalConstants.js";
 import { FLOWER_BLOCKS, WOODS } from "./woods.js";
 import { isSlab, isStairs, isWall } from "./building.js";
 
-/** Thuốc nhuộm có từ Giai đoạn 4d (nguồn màu gốc). */
-export const BASE_DYES = ["white_dye", "red_dye", "yellow_dye", "blue_dye", "green_dye"] as const;
+
 
 export type ArmorPiece = "helmet" | "chestplate" | "leggings" | "boots";
 export const ARMOR_PIECES: readonly ArmorPiece[] = ["helmet", "chestplate", "leggings", "boots"];
-/** shape = vẽ đúng hình block (bậc, tấm, tường) từ texture block. */
+/** shape = vẽ đúng hình block (bậc, tấm, tường...) từ texture block; tex (nếu có) = dùng ảnh này cho mọi mặt (block có màu). */
 export type ItemIcon =
-  | { type: "cube"; block: BlockId } | { type: "shape"; block: BlockId } | { type: "tex"; name: string } | { type: "icon"; name: string };
+  | { type: "cube"; block: BlockId; tex?: string } | { type: "shape"; block: BlockId; tex?: string }
+  | { type: "tex"; name: string } | { type: "icon"; name: string };
 
 export interface ItemDef {
   key: string;
   maxStack: number;
   icon: ItemIcon;
   places?: BlockId; // chuột phải đặt ra block này
+  meta?: number; // dữ liệu phụ đi kèm khi đặt (màu của len, thảm, kính màu, giường)
   tool?: { kind: ToolKind; tier: ToolTier; durability: number };
   armor?: { piece: ArmorPiece; tier: ArmorTier; points: number; toughness: number; durability: number };
   food?: FoodDef;
@@ -48,7 +50,6 @@ add({ key: "door", maxStack: STACK.SINGLE, icon: { type: "icon", name: "door" },
 for (const b of BLOCKS) if (isStairs(b.id) || isSlab(b.id) || isWall(b.id)) add({ key: b.key, maxStack: STACK.DEFAULT, icon: { type: "shape", block: b.id }, places: b.id });
 for (const [id, single] of [[B.SPRUCE_FENCE, false], [B.BIRCH_FENCE, false], [B.ACACIA_FENCE, false], [B.SPRUCE_DOOR, true], [B.BIRCH_DOOR, true], [B.ACACIA_DOOR, true]] as const)
   add({ key: BLOCKS[id]!.key, maxStack: single ? STACK.SINGLE : STACK.DEFAULT, icon: { type: "icon", name: BLOCKS[id]!.key }, places: id });
-add({ key: "bed", maxStack: STACK.SINGLE, icon: { type: "icon", name: "bed" }, places: B.BED });
 add({ key: "seeds", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "seeds" }, places: B.WHEAT });
 for (const [k, id] of [["beetroot_seeds", B.BEETROOTS], ["melon_seeds", B.MELON_STEM], ["pumpkin_seeds", B.PUMPKIN_STEM]] as const)
   add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k }, places: id });
@@ -58,9 +59,28 @@ const PLANTED: Readonly<Record<string, BlockId>> = { carrot: B.CARROTS, potato: 
 // --- nguyên liệu ---
 for (const k of [
   "stick", "coal", "raw_iron", "iron_ingot", "raw_gold", "gold_ingot", "diamond", "emerald", "flint", "string",
-  "feather", "leather", "wool", "wheat", "arrow", "bowl",
-  ...BASE_DYES, // thuốc nhuộm từ hoa / xương rồng / củ cải (Giai đoạn 4d; trộn màu ở 4e)
+  "feather", "leather", "wheat", "arrow", "bowl", "iron_nugget",
+  ...COLORS.map((c) => `${c}_dye`), // thuốc nhuộm 16 màu (Giai đoạn 4d / 4f)
 ]) add({ key: k, maxStack: STACK.DEFAULT, icon: { type: "icon", name: k } });
+
+// --- Giai đoạn 4f: 16 màu (màu = dữ liệu phụ khi đặt) ---
+COLORS.forEach((c, i) => {
+  add({ key: `${c}_wool`, maxStack: STACK.DEFAULT, icon: { type: "cube", block: B.WOOL, tex: `${c}_wool` }, places: B.WOOL, meta: i });
+  add({ key: `${c}_carpet`, maxStack: STACK.DEFAULT, icon: { type: "shape", block: B.CARPET, tex: `${c}_wool` }, places: B.CARPET, meta: i });
+  add({ key: `${c}_stained_glass`, maxStack: STACK.DEFAULT, icon: { type: "cube", block: B.STAINED_GLASS, tex: `${c}_stained_glass` }, places: B.STAINED_GLASS, meta: i });
+  add({ key: `${c}_stained_glass_pane`, maxStack: STACK.DEFAULT, icon: { type: "tex", name: `${c}_stained_glass` }, places: B.STAINED_GLASS_PANE, meta: i });
+  add({ key: `${c}_bed`, maxStack: STACK.SINGLE, icon: { type: "icon", name: `${c}_bed` }, places: B.BED, meta: i });
+});
+// --- Giai đoạn 4f: đồ sắt, lửa, nút / cần gạt ---
+for (const id of [B.COAL_BLOCK, B.IRON_BLOCK, B.GOLD_BLOCK, B.DIAMOND_BLOCK, B.EMERALD_BLOCK, B.RAW_IRON_BLOCK, B.RAW_GOLD_BLOCK] as BlockId[])
+  add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "cube", block: id }, places: id });
+for (const [id, tex] of [[B.GLASS_PANE, "glass"], [B.IRON_BARS, "iron_bars"], [B.LEVER, "lever"], [B.COBWEB, "cobweb"], [B.TALLGRASS, "tallgrass"]] as const)
+  add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "tex", name: tex }, places: id });
+for (const id of [B.STONE_BUTTON, B.OAK_BUTTON] as BlockId[]) add({ key: BLOCKS[id]!.key, maxStack: STACK.DEFAULT, icon: { type: "shape", block: id }, places: id });
+add({ key: "lantern", maxStack: STACK.DEFAULT, icon: { type: "icon", name: "lantern" }, places: B.LANTERN });
+add({ key: "iron_door", maxStack: STACK.SINGLE, icon: { type: "icon", name: "iron_door" }, places: B.IRON_DOOR });
+add({ key: "shears", maxStack: STACK.SINGLE, icon: { type: "icon", name: "shears" }, tool: { kind: "shears", tier: "iron", durability: SHEARS.DURABILITY } });
+add({ key: "flint_and_steel", maxStack: STACK.SINGLE, icon: { type: "icon", name: "flint_and_steel" }, durability: FIRE.FLINT_AND_STEEL_DURABILITY });
 // xô (Giai đoạn 4c): rỗng chồng 16; có nước / dung nham không chồng; liquid = chất lỏng đang chứa
 add({ key: "bucket", maxStack: STACK.BUCKET, icon: { type: "icon", name: "bucket" } });
 add({ key: "water_bucket", maxStack: STACK.SINGLE, icon: { type: "icon", name: "water_bucket" }, liquid: B.WATER });

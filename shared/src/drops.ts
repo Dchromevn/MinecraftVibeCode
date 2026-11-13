@@ -4,6 +4,8 @@ import { B, BLOCKS } from "./blocks.js";
 import { cropMax } from "./crops.js";
 import { CROP_DROPS } from "./tickConstants.js";
 import { SLAB_DOUBLE, isSlab } from "./building.js";
+import { bedColor, withColor } from "./colors.js";
+import { shearsTakes } from "./digging.js";
 import { canHarvest, type HeldTool } from "./digging.js";
 import type { ItemStack } from "./inventory.js";
 import type { Rng } from "./rng.js";
@@ -19,6 +21,14 @@ export function blockDrops(id: number, meta: number, tool: HeldTool | null, rng:
   const give = (item: string, count = 1): void => void out.push({ item, count, damage: 0 });
   const between = (r: readonly [number, number]): number => r[0] + Math.floor(rng() * (r[1] - r[0] + 1));
   const ripe = (meta & 7) >= cropMax(id);
+  if (d.colorItem) { // len, thảm, giường: rơi đúng màu
+    give(withColor(d.colorItem, id === B.BED ? bedColor(meta) : meta & 15));
+    return out;
+  }
+  if (tool?.kind === "shears" && shearsTakes(id)) { // kéo: lá, mạng nhện, cỏ cao rơi ra chính nó
+    give(d.key);
+    return out;
+  }
   if (isSlab(id) && (meta & 3) === SLAB_DOUBLE) { // tấm đôi rơi ra 2 tấm
     give(d.key, 2);
     return out;

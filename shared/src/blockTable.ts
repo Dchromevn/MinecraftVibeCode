@@ -1,6 +1,6 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–45 theo bảng 2.2, 46–62 (4d) và 63–94 (4e) theo mục 2.13.
-import { LEAF_DROPS, LIGHT, MOVE } from "./constants.js";
+// Đủ id 0–45 theo bảng 2.2, 46–62 (4d), 63–94 (4e) và 95–113 (4f) theo mục 2.13.
+import { FIRE, LANTERN_LIGHT, LEAF_DROPS, LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
 
 const same = (t: string): BlockTextures => ({ top: t, bottom: t, side: t });
@@ -210,6 +210,42 @@ for (const w of ["spruce", "birch", "acacia"])
     ...TABLE[29]!, id: TABLE.length as BlockId, key: `${w}_door`, drops: [drop(`${w}_door`)],
     tex: { top: `${w}_door_upper`, bottom: `${w}_door_lower`, side: `${w}_door_lower` },
   });
+
+// Giai đoạn 4f (mục 2.13): 16 màu, đồ sắt, lửa, nút / cần gạt. Màu ở dữ liệu phụ (colorTex / colorItem).
+const SEE: Partial<BlockDef> = { transparent: true, opaque: false, lightOpacity: 0 };
+const colored = (pattern: string): BlockTextures => same(pattern);
+TABLE.push(
+  def(95, "wool", 0.8, "none", [], same("white_wool"), { meta: "color", colorTex: colored("{c}_wool"), colorItem: "{c}_wool" }),
+  def(96, "carpet", 0.1, "none", [], same("white_wool"), {
+    ...SEE, box: [0, 0, 0, 1, 1 / 16, 1], render: "carpet", meta: "color", colorTex: colored("{c}_wool"), colorItem: "{c}_carpet",
+  }),
+  def(97, "stained_glass", 0.3, "none", [], same("white_stained_glass"), {
+    ...SEE, translucent: true, meta: "color", colorTex: colored("{c}_stained_glass"),
+  }),
+  def(98, "glass_pane", 0.3, "none", [], { top: "glass_pane_top", bottom: "glass_pane_top", side: "glass" }, { ...SEE, render: "pane" }),
+  def(99, "stained_glass_pane", 0.3, "none", [], { top: "white_stained_glass_pane_top", bottom: "white_stained_glass_pane_top", side: "white_stained_glass" }, {
+    ...SEE, render: "pane", translucent: true, meta: "color",
+    colorTex: { top: "{c}_stained_glass_pane_top", bottom: "{c}_stained_glass_pane_top", side: "{c}_stained_glass" },
+  }),
+  def(100, "iron_bars", 5, "pickaxe", [drop("iron_bars")], same("iron_bars"), { ...PICK_ONLY, ...SEE, render: "pane" }),
+  def(101, "fire", 0, "none", [], same("fire"), { ...OPEN, lightEmit: FIRE.LIGHT, render: "fire" }),
+  ...([["coal_block", "wood"], ["iron_block", "stone"], ["gold_block", "iron"], ["diamond_block", "iron"], ["emerald_block", "iron"],
+    ["raw_iron_block", "stone"], ["raw_gold_block", "iron"]] as const).map(([k, tier], i) =>
+    def(102 + i, k, k === "gold_block" ? 3 : 5, "pickaxe", [drop(k)], same(k), { ...PICK_ONLY, minTier: tier })),
+  def(109, "lantern", 3.5, "pickaxe", [drop("lantern")], same("lantern"), {
+    ...PICK_ONLY, ...SEE, lightEmit: LANTERN_LIGHT, box: [5 / 16, 0, 5 / 16, 11 / 16, 9 / 16, 11 / 16], render: "lantern", meta: "lantern",
+  }),
+  { ...TABLE[29]!, id: 110 as BlockId, key: "iron_door", hardness: 5, tool: "pickaxe", toolRequired: true, drops: [drop("iron_door")],
+    tex: { top: "iron_door_upper", bottom: "iron_door_lower", side: "iron_door_lower" } },
+  def(111, "stone_button", 0.5, "pickaxe", [drop("stone_button")], same("stone"), { ...OPEN, render: "button", meta: "switch" }),
+  def(112, "oak_button", 0.5, "axe", [drop("oak_button")], same("planks"), { ...OPEN, render: "button", meta: "switch" }),
+  def(113, "lever", 0.5, "none", [drop("lever")], { top: "cobble", bottom: "cobble", side: "cobble", front: "lever" }, {
+    ...OPEN, render: "lever", meta: "switch",
+  }),
+);
+
+// giường 16 màu: rơi ra giường đúng màu (bit 3–6 dữ liệu phụ)
+TABLE[33] = { ...TABLE[33]!, drops: [], colorItem: "{c}_bed" };
 
 TABLE.forEach((b, i) => {
   if (b.id !== i) throw new Error(`blockTable: id ${b.id} ở vị trí ${i}`);

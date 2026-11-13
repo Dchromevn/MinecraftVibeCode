@@ -48,10 +48,10 @@ export class ItemEntities {
     const icon = itemDef(item)?.icon;
     if (icon?.type === "cube") {
       const geo = new THREE.BoxGeometry(DROPPED.SIZE, DROPPED.SIZE, DROPPED.SIZE);
-      setBoxTiles(geo, blockTiles(this.atlas, icon.block));
+      setBoxTiles(geo, blockTiles(this.atlas, icon.block, icon.tex));
       return new THREE.Mesh(geo, this.blockMat);
     }
-    if (icon?.type === "shape") return shapeObject(this.atlas, icon.block, DROPPED.SIZE, this.blockMat);
+    if (icon?.type === "shape") return shapeObject(this.atlas, icon.block, DROPPED.SIZE, this.blockMat, icon.tex);
     return new THREE.Mesh(this.plane, this.iconMat(item));
   }
 

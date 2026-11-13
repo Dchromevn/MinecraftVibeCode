@@ -13,6 +13,7 @@ const WATER = { OPACITY: 0.8, DRIFT_U: 0.04, DRIFT_V: 0.025 } as const;
 interface SectionEntry {
   solid: THREE.Mesh | null;
   water: THREE.Mesh | null;
+  glass: THREE.Mesh | null;
   conn: Uint8Array;
 }
 
@@ -32,6 +33,8 @@ export class ChunkMeshes {
   private readonly chunks = new Set<number>(); // chunk đã có mesh
   private readonly solidMat: THREE.MeshBasicMaterial;
   private readonly waterMat: THREE.MeshBasicMaterial;
+  /** Kính màu, tấm kính màu (Giai đoạn 4f): atlas thường, bán trong suốt có pha trộn. */
+  private readonly glassMat: THREE.MeshBasicMaterial;
   private readonly culler = new SectionCuller();
   readonly uniforms: ChunkUniforms = { uTime: { value: 0 }, uDaylight: { value: 1 }, uMinLight: { value: 0 } };
   culling = true;
@@ -52,7 +55,9 @@ export class ChunkMeshes {
       depthWrite: false,
       side: THREE.DoubleSide,
     });
+    this.glassMat = new THREE.MeshBasicMaterial({ map: texture, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide });
     applyChunkShader(this.solidMat, this.uniforms, false);
+    applyChunkShader(this.glassMat, this.uniforms, false);
     applyChunkShader(this.waterMat, this.uniforms, true);
   }
 
@@ -80,6 +85,7 @@ export class ChunkMeshes {
       this.sections.set(sectionKey(cx, sy, cz), {
         solid: make(s.solid, this.solidMat, 0),
         water: make(s.water, this.waterMat, 1),
+        glass: make(s.glass, this.glassMat, 2),
         conn: s.conn,
       });
     });
@@ -92,7 +98,7 @@ export class ChunkMeshes {
       const key = sectionKey(cx, sy, cz);
       const e = this.sections.get(key);
       if (!e) continue;
-      for (const m of [e.solid, e.water]) {
+      for (const m of [e.solid, e.water, e.glass]) {
         if (!m) continue;
         this.scene.remove(m);
         m.geometry.dispose();
@@ -119,7 +125,8 @@ export class ChunkMeshes {
       const v = !useCulling || this.culler.visible.has(key);
       if (e.solid) e.solid.visible = v;
       if (e.water) e.water.visible = v;
-      if (v && (e.solid || e.water)) drawn++;
+      if (e.glass) e.glass.visible = v;
+      if (v && (e.solid || e.water || e.glass)) drawn++;
     }
     this.drawnSections = drawn;
   }

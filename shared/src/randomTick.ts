@@ -147,5 +147,7 @@ export function randomTick(w: TickWorld, x: number, y: number, z: number, rng: R
       return grass(w, x, y, z, rng);
     case B.CACTUS:
       return cactus(w, x, y, z, meta);
+    case B.FIRE: // lửa sót lại (vd. chunk vừa tải lại): tắt; bình thường server tắt sau 2–6 giây
+      return w.setCell(x, y, z, B.AIR, 0);
   }
 }

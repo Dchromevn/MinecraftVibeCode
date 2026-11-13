@@ -1,5 +1,5 @@
 // Lò nung (DESIGN.md 2.5): công thức nung và nhiên liệu.
-import { FURNACE } from "./constants.js";
+import { COAL_BLOCK_FUEL, FURNACE } from "./constants.js";
 import { LOG_ITEMS, PLANK_ITEMS } from "./woods.js";
 
 /** Nguyên liệu → thành phẩm (thịt sống → chín thêm ở Giai đoạn 7 khi có thịt). */
@@ -20,6 +20,7 @@ const WOOD_FUEL = new Map<string, number>([
 
 /** Số món nung được với 1 đơn vị nhiên liệu (0 = không đốt được). */
 export function fuelValue(item: string): number {
+  if (item === "coal_block") return COAL_BLOCK_FUEL;
   return (FURNACE.FUEL as Record<string, number>)[item] ?? WOOD_FUEL.get(item) ?? 0;
 }
 

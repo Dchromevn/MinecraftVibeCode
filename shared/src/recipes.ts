@@ -4,9 +4,13 @@ import { BLOCKS } from "./blocks.js";
 import { SHAPE_MATERIALS, WALL_MATERIALS } from "./blockTable.js";
 import { ARMOR_PIECES, TOOL_KINDS } from "./items.js";
 import { LOG_ITEMS, PLANK_ITEMS, WOODS } from "./woods.js";
+import { COLORS } from "./colors.js";
 
 /** Nhóm nguyên liệu (Giai đoạn 4d): ô lưới nhận bất kỳ vật phẩm nào trong nhóm, có thể trộn loài. */
-export const ITEM_TAGS: Readonly<Record<string, readonly string[]>> = { "#planks": PLANK_ITEMS, "#log": LOG_ITEMS };
+export const ITEM_TAGS: Readonly<Record<string, readonly string[]>> = {
+  "#planks": PLANK_ITEMS, "#log": LOG_ITEMS,
+  "#wool": COLORS.map((c) => `${c}_wool`), "#bed": COLORS.map((c) => `${c}_bed`), // Giai đoạn 4f
+};
 
 /** Vật phẩm have có dùng được cho nguyên liệu want (khóa vật phẩm hoặc nhóm "#...") không. */
 export function ingredientMatches(want: string, have: string | null): boolean {
@@ -86,7 +90,6 @@ for (const [m, src] of SHAPE_MATERIALS) {
 for (const m of WALL_MATERIALS) shaped(`${m}_wall`, 6, ["XXX", "XXX"], { X: BLOCKS[SHAPE_MATERIALS.find((x) => x[0] === m)![1]]!.key });
 shaped("rail", 16, ["I I", "I|I", "I I"], { I: "iron_ingot", "|": "stick" });
 shaped("bread", 1, ["WWW"], { W: "wheat" });
-shaped("bed", 1, ["WWW", "PPP"], { W: "wool", P: "#planks" });
 shaped("sandstone", 1, ["SS", "SS"], { S: "sand" });
 shaped("golden_apple", 1, ["GGG", "GAG", "GGG"], { G: "gold_ingot", A: "apple" });
 shaped("bowl", 4, ["P P", " P "], { P: "#planks" });
@@ -100,6 +103,44 @@ shapeless("red_dye", 1, ["poppy"]);
 shapeless("red_dye", 1, ["beetroot"]);
 shapeless("blue_dye", 1, ["cornflower"]);
 shapeless("white_dye", 1, ["lily_of_the_valley"]);
+
+// ---- Giai đoạn 4f: thuốc nhuộm còn lại (đen từ than, nâu = đỏ + xanh lá: game tự đặt), trộn màu ----
+shapeless("black_dye", 1, ["coal"]);
+for (const [out, n, ins] of [
+  ["brown_dye", 2, ["red_dye", "green_dye"]], ["orange_dye", 2, ["red_dye", "yellow_dye"]], ["purple_dye", 2, ["red_dye", "blue_dye"]],
+  ["cyan_dye", 2, ["blue_dye", "green_dye"]], ["light_blue_dye", 2, ["blue_dye", "white_dye"]], ["lime_dye", 2, ["green_dye", "white_dye"]],
+  ["pink_dye", 2, ["red_dye", "white_dye"]], ["gray_dye", 2, ["black_dye", "white_dye"]], ["light_gray_dye", 2, ["gray_dye", "white_dye"]],
+  ["magenta_dye", 2, ["purple_dye", "pink_dye"]],
+] as const) shapeless(out, n, [...ins]);
+// ---- len, thảm, kính màu, tấm kính, giường 16 màu ----
+shaped("white_wool", 1, ["TT", "TT"], { T: "string" }, "hand");
+shaped("glass_pane", 16, ["GGG", "GGG"], { G: "glass" });
+for (const c of COLORS) {
+  const dye = `${c}_dye`, wool = `${c}_wool`;
+  shapeless(wool, 1, [dye, "#wool"]);
+  shaped(`${c}_carpet`, 3, ["WW"], { W: wool }, "hand");
+  shaped(`${c}_stained_glass`, 8, ["GGG", "GDG", "GGG"], { G: "glass", D: dye });
+  shaped(`${c}_stained_glass_pane`, 16, ["GGG", "GGG"], { G: `${c}_stained_glass` });
+  shaped(`${c}_stained_glass_pane`, 8, ["PPP", "PDP", "PPP"], { P: "glass_pane", D: dye });
+  shaped(`${c}_bed`, 1, ["WWW", "PPP"], { W: wool, P: "#planks" });
+  shapeless(`${c}_bed`, 1, ["#bed", dye]);
+}
+// ---- đồ sắt và đồ hay dùng ----
+shaped("shears", 1, [" I", "I "], { I: "iron_ingot" }, "hand");
+shapeless("flint_and_steel", 1, ["iron_ingot", "flint"]);
+for (const [block, item] of [["coal_block", "coal"], ["iron_block", "iron_ingot"], ["gold_block", "gold_ingot"], ["diamond_block", "diamond"],
+  ["emerald_block", "emerald"], ["raw_iron_block", "raw_iron"], ["raw_gold_block", "raw_gold"]] as const) {
+  shaped(block, 1, ["XXX", "XXX", "XXX"], { X: item });
+  shapeless(item, 9, [block]);
+}
+shapeless("iron_nugget", 9, ["iron_ingot"]);
+shaped("iron_ingot", 1, ["NNN", "NNN", "NNN"], { N: "iron_nugget" });
+shaped("lantern", 1, ["NNN", "NTN", "NNN"], { N: "iron_nugget", T: "torch" });
+shaped("iron_bars", 16, ["III", "III"], { I: "iron_ingot" });
+shaped("iron_door", 3, ["II", "II", "II"], { I: "iron_ingot" });
+shapeless("stone_button", 1, ["stone"]);
+shapeless("oak_button", 1, ["#planks"]);
+shaped("lever", 1, ["S", "C"], { S: "stick", C: "cobble" }, "hand");
 
 export const RECIPES: readonly Recipe[] = R;
 
@@ -136,6 +177,23 @@ function shapeEquals(m: (string | null)[][], r: Recipe, mirror: boolean): boolea
   return true;
 }
 
+/** Công thức không cần hình: mỗi ô có đồ khớp đúng một nguyên liệu (nguyên liệu có thể là nhóm "#..."). */
+function shapelessMatch(want: readonly string[], items: readonly string[]): boolean {
+  if (want.length !== items.length) return false;
+  const used = items.map(() => false);
+  const fit = (k: number): boolean => {
+    if (k === want.length) return true;
+    for (let i = 0; i < items.length; i++) {
+      if (used[i] || !ingredientMatches(want[k]!, items[i]!)) continue;
+      used[i] = true;
+      if (fit(k + 1)) return true;
+      used[i] = false;
+    }
+    return false;
+  };
+  return fit(0);
+}
+
 /** Công thức khớp với lưới (khóa vật phẩm từng ô), hoặc null. */
 export function matchGrid(grid: readonly (string | null)[], size: number): Recipe | null {
   const m = trim(grid, size);
@@ -145,7 +203,7 @@ export function matchGrid(grid: readonly (string | null)[], size: number): Recip
     if (!fitsGrid(r, size)) continue;
     if (r.shape) {
       if (shapeEquals(m, r, false) || shapeEquals(m, r, true)) return r;
-    } else if (items.length === r.shapeless.length && [...r.shapeless].sort().every((it, i) => it === items[i])) return r;
+    } else if (shapelessMatch(r.shapeless, items)) return r;
   }
   return null;
 }

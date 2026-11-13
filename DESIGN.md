@@ -657,6 +657,29 @@ Thông số đã dùng (Giai đoạn 4e):
   cộng các trục), không có dây dẫn. Hết bật thì cửa đóng. Nút / cần gạt không làm gì khác.
 - Xô sữa chuyển sang GĐ 7 (cần bò).
 
+Thông số đã dùng (Giai đoạn 4f, `/shared/src/decorConstants.ts`, `colors.ts`, `decor.ts`):
+- Id: 95 len, 96 thảm, 97 kính màu, 98 tấm kính, 99 tấm kính màu, 100 song sắt, 101 lửa, 102–108 khối than / sắt /
+  vàng / kim cương / ngọc lục bảo / sắt thô / vàng thô, 109 lồng đèn, 110 cửa sắt, 111 nút đá, 112 nút gỗ, 113 cần gạt.
+  Id 8 bit còn trống 114–255.
+- Màu theo thứ tự (giá trị dữ liệu phụ 0–15): trắng, cam, đỏ tía, xanh nhạt, vàng, vàng chanh, hồng, xám, xám nhạt,
+  lục lam, tím, xanh dương, nâu, xanh lá, đỏ, đen. Giường: màu ở bit 3–6 (giường đỏ = 14). Vật phẩm theo màu:
+  "<màu>_wool", "<màu>_carpet", "<màu>_stained_glass", "<màu>_stained_glass_pane", "<màu>_bed", "<màu>_dye"
+  (len trắng đổi khóa "wool" → "white_wool", giường đỏ "bed" → "red_bed").
+- Thuốc nhuộm: gốc như trên; đen = 1 than; trộn ra 2 (nâu = đỏ + xanh lá; xám nhạt = xám + trắng; đỏ tía = tím + hồng).
+  Nhuộm: thuốc nhuộm + len màu bất kỳ → len màu đó; giường bất kỳ + thuốc nhuộm → giường màu đó.
+- Kính màu và tấm kính màu vẽ bán trong suốt có pha trộn (lớp vẽ riêng), không chặn sáng; tấm kính / song sắt nối với
+  nhau, với tường và khối đặc; cột giữa rộng 2/16, va chạm cao 1.
+- Kéo: độ bền 238; lá / mạng nhện nhanh gấp 15 tay không, len gấp 5; lá, mạng nhện, cỏ cao rơi ra chính nó (mạng nhện
+  và cỏ cao đặt lại được).
+- Bật lửa: độ bền 64; chỉ đốt lên mặt trên khối đầy; lửa tắt sau 2–6 giây (server hẹn giờ; lửa sót lại khi chunk tải
+  lại thì random tick dập), nước chảy vào thì tắt; đứng trong lửa: 1 máu và cháy 8 giây. Không nhắm vào lửa được; đặt
+  block vào ô lửa thì đè lên.
+- Khối tài nguyên: độ cứng 5 (vàng 3), cuốc cùng cấp với quặng; khối than đốt 80 món. Mảnh sắt: 1 thỏi ↔ 9 mảnh.
+- Lồng đèn sáng 15, thân 6x7x6 + nắp 4x2x4; bấm mặt dưới trần thì treo; đứng trên khối đặc / hàng rào / tường, treo
+  dưới khối đặc / hàng rào / tường. Cần cuốc mới rơi ra.
+- Nút đá bật 1 giây, nút gỗ 1.5 giây, cần gạt bật / tắt; gắn sàn, trần, tường (cần khối đặc). Cửa sắt mở khi có nút /
+  cần gạt đang bật cách một nửa cửa ≤ 2 ô (cộng các trục), chuột phải không mở; độ cứng 5, cần cuốc.
+
 #### Thêm ở GĐ 7 (cùng động vật)
 
 - Thịt sống / chín các loại (bảng MECHANICS.md 3), thịt thối, xương → 3 bột xương (thuốc nhuộm

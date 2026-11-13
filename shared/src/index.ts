@@ -4,6 +4,8 @@ export * from "./blocks.js";
 export * from "./blockMeta.js";
 export * from "./woods.js";
 export * from "./building.js";
+export * from "./colors.js";
+export * from "./decor.js";
 export * from "./blockShapes.js";
 export * from "./rng.js";
 export * from "./noise.js";

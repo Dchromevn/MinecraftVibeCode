@@ -4,6 +4,7 @@
 import { B, BLOCKS, type BlockBox } from "./blocks.js";
 import { HDX, HDZ, cellId, cellMeta, doorSide, rotXZ, torchWall } from "./blockMeta.js";
 import { isFence, slabBox, stairBoxes, wallBoxes } from "./building.js";
+import { buttonBoxes, lanternBoxes, leverBoxes, paneBoxes } from "./decor.js";
 
 export type Box = BlockBox;
 /** Đọc id block tại tọa độ thế giới (dùng cho hàng rào nối nhau). */
@@ -47,6 +48,8 @@ export function collisionBoxes(cell: number, x: number, y: number, z: number, id
   if (!def || !def.solid || def.liquid) return [];
   if (def.render === "fence") return fenceBoxes(x, y, z, idAt, 1.5); // cao 1.5: không nhảy qua được
   if (def.render === "wall") return wallBoxes(x, y, z, idAt, 1.5, 1.5);
+  if (def.render === "pane") return paneBoxes(x, y, z, idAt);
+  if (def.render === "lantern") return lanternBoxes(cellMeta(cell));
   if (def.render === "stairs" || def.render === "slab") {
     let hit = COLLISION_CACHE.get(cell);
     if (!hit) COLLISION_CACHE.set(cell, (hit = def.render === "stairs" ? stairBoxes(cellMeta(cell)) : [slabBox(cellMeta(cell))]));
@@ -72,6 +75,18 @@ export function selectionBoxes(cell: number, x: number, y: number, z: number, id
       return fenceBoxes(x, y, z, idAt, 1);
     case "wall":
       return wallBoxes(x, y, z, idAt, 1, 14 / 16);
+    case "pane":
+      return paneBoxes(x, y, z, idAt);
+    case "lantern":
+      return lanternBoxes(meta);
+    case "button":
+      return buttonBoxes(meta);
+    case "lever": {
+      const l = leverBoxes(meta);
+      return [l.base, l.handle];
+    }
+    case "fire":
+      return []; // không nhắm vào lửa (đặt block vào ô lửa thì đè lên)
     case "stairs":
       return stairBoxes(meta);
     case "slab":

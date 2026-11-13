@@ -86,6 +86,8 @@ const PALETTE: Record<string, Palette> = {
   spruce_door_upper: ["#6a4a2a", "#3d2b1a"], spruce_door_lower: ["#6a4a2a", "#3d2b1a"],
   birch_door_upper: ["#e0d6a8", "#c0ae74"], birch_door_lower: ["#e0d6a8", "#c0ae74"],
   acacia_door_upper: ["#b05a32", "#8a4426"], acacia_door_lower: ["#b05a32", "#8a4426"],
+  lantern: ["#3a3a40", "#f2c060"],
+  lever: ["#6b4a2a", "#9c7640"],
   missing: ["#ff00ff", "#000000"],
 };
 
@@ -125,7 +127,7 @@ export function drawFallbackTile(
     return;
   }
 
-  const [base, accent] = PALETTE[name] ?? PALETTE.missing!;
+  const [base, accent] = PALETTE[name] ?? (name.endsWith("pane_top") ? PALETTE.glass! : PALETTE.missing!);
 
   if (FLOWERS.has(name)) {
     // thân xanh + bông hoa nhỏ màu accent

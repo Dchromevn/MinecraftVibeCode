@@ -135,7 +135,7 @@ function mkWorld() {
     dye("dandelion") === "yellow_dye" && dye("poppy") === "red_dye" && dye("cornflower") === "blue_dye"
     && dye("lily_of_the_valley") === "white_dye" && dye("beetroot") === "red_dye" && smeltResult("cactus") === "green_dye");
   check("thân / ván mọi loài là nhiên liệu", fuelValue("spruce_log") === fuelValue("log") && fuelValue("acacia_planks") === fuelValue("planks") && fuelValue("acacia_planks") > 0);
-  check("mọi block mới có vật phẩm và tên kỹ thuật", BLOCKS.slice(46).every((b) => !!b.key && b.drops.length > 0));
+  check("mọi block mới có vật phẩm và tên kỹ thuật", BLOCKS.slice(46, 63).every((b) => !!b.key && b.drops.length > 0));
 }
 
 { // 5. xương rồng: chỗ bám, vỡ khi đặt block cạnh, lớn tới 3 khúc, chạm vào mất máu

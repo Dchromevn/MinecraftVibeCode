@@ -31,6 +31,7 @@ const FALLING = 8;
 const BREAKS = new Set<number>([
   B.TORCH, B.TALLGRASS, B.RAIL, B.WHEAT, B.CARROTS, B.POTATOES, B.BEETROOTS, B.MELON_STEM, B.PUMPKIN_STEM,
   ...WOODS.map((w) => w.sapling), ...FLOWER_BLOCKS,
+  B.FIRE, B.STONE_BUTTON, B.OAK_BUTTON, B.LEVER, // Giai đoạn 4f
 ]);
 export const isLiquidId = (id: number): boolean => FLUIDS.has(id);
 

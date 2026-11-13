@@ -2,7 +2,8 @@
 // rương / lò, cửa, cuốc đất, xô, đặt block), ăn, giáp mòn, chết. Từ chối thì gửi lại ô thật để
 // client bỏ phần đã đoán trước.
 import {
-  B, BLOCKS, PLAYER, breakAt, canPlace, doorUpper, isDoor, isLiquidId, isReplaceable, itemDef, mergeChest, placeCells, planPlace,
+  B, BLOCKS, PLAYER, breakAt, canPlace, doorUpper, isDoor, isFullSolid, isLiquidId, isReplaceable, isSwitch, itemDef, mergeChest, placeCells,
+  planPlace,
   playerBox, stack, toolWear, type NetHit, type BlockEntities,
 } from "../../shared/src/index.js";
 import type { Containers } from "./containers.js";
@@ -13,7 +14,8 @@ import type { ServerWorld } from "./serverWorld.js";
 
 const REACH_FLY = 12; // như client khi bay (Giai đoạn 5b: chỉ quản trị viên)
 const USABLE = new Set<number>([B.WORKBENCH, B.CHEST, B.FURNACE]);
-const usable = (id: number): boolean => USABLE.has(id) || isDoor(id); // cửa mọi loài gỗ
+/** Chuột phải dùng được: bàn, rương, lò, cửa gỗ (cửa sắt chỉ mở bằng nút / cần gạt), nút, cần gạt. */
+const usable = (id: number): boolean => USABLE.has(id) || (isDoor(id) && id !== B.IRON_DOOR) || isSwitch(id);
 
 export class Actions {
   constructor(
@@ -69,6 +71,7 @@ export class Actions {
     const cell = this.w.getCell(hit.x, hit.y, hit.z), id = cell & 255;
     if (cell < 0) return;
     if (!sneaking && usable(id)) return this.useBlock(p, hit.x, hit.y, hit.z, cell);
+    if (held?.item === "flint_and_steel") return this.ignite(p, hit);
     if (def?.tool?.kind === "hoe") {
       if ((id === B.DIRT || id === B.GRASS) && this.w.getCell(hit.x, hit.y + 1, hit.z) === B.AIR) {
         this.ticker.acc.setCell(hit.x, hit.y, hit.z, B.FARMLAND, 0);
@@ -91,6 +94,7 @@ export class Actions {
       p.invDirty = true;
       p.send({ t: "open", kind: "workbench", size: 9 });
     } else if (id === B.CHEST || id === B.FURNACE) this.containers.open(p, x, y, z);
+    else if (isSwitch(id)) this.ticker.pressSwitch(x, y, z);
     else if (isDoor(id)) {
       const lowerY = doorUpper(cell >> 8) ? y - 1 : y;
       for (const yy of [lowerY, lowerY + 1]) {
@@ -100,6 +104,17 @@ export class Actions {
     }
   }
 
+  /** Bật lửa: đốt lửa lên mặt trên khối đầy (lửa không lan, tự tắt), mất 1 độ bền. */
+  private ignite(p: ServerPlayer, t: NetHit): void {
+    const above = this.w.getCell(t.x, t.y + 1, t.z);
+    if (t.ny !== 1 || !isFullSolid(this.w.getCell(t.x, t.y, t.z) & 255) || above < 0 || !isReplaceable(above & 255) || isLiquidId(above & 255))
+      return this.correct(p, [{ x: t.x, y: t.y + 1, z: t.z }]);
+    this.ticker.acc.setCell(t.x, t.y + 1, t.z, B.FIRE, 0);
+    this.ticker.scheduleFire(t.x, t.y + 1, t.z);
+    p.inv.damageSlot("main", p.inv.selected, 1);
+    p.invDirty = true;
+  }
+
   private place(p: ServerPlayer, t: NetHit, cell: number, sneaking: boolean, yaw: number): void {
     const held = p.inv.held;
     const places = held ? itemDef(held.item)?.places : undefined;
@@ -107,7 +122,7 @@ export class Actions {
     const x = into ? t.x : t.x + t.nx, y = into ? t.y : t.y + t.ny, z = into ? t.z : t.z + t.nz;
     const get = (a: number, b: number, c: number): number => this.w.getCell(a, b, c);
     const fy = typeof t.fy === "number" && Number.isFinite(t.fy) ? t.fy : 0;
-    const cells = places === undefined ? null : planPlace(places, { ...t, fy }, yaw, get);
+    const cells = places === undefined ? null : planPlace(places, { ...t, fy }, yaw, get, held ? itemDef(held.item)?.meta : undefined);
     if (!cells || !canPlace(cells, get, p.flying ? null : playerBox(p))) {
       this.correct(p, [t, { x, y, z }, { x, y: y + 1, z }]);
       return;

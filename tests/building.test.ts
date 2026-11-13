@@ -133,5 +133,5 @@ const walkInput = { forward: 1, strafe: 0, jump: false, sneak: false, sprint: fa
   check("bậc đá cuội ×4, tấm đá ×6, tường gạch đá ×6, gạch đá ×4 (lưới 2x2)",
     st?.item === "cobble_stairs" && st.count === 4 && sl?.item === "stone_slab" && sl.count === 6
     && wl?.item === "stone_brick_wall" && wl.count === 6 && br?.item === "stone_bricks" && br.count === 4);
-  check("đủ 32 block mới (id 63–94) có tên kỹ thuật và rơi ra chính nó", BLOCKS.length === 95 && BLOCKS.slice(63).every((b) => b.drops[0]?.item === b.key));
+  check("đủ 32 block mới (id 63–94) có tên kỹ thuật và rơi ra chính nó", BLOCKS.slice(63, 95).length === 32 && BLOCKS.slice(63, 95).every((b) => b.drops[0]?.item === b.key));
 }

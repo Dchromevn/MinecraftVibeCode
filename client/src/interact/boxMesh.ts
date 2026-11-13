@@ -22,13 +22,15 @@ export function shapeBoxes(blockId: number): readonly BlockBox[] {
   const r = BLOCKS[blockId]!.render;
   if (r === "stairs") return stairBoxes(stairsMeta(1, false)); // phía cao ở −X
   if (r === "slab") return [slabBox(0)];
+  if (r === "carpet") return [[0, 0, 0, 1, 1 / 16, 1]];
+  if (r === "button") return [[3 / 16, 0, 4 / 16, 13 / 16, 4 / 16, 12 / 16]]; // to hơn nút thật cho dễ nhìn
   return [[4 / 16, 0, 4 / 16, 12 / 16, 1, 12 / 16], [5 / 16, 0, 0, 11 / 16, 14 / 16, 1]]; // tường
 }
 
 /** Mô hình 3D của vật phẩm hình đặc biệt: các hộp trong khối cạnh size, tâm ở gốc. */
-export function shapeObject(atlas: Atlas, blockId: number, size: number, mat: THREE.Material): THREE.Group {
+export function shapeObject(atlas: Atlas, blockId: number, size: number, mat: THREE.Material, tex?: string): THREE.Group {
   const g = new THREE.Group();
-  const tiles = blockTiles(atlas, blockId);
+  const tiles = blockTiles(atlas, blockId, tex);
   for (const [x0, y0, z0, x1, y1, z1] of shapeBoxes(blockId)) {
     const geo = new THREE.BoxGeometry((x1 - x0) * size, (y1 - y0) * size, (z1 - z0) * size);
     setBoxTiles(geo, tiles);
@@ -40,7 +42,8 @@ export function shapeObject(atlas: Atlas, blockId: number, size: number, mat: TH
 }
 
 /** 6 ô texture của một block theo bảng block (trên/dưới/bên/trước). */
-export function blockTiles(atlas: Atlas, id: number): TileUV[] {
+export function blockTiles(atlas: Atlas, id: number, tex?: string): TileUV[] {
+  if (tex) return Array<TileUV>(6).fill(atlas.uv(tex)); // block có màu: một ảnh cho mọi mặt
   const t = BLOCKS[id]!.tex;
   const side = atlas.uv(t.side);
   return [side, side, atlas.uv(t.top), atlas.uv(t.bottom), atlas.uv(t.front ?? t.side), side];

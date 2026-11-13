@@ -2,9 +2,10 @@
 // cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), cây trồng theo
 // giai đoạn, thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả). Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
 import {
-  BLOCKS, STEM_RIPE, bedDir, bedHead, doorSide, doorUpper, isFence, railKind, railRot, slabBox, stairBoxes, stemAttachedDir,
-  torchWall, wallBoxes, type BlockBox,
+  BED_PARTS, BLOCKS, STEM_RIPE, bedColor, bedDir, bedHead, buttonBoxes, doorSide, doorUpper, isFence, lanternBoxes, leverBoxes,
+  paneBoxes, railKind, railRot, slabBox, stairBoxes, stemAttachedDir, torchWall, wallBoxes, type BlockBox,
 } from "../../../shared/src/index.js";
+import { LANTERN_UV, addBoxRegion } from "./decorShapes.js";
 import type { TileUV } from "../atlas.js";
 import type { GeomBuilder } from "./geomBuilder.js";
 import {
@@ -22,6 +23,8 @@ export interface SpecialUv {
   crops: (TileUV[] | undefined)[]; // [id][giai đoạn 0..7] của cây trồng
   stemAttached: (TileUV | undefined)[]; // [id] thân đã ra quả
   farmlandWet: TileUV;
+  colored: (TileUV[][] | undefined)[]; // [id][màu][trên, dưới, bên, trước] (Giai đoạn 4f)
+  beds: Record<(typeof BED_PARTS)[number], TileUV>[]; // [màu]
 }
 
 const OPAQUE = new Uint8Array(256);
@@ -56,7 +59,7 @@ export function addSpecial(
   b: GeomBuilder, id: number, meta: number, x: number, y: number, z: number, at: At, uv: SpecialUv,
   light: readonly number[],
 ): boolean {
-  const t = uv.blocks[id]!;
+  const t = BLOCKS[id]!.colorTex ? uv.colored[id]![meta & 15]! : uv.blocks[id]!;
   const def = BLOCKS[id]!;
   switch (def.render) {
     case "cross":
@@ -100,11 +103,35 @@ export function addSpecial(
       return true;
     }
     case "bed": {
-      const head = bedHead(meta);
+      const head = bedHead(meta), c = uv.beds[bedColor(meta)]!;
       addBed(b, x, y, z, {
-        top: head ? t[0]! : t[3]!, end: head ? uv.bedHeadEnd : uv.bedFootEnd,
-        side: head ? t[2]! : uv.bedFootSide, bottom: t[1]!,
+        top: head ? c.head_top : c.foot_top, end: head ? c.head_end : c.foot_end,
+        side: head ? c.head_side : c.foot_side, bottom: t[1]!,
       }, light, bedDir(meta), head);
+      return true;
+    }
+    case "carpet":
+      addBoxes(b, x, y, z, [[0, 0, 0, 1, 1 / 16, 1]], { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
+    case "pane":
+      addBoxes(b, x, y, z, paneBoxes(x, y, z, at), { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
+    case "fire":
+      addCross(b, x, y, z, t[2]!, light);
+      return true;
+    case "lantern": {
+      const [body, cap] = lanternBoxes(meta);
+      addBoxRegion(b, x, y, z, body!, t[2]!, LANTERN_UV.body.side, LANTERN_UV.body.top, light);
+      addBoxRegion(b, x, y, z, cap!, t[2]!, LANTERN_UV.cap.side, LANTERN_UV.cap.top, light);
+      return true;
+    }
+    case "button":
+      addBoxes(b, x, y, z, buttonBoxes(meta), { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
+    case "lever": {
+      const l = leverBoxes(meta);
+      addBoxes(b, x, y, z, [l.base], { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      addBoxes(b, x, y, z, [l.handle], { top: t[3]!, bottom: t[3]!, side: t[3]! }, light, at);
       return true;
     }
     case "stairs":

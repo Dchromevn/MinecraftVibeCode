@@ -14,6 +14,7 @@ const SUITES: [string, () => Promise<unknown>][] = [
   ["sinh thế giới", () => import("./worldgen.test.js")],
   ["loài cây, hoa, xương rồng (4d)", () => import("./flora.test.js")],
   ["bậc, tấm, tường, gỗ theo loài (4e)", () => import("./building.test.js")],
+  ["16 màu, đồ sắt (4f)", () => import("./decor.test.js")],
 ];
 
 const args = process.argv.slice(2);

@@ -60,13 +60,13 @@ export function heldModel(key: string, atlas: Atlas): Promise<THREE.Object3D> {
     const icon = itemDef(key)?.icon;
     if (icon?.type === "cube") {
       const geo = new THREE.BoxGeometry(1, 1, 1);
-      setBoxTiles(geo, blockTiles(atlas, icon.block));
+      setBoxTiles(geo, blockTiles(atlas, icon.block, icon.tex));
       const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xdddddd }));
       m.userData.kind = "block";
       return m;
     }
     if (icon?.type === "shape") {
-      const g = shapeObject(atlas, icon.block, 1, new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xdddddd }));
+      const g = shapeObject(atlas, icon.block, 1, new THREE.MeshBasicMaterial({ map: atlas.texture, color: 0xdddddd }), icon.tex);
       g.userData.kind = "block";
       return g;
     }

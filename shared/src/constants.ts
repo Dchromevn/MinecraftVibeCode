@@ -190,3 +190,4 @@ export * from "./gameplay.js";
 export * from "./survivalConstants.js";
 export * from "./tickConstants.js";
 export * from "./floraConstants.js";
+export * from "./decorConstants.js";

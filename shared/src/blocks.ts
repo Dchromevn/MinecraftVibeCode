@@ -1,6 +1,10 @@
 // Kiểu dữ liệu và id block (DESIGN.md mục 2.2). Bảng dữ liệu nằm trong blockTable.ts.
 import type { ToolTier } from "./constants.js";
 import { BLOCKS } from "./blockTable.js";
+import { COLORS, withColor } from "./colors.js";
+
+/** Ảnh giường mỗi màu: "<màu>_bed_<phần>". */
+export const BED_PARTS = ["head_top", "foot_top", "head_side", "foot_side", "head_end", "foot_end"] as const;
 
 /** Id block theo bảng 2.2. */
 export const B = {
@@ -101,10 +105,30 @@ export const B = {
   SPRUCE_DOOR: 92,
   BIRCH_DOOR: 93,
   ACACIA_DOOR: 94,
+  // Giai đoạn 4f: 16 màu (len, thảm, kính màu, tấm kính), đồ sắt, lửa, nút / cần gạt
+  WOOL: 95,
+  CARPET: 96,
+  STAINED_GLASS: 97,
+  GLASS_PANE: 98,
+  STAINED_GLASS_PANE: 99,
+  IRON_BARS: 100,
+  FIRE: 101,
+  COAL_BLOCK: 102,
+  IRON_BLOCK: 103,
+  GOLD_BLOCK: 104,
+  DIAMOND_BLOCK: 105,
+  EMERALD_BLOCK: 106,
+  RAW_IRON_BLOCK: 107,
+  RAW_GOLD_BLOCK: 108,
+  LANTERN: 109,
+  IRON_DOOR: 110,
+  STONE_BUTTON: 111,
+  OAK_BUTTON: 112,
+  LEVER: 113,
 } as const;
 export type BlockId = (typeof B)[keyof typeof B];
 
-export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
+export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "shears" | "none";
 
 /**
  * Cách vẽ: cube = khối đầy đủ; cross = hai mặt chéo chữ X; liquid = chất lỏng
@@ -113,11 +137,14 @@ export type ToolKind = "pickaxe" | "axe" | "shovel" | "sword" | "hoe" | "none";
  * door = tấm mỏng; crop = dạng #; bed = cao 9/16; farmland = thấp hơn 1/16;
  * stem = thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả);
  * cactus = khối thu vào 1/16 ở bốn mặt bên; stairs = bậc (nửa dưới + phần trên theo hướng / góc);
- * slab = tấm nửa dưới / nửa trên / đôi; wall = tường (cột + tay nối, như hàng rào).
+ * slab = tấm nửa dưới / nửa trên / đôi; wall = tường (cột + tay nối, như hàng rào); carpet = thảm 1/16;
+ * pane = tấm kính / song sắt (cột mỏng + tay nối); fire = lửa; lantern = lồng đèn (sàn / treo);
+ * button, lever = nút, cần gạt (sàn / trần / tường).
  */
 export type RenderKind =
   | "none" | "cube" | "cross" | "liquid" | "layer" | "fence" | "rail"
-  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem" | "cactus" | "stairs" | "slab" | "wall";
+  | "torch" | "ladder" | "door" | "crop" | "bed" | "farmland" | "stem" | "cactus" | "stairs" | "slab" | "wall"
+  | "carpet" | "pane" | "fire" | "lantern" | "button" | "lever";
 
 /**
  * Dữ liệu phụ: 1 byte mỗi block, song song với id (DESIGN.md 2.2). Block có kiểu
@@ -134,21 +161,24 @@ export type RenderKind =
  * - sapling: bit 0 = giai đoạn ẩn (0–1)
  * - leaves: bit 0 = do người chơi đặt (không rụng)
  * - rail:   bit 0–1 góc xoay, bit 2–3 dạng (0 thẳng, 1 cong, 2 ngã ba, 3 ngã tư)
- * - bed:    bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường
+ * - bed:    bit 0–1 hướng từ chân tới đầu, bit 2 = ô đầu giường, bit 3–6 màu (0..15, Giai đoạn 4f)
  * - cactus: 0..15 = tuổi (đủ tuổi thì mọc thêm một khúc)
  * - stairs: bit 0–1 hướng phía cao, bit 2 lật ngược, bit 3–5 dạng (0 thẳng, 1 góc trong trái, 2 góc trong
  *           phải, 3 góc ngoài trái, 4 góc ngoài phải; "trái" = hướng quay ngược chiều kim đồng hồ từ phía cao)
  * - slab:   0 nửa dưới, 1 nửa trên, 2 tấm đôi
+ * - color:  0..15 màu (len, thảm, kính màu, tấm kính màu) theo thứ tự COLORS
+ * - lantern: bit 0 = treo dưới trần
+ * - switch: bit 0–2 chỗ gắn (0 sàn, 1 trần, 2..5 tường ở hướng giá trị − 2), bit 3 đang bật (nút, cần gạt)
  * Hàm giải mã / mã hóa nằm trong blockMeta.ts.
  */
 export type MetaKind =
   | "none" | "torch" | "ladder" | "door" | "crop" | "liquid" | "facing" | "rail" | "bed"
-  | "chest" | "farmland" | "sapling" | "leaves" | "stem" | "cactus" | "stairs" | "slab";
+  | "chest" | "farmland" | "sapling" | "leaves" | "stem" | "cactus" | "stairs" | "slab" | "color" | "lantern" | "switch";
 
 /** Các bit được dùng của từng kiểu (bit khác luôn 0). */
 export const META_MASK: Readonly<Record<MetaKind, number>> = {
-  none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 7,
-  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15, cactus: 15, stairs: 63, slab: 3,
+  none: 0, torch: 7, ladder: 3, door: 15, crop: 7, liquid: 15, facing: 7, rail: 15, bed: 127,
+  chest: 15, farmland: 1, sapling: 1, leaves: 1, stem: 15, cactus: 15, stairs: 63, slab: 3, color: 15, lantern: 1, switch: 15,
 };
 
 export interface BlockTextures {
@@ -179,6 +209,12 @@ export interface BlockDef {
   box: BlockBox | null; // hộp va chạm nếu không phải cả khối (null = cả khối hoặc không va chạm)
   opaque: boolean; // che khuất hoàn toàn (AO, cản sáng)
   liquid: boolean;
+  /** Block có màu (Giai đoạn 4f): texture từng mặt theo mẫu, {c} = tên màu (dữ liệu phụ, hoặc bit 3–6 của giường). */
+  colorTex?: BlockTextures;
+  /** Vật phẩm rơi ra theo màu, {c} = tên màu (thay cho drops). */
+  colorItem?: string;
+  /** Vẽ bán trong suốt có pha trộn (kính màu) thay vì cắt alpha. */
+  translucent?: boolean;
   falls: boolean; // rơi xuống khi bên dưới trống (cát, sỏi) — Giai đoạn 3
   moveFactor: number; // hệ số tốc độ khi đi trong block
   lightEmit: number; // 0..15
@@ -197,7 +233,12 @@ export function allBlockTextureNames(): string[] {
     names.add(b.tex.bottom);
     names.add(b.tex.side);
     if (b.tex.front) names.add(b.tex.front);
+    if (b.colorTex)
+      for (let c = 0; c < COLORS.length; c++)
+        for (const t of [b.colorTex.top, b.colorTex.bottom, b.colorTex.side]) names.add(withColor(t, c));
   }
+  // giường 16 màu (Giai đoạn 4f): 6 ảnh mỗi màu
+  for (let c = 0; c < COLORS.length; c++) for (const p of BED_PARTS) names.add(`${COLORS[c]}_bed_${p}`);
   return [...names];
 }
 
