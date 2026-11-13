@@ -73,7 +73,7 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 | 4c | Chất lỏng, xô | đã xong |
 | 5a | Server làm chủ thế giới, chơi chung qua link | đã xong |
 | 4d | Loài cây mới, hoa, xương rồng (sau 5a, trước 5b) | đã xong |
-| 4e | Bậc, tấm, tường, gỗ theo loài (trước 5b) | |
+| 4e | Bậc, tấm, tường, gỗ theo loài (trước 5b) | đã xong |
 | 4f | 16 màu, đồ sắt (trước 5b) | |
 | 5b | Lưu thế giới, đăng nhập | |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | |
