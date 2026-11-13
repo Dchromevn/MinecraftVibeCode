@@ -249,7 +249,7 @@ kèm trong gói tin (chunk và thay đổi block).
 - Rương đôi chứa 54 ô (6 hàng); mở bên nào cũng ra cùng giao diện: 27 ô của nửa trái ở
   trên, 27 ô của nửa phải ở dưới. Mỗi nửa vẫn lưu 27 ô của riêng nó.
 - Phá một nửa: đồ trong nửa đó rơi ra (kèm 1 rương), nửa kia trở lại rương đơn, giữ đồ.
-- Vẽ liền thành một khối dài 2 ô bằng texture rương lớn của REFI.
+- Vẽ liền thành một khối dài 2 ô bằng ảnh rương đôi gốc (client.jar).
 - Rương sinh sẵn trong hầm mỏ là rương đơn.
 
 #### Chỗ bám của block
@@ -596,18 +596,11 @@ giai đoạn sau. Màu (16) lưu trong dữ liệu phụ; mỗi loài cây dùng
 
 ## 3. Tài nguyên hình ảnh
 
-Nguồn: REFI_Textures của MysticTempest, giấy phép CC BY-SA 4.0
-(https://github.com/MysticTempest/REFI_Textures).
-Người dùng giải nén vào `/assets-src/REFI_Textures`.
-Đường dẫn dưới đây tính từ `/assets-src/REFI_Textures/textures/`.
-Bảng ánh xạ thực tế nằm trong `scripts/texture-map.json`; mục này là nguồn để
-cập nhật file đó.
-
-Nguồn ưu tiên tùy chọn (người dùng chọn 2026-11-12): texture gốc trong client.jar của
-Minecraft, người dùng tự tải vào `/assets-src/minecraft`, `npm run import-mc` nhập theo
-`scripts/mc-texture-map.json` vào `client/public_mc` (không commit). File có ở đó thì đè
-file REFI cùng tên; thiếu thì dùng REFI. (Bộ icon minecraft.wiki đã bỏ 2026-11-12: client.jar
-có đủ hình gốc.)
+Nguồn duy nhất (người dùng chọn 2026-11-13, bỏ REFI_Textures): texture gốc trong client.jar của
+Minecraft, người dùng tự tải vào `/assets-src/minecraft`; `npm run import-textures` nhập theo
+`scripts/mc-texture-map.json` vào `client/public_mc` (không commit). Thiếu file thì game vẽ tạm.
+Các bảng 3.1–3.4 dưới đây là danh sách texture ban đầu; đường dẫn REFI trong đó không còn dùng —
+bảng ánh xạ thật là `scripts/mc-texture-map.json`.
 
 Nguyên tắc chung cho script nhập:
 - Texture có điểm trong suốt mà dùng cho block đặc (quặng, cỏ mặt bên) thì
@@ -765,7 +758,7 @@ BLOCK CẦN CHO ĐỊA HÌNH
 - Đánh số lại block theo bảng 2.2 (id 0–15 giữ nguyên). Thêm ở giai đoạn này:
   sỏi (16), nước (17), sa thạch (20), tuyết phủ (21), cây non (32, chỉ hình ảnh),
   đá sâu (34). Các block còn lại làm ở 2b.
-- Cập nhật `scripts/texture-map.json` cho các block này và chạy lại script nhập.
+- Cập nhật `scripts/mc-texture-map.json` cho các block này và chạy lại script nhập.
 
 NGHIỆM THU
 - Bay thẳng một hướng 2 phút: địa hình sinh liên tục, không khựng hình rõ rệt,
@@ -812,7 +805,7 @@ HẦM MỎ BỎ HOANG
 BLOCK MỚI CÒN LẠI
 - Thêm các block id còn thiếu trong 16–37 (chỉ dữ liệu và hình ảnh; hành vi
   đặc biệt như cửa, giường, lò, cây lớn làm ở Giai đoạn 4 và 7).
-- Cập nhật `scripts/texture-map.json` theo mục 3.2 và chạy lại script nhập.
+- Cập nhật `scripts/mc-texture-map.json` theo mục 3.2 và chạy lại script nhập.
 - Hình dạng đặc biệt: hàng rào (cột + thanh nối), đường ray (tấm phẳng sát
   sàn, tự chọn thẳng/cong theo ray bên cạnh), đuốc (que nhỏ), cửa, thang (tấm
   phẳng sát tường), mạng nhện và cây non (chữ X), lúa mì (dạng #), giường
@@ -996,7 +989,7 @@ sinh sẽ làm lệch chỗ đã xây với địa hình mới).
   đồ có màu ở 4e).
 - Xương rồng: chỗ bám, vỡ khi có block cạnh, mọc theo random tick, gây sát thương khi chạm
   (sát thương do server tính từ 5c; tới lúc đó theo cách hiện tại của máu).
-- Texture từ client.jar (`import-mc`) và REFI; thiếu thì vẽ tạm bằng canvas.
+- Texture từ client.jar (`npm run import-textures`); thiếu thì vẽ tạm bằng canvas.
 - Thêm số phiên bản bộ sinh thế giới (`WORLDGEN_VERSION` trong `/shared`) để 5b ghi vào file lưu.
 
 NGHIỆM THU
@@ -1276,7 +1269,7 @@ NGHIỆM THU
 - Chơi được qua link công khai từ 2 máy khác mạng; server khởi động lại
   không mất thế giới.
 - 8 tab chạy 30 phút không rò bộ nhớ, không tụt FPS dần.
-- `CREDITS.md` có dòng ghi công REFI_Textures kèm giấy phép CC BY-SA 4.0.
+- `CREDITS.md` ghi rõ nguồn texture (client.jar, © Mojang) và giới hạn chỉ chơi riêng.
 
 ---
 

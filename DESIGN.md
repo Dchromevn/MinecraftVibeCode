@@ -199,7 +199,7 @@ kèm trong gói tin (chunk và thay đổi block).
 - Rương đôi chứa 54 ô (6 hàng); mở bên nào cũng ra cùng giao diện: 27 ô của nửa trái ở
   trên, 27 ô của nửa phải ở dưới. Mỗi nửa vẫn lưu 27 ô của riêng nó.
 - Phá một nửa: đồ trong nửa đó rơi ra (kèm 1 rương), nửa kia trở lại rương đơn, giữ đồ.
-- Vẽ liền thành một khối dài 2 ô bằng texture rương lớn của REFI.
+- Vẽ liền thành một khối dài 2 ô bằng ảnh rương đôi gốc (client.jar).
 - Rương sinh sẵn trong hầm mỏ là rương đơn.
 
 #### Random tick và trồng trọt (Giai đoạn 4b, MECHANICS.md 1 và 9)

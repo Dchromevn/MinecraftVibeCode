@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 
-/** Ảnh gốc Minecraft (npm run import-mc, không commit): file trong public_mc đè file cùng đường dẫn trong public. */
+/** Ảnh của game: nhập từ client.jar của Minecraft (npm run import-textures, không commit) vào public_mc. */
 const MC_DIR = fileURLToPath(new URL("./public_mc", import.meta.url));
 
 function mcOverride(): Plugin {

@@ -1,5 +1,5 @@
 // Icon vật phẩm cho giao diện: block khối đầy vẽ thành khối 3D nhỏ từ texture block, còn lại dùng
-// ảnh phẳng trong /icons hoặc /textures (ảnh gốc từ client.jar nếu đã nhập, không thì REFI).
+// ảnh phẳng trong /icons hoặc /textures (ảnh gốc từ client.jar; chưa nhập thì ô màu).
 // Thiếu ảnh thì vẽ ô màu.
 import { BLOCKS, allItems, itemDef } from "../../../shared/src/index.js";
 import { shapeBoxes } from "../interact/boxMesh.js";

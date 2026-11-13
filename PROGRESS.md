@@ -736,6 +736,20 @@ Trạng thái: chờ người dùng test. Người dùng chọn (2026-11-13): c�
 - Lửa là hình chữ X tĩnh (khung đầu của ảnh động), chưa có hoạt ảnh. Cần gạt là hai hộp đơn giản (tay gạt không xoay nghiêng).
 - REFI không có ảnh mép tấm kính, lồng đèn, cần gạt, mảnh sắt, kéo → vẽ tạm khi chưa nhập client.jar.
 
+## Bỏ REFI, chỉ dùng texture từ client.jar (2026-11-13, người dùng yêu cầu)
+
+- Xóa khỏi repo 414 ảnh REFI trong `client/public`, `scripts/import-textures.ts`, `scripts/texture-map.json`. Thư mục `assets-src/REFI_Textures` vẫn giữ trên máy (người dùng chọn), dự án không đọc nữa.
+- `npm run import-textures` giờ nhập từ client.jar (cùng script với `npm run import-mc`) vào `client/public_mc` (không commit; bản build chép sang `client/dist`). Máy chưa nhập client.jar thì game vẽ texture tạm bằng canvas.
+- Cập nhật AGENTS.md (mục Tài nguyên hình ảnh, lệnh), CREDITS.md (nguồn client.jar © Mojang, chỉ chơi riêng, không phát hành công khai kèm ảnh), PLAN.md mục 3 và các chỗ nhắc REFI, DESIGN.md.
+- Đã kiểm: `npm run import-textures` ghi 435 ảnh; typecheck, build (dist có 280 texture, 125 icon); trình duyệt không còn texture vẽ tạm.
+
+### Vật phẩm chưa có cách lấy trong chế độ sinh tồn (phân tích 2026-11-13)
+
+Sinh thử vùng 60x60 chunk (2 seed) + đồ rương hầm mỏ, rồi lan theo phá block / chế tạo / nung / đặt rồi phá: 253 / 261 vật phẩm lấy được (xô nước, xô dung nham, đá vỏ chai lấy được nhờ múc / nước gặp dung nham). Còn 8:
+- Cần sinh vật (GĐ 7): lông gà → mũi tên; da → mũ / áo / quần / giày da.
+- Khối dưa hấu: phá ra lát dưa, chưa có công thức 9 lát → khối (bản gốc có).
+- Block có trong thế giới nhưng không có dạng vật phẩm (bản gốc cần phù phép "Mềm tay", game không có): khối cỏ, các quặng, lớp tuyết, đất cày, đá nền, nước, dung nham, lửa.
+
 ## Bàn giao cho phiên sau (2026-11-12)
 
 Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md → PLAN.md → DESIGN.md → PROGRESS.md (mục này trước tiên).

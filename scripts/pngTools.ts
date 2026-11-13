@@ -1,4 +1,4 @@
-// Xử lý ảnh PNG dùng chung cho import-textures và import-mc: cắt, nhân màu, lật, xoay, phóng
+// Xử lý ảnh PNG cho script nhập texture từ client.jar (import-mc): cắt, nhân màu, lật, xoay, phóng
 // (lân cận gần nhất), dán đè có độ trong suốt, ghép nhiều mảnh (rương từ ảnh thực thể, ray ngã ba / ngã tư).
 import { PNG } from "pngjs";
 

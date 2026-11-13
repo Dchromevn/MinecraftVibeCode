@@ -70,16 +70,17 @@ chỉ chứa quy tắc làm việc.
 - `npm run dev` — chạy client và server cùng lúc
 - `npm run typecheck` — kiểm tra kiểu toàn dự án
 - `npm run build` — build client và server
-- `npm run import-textures` — nhập texture (có từ Giai đoạn 1)
+- `npm run import-textures` — nhập texture từ client.jar (có từ Giai đoạn 1; `npm run import-mc` là tên cũ, giống hệt)
 
 Giai đoạn 0 phải tạo đủ các lệnh này.
 
 ## Tài nguyên hình ảnh
 
-- Nguồn: `/assets-src/REFI_Textures` (người dùng tự tải về, CC BY-SA 4.0,
-  tác giả MysticTempest). Thư mục này KHÔNG commit vào git.
-- Bảng ánh xạ file nằm trong `PLAN.md`, mục 3.
-- Nếu thư mục nguồn chưa có hoặc thiếu file: tự vẽ texture tạm bằng canvas để
+- Nguồn duy nhất (người dùng chọn 2026-11-13, bỏ REFI_Textures): file client.jar của Minecraft do
+  người dùng tự tải vào `/assets-src/minecraft` (© Mojang). `npm run import-textures` nhập theo
+  `scripts/mc-texture-map.json` vào `client/public_mc`. Cả hai thư mục KHÔNG commit vào git.
+- Thêm texture / icon mới: thêm mục vào `scripts/mc-texture-map.json` rồi chạy lại lệnh nhập.
+- Nếu chưa nhập client.jar hoặc thiếu file: tự vẽ texture tạm bằng canvas để
   game vẫn chạy, và báo người dùng file nào thiếu.
 
 

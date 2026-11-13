@@ -1,8 +1,8 @@
 // Nhập texture gốc từ client.jar của Minecraft (người dùng tự tải, © Mojang — chỉ dùng trên máy,
 // KHÔNG commit). Đọc thẳng file jar (zip) bằng zlib có sẵn của Node, lấy ảnh theo
-// scripts/mc-texture-map.json, ghi vào client/public_mc/ (Vite ưu tiên thư mục này hơn client/public).
-// Mục nào không có trong jar thì game vẫn dùng ảnh REFI. Xóa client/public_mc để quay lại REFI.
-//   npm run import-mc              tìm *.jar trong assets-src/minecraft
+// scripts/mc-texture-map.json, ghi vào client/public_mc/ (Vite phục vụ và chép vào bản build). Đây là nguồn ảnh
+// duy nhất của game (bỏ REFI 2026-11-13); mục nào không có trong jar thì game vẽ tạm bằng canvas.
+//   npm run import-textures (hoặc import-mc)   tìm *.jar trong assets-src/minecraft
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { inflateRawSync } from "node:zlib";
@@ -123,6 +123,6 @@ for (const raw of map.entries)
   }
 console.log(`[import-mc] ${jarName}: đã ghi ${written} ảnh vào client/public_mc.`);
 if (missing.length) {
-  console.log(`[import-mc] Không có trong jar ${missing.length} mục (game dùng ảnh REFI):`);
+  console.log(`[import-mc] Không có trong jar ${missing.length} mục (game sẽ vẽ tạm):`);
   for (const m of missing) console.log(`  - ${m}`);
 }
