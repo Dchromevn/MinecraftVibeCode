@@ -18,7 +18,8 @@ Trạng thái: `chưa làm` · `đang làm` · `chờ người dùng test` · `x
 | 4c | Chất lỏng, xô | xong (người dùng xác nhận 2026-11-12) |
 | 5a | Server làm chủ thế giới, chơi chung qua link | xong (người dùng xác nhận 2026-11-13) |
 | 4d | Loài cây mới, hoa, xương rồng | xong (người dùng xác nhận 2026-11-13) |
-| 4e | Bậc, tấm, tường, 16 màu, đồ sắt | chưa làm (trước 5b) |
+| 4e | Bậc, tấm, tường, gỗ theo loài | đang làm |
+| 4f | 16 màu, đồ sắt | chưa làm (trước 5b) |
 | 5b | Lưu thế giới, đăng nhập | chưa làm |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | chưa làm |
 | 6 | Chiến đấu PvP và hồi sinh | chưa làm |
@@ -674,7 +675,7 @@ Phiên làm việc trước kết thúc sau 5a. Phiên mới: đọc AGENTS.md �
 ### Trạng thái
 
 - Xong: 0 → 4c (người dùng xác nhận 4a, 4b, 4c đều đạt, 2026-11-12).
-- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: xong. Kế tiếp (người dùng chọn 2026-11-13): 4e → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
+- 5a: xong (người dùng xác nhận 2026-11-13). Khi thử multiplayer trên một máy: dùng 2 cửa sổ trình duyệt cạnh nhau, không dùng 2 tab vì tab ẩn ngừng gửi vị trí. 4d: xong. Kế tiếp (người dùng chọn 2026-11-13; 4e chia thành 4e + 4f): 4e → 4f → 5b (lưu thế giới + đăng nhập) → 5c — xem PLAN.md mục 2.13, Giai đoạn 4d / 4e / 5.
 - Lựa chọn của người dùng cho 4d / 4e: thuốc nhuộm lấy từ hoa + xương rồng; cửa sắt mở bằng nút / cần gạt đơn giản (không dây redstone); lửa không lan; xô sữa để GĐ 7.
 - Đã chọn (2026-11-12): sát thương rìu = kiếm cùng cấp − 1 (rìu yếu hơn kiếm) — dùng ở Giai đoạn 6.
 

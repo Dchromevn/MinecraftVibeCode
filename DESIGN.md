@@ -602,7 +602,7 @@ Thông số đã dùng (Giai đoạn 4d, `/shared/src/floraConstants.ts`):
   (rơi ra 2 tấm). Tấm nửa dưới không chặn ánh sáng hoàn toàn.
 - Tường: nối với tường, khối đầy, cổng như hàng rào; va chạm cao 1.5; cột giữa cao hơn khi không thẳng.
 
-#### Thuốc nhuộm và 16 màu (4e)
+#### Thuốc nhuộm và 16 màu (4f)
 
 - 16 màu: trắng, cam, đỏ tía, xanh nhạt, vàng, vàng chanh, hồng, xám, xám nhạt, lục lam,
   tím, xanh dương, nâu, xanh lá, đỏ, đen.
@@ -621,7 +621,7 @@ Thông số đã dùng (Giai đoạn 4d, `/shared/src/floraConstants.ts`):
   - giường: 3 len cùng màu + 3 ván → giường màu đó; giường + thuốc nhuộm → đổi màu.
     Giường: dữ liệu phụ thêm bit 3–6 = màu (giường đã có hiện là màu đỏ).
 
-#### Đồ sắt và đồ hay dùng (4e)
+#### Đồ sắt và đồ hay dùng (4f)
 
 | Vật phẩm / block | Công thức | Thông số |
 |---|---|---|

@@ -72,8 +72,9 @@ AGENTS.md  PLAN.md  DESIGN.md  PROGRESS.md  CREDITS.md
 | 4b | Rương, lò nung, cửa, trồng trọt | đã xong |
 | 4c | Chất lỏng, xô | đã xong |
 | 5a | Server làm chủ thế giới, chơi chung qua link | đã xong |
-| 4d | Loài cây mới, hoa, xương rồng (sau 5a, trước 5b) | |
-| 4e | Bậc, tấm, tường, 16 màu, đồ sắt (trước 5b) | |
+| 4d | Loài cây mới, hoa, xương rồng (sau 5a, trước 5b) | đã xong |
+| 4e | Bậc, tấm, tường, gỗ theo loài (trước 5b) | |
+| 4f | 16 màu, đồ sắt (trước 5b) | |
 | 5b | Lưu thế giới, đăng nhập | |
 | 5c | Server tính di chuyển, chống gian lận, mạng trễ | |
 | 6 | Chiến đấu PvP và hồi sinh | |
@@ -546,7 +547,7 @@ giai đoạn sau. Màu (16) lưu trong dữ liệu phụ; mỗi loài cây dùng
   (rơi ra 2 tấm). Tấm nửa dưới không chặn ánh sáng hoàn toàn.
 - Tường: nối với tường, khối đầy, cổng như hàng rào; va chạm cao 1.5; cột giữa cao hơn khi không thẳng.
 
-#### Thuốc nhuộm và 16 màu (4e)
+#### Thuốc nhuộm và 16 màu (4f)
 
 - 16 màu: trắng, cam, đỏ tía, xanh nhạt, vàng, vàng chanh, hồng, xám, xám nhạt, lục lam,
   tím, xanh dương, nâu, xanh lá, đỏ, đen.
@@ -565,7 +566,7 @@ giai đoạn sau. Màu (16) lưu trong dữ liệu phụ; mỗi loài cây dùng
   - giường: 3 len cùng màu + 3 ván → giường màu đó; giường + thuốc nhuộm → đổi màu.
     Giường: dữ liệu phụ thêm bit 3–6 = màu (giường đã có hiện là màu đỏ).
 
-#### Đồ sắt và đồ hay dùng (4e)
+#### Đồ sắt và đồ hay dùng (4f)
 
 | Vật phẩm / block | Công thức | Thông số |
 |---|---|---|
@@ -1006,30 +1007,42 @@ NGHIỆM THU
 - Chặt thân mọi loài ra ván đúng loài; ván mọi loài làm được que, bàn, rương, công cụ gỗ.
 - Trồng cây non mỗi loài lớn thành đúng loài.
 
-### Giai đoạn 4e — Bậc, tấm, tường, 16 màu, đồ sắt (làm sau 4d, trước 5b)
+### Giai đoạn 4e — Bậc, tấm, tường, gỗ theo loài (làm sau 4d, trước 5b)
+
+Người dùng chọn (2026-11-13): chia phần cũ "4e" làm hai lần chơi thử, 4e và 4f. Thông số ở mục 2.13.
+Không đổi thế giới sinh ra.
+
+- Hình dạng block mới: bậc (hướng, lật ngược, góc tự nối), tấm (dưới / trên / đôi), tường (nối
+  như hàng rào). Mesh, va chạm, hộp nhắm, ánh sáng, chỗ bám cho từng hình.
+- Vật liệu bậc / tấm / tường và gạch đá; hàng rào, cửa theo loài gỗ (thông, bạch dương, keo).
+- Server kiểm tra và đồng bộ như mọi block khác (đặt bậc, ghép tấm đôi).
+
+NGHIỆM THU
+- Xây nhà bằng bậc / tấm / tường: đi lên cầu thang không cần nhảy, cầu thang tự thành góc, bậc
+  lật ngược khi đặt vào nửa trên, hai tấm chồng thành tấm đôi, tường nối nhau.
+- Hàng rào, cửa làm từ ván loài nào ra đúng loài đó; hàng rào khác loài nối với nhau.
+- Hai người chơi thấy cùng một kết quả.
+
+### Giai đoạn 4f — 16 màu, đồ sắt (làm sau 4e, trước 5b)
 
 Thông số ở mục 2.13. Không đổi thế giới sinh ra.
 
-- Hình dạng block mới: bậc (hướng, lật ngược, góc tự nối), tấm (dưới / trên / đôi), tường
-  (nối như hàng rào), tấm kính và song sắt (nối hai bên), thảm, lồng đèn (sàn / treo), nút,
+- Hình dạng block mới: tấm kính và song sắt (nối hai bên), thảm, lồng đèn (sàn / treo), nút,
   cần gạt, lửa. Mesh, va chạm, hộp nhắm, ánh sáng, chỗ bám cho từng hình.
-- Vật liệu bậc / tấm / tường và gạch đá; hàng rào, cửa theo loài gỗ.
 - Thuốc nhuộm trộn màu; len, thảm, kính màu, tấm kính màu, giường 16 màu (màu ở dữ liệu phụ);
   len từ 4 sợi tơ.
 - Đồ sắt: kéo, bật lửa + lửa không lan, khối tài nguyên, mảnh sắt, lồng đèn, song sắt, tấm
   kính, cửa sắt mở bằng nút / cần gạt ở gần.
-- Server kiểm tra và đồng bộ như mọi block khác (đặt bậc / tấm đôi, bấm nút, cửa sắt đóng
-  mở, lửa tự tắt chạy trong tick server).
+- Server kiểm tra và đồng bộ như mọi block khác (bấm nút, cửa sắt đóng mở, lửa tự tắt chạy
+  trong tick server).
 
 NGHIỆM THU
-- Xây nhà bằng bậc / tấm / tường: đi lên cầu thang không cần nhảy, cầu thang tự thành góc,
-  hai tấm chồng thành tấm đôi, tường nối nhau.
 - Đủ 16 màu thuốc nhuộm; nhuộm len, thảm, kính, giường; kính màu nhìn xuyên được và ám màu.
 - Kéo lấy lá và mạng nhện; bật lửa đốt lửa, lửa tự tắt, không lan sang nhà gỗ.
 - Đặt cửa sắt + nút / cần gạt bên cạnh: bấm thì mở, nút tự đóng sau 1 giây; chuột phải vào
   cửa sắt không mở.
 - Khối tài nguyên ↔ 9 món; lồng đèn sáng; song sắt và tấm kính nối nhau.
-- Hai người chơi thấy cùng một kết quả (bậc, màu, cửa sắt, lửa).
+- Hai người chơi thấy cùng một kết quả (màu, cửa sắt, lửa).
 
 ---
 
