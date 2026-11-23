@@ -97,13 +97,13 @@ export function addCactus(
 export function addBox(
   b: GeomBuilder, x: number, y: number, z: number,
   x0: number, x1: number, y0: number, y1: number, z0: number, z1: number,
-  tex: BoxTex, light: readonly number[], faces = 63,
+  tex: BoxTex, light: readonly number[], faces = 63, topRot = false,
 ): void {
   const X0 = x + x0 / 16, X1 = x + x1 / 16, Y0 = y + y0 / 16, Y1 = y + y1 / 16, Z0 = z + z0 / 16, Z1 = z + z1 / 16;
-  if (faces & 1) {
+  if (faces & 1) { // topRot: texture mặt trên xoay 90° (u theo Z, v theo X) — mặt đe nằm ngang trục X
     setLight(light, 1);
-    const [a, c, d, e] = sub(tex.top, x0, 16 - z1, x1, 16 - z0);
-    face(b, [X0, Y1, Z1, X1, Y1, Z1, X1, Y1, Z0, X0, Y1, Z0], a, c, d, e);
+    const [a, c, d, e] = topRot ? sub(tex.top, z0, x0, z1, x1) : sub(tex.top, x0, 16 - z1, x1, 16 - z0);
+    face(b, [X0, Y1, Z1, X1, Y1, Z1, X1, Y1, Z0, X0, Y1, Z0], a, c, d, e, topRot ? 1 : 0);
   }
   if (faces & 2) {
     setLight(light, 0.5);

@@ -49,6 +49,8 @@ export class ChunkManager {
   private readonly spare: Uint8Array[] = [];
   /** Chunk đang dựng lại nền: tối đa pool.size việc cùng lúc, chỗ còn lại dành cho sinh / dựng chunk mới. */
   private readonly bgRunning = new Set<number>();
+  /** (10a) Tăng khi đổi cõi: kết quả việc gửi trước đó bị bỏ. */
+  private epoch = 0;
 
   constructor(
     readonly world: World,
@@ -84,6 +86,15 @@ export class ChunkManager {
     const r = RELIGHT_RADIUS;
     for (let cz = Math.floor((z - r) / 16); cz <= Math.floor((z + r) / 16); cz++)
       for (let cx = Math.floor((x - r) / 16); cx <= Math.floor((x + r) / 16); cx++) mark(cx, cz);
+  }
+
+  /** (10a) Đổi cõi: bỏ hết chunk, mesh, việc đang chờ (không hủy đăng ký — server đã quên). */
+  reset(): void {
+    this.epoch++;
+    for (const c of [...this.world.chunks.values()]) this.world.removeChunk(c.cx, c.cz);
+    for (const key of this.meshes.chunkKeys()) this.meshes.remove(Math.floor(key / 0x10000) - 0x8000, (key % 0x10000) - 0x8000);
+    for (const s of [this.generating, this.dirty, this.bgRunning]) s.clear();
+    for (const m of [this.meshing, this.version, this.urgent, this.lastMesh]) m.clear();
   }
 
   update(camX: number, camZ: number, dirX: number, dirZ: number): void {
@@ -161,7 +172,9 @@ export class ChunkManager {
     const key = chunkKey(cx, cz);
     this.generating.add(key);
     this.onGenStart(cx, cz);
+    const ep = this.epoch;
     this.pool.run({ type: "gen", cx, cz }, (msg) => {
+      if (ep !== this.epoch) return; // việc của cõi cũ
       this.generating.delete(key);
       if (msg.type !== "gen" || this.world.chunks.has(key)) return;
       // chunk ở xa (camera đã đi khỏi) sẽ bị gỡ ở lần cập nhật sau
@@ -193,9 +206,11 @@ export class ChunkManager {
       }
     const transfer: ArrayBuffer[] = [];
     for (const c of chunks) if (c) transfer.push(c.data.buffer as ArrayBuffer, c.meta.buffer as ArrayBuffer);
+    const ep = this.epoch;
     this.pool.run(
       { type: "mesh", cx, cz, chunks },
       (msg) => {
+        if (ep !== this.epoch) return; // việc của cõi cũ
         this.meshing.delete(key);
         this.bgRunning.delete(key);
         if (msg.type === "mesh")

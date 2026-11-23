@@ -359,7 +359,8 @@
     "stone": "stone",
     "iron": "iron",
     "gold": "golden",
-    "diamond": "diamond"
+    "diamond": "diamond",
+    "netherite": "netherite"
    },
    "pieces": [
     "pickaxe",
@@ -376,7 +377,8 @@
     "leather": "leather",
     "iron": "iron",
     "gold": "golden",
-    "diamond": "diamond"
+    "diamond": "diamond",
+    "netherite": "netherite"
    },
    "pieces": [
     "helmet",
@@ -2507,6 +2509,3733 @@
   {
    "dest": "icons/iron_door",
    "src": "item/iron_door"
+  },
+  {
+   "dest": "entities/shield",
+   "src": "entity/shield/shield_base_nopattern"
+  },
+  {
+   "dest": "icons/shield",
+   "src": "entity/shield/shield_base_nopattern",
+   "compose": {
+    "w": 24,
+    "h": 24,
+    "parts": [
+     {
+      "x": 1,
+      "y": 1,
+      "w": 12,
+      "h": 22,
+      "dx": 6,
+      "dy": 1
+     }
+    ]
+   }
+  },
+  {
+   "dest": "ui/slot_shield",
+   "src": "gui/sprites/container/slot/shield"
+  },
+  {
+   "dest": "particles/crit",
+   "src": "particle/critical_hit"
+  },
+  {
+   "dest": "particles/sweep_0",
+   "src": "particle/sweep_0"
+  },
+  {
+   "dest": "particles/sweep_1",
+   "src": "particle/sweep_1"
+  },
+  {
+   "dest": "particles/sweep_2",
+   "src": "particle/sweep_2"
+  },
+  {
+   "dest": "particles/sweep_3",
+   "src": "particle/sweep_3"
+  },
+  {
+   "dest": "particles/sweep_4",
+   "src": "particle/sweep_4"
+  },
+  {
+   "dest": "particles/sweep_5",
+   "src": "particle/sweep_5"
+  },
+  {
+   "dest": "particles/sweep_6",
+   "src": "particle/sweep_6"
+  },
+  {
+   "dest": "particles/sweep_7",
+   "src": "particle/sweep_7"
+  },
+  {
+   "dest": "icons/beef",
+   "src": "item/beef"
+  },
+  {
+   "dest": "icons/cooked_beef",
+   "src": "item/cooked_beef"
+  },
+  {
+   "dest": "icons/porkchop",
+   "src": "item/porkchop"
+  },
+  {
+   "dest": "icons/cooked_porkchop",
+   "src": "item/cooked_porkchop"
+  },
+  {
+   "dest": "icons/chicken",
+   "src": "item/chicken"
+  },
+  {
+   "dest": "icons/cooked_chicken",
+   "src": "item/cooked_chicken"
+  },
+  {
+   "dest": "icons/mutton",
+   "src": "item/mutton"
+  },
+  {
+   "dest": "icons/cooked_mutton",
+   "src": "item/cooked_mutton"
+  },
+  {
+   "dest": "icons/rotten_flesh",
+   "src": "item/rotten_flesh"
+  },
+  {
+   "dest": "icons/bone",
+   "src": "item/bone"
+  },
+  {
+   "dest": "icons/bone_meal",
+   "src": "item/bone_meal"
+  },
+  {
+   "dest": "icons/spider_eye",
+   "src": "item/spider_eye"
+  },
+  {
+   "dest": "icons/egg",
+   "src": "item/egg"
+  },
+  {
+   "dest": "icons/milk_bucket",
+   "src": "item/milk_bucket"
+  },
+  {
+   "dest": "entities/mobs/zombie",
+   "src": "entity/zombie/zombie"
+  },
+  {
+   "dest": "entities/mobs/skeleton",
+   "src": "entity/skeleton/skeleton"
+  },
+  {
+   "dest": "entities/mobs/spider",
+   "src": "entity/spider/spider"
+  },
+  {
+   "dest": "entities/mobs/spider_eyes",
+   "src": "entity/spider/spider_eyes"
+  },
+  {
+   "dest": "entities/mobs/pig_temperate",
+   "src": "entity/pig/pig_temperate"
+  },
+  {
+   "dest": "entities/mobs/cow_temperate",
+   "src": "entity/cow/cow_temperate"
+  },
+  {
+   "dest": "entities/mobs/chicken_temperate",
+   "src": "entity/chicken/chicken_temperate"
+  },
+  {
+   "dest": "entities/mobs/pig_cold",
+   "src": "entity/pig/pig_cold"
+  },
+  {
+   "dest": "entities/mobs/cow_cold",
+   "src": "entity/cow/cow_cold"
+  },
+  {
+   "dest": "entities/mobs/chicken_cold",
+   "src": "entity/chicken/chicken_cold"
+  },
+  {
+   "dest": "entities/mobs/pig_warm",
+   "src": "entity/pig/pig_warm"
+  },
+  {
+   "dest": "entities/mobs/cow_warm",
+   "src": "entity/cow/cow_warm"
+  },
+  {
+   "dest": "entities/mobs/chicken_warm",
+   "src": "entity/chicken/chicken_warm"
+  },
+  {
+   "dest": "entities/mobs/sheep",
+   "src": "entity/sheep/sheep"
+  },
+  {
+   "dest": "entities/mobs/sheep_wool",
+   "src": "entity/sheep/sheep_wool"
+  },
+  {
+   "dest": "environment/sun",
+   "src": "environment/celestial/sun"
+  },
+  {
+   "dest": "environment/moon",
+   "src": "environment/celestial/moon/full_moon"
+  },
+  {
+   "dest": "particles/flame",
+   "src": "particle/flame"
+  },
+  {
+   "dest": "particles/heart",
+   "src": "particle/heart"
+  },
+  {
+   "dest": "particles/smoke",
+   "src": "particle/generic_0"
+  },
+  {
+   "dest": "ui/hunger_fx",
+   "src": "gui/sprites/hud/food_full_hunger"
+  },
+  {
+   "dest": "ui/hunger_fx_gone",
+   "src": "gui/sprites/hud/food_empty_hunger"
+  },
+  {
+   "dest": "textures/tnt_top",
+   "src": "block/tnt_top"
+  },
+  {
+   "dest": "textures/tnt_bottom",
+   "src": "block/tnt_bottom"
+  },
+  {
+   "dest": "textures/tnt_side",
+   "src": "block/tnt_side"
+  },
+  {
+   "dest": "textures/spawner",
+   "src": "block/spawner"
+  },
+  {
+   "dest": "icons/gunpowder",
+   "src": "item/gunpowder"
+  },
+  {
+   "dest": "icons/ender_pearl",
+   "src": "item/ender_pearl"
+  },
+  {
+   "dest": "icons/slime_ball",
+   "src": "item/slime_ball"
+  },
+  {
+   "dest": "icons/phantom_membrane",
+   "src": "item/phantom_membrane"
+  },
+  {
+   "dest": "icons/splash_potion",
+   "src": "item/splash_potion"
+  },
+  {
+   "dest": "entities/mobs/creeper",
+   "src": "entity/creeper/creeper"
+  },
+  {
+   "dest": "entities/mobs/enderman",
+   "src": "entity/enderman/enderman"
+  },
+  {
+   "dest": "entities/mobs/enderman_eyes",
+   "src": "entity/enderman/enderman_eyes"
+  },
+  {
+   "dest": "entities/mobs/endermite",
+   "src": "entity/endermite/endermite"
+  },
+  {
+   "dest": "entities/mobs/slime",
+   "src": "entity/slime/slime"
+  },
+  {
+   "dest": "entities/mobs/husk",
+   "src": "entity/zombie/husk"
+  },
+  {
+   "dest": "entities/mobs/drowned",
+   "src": "entity/zombie/drowned"
+  },
+  {
+   "dest": "entities/mobs/drowned_outer",
+   "src": "entity/zombie/drowned_outer_layer"
+  },
+  {
+   "dest": "entities/mobs/stray",
+   "src": "entity/skeleton/stray"
+  },
+  {
+   "dest": "entities/mobs/stray_overlay",
+   "src": "entity/skeleton/stray_overlay"
+  },
+  {
+   "dest": "entities/mobs/cave_spider",
+   "src": "entity/spider/cave_spider"
+  },
+  {
+   "dest": "entities/mobs/phantom",
+   "src": "entity/phantom/phantom"
+  },
+  {
+   "dest": "entities/mobs/phantom_eyes",
+   "src": "entity/phantom/phantom_eyes"
+  },
+  {
+   "dest": "entities/mobs/witch",
+   "src": "entity/witch/witch"
+  },
+  {
+   "dest": "entities/mobs/silverfish",
+   "src": "entity/silverfish/silverfish"
+  },
+  {
+   "dest": "particles/explosion_0",
+   "src": "particle/explosion_0"
+  },
+  {
+   "dest": "particles/explosion_1",
+   "src": "particle/explosion_1"
+  },
+  {
+   "dest": "particles/explosion_2",
+   "src": "particle/explosion_2"
+  },
+  {
+   "dest": "particles/explosion_3",
+   "src": "particle/explosion_3"
+  },
+  {
+   "dest": "particles/explosion_4",
+   "src": "particle/explosion_4"
+  },
+  {
+   "dest": "particles/explosion_5",
+   "src": "particle/explosion_5"
+  },
+  {
+   "dest": "particles/explosion_6",
+   "src": "particle/explosion_6"
+  },
+  {
+   "dest": "particles/explosion_7",
+   "src": "particle/explosion_7"
+  },
+  {
+   "dest": "particles/explosion_8",
+   "src": "particle/explosion_8"
+  },
+  {
+   "dest": "particles/explosion_9",
+   "src": "particle/explosion_9"
+  },
+  {
+   "dest": "particles/explosion_10",
+   "src": "particle/explosion_10"
+  },
+  {
+   "dest": "particles/explosion_11",
+   "src": "particle/explosion_11"
+  },
+  {
+   "dest": "particles/explosion_12",
+   "src": "particle/explosion_12"
+  },
+  {
+   "dest": "particles/explosion_13",
+   "src": "particle/explosion_13"
+  },
+  {
+   "dest": "particles/explosion_14",
+   "src": "particle/explosion_14"
+  },
+  {
+   "dest": "particles/explosion_15",
+   "src": "particle/explosion_15"
+  },
+  {
+   "dest": "ui/effect_poison",
+   "src": "mob_effect/poison"
+  },
+  {
+   "dest": "ui/effect_slowness",
+   "src": "mob_effect/slowness"
+  },
+  {
+   "dest": "ui/effect_weakness",
+   "src": "mob_effect/weakness"
+  },
+  {
+   "dest": "ui/effect_hunger",
+   "src": "mob_effect/hunger"
+  },
+  {
+   "dest": "ui/effect_nausea",
+   "src": "mob_effect/nausea"
+  },
+  {
+   "dest": "textures/vine",
+   "src": "block/vine",
+   "tint": "#6A7039"
+  },
+  {
+   "dest": "textures/lily_pad",
+   "src": "block/lily_pad",
+   "tint": "#208030"
+  },
+  {
+   "dest": "icons/rabbit",
+   "src": "item/rabbit"
+  },
+  {
+   "dest": "icons/cooked_rabbit",
+   "src": "item/cooked_rabbit"
+  },
+  {
+   "dest": "icons/cod",
+   "src": "item/cod"
+  },
+  {
+   "dest": "icons/cooked_cod",
+   "src": "item/cooked_cod"
+  },
+  {
+   "dest": "icons/salmon",
+   "src": "item/salmon"
+  },
+  {
+   "dest": "icons/cooked_salmon",
+   "src": "item/cooked_salmon"
+  },
+  {
+   "dest": "icons/pufferfish",
+   "src": "item/pufferfish"
+  },
+  {
+   "dest": "icons/tropical_fish",
+   "src": "item/tropical_fish"
+  },
+  {
+   "dest": "icons/rabbit_hide",
+   "src": "item/rabbit_hide"
+  },
+  {
+   "dest": "icons/rabbit_foot",
+   "src": "item/rabbit_foot"
+  },
+  {
+   "dest": "icons/ink_sac",
+   "src": "item/ink_sac"
+  },
+  {
+   "dest": "icons/glow_ink_sac",
+   "src": "item/glow_ink_sac"
+  },
+  {
+   "dest": "icons/armadillo_scute",
+   "src": "item/armadillo_scute"
+  },
+  {
+   "dest": "icons/wolf_armor",
+   "src": "item/wolf_armor"
+  },
+  {
+   "dest": "icons/cod_bucket",
+   "src": "item/cod_bucket"
+  },
+  {
+   "dest": "icons/salmon_bucket",
+   "src": "item/salmon_bucket"
+  },
+  {
+   "dest": "icons/pufferfish_bucket",
+   "src": "item/pufferfish_bucket"
+  },
+  {
+   "dest": "icons/tropical_fish_bucket",
+   "src": "item/tropical_fish_bucket"
+  },
+  {
+   "dest": "ui/effect_dolphins_grace",
+   "src": "mob_effect/dolphins_grace"
+  },
+  {
+   "dest": "entities/mobs/rabbit_brown",
+   "src": "entity/rabbit/rabbit_brown"
+  },
+  {
+   "dest": "entities/mobs/rabbit_white",
+   "src": "entity/rabbit/rabbit_white"
+  },
+  {
+   "dest": "entities/mobs/rabbit_white_splotched",
+   "src": "entity/rabbit/rabbit_white_splotched"
+  },
+  {
+   "dest": "entities/mobs/rabbit_gold",
+   "src": "entity/rabbit/rabbit_gold"
+  },
+  {
+   "dest": "entities/mobs/rabbit_black",
+   "src": "entity/rabbit/rabbit_black"
+  },
+  {
+   "dest": "entities/mobs/rabbit_salt",
+   "src": "entity/rabbit/rabbit_salt"
+  },
+  {
+   "dest": "entities/mobs/wolf",
+   "src": "entity/wolf/wolf"
+  },
+  {
+   "dest": "entities/mobs/wolf_tame",
+   "src": "entity/wolf/wolf_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_angry",
+   "src": "entity/wolf/wolf_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_woods",
+   "src": "entity/wolf/wolf_woods"
+  },
+  {
+   "dest": "entities/mobs/wolf_woods_tame",
+   "src": "entity/wolf/wolf_woods_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_woods_angry",
+   "src": "entity/wolf/wolf_woods_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_ashen",
+   "src": "entity/wolf/wolf_ashen"
+  },
+  {
+   "dest": "entities/mobs/wolf_ashen_tame",
+   "src": "entity/wolf/wolf_ashen_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_ashen_angry",
+   "src": "entity/wolf/wolf_ashen_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_snowy",
+   "src": "entity/wolf/wolf_snowy"
+  },
+  {
+   "dest": "entities/mobs/wolf_snowy_tame",
+   "src": "entity/wolf/wolf_snowy_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_snowy_angry",
+   "src": "entity/wolf/wolf_snowy_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_spotted",
+   "src": "entity/wolf/wolf_spotted"
+  },
+  {
+   "dest": "entities/mobs/wolf_spotted_tame",
+   "src": "entity/wolf/wolf_spotted_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_spotted_angry",
+   "src": "entity/wolf/wolf_spotted_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_black",
+   "src": "entity/wolf/wolf_black"
+  },
+  {
+   "dest": "entities/mobs/wolf_black_tame",
+   "src": "entity/wolf/wolf_black_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_black_angry",
+   "src": "entity/wolf/wolf_black_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_chestnut",
+   "src": "entity/wolf/wolf_chestnut"
+  },
+  {
+   "dest": "entities/mobs/wolf_chestnut_tame",
+   "src": "entity/wolf/wolf_chestnut_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_chestnut_angry",
+   "src": "entity/wolf/wolf_chestnut_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_rusty",
+   "src": "entity/wolf/wolf_rusty"
+  },
+  {
+   "dest": "entities/mobs/wolf_rusty_tame",
+   "src": "entity/wolf/wolf_rusty_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_rusty_angry",
+   "src": "entity/wolf/wolf_rusty_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_striped",
+   "src": "entity/wolf/wolf_striped"
+  },
+  {
+   "dest": "entities/mobs/wolf_striped_tame",
+   "src": "entity/wolf/wolf_striped_tame"
+  },
+  {
+   "dest": "entities/mobs/wolf_striped_angry",
+   "src": "entity/wolf/wolf_striped_angry"
+  },
+  {
+   "dest": "entities/mobs/wolf_collar",
+   "src": "entity/wolf/wolf_collar"
+  },
+  {
+   "dest": "entities/mobs/wolf_armor",
+   "src": "entity/equipment/wolf_body/armadillo_scute"
+  },
+  {
+   "dest": "entities/mobs/wolf_armor_overlay",
+   "src": "entity/equipment/wolf_body/armadillo_scute_overlay"
+  },
+  {
+   "dest": "entities/mobs/fox",
+   "src": "entity/fox/fox"
+  },
+  {
+   "dest": "entities/mobs/fox_sleep",
+   "src": "entity/fox/fox_sleep"
+  },
+  {
+   "dest": "entities/mobs/fox_snow",
+   "src": "entity/fox/fox_snow"
+  },
+  {
+   "dest": "entities/mobs/fox_snow_sleep",
+   "src": "entity/fox/fox_snow_sleep"
+  },
+  {
+   "dest": "entities/mobs/goat",
+   "src": "entity/goat/goat"
+  },
+  {
+   "dest": "entities/mobs/polar_bear",
+   "src": "entity/bear/polarbear"
+  },
+  {
+   "dest": "entities/mobs/llama_creamy",
+   "src": "entity/llama/llama_creamy"
+  },
+  {
+   "dest": "entities/mobs/llama_white",
+   "src": "entity/llama/llama_white"
+  },
+  {
+   "dest": "entities/mobs/llama_brown",
+   "src": "entity/llama/llama_brown"
+  },
+  {
+   "dest": "entities/mobs/llama_gray",
+   "src": "entity/llama/llama_gray"
+  },
+  {
+   "dest": "entities/mobs/armadillo",
+   "src": "entity/armadillo/armadillo"
+  },
+  {
+   "dest": "entities/mobs/bat",
+   "src": "entity/bat/bat"
+  },
+  {
+   "dest": "entities/mobs/squid",
+   "src": "entity/squid/squid"
+  },
+  {
+   "dest": "entities/mobs/glow_squid",
+   "src": "entity/squid/glow_squid"
+  },
+  {
+   "dest": "entities/mobs/dolphin",
+   "src": "entity/dolphin/dolphin"
+  },
+  {
+   "dest": "entities/mobs/cod",
+   "src": "entity/fish/cod"
+  },
+  {
+   "dest": "entities/mobs/salmon",
+   "src": "entity/fish/salmon"
+  },
+  {
+   "dest": "entities/mobs/pufferfish",
+   "src": "entity/fish/pufferfish"
+  },
+  {
+   "dest": "entities/mobs/tropical_a",
+   "src": "entity/fish/tropical_a"
+  },
+  {
+   "dest": "entities/mobs/tropical_b",
+   "src": "entity/fish/tropical_b"
+  },
+  {
+   "dest": "entities/mobs/tropical_a_pattern_1",
+   "src": "entity/fish/tropical_a_pattern_1"
+  },
+  {
+   "dest": "entities/mobs/tropical_a_pattern_2",
+   "src": "entity/fish/tropical_a_pattern_2"
+  },
+  {
+   "dest": "entities/mobs/tropical_a_pattern_3",
+   "src": "entity/fish/tropical_a_pattern_3"
+  },
+  {
+   "dest": "entities/mobs/tropical_a_pattern_4",
+   "src": "entity/fish/tropical_a_pattern_4"
+  },
+  {
+   "dest": "entities/mobs/tropical_a_pattern_5",
+   "src": "entity/fish/tropical_a_pattern_5"
+  },
+  {
+   "dest": "entities/mobs/tropical_a_pattern_6",
+   "src": "entity/fish/tropical_a_pattern_6"
+  },
+  {
+   "dest": "entities/mobs/tropical_b_pattern_1",
+   "src": "entity/fish/tropical_b_pattern_1"
+  },
+  {
+   "dest": "entities/mobs/tropical_b_pattern_2",
+   "src": "entity/fish/tropical_b_pattern_2"
+  },
+  {
+   "dest": "entities/mobs/tropical_b_pattern_3",
+   "src": "entity/fish/tropical_b_pattern_3"
+  },
+  {
+   "dest": "entities/mobs/tropical_b_pattern_4",
+   "src": "entity/fish/tropical_b_pattern_4"
+  },
+  {
+   "dest": "entities/mobs/tropical_b_pattern_5",
+   "src": "entity/fish/tropical_b_pattern_5"
+  },
+  {
+   "dest": "entities/mobs/tropical_b_pattern_6",
+   "src": "entity/fish/tropical_b_pattern_6"
+  },
+  {
+   "dest": "textures/ice",
+   "src": "block/ice"
+  },
+  {
+   "dest": "textures/chiseled_stone_bricks",
+   "src": "block/chiseled_stone_bricks"
+  },
+  {
+   "dest": "textures/cracked_stone_bricks",
+   "src": "block/cracked_stone_bricks"
+  },
+  {
+   "dest": "textures/mossy_stone_bricks",
+   "src": "block/mossy_stone_bricks"
+  },
+  {
+   "dest": "textures/netherrack",
+   "src": "block/netherrack"
+  },
+  {
+   "dest": "textures/crying_obsidian",
+   "src": "block/crying_obsidian"
+  },
+  {
+   "dest": "textures/sandstone_top",
+   "src": "block/sandstone_top"
+  },
+  {
+   "dest": "textures/chiseled_sandstone",
+   "src": "block/chiseled_sandstone"
+  },
+  {
+   "dest": "textures/cut_sandstone",
+   "src": "block/cut_sandstone"
+  },
+  {
+   "dest": "textures/orange_terracotta",
+   "src": "block/orange_terracotta"
+  },
+  {
+   "dest": "textures/blue_terracotta",
+   "src": "block/blue_terracotta"
+  },
+  {
+   "dest": "textures/dirt_path_top",
+   "src": "block/dirt_path_top"
+  },
+  {
+   "dest": "textures/dirt_path_side",
+   "src": "block/dirt_path_side"
+  },
+  {
+   "dest": "textures/magma",
+   "src": "block/magma",
+   "crop": [
+    0,
+    0,
+    16,
+    16
+   ]
+  },
+  {
+   "dest": "icons/saddle",
+   "src": "item/saddle"
+  },
+  {
+   "dest": "icons/lead",
+   "src": "item/lead"
+  },
+  {
+   "dest": "entities/mobs/horse_white",
+   "src": "entity/horse/horse_white"
+  },
+  {
+   "dest": "entities/mobs/horse_creamy",
+   "src": "entity/horse/horse_creamy"
+  },
+  {
+   "dest": "entities/mobs/horse_chestnut",
+   "src": "entity/horse/horse_chestnut"
+  },
+  {
+   "dest": "entities/mobs/horse_brown",
+   "src": "entity/horse/horse_brown"
+  },
+  {
+   "dest": "entities/mobs/horse_black",
+   "src": "entity/horse/horse_black"
+  },
+  {
+   "dest": "entities/mobs/horse_gray",
+   "src": "entity/horse/horse_gray"
+  },
+  {
+   "dest": "entities/mobs/horse_darkbrown",
+   "src": "entity/horse/horse_darkbrown"
+  },
+  {
+   "dest": "entities/mobs/horse_markings_white",
+   "src": "entity/horse/horse_markings_white"
+  },
+  {
+   "dest": "entities/mobs/horse_markings_whitefield",
+   "src": "entity/horse/horse_markings_whitefield"
+  },
+  {
+   "dest": "entities/mobs/horse_markings_whitedots",
+   "src": "entity/horse/horse_markings_whitedots"
+  },
+  {
+   "dest": "entities/mobs/horse_markings_blackdots",
+   "src": "entity/horse/horse_markings_blackdots"
+  },
+  {
+   "dest": "entities/mobs/donkey",
+   "src": "entity/horse/donkey"
+  },
+  {
+   "dest": "entities/mobs/mule",
+   "src": "entity/horse/mule"
+  },
+  {
+   "dest": "entities/mobs/horse_saddle",
+   "src": "entity/equipment/horse_saddle/saddle"
+  },
+  {
+   "dest": "entities/mobs/donkey_saddle",
+   "src": "entity/equipment/donkey_saddle/saddle"
+  },
+  {
+   "dest": "entities/mobs/mule_saddle",
+   "src": "entity/equipment/mule_saddle/saddle"
+  },
+  {
+   "dest": "entities/mobs/lead_knot",
+   "src": "entity/lead_knot/lead_knot"
+  },
+  {
+   "dest": "textures/terracotta",
+   "src": "block/terracotta"
+  },
+  {
+   "dest": "textures/hay_block_top",
+   "src": "block/hay_block_top"
+  },
+  {
+   "dest": "textures/hay_block_side",
+   "src": "block/hay_block_side"
+  },
+  {
+   "dest": "textures/bookshelf",
+   "src": "block/bookshelf"
+  },
+  {
+   "dest": "textures/composter_top",
+   "src": "block/composter_top",
+   "underlay": "block/composter_compost"
+  },
+  {
+   "dest": "textures/composter_bottom",
+   "src": "block/composter_bottom"
+  },
+  {
+   "dest": "textures/composter_side",
+   "src": "block/composter_side"
+  },
+  {
+   "dest": "textures/barrel_top",
+   "src": "block/barrel_top"
+  },
+  {
+   "dest": "textures/barrel_bottom",
+   "src": "block/barrel_bottom"
+  },
+  {
+   "dest": "textures/barrel_side",
+   "src": "block/barrel_side"
+  },
+  {
+   "dest": "textures/loom_top",
+   "src": "block/loom_top"
+  },
+  {
+   "dest": "textures/loom_bottom",
+   "src": "block/loom_bottom"
+  },
+  {
+   "dest": "textures/loom_side",
+   "src": "block/loom_side"
+  },
+  {
+   "dest": "textures/loom_front",
+   "src": "block/loom_front"
+  },
+  {
+   "dest": "textures/smoker_top",
+   "src": "block/smoker_top"
+  },
+  {
+   "dest": "textures/smoker_bottom",
+   "src": "block/smoker_bottom"
+  },
+  {
+   "dest": "textures/smoker_side",
+   "src": "block/smoker_side"
+  },
+  {
+   "dest": "textures/smoker_front",
+   "src": "block/smoker_front"
+  },
+  {
+   "dest": "textures/blast_furnace_top",
+   "src": "block/blast_furnace_top"
+  },
+  {
+   "dest": "textures/blast_furnace_side",
+   "src": "block/blast_furnace_side"
+  },
+  {
+   "dest": "textures/blast_furnace_front",
+   "src": "block/blast_furnace_front"
+  },
+  {
+   "dest": "textures/cartography_table_top",
+   "src": "block/cartography_table_top"
+  },
+  {
+   "dest": "textures/cartography_table_side3",
+   "src": "block/cartography_table_side3"
+  },
+  {
+   "dest": "textures/fletching_table_top",
+   "src": "block/fletching_table_top"
+  },
+  {
+   "dest": "textures/fletching_table_side",
+   "src": "block/fletching_table_side"
+  },
+  {
+   "dest": "textures/fletching_table_front",
+   "src": "block/fletching_table_front"
+  },
+  {
+   "dest": "textures/smithing_table_top",
+   "src": "block/smithing_table_top"
+  },
+  {
+   "dest": "textures/smithing_table_bottom",
+   "src": "block/smithing_table_bottom"
+  },
+  {
+   "dest": "textures/smithing_table_side",
+   "src": "block/smithing_table_side"
+  },
+  {
+   "dest": "textures/smithing_table_front",
+   "src": "block/smithing_table_front"
+  },
+  {
+   "dest": "textures/lectern_top",
+   "src": "block/lectern_top"
+  },
+  {
+   "dest": "textures/lectern_sides",
+   "src": "block/lectern_sides"
+  },
+  {
+   "dest": "textures/lectern_front",
+   "src": "block/lectern_front"
+  },
+  {
+   "dest": "textures/stonecutter_top",
+   "src": "block/stonecutter_top"
+  },
+  {
+   "dest": "textures/stonecutter_bottom",
+   "src": "block/stonecutter_bottom"
+  },
+  {
+   "dest": "textures/stonecutter_side",
+   "src": "block/stonecutter_side",
+   "underlay": "block/smooth_stone"
+  },
+  {
+   "dest": "textures/grindstone_round",
+   "src": "block/grindstone_round",
+   "underlay": "block/smooth_stone"
+  },
+  {
+   "dest": "textures/grindstone_side",
+   "src": "block/grindstone_side",
+   "underlay": "block/smooth_stone"
+  },
+  {
+   "dest": "textures/cauldron_top",
+   "src": "block/cauldron_top",
+   "underlay": "block/cauldron_inner"
+  },
+  {
+   "dest": "textures/cauldron_bottom",
+   "src": "block/cauldron_bottom",
+   "underlay": "block/cauldron_inner"
+  },
+  {
+   "dest": "textures/cauldron_side",
+   "src": "block/cauldron_side"
+  },
+  {
+   "dest": "textures/brewing_stand",
+   "src": "block/brewing_stand"
+  },
+  {
+   "dest": "textures/white_terracotta",
+   "src": "block/white_terracotta"
+  },
+  {
+   "dest": "textures/magenta_terracotta",
+   "src": "block/magenta_terracotta"
+  },
+  {
+   "dest": "textures/light_blue_terracotta",
+   "src": "block/light_blue_terracotta"
+  },
+  {
+   "dest": "textures/yellow_terracotta",
+   "src": "block/yellow_terracotta"
+  },
+  {
+   "dest": "textures/lime_terracotta",
+   "src": "block/lime_terracotta"
+  },
+  {
+   "dest": "textures/pink_terracotta",
+   "src": "block/pink_terracotta"
+  },
+  {
+   "dest": "textures/gray_terracotta",
+   "src": "block/gray_terracotta"
+  },
+  {
+   "dest": "textures/light_gray_terracotta",
+   "src": "block/light_gray_terracotta"
+  },
+  {
+   "dest": "textures/cyan_terracotta",
+   "src": "block/cyan_terracotta"
+  },
+  {
+   "dest": "textures/purple_terracotta",
+   "src": "block/purple_terracotta"
+  },
+  {
+   "dest": "textures/brown_terracotta",
+   "src": "block/brown_terracotta"
+  },
+  {
+   "dest": "textures/green_terracotta",
+   "src": "block/green_terracotta"
+  },
+  {
+   "dest": "textures/red_terracotta",
+   "src": "block/red_terracotta"
+  },
+  {
+   "dest": "textures/black_terracotta",
+   "src": "block/black_terracotta"
+  },
+  {
+   "dest": "textures/white_glazed_terracotta",
+   "src": "block/white_glazed_terracotta"
+  },
+  {
+   "dest": "textures/orange_glazed_terracotta",
+   "src": "block/orange_glazed_terracotta"
+  },
+  {
+   "dest": "textures/magenta_glazed_terracotta",
+   "src": "block/magenta_glazed_terracotta"
+  },
+  {
+   "dest": "textures/light_blue_glazed_terracotta",
+   "src": "block/light_blue_glazed_terracotta"
+  },
+  {
+   "dest": "textures/yellow_glazed_terracotta",
+   "src": "block/yellow_glazed_terracotta"
+  },
+  {
+   "dest": "textures/lime_glazed_terracotta",
+   "src": "block/lime_glazed_terracotta"
+  },
+  {
+   "dest": "textures/pink_glazed_terracotta",
+   "src": "block/pink_glazed_terracotta"
+  },
+  {
+   "dest": "textures/gray_glazed_terracotta",
+   "src": "block/gray_glazed_terracotta"
+  },
+  {
+   "dest": "textures/light_gray_glazed_terracotta",
+   "src": "block/light_gray_glazed_terracotta"
+  },
+  {
+   "dest": "textures/cyan_glazed_terracotta",
+   "src": "block/cyan_glazed_terracotta"
+  },
+  {
+   "dest": "textures/purple_glazed_terracotta",
+   "src": "block/purple_glazed_terracotta"
+  },
+  {
+   "dest": "textures/blue_glazed_terracotta",
+   "src": "block/blue_glazed_terracotta"
+  },
+  {
+   "dest": "textures/brown_glazed_terracotta",
+   "src": "block/brown_glazed_terracotta"
+  },
+  {
+   "dest": "textures/green_glazed_terracotta",
+   "src": "block/green_glazed_terracotta"
+  },
+  {
+   "dest": "textures/red_glazed_terracotta",
+   "src": "block/red_glazed_terracotta"
+  },
+  {
+   "dest": "textures/black_glazed_terracotta",
+   "src": "block/black_glazed_terracotta"
+  },
+  {
+   "dest": "entities/mobs/villager_plains_none",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_none",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_nitwit",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_nitwit",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_farmer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/farmer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_farmer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/farmer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_fisherman",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/fisherman",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_fisherman",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/fisherman",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_shepherd",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/shepherd",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_shepherd",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/shepherd",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_fletcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/fletcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_fletcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/fletcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_librarian",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/librarian",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_librarian",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/librarian",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_cartographer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/cartographer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_cartographer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/cartographer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_cleric",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/cleric",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_cleric",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/cleric",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_armorer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/armorer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_armorer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/armorer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_weaponsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/weaponsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_weaponsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/weaponsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_toolsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/toolsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_toolsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/toolsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_butcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/butcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_butcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/butcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_leatherworker",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/leatherworker",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_leatherworker",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/leatherworker",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_plains_mason",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/plains",
+    "entity/villager/profession/mason",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_plains_mason",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/plains",
+    "entity/zombie_villager/profession/mason",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_none",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_none",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_nitwit",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_nitwit",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_farmer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/farmer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_farmer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/farmer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_fisherman",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/fisherman",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_fisherman",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/fisherman",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_shepherd",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/shepherd",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_shepherd",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/shepherd",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_fletcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/fletcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_fletcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/fletcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_librarian",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/librarian",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_librarian",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/librarian",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_cartographer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/cartographer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_cartographer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/cartographer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_cleric",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/cleric",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_cleric",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/cleric",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_armorer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/armorer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_armorer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/armorer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_weaponsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/weaponsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_weaponsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/weaponsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_toolsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/toolsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_toolsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/toolsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_butcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/butcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_butcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/butcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_leatherworker",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/leatherworker",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_leatherworker",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/leatherworker",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_desert_mason",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/desert",
+    "entity/villager/profession/mason",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_desert_mason",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/desert",
+    "entity/zombie_villager/profession/mason",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_none",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_none",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_nitwit",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_nitwit",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_farmer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/farmer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_farmer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/farmer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_fisherman",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/fisherman",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_fisherman",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/fisherman",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_shepherd",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/shepherd",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_shepherd",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/shepherd",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_fletcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/fletcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_fletcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/fletcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_librarian",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/librarian",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_librarian",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/librarian",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_cartographer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/cartographer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_cartographer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/cartographer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_cleric",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/cleric",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_cleric",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/cleric",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_armorer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/armorer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_armorer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/armorer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_weaponsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/weaponsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_weaponsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/weaponsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_toolsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/toolsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_toolsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/toolsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_butcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/butcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_butcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/butcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_leatherworker",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/leatherworker",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_leatherworker",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/leatherworker",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_savanna_mason",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/savanna",
+    "entity/villager/profession/mason",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_savanna_mason",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/savanna",
+    "entity/zombie_villager/profession/mason",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_none",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_none",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_nitwit",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_nitwit",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_farmer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/farmer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_farmer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/farmer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_fisherman",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/fisherman",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_fisherman",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/fisherman",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_shepherd",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/shepherd",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_shepherd",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/shepherd",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_fletcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/fletcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_fletcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/fletcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_librarian",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/librarian",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_librarian",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/librarian",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_cartographer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/cartographer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_cartographer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/cartographer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_cleric",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/cleric",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_cleric",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/cleric",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_armorer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/armorer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_armorer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/armorer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_weaponsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/weaponsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_weaponsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/weaponsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_toolsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/toolsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_toolsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/toolsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_butcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/butcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_butcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/butcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_leatherworker",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/leatherworker",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_leatherworker",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/leatherworker",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_snow_mason",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/snow",
+    "entity/villager/profession/mason",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_snow_mason",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/snow",
+    "entity/zombie_villager/profession/mason",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_none",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_none",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_nitwit",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_nitwit",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/nitwit"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_farmer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/farmer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_farmer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/farmer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_fisherman",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/fisherman",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_fisherman",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/fisherman",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_shepherd",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/shepherd",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_shepherd",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/shepherd",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_fletcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/fletcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_fletcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/fletcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_librarian",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/librarian",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_librarian",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/librarian",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_cartographer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/cartographer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_cartographer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/cartographer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_cleric",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/cleric",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_cleric",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/cleric",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_armorer",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/armorer",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_armorer",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/armorer",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_weaponsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/weaponsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_weaponsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/weaponsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_toolsmith",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/toolsmith",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_toolsmith",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/toolsmith",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_butcher",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/butcher",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_butcher",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/butcher",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_leatherworker",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/leatherworker",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_leatherworker",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/leatherworker",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/villager_taiga_mason",
+   "src": "entity/villager/villager",
+   "overlay": [
+    "entity/villager/type/taiga",
+    "entity/villager/profession/mason",
+    "entity/villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/zombie_villager_taiga_mason",
+   "src": "entity/zombie_villager/zombie_villager",
+   "overlay": [
+    "entity/zombie_villager/type/taiga",
+    "entity/zombie_villager/profession/mason",
+    "entity/zombie_villager/profession_level/stone"
+   ]
+  },
+  {
+   "dest": "entities/mobs/iron_golem",
+   "src": "entity/iron_golem/iron_golem"
+  },
+  {
+   "dest": "entities/mobs/wandering_trader",
+   "src": "entity/wandering_trader/wandering_trader"
+  },
+  {
+   "dest": "entities/mobs/cat_tabby",
+   "src": "entity/cat/cat_tabby"
+  },
+  {
+   "dest": "entities/mobs/cat_black",
+   "src": "entity/cat/cat_black"
+  },
+  {
+   "dest": "entities/mobs/cat_red",
+   "src": "entity/cat/cat_red"
+  },
+  {
+   "dest": "entities/mobs/cat_siamese",
+   "src": "entity/cat/cat_siamese"
+  },
+  {
+   "dest": "entities/mobs/cat_british_shorthair",
+   "src": "entity/cat/cat_british_shorthair"
+  },
+  {
+   "dest": "entities/mobs/cat_calico",
+   "src": "entity/cat/cat_calico"
+  },
+  {
+   "dest": "entities/mobs/cat_persian",
+   "src": "entity/cat/cat_persian"
+  },
+  {
+   "dest": "entities/mobs/cat_ragdoll",
+   "src": "entity/cat/cat_ragdoll"
+  },
+  {
+   "dest": "entities/mobs/cat_white",
+   "src": "entity/cat/cat_white"
+  },
+  {
+   "dest": "entities/mobs/cat_jellie",
+   "src": "entity/cat/cat_jellie"
+  },
+  {
+   "dest": "entities/mobs/cat_all_black",
+   "src": "entity/cat/cat_all_black"
+  },
+  {
+   "dest": "entities/mobs/cat_collar",
+   "src": "entity/cat/cat_collar"
+  },
+  {
+   "dest": "entities/mobs/camel",
+   "src": "entity/camel/camel"
+  },
+  {
+   "dest": "entities/mobs/camel_saddle",
+   "src": "entity/equipment/camel_saddle/saddle"
+  },
+  {
+   "dest": "entities/mobs/trader_llama",
+   "src": "entity/equipment/llama_body/trader_llama"
+  },
+  {
+   "dest": "entities/mobs/pillager",
+   "src": "entity/illager/pillager"
+  },
+  {
+   "dest": "entities/mobs/allay",
+   "src": "entity/allay/allay"
+  },
+  {
+   "dest": "entities/mobs/ominous_banner",
+   "src": "entity/banner/base",
+   "overlay": [
+    {
+     "src": "entity/banner/rhombus",
+     "tint": "#169C9C"
+    },
+    {
+     "src": "entity/banner/stripe_bottom",
+     "tint": "#9D9D97"
+    },
+    {
+     "src": "entity/banner/stripe_center",
+     "tint": "#474F52"
+    },
+    {
+     "src": "entity/banner/border",
+     "tint": "#9D9D97"
+    },
+    {
+     "src": "entity/banner/stripe_middle",
+     "tint": "#1D1D21"
+    },
+    {
+     "src": "entity/banner/half_horizontal",
+     "tint": "#9D9D97"
+    },
+    {
+     "src": "entity/banner/circle",
+     "tint": "#9D9D97"
+    },
+    {
+     "src": "entity/banner/border",
+     "tint": "#1D1D21"
+    }
+   ]
+  },
+  {
+   "dest": "icons/crossbow",
+   "src": "item/crossbow_standby"
+  },
+  {
+   "dest": "icons/crossbow_loaded",
+   "src": "item/crossbow_arrow"
+  },
+  {
+   "dest": "icons/crossbow_pulling_0",
+   "src": "item/crossbow_pulling_0"
+  },
+  {
+   "dest": "icons/crossbow_pulling_1",
+   "src": "item/crossbow_pulling_1"
+  },
+  {
+   "dest": "icons/crossbow_pulling_2",
+   "src": "item/crossbow_pulling_2"
+  },
+  {
+   "dest": "textures/sugar_cane",
+   "src": "block/sugar_cane",
+   "tint": "#91BD59"
+  },
+  {
+   "dest": "textures/ore_lapis",
+   "src": "block/lapis_ore"
+  },
+  {
+   "dest": "textures/ore_lapis_deep",
+   "src": "block/deepslate_lapis_ore"
+  },
+  {
+   "dest": "textures/lapis_block",
+   "src": "block/lapis_block"
+  },
+  {
+   "dest": "textures/enchanting_table_top",
+   "src": "block/enchanting_table_top"
+  },
+  {
+   "dest": "textures/enchanting_table_side",
+   "src": "block/enchanting_table_side"
+  },
+  {
+   "dest": "textures/enchanting_table_bottom",
+   "src": "block/enchanting_table_bottom"
+  },
+  {
+   "dest": "icons/paper",
+   "src": "item/paper"
+  },
+  {
+   "dest": "icons/book",
+   "src": "item/book"
+  },
+  {
+   "dest": "icons/lapis_lazuli",
+   "src": "item/lapis_lazuli"
+  },
+  {
+   "dest": "icons/sugar_cane",
+   "src": "item/sugar_cane"
+  },
+  {
+   "dest": "icons/enchanted_book",
+   "src": "item/enchanted_book"
+  },
+  {
+   "dest": "icons/xp_orb",
+   "src": "entity/experience/experience_orb",
+   "crop": [
+    0,
+    0,
+    16,
+    16
+   ],
+   "tint": "#B6FF4A"
+  },
+  {
+   "dest": "ui/xp_bar_bg",
+   "src": "gui/sprites/hud/experience_bar_background"
+  },
+  {
+   "dest": "ui/xp_bar_fill",
+   "src": "gui/sprites/hud/experience_bar_progress"
+  },
+  {
+   "dest": "textures/anvil",
+   "src": "block/anvil"
+  },
+  {
+   "dest": "textures/anvil_top",
+   "src": "block/anvil_top"
+  },
+  {
+   "dest": "textures/chipped_anvil_top",
+   "src": "block/chipped_anvil_top"
+  },
+  {
+   "dest": "textures/damaged_anvil_top",
+   "src": "block/damaged_anvil_top"
+  },
+  {
+   "dest": "ui/heart_absorb",
+   "src": "gui/sprites/hud/heart/absorbing_full"
+  },
+  {
+   "dest": "ui/effect_absorption",
+   "src": "mob_effect/absorption"
+  },
+  {
+   "dest": "ui/effect_regeneration",
+   "src": "mob_effect/regeneration"
+  },
+  {
+   "dest": "textures/dark_oak_log",
+   "src": "block/dark_oak_log"
+  },
+  {
+   "dest": "textures/dark_oak_log_top",
+   "src": "block/dark_oak_log_top"
+  },
+  {
+   "dest": "textures/dark_oak_leaves",
+   "src": "block/dark_oak_leaves",
+   "tint": "#59AE30"
+  },
+  {
+   "dest": "textures/dark_oak_planks",
+   "src": "block/dark_oak_planks"
+  },
+  {
+   "dest": "textures/dark_oak_sapling",
+   "src": "block/dark_oak_sapling"
+  },
+  {
+   "dest": "textures/dark_oak_door_upper",
+   "src": "block/dark_oak_door_top"
+  },
+  {
+   "dest": "textures/dark_oak_door_lower",
+   "src": "block/dark_oak_door_bottom"
+  },
+  {
+   "dest": "icons/dark_oak_door",
+   "src": "item/dark_oak_door"
+  },
+  {
+   "dest": "icons/dark_oak_fence",
+   "src": "block/dark_oak_planks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
+  },
+  {
+   "dest": "entities/mobs/vindicator",
+   "src": "entity/illager/vindicator"
+  },
+  {
+   "dest": "entities/mobs/evoker",
+   "src": "entity/illager/evoker"
+  },
+  {
+   "dest": "entities/mobs/vex",
+   "src": "entity/illager/vex"
+  },
+  {
+   "dest": "entities/mobs/vex_charging",
+   "src": "entity/illager/vex_charging"
+  },
+  {
+   "dest": "entities/mobs/evoker_fangs",
+   "src": "entity/illager/evoker_fangs"
+  },
+  {
+   "dest": "icons/totem_of_undying",
+   "src": "item/totem_of_undying"
+  },
+  {
+   "dest": "ui/effect_fire_resistance",
+   "src": "mob_effect/fire_resistance"
+  },
+  {
+   "dest": "particles/spell_0",
+   "src": "particle/spell_0"
+  },
+  {
+   "dest": "particles/spell_1",
+   "src": "particle/spell_1"
+  },
+  {
+   "dest": "particles/spell_2",
+   "src": "particle/spell_2"
+  },
+  {
+   "dest": "particles/spell_3",
+   "src": "particle/spell_3"
+  },
+  {
+   "dest": "particles/spell_4",
+   "src": "particle/spell_4"
+  },
+  {
+   "dest": "particles/spell_5",
+   "src": "particle/spell_5"
+  },
+  {
+   "dest": "particles/spell_6",
+   "src": "particle/spell_6"
+  },
+  {
+   "dest": "particles/spell_7",
+   "src": "particle/spell_7"
+  },
+  {
+   "dest": "textures/soul_sand",
+   "src": "block/soul_sand"
+  },
+  {
+   "dest": "textures/glowstone",
+   "src": "block/glowstone"
+  },
+  {
+   "dest": "textures/nether_quartz_ore",
+   "src": "block/nether_quartz_ore"
+  },
+  {
+   "dest": "textures/nether_gold_ore",
+   "src": "block/nether_gold_ore"
+  },
+  {
+   "dest": "textures/quartz_block_top",
+   "src": "block/quartz_block_top"
+  },
+  {
+   "dest": "textures/quartz_block_bottom",
+   "src": "block/quartz_block_bottom"
+  },
+  {
+   "dest": "textures/quartz_block_side",
+   "src": "block/quartz_block_side"
+  },
+  {
+   "dest": "textures/nether_portal",
+   "src": "block/nether_portal"
+  },
+  {
+   "dest": "icons/glowstone_dust",
+   "src": "item/glowstone_dust"
+  },
+  {
+   "dest": "icons/quartz",
+   "src": "item/quartz"
+  },
+  {
+   "dest": "icons/gold_nugget",
+   "src": "item/gold_nugget"
+  },
+  {
+   "dest": "textures/soul_soil",
+   "src": "block/soul_soil"
+  },
+  {
+   "dest": "textures/basalt_top",
+   "src": "block/basalt_top"
+  },
+  {
+   "dest": "textures/basalt_side",
+   "src": "block/basalt_side"
+  },
+  {
+   "dest": "textures/polished_basalt_top",
+   "src": "block/polished_basalt_top"
+  },
+  {
+   "dest": "textures/polished_basalt_side",
+   "src": "block/polished_basalt_side"
+  },
+  {
+   "dest": "textures/smooth_basalt",
+   "src": "block/smooth_basalt"
+  },
+  {
+   "dest": "textures/blackstone",
+   "src": "block/blackstone"
+  },
+  {
+   "dest": "textures/blackstone_top",
+   "src": "block/blackstone_top"
+  },
+  {
+   "dest": "textures/polished_blackstone",
+   "src": "block/polished_blackstone"
+  },
+  {
+   "dest": "textures/polished_blackstone_bricks",
+   "src": "block/polished_blackstone_bricks"
+  },
+  {
+   "dest": "textures/crimson_nylium",
+   "src": "block/crimson_nylium"
+  },
+  {
+   "dest": "textures/crimson_nylium_side",
+   "src": "block/crimson_nylium_side"
+  },
+  {
+   "dest": "textures/warped_nylium",
+   "src": "block/warped_nylium"
+  },
+  {
+   "dest": "textures/warped_nylium_side",
+   "src": "block/warped_nylium_side"
+  },
+  {
+   "dest": "textures/crimson_stem",
+   "src": "block/crimson_stem"
+  },
+  {
+   "dest": "textures/crimson_stem_top",
+   "src": "block/crimson_stem_top"
+  },
+  {
+   "dest": "textures/warped_stem",
+   "src": "block/warped_stem"
+  },
+  {
+   "dest": "textures/warped_stem_top",
+   "src": "block/warped_stem_top"
+  },
+  {
+   "dest": "textures/crimson_planks",
+   "src": "block/crimson_planks"
+  },
+  {
+   "dest": "textures/warped_planks",
+   "src": "block/warped_planks"
+  },
+  {
+   "dest": "textures/nether_wart_block",
+   "src": "block/nether_wart_block"
+  },
+  {
+   "dest": "textures/warped_wart_block",
+   "src": "block/warped_wart_block"
+  },
+  {
+   "dest": "textures/shroomlight",
+   "src": "block/shroomlight"
+  },
+  {
+   "dest": "textures/crimson_fungus",
+   "src": "block/crimson_fungus"
+  },
+  {
+   "dest": "textures/warped_fungus",
+   "src": "block/warped_fungus"
+  },
+  {
+   "dest": "textures/crimson_roots",
+   "src": "block/crimson_roots"
+  },
+  {
+   "dest": "textures/warped_roots",
+   "src": "block/warped_roots"
+  },
+  {
+   "dest": "textures/nether_sprouts",
+   "src": "block/nether_sprouts"
+  },
+  {
+   "dest": "textures/weeping_vines",
+   "src": "block/weeping_vines"
+  },
+  {
+   "dest": "textures/weeping_vines_plant",
+   "src": "block/weeping_vines_plant"
+  },
+  {
+   "dest": "textures/twisting_vines",
+   "src": "block/twisting_vines"
+  },
+  {
+   "dest": "textures/twisting_vines_plant",
+   "src": "block/twisting_vines_plant"
+  },
+  {
+   "dest": "textures/bone_block_top",
+   "src": "block/bone_block_top"
+  },
+  {
+   "dest": "textures/bone_block_side",
+   "src": "block/bone_block_side"
+  },
+  {
+   "dest": "textures/nether_wart_stage0",
+   "src": "block/nether_wart_stage0"
+  },
+  {
+   "dest": "textures/nether_wart_stage1",
+   "src": "block/nether_wart_stage1"
+  },
+  {
+   "dest": "textures/nether_wart_stage2",
+   "src": "block/nether_wart_stage2"
+  },
+  {
+   "dest": "textures/soul_torch",
+   "src": "block/soul_torch"
+  },
+  {
+   "dest": "textures/soul_fire",
+   "src": "block/soul_fire_0"
+  },
+  {
+   "dest": "textures/crimson_door_upper",
+   "src": "block/crimson_door_top"
+  },
+  {
+   "dest": "textures/crimson_door_lower",
+   "src": "block/crimson_door_bottom"
+  },
+  {
+   "dest": "icons/crimson_door",
+   "src": "item/crimson_door"
+  },
+  {
+   "dest": "icons/crimson_fence",
+   "src": "block/crimson_planks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
+  },
+  {
+   "dest": "textures/warped_door_upper",
+   "src": "block/warped_door_top"
+  },
+  {
+   "dest": "textures/warped_door_lower",
+   "src": "block/warped_door_bottom"
+  },
+  {
+   "dest": "icons/warped_door",
+   "src": "item/warped_door"
+  },
+  {
+   "dest": "icons/warped_fence",
+   "src": "block/warped_planks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
+  },
+  {
+   "dest": "icons/nether_wart",
+   "src": "item/nether_wart"
+  },
+  {
+   "dest": "icons/warped_fungus_on_a_stick",
+   "src": "item/warped_fungus_on_a_stick"
+  },
+  {
+   "dest": "icons/ghast_tear",
+   "src": "item/ghast_tear"
+  },
+  {
+   "dest": "icons/magma_cream",
+   "src": "item/magma_cream"
+  },
+  {
+   "dest": "entities/mobs/ghast",
+   "src": "entity/ghast/ghast"
+  },
+  {
+   "dest": "entities/mobs/ghast_shooting",
+   "src": "entity/ghast/ghast_shooting"
+  },
+  {
+   "dest": "entities/mobs/zombified_piglin",
+   "src": "entity/piglin/zombified_piglin"
+  },
+  {
+   "dest": "entities/mobs/magmacube",
+   "src": "entity/slime/magmacube"
+  },
+  {
+   "dest": "entities/mobs/strider",
+   "src": "entity/strider/strider"
+  },
+  {
+   "dest": "entities/mobs/strider_cold",
+   "src": "entity/strider/strider_cold"
+  },
+  {
+   "dest": "entities/mobs/strider_saddle",
+   "src": "entity/equipment/strider_saddle/saddle"
+  },
+  {
+   "dest": "entities/mobs/hoglin",
+   "src": "entity/hoglin/hoglin"
+  },
+  {
+   "dest": "icons/fire_charge",
+   "src": "item/fire_charge"
+  },
+  {
+   "dest": "textures/nether_bricks",
+   "src": "block/nether_bricks"
+  },
+  {
+   "dest": "textures/cracked_nether_bricks",
+   "src": "block/cracked_nether_bricks"
+  },
+  {
+   "dest": "textures/chiseled_nether_bricks",
+   "src": "block/chiseled_nether_bricks"
+  },
+  {
+   "dest": "textures/red_nether_bricks",
+   "src": "block/red_nether_bricks"
+  },
+  {
+   "dest": "textures/wither_skull_front",
+   "src": "entity/skeleton/wither_skeleton",
+   "regions": [
+    [
+     8,
+     8,
+     8,
+     8,
+     4,
+     8
+    ]
+   ],
+   "size": [
+    16,
+    16
+   ]
+  },
+  {
+   "dest": "textures/wither_skull_side",
+   "src": "entity/skeleton/wither_skeleton",
+   "regions": [
+    [
+     0,
+     8,
+     8,
+     8,
+     4,
+     8
+    ]
+   ],
+   "size": [
+    16,
+    16
+   ]
+  },
+  {
+   "dest": "textures/wither_skull_top",
+   "src": "entity/skeleton/wither_skeleton",
+   "regions": [
+    [
+     8,
+     0,
+     8,
+     8,
+     4,
+     4
+    ]
+   ],
+   "size": [
+    16,
+    16
+   ]
+  },
+  {
+   "dest": "textures/wither_skull_bottom",
+   "src": "entity/skeleton/wither_skeleton",
+   "regions": [
+    [
+     16,
+     0,
+     8,
+     8,
+     4,
+     4
+    ]
+   ],
+   "size": [
+    16,
+    16
+   ]
+  },
+  {
+   "dest": "icons/wither_skeleton_skull",
+   "src": "entity/skeleton/wither_skeleton",
+   "crop": [
+    8,
+    8,
+    8,
+    8
+   ]
+  },
+  {
+   "dest": "icons/nether_brick",
+   "src": "item/nether_brick"
+  },
+  {
+   "dest": "icons/blaze_rod",
+   "src": "item/blaze_rod"
+  },
+  {
+   "dest": "icons/blaze_powder",
+   "src": "item/blaze_powder"
+  },
+  {
+   "dest": "icons/snowball",
+   "src": "item/snowball"
+  },
+  {
+   "dest": "icons/iron_horse_armor",
+   "src": "item/iron_horse_armor"
+  },
+  {
+   "dest": "icons/golden_horse_armor",
+   "src": "item/golden_horse_armor"
+  },
+  {
+   "dest": "icons/diamond_horse_armor",
+   "src": "item/diamond_horse_armor"
+  },
+  {
+   "dest": "icons/nether_brick_fence",
+   "src": "block/nether_bricks",
+   "compose": {
+    "w": 16,
+    "h": 16,
+    "parts": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 0
+     },
+     {
+      "x": 12,
+      "y": 0,
+      "w": 4,
+      "h": 16,
+      "dx": 12
+     },
+     {
+      "x": 4,
+      "y": 2,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 3
+     },
+     {
+      "x": 4,
+      "y": 9,
+      "w": 8,
+      "h": 3,
+      "dx": 4,
+      "dy": 9
+     }
+    ]
+   }
+  },
+  {
+   "dest": "entities/mobs/blaze",
+   "src": "entity/blaze/blaze"
+  },
+  {
+   "dest": "entities/mobs/wither_skeleton",
+   "src": "entity/skeleton/wither_skeleton"
+  },
+  {
+   "dest": "entities/mobs/horse_armor_iron",
+   "src": "entity/equipment/horse_body/iron"
+  },
+  {
+   "dest": "entities/mobs/horse_armor_gold",
+   "src": "entity/equipment/horse_body/gold"
+  },
+  {
+   "dest": "entities/mobs/horse_armor_diamond",
+   "src": "entity/equipment/horse_body/diamond"
+  },
+  {
+   "dest": "ui/effect_wither",
+   "src": "mob_effect/wither"
+  },
+  {
+   "dest": "ui/heart_wither",
+   "src": "gui/sprites/hud/heart/withered_full"
+  },
+  {
+   "dest": "entities/mobs/piglin",
+   "src": "entity/piglin/piglin"
+  },
+  {
+   "dest": "entities/mobs/piglin_brute",
+   "src": "entity/piglin/piglin_brute"
+  },
+  {
+   "dest": "entities/mobs/zoglin",
+   "src": "entity/hoglin/zoglin"
+  },
+  {
+   "dest": "icons/glass_bottle",
+   "src": "item/glass_bottle"
+  },
+  {
+   "dest": "icons/spectral_arrow",
+   "src": "item/spectral_arrow"
+  },
+  {
+   "dest": "icons/water_bottle",
+   "src": "item/potion_overlay",
+   "tint": "#385DC6",
+   "overlay": "item/potion"
+  },
+  {
+   "dest": "icons/fire_resistance_potion",
+   "src": "item/potion_overlay",
+   "tint": "#FF9900",
+   "overlay": "item/potion"
+  },
+  {
+   "dest": "icons/fire_resistance_splash_potion",
+   "src": "item/potion_overlay",
+   "tint": "#FF9900",
+   "overlay": "item/splash_potion"
+  },
+  {
+   "dest": "ui/effect_glowing",
+   "src": "mob_effect/glowing"
+  },
+  {
+   "dest": "entities/armor/netherite_helmet",
+   "src": [
+    "entity/equipment/humanoid/netherite",
+    "models/armor/netherite_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     0,
+     32,
+     16,
+     32,
+     0
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/netherite_chestplate",
+   "src": [
+    "entity/equipment/humanoid/netherite",
+    "models/armor/netherite_layer_1"
+   ],
+   "regions": [
+    [
+     16,
+     16,
+     40,
+     16,
+     16,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/netherite_boots",
+   "src": [
+    "entity/equipment/humanoid/netherite",
+    "models/armor/netherite_layer_1"
+   ],
+   "regions": [
+    [
+     0,
+     16,
+     16,
+     16,
+     0,
+     16
+    ]
+   ]
+  },
+  {
+   "dest": "entities/armor/netherite_leggings",
+   "src": [
+    "entity/equipment/humanoid_leggings/netherite",
+    "models/armor/netherite_layer_2"
+   ]
+  },
+  {
+   "dest": "textures/cracked_polished_blackstone_bricks",
+   "src": "block/cracked_polished_blackstone_bricks"
+  },
+  {
+   "dest": "textures/chiseled_polished_blackstone",
+   "src": "block/chiseled_polished_blackstone"
+  },
+  {
+   "dest": "textures/gilded_blackstone",
+   "src": "block/gilded_blackstone"
+  },
+  {
+   "dest": "textures/ancient_debris_top",
+   "src": "block/ancient_debris_top"
+  },
+  {
+   "dest": "textures/ancient_debris_side",
+   "src": "block/ancient_debris_side"
+  },
+  {
+   "dest": "textures/netherite_block",
+   "src": "block/netherite_block"
+  },
+  {
+   "dest": "textures/lodestone_top",
+   "src": "block/lodestone_top"
+  },
+  {
+   "dest": "textures/lodestone_side",
+   "src": "block/lodestone_side"
+  },
+  {
+   "dest": "textures/respawn_anchor_top_off",
+   "src": "block/respawn_anchor_top_off"
+  },
+  {
+   "dest": "textures/respawn_anchor_top",
+   "src": "block/respawn_anchor_top"
+  },
+  {
+   "dest": "textures/respawn_anchor_bottom",
+   "src": "block/respawn_anchor_bottom"
+  },
+  {
+   "dest": "textures/respawn_anchor_side0",
+   "src": "block/respawn_anchor_side0"
+  },
+  {
+   "dest": "textures/respawn_anchor_side1",
+   "src": "block/respawn_anchor_side1"
+  },
+  {
+   "dest": "textures/respawn_anchor_side2",
+   "src": "block/respawn_anchor_side2"
+  },
+  {
+   "dest": "textures/respawn_anchor_side3",
+   "src": "block/respawn_anchor_side3"
+  },
+  {
+   "dest": "textures/respawn_anchor_side4",
+   "src": "block/respawn_anchor_side4"
+  },
+  {
+   "dest": "textures/iron_chain",
+   "src": [
+    "block/iron_chain",
+    "block/chain"
+   ]
+  },
+  {
+   "dest": "icons/netherite_scrap",
+   "src": "item/netherite_scrap"
+  },
+  {
+   "dest": "icons/netherite_ingot",
+   "src": "item/netherite_ingot"
+  },
+  {
+   "dest": "icons/netherite_upgrade_smithing_template",
+   "src": "item/netherite_upgrade_smithing_template"
+  },
+  {
+   "dest": "icons/chain",
+   "src": [
+    "item/iron_chain",
+    "item/chain"
+   ]
+  },
+  {
+   "dest": "icons/compass_00",
+   "src": "item/compass_00"
+  },
+  {
+   "dest": "icons/compass_01",
+   "src": "item/compass_01"
+  },
+  {
+   "dest": "icons/compass_02",
+   "src": "item/compass_02"
+  },
+  {
+   "dest": "icons/compass_03",
+   "src": "item/compass_03"
+  },
+  {
+   "dest": "icons/compass_04",
+   "src": "item/compass_04"
+  },
+  {
+   "dest": "icons/compass_05",
+   "src": "item/compass_05"
+  },
+  {
+   "dest": "icons/compass_06",
+   "src": "item/compass_06"
+  },
+  {
+   "dest": "icons/compass_07",
+   "src": "item/compass_07"
+  },
+  {
+   "dest": "icons/compass_08",
+   "src": "item/compass_08"
+  },
+  {
+   "dest": "icons/compass_09",
+   "src": "item/compass_09"
+  },
+  {
+   "dest": "icons/compass_10",
+   "src": "item/compass_10"
+  },
+  {
+   "dest": "icons/compass_11",
+   "src": "item/compass_11"
+  },
+  {
+   "dest": "icons/compass_12",
+   "src": "item/compass_12"
+  },
+  {
+   "dest": "icons/compass_13",
+   "src": "item/compass_13"
+  },
+  {
+   "dest": "icons/compass_14",
+   "src": "item/compass_14"
+  },
+  {
+   "dest": "icons/compass_15",
+   "src": "item/compass_15"
+  },
+  {
+   "dest": "icons/compass_16",
+   "src": "item/compass_16"
+  },
+  {
+   "dest": "icons/compass_17",
+   "src": "item/compass_17"
+  },
+  {
+   "dest": "icons/compass_18",
+   "src": "item/compass_18"
+  },
+  {
+   "dest": "icons/compass_19",
+   "src": "item/compass_19"
+  },
+  {
+   "dest": "icons/compass_20",
+   "src": "item/compass_20"
+  },
+  {
+   "dest": "icons/compass_21",
+   "src": "item/compass_21"
+  },
+  {
+   "dest": "icons/compass_22",
+   "src": "item/compass_22"
+  },
+  {
+   "dest": "icons/compass_23",
+   "src": "item/compass_23"
+  },
+  {
+   "dest": "icons/compass_24",
+   "src": "item/compass_24"
+  },
+  {
+   "dest": "icons/compass_25",
+   "src": "item/compass_25"
+  },
+  {
+   "dest": "icons/compass_26",
+   "src": "item/compass_26"
+  },
+  {
+   "dest": "icons/compass_27",
+   "src": "item/compass_27"
+  },
+  {
+   "dest": "icons/compass_28",
+   "src": "item/compass_28"
+  },
+  {
+   "dest": "icons/compass_29",
+   "src": "item/compass_29"
+  },
+  {
+   "dest": "icons/compass_30",
+   "src": "item/compass_30"
+  },
+  {
+   "dest": "icons/compass_31",
+   "src": "item/compass_31"
   }
  ]
 }

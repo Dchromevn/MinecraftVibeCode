@@ -2,16 +2,23 @@
 // trỏ. Thuần túy để server (Giai đoạn 5) dùng lại. Tổng số vật phẩm không đổi qua mọi
 // thao tác bấm (không nhân đôi, không mất).
 import { INVENTORY } from "./survivalConstants.js";
-import { ARMOR_PIECES, itemDef, maxDurability } from "./items.js";
+import { ARMOR_PIECES, SHIELD_KEY, itemDef, maxDurability } from "./items.js";
+
+/** (8b2) Không phá vỡ cấp L: mỗi điểm mòn chỉ tính với xác suất 1/(L+1) (giáp: 60% + 40%/(L+1)). */
+const unbreakingWear = (amount: number, l: number, armor: boolean): number =>
+  l <= 0 ? amount : Array.from({ length: amount }).filter(() => Math.random() < (armor ? 0.6 + 0.4 / (l + 1) : 1 / (l + 1))).length;
 
 export interface ItemStack {
   item: string;
   count: number;
   damage: number; // độ bền đã dùng
+  ench?: Record<string, number>; // (8b2) phù phép: khóa → cấp
+  name?: string; work?: number; // (8b3) tên đặt ở đe, số lần đã qua đe
+  lode?: [number, number, number, number]; // (10d2) la bàn đá nam châm: x, y, z, cõi của đá nam châm
 }
 
 export type Slot = ItemStack | null;
-export type SlotArea = "main" | "armor" | "craft" | "ext";
+export type SlotArea = "main" | "armor" | "craft" | "ext" | "offhand";
 
 /** Luật của ô chứa ngoài (rương, lò nung) đang mở. */
 export interface ExtRules {
@@ -25,11 +32,12 @@ export const stack = (item: string, count = 1, damage = 0): ItemStack => ({ item
 const maxOf = (item: string): number => itemDef(item)?.maxStack ?? INVENTORY.MAX_STACK;
 /** Hai chồng gộp được (cùng loại, chưa dùng, không phải đồ đơn chiếc). */
 export const canMerge = (a: ItemStack, b: ItemStack): boolean =>
-  a.item === b.item && a.damage === 0 && b.damage === 0 && maxOf(a.item) > 1;
+  a.item === b.item && a.damage === 0 && b.damage === 0 && maxOf(a.item) > 1 && a.name === b.name && !a.ench && !b.ench;
 
 export class Inventory {
   readonly main: Slot[] = new Array<Slot>(INVENTORY.MAIN).fill(null);
   readonly armor: Slot[] = new Array<Slot>(INVENTORY.ARMOR).fill(null); // mũ, áo, quần, giày
+  readonly offhand: Slot[] = [null]; // tay trái (6a: khiên)
   cursor: Slot = null;
   selected = 0; // ô hotbar đang cầm
   /** Lưới chế tạo đang mở (2x2 túi đồ hoặc 3x3 bàn chế tạo), theo hàng. */
@@ -45,7 +53,12 @@ export class Inventory {
 
   /** Mảng ô của một vùng. */
   slots(a: SlotArea): Slot[] {
-    return a === "main" ? this.main : a === "armor" ? this.armor : a === "craft" ? this.craft : this.ext;
+    return a === "main" ? this.main : a === "armor" ? this.armor : a === "craft" ? this.craft : a === "offhand" ? this.offhand : this.ext;
+  }
+
+  /** F: đổi đồ tay phải (ô hotbar đang chọn) với tay trái. */
+  swapHands(): void {
+    [this.main[this.selected], this.offhand[0]] = [this.offhand[0]!, this.main[this.selected]!];
   }
 
   /** Đổi cỡ lưới chế tạo; đồ trong lưới cũ trả về túi. Trả về phần không vừa (vứt ra). */
@@ -83,7 +96,7 @@ export class Inventory {
     for (let i = 0; i < this.main.length && left > 0; i++) {
       if (this.main[i]) continue;
       const n = Math.min(left, max);
-      this.main[i] = { item: s.item, count: n, damage: s.damage };
+      this.main[i] = { ...s, count: n };
       left -= n;
     }
     return left > 0 ? { ...s, count: left } : null;
@@ -123,7 +136,7 @@ export class Inventory {
     const t = slots[i];
     const max = t ? maxDurability(t.item) : 0;
     if (!t || max === 0) return false;
-    t.damage += amount;
+    t.damage += unbreakingWear(amount, t.ench?.unbreaking ?? 0, area === "armor"); // (8b2) Không phá vỡ
     if (t.damage < max) return false;
     slots[i] = null;
     return true;
@@ -222,8 +235,9 @@ export class Inventory {
     }
     if (area === "main") {
       const piece = ARMOR_PIECES.indexOf(itemDef(s.item)?.armor?.piece ?? ("" as never));
-      if (piece >= 0 && !this.armor[piece]) {
-        this.armor[piece] = s;
+      const to = piece >= 0 && !this.armor[piece] ? this.armor : s.item === SHIELD_KEY && !this.offhand[0] ? this.offhand : null;
+      if (to) {
+        to[to === this.armor ? piece : 0] = s; // giáp → ô giáp, khiên → tay trái
         slots[i] = null;
         return;
       }
@@ -260,7 +274,7 @@ export class Inventory {
   /** Lấy hết đồ ra (khi chết). */
   takeAll(): ItemStack[] {
     const out: ItemStack[] = [];
-    for (const slots of [this.main, this.armor, this.craft])
+    for (const slots of [this.main, this.armor, this.craft, this.offhand])
       for (let i = 0; i < slots.length; i++) {
         if (slots[i]) out.push(slots[i]!);
         slots[i] = null;

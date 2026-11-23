@@ -88,6 +88,34 @@ function acacia(x: number, base: number, z: number, trunk: number, rng: Rng, p: 
   disc(bx, by + 2, bz, 1, p.leaves);
 }
 
+/**
+ * (8c) Sồi tối: thân 2 × 2 (gốc ở góc nhỏ nhất (x, z)), nửa trên có thể lệch 1 block về một hướng; tán rộng dẹt quanh ngọn
+ * (bán kính 3 ở hai tầng dưới, 2 ở tầng trên) và một tầng lá thưa rủ thấp hơn.
+ */
+function darkOak(x: number, base: number, z: number, trunk: number, rng: Rng, p: TreePlan): void {
+  const DIRS: readonly [number, number][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const [dx, dz] = DIRS[Math.floor(rng() * 4)]!;
+  const bendAt = rng() < 0.5 ? trunk - 1 - Math.floor(rng() * 2) : trunk; // lệch ở 1–2 khúc trên cùng (50%)
+  let ox = x, oz = z;
+  for (let i = 0; i < trunk; i++) {
+    if (i === bendAt) [ox, oz] = [ox + dx, oz + dz];
+    for (const [a, b] of [[0, 0], [1, 0], [0, 1], [1, 1]] as const) p.logs.push([ox + a, base + i, oz + b]);
+  }
+  const top = base + trunk - 1, cx = ox + 0.5, cz = oz + 0.5, R = TREE_SPECIES.DARK_OAK_CANOPY_RADIUS;
+  const layer = (y: number, r: number, sparse: number): void => {
+    for (let px = Math.floor(cx - r); px <= Math.ceil(cx + r); px++)
+      for (let pz = Math.floor(cz - r); pz <= Math.ceil(cz + r); pz++) {
+        const d2 = (px - cx) ** 2 + (pz - cz) ** 2;
+        if (d2 > (r + 0.3) ** 2 || (d2 > (r - 0.8) ** 2 && rng() < sparse)) continue;
+        p.leaves.push([px, y, pz]);
+      }
+  };
+  layer(top - 2, R - 1, 0.6);
+  layer(top - 1, R, 0.35);
+  layer(top, R, 0.25);
+  layer(top + 1, R - 1, 0.3);
+}
+
 /** Kế hoạch một cây; trunk = số khúc gỗ của thân chính. */
 export function planTree(kind: WoodKind, x: number, base: number, z: number, trunk: number, rng: Rng): TreePlan {
   const p: TreePlan = { logs: [], leaves: [] };
@@ -97,6 +125,9 @@ export function planTree(kind: WoodKind, x: number, base: number, z: number, tru
       break;
     case "acacia":
       acacia(x, base, z, trunk, rng, p);
+      break;
+    case "dark_oak": // 8c
+      darkOak(x, base, z, trunk, rng, p);
       break;
     default: // sồi, bạch dương
       treeCanopy(x, z, base + trunk - 1, rng, (a, b, c) => void p.leaves.push([a, b, c]));

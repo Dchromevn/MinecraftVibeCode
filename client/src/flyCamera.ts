@@ -21,6 +21,8 @@ export class FlyCamera {
   yaw = 0;
   pitch = 0;
   readonly keys = new Set<string>();
+  /** Bay nhanh (nhấn đúp W, PlayerController đặt). */
+  fast = false;
   private readonly dir = new THREE.Vector3();
 
   constructor(
@@ -65,7 +67,7 @@ export class FlyCamera {
     const k = this.keys;
     const forward = (k.has("KeyW") ? 1 : 0) - (k.has("KeyS") ? 1 : 0);
     const strafe = (k.has("KeyD") ? 1 : 0) - (k.has("KeyA") ? 1 : 0);
-    const up = (k.has("Space") ? 1 : 0) - (k.has("KeyC") ? 1 : 0);
+    const up = (k.has("Space") ? 1 : 0) - (k.has("ShiftLeft") || k.has("ShiftRight") ? 1 : 0); // như Minecraft: Shift hạ xuống
 
     const sin = Math.sin(this.yaw);
     const cos = Math.cos(this.yaw);
@@ -73,7 +75,7 @@ export class FlyCamera {
     this.dir.set(-sin * forward + cos * strafe, up, -cos * forward - sin * strafe);
     if (this.dir.lengthSq() === 0) return;
     this.dir.normalize();
-    const speed = SPEED * (k.has("ShiftLeft") || k.has("ShiftRight") ? FAST_MULT : 1);
+    const speed = SPEED * (this.fast ? FAST_MULT : 1);
     cam.position.addScaledVector(this.dir, speed * dt);
   }
 }

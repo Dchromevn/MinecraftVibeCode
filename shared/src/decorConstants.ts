@@ -22,6 +22,10 @@ export const SWITCHES = {
   WOOD_BUTTON_S: 1.5,
   /** Cửa sắt mở khi có nút / cần gạt đang bật cách một nửa cửa tối đa từng này ô (cộng các trục). */
   POWER_RANGE: 2,
+  /** Tấm áp lực tắt sau khi không còn gì đè lên trong khoảng này. */
+  PLATE_RELEASE_S: 1,
+  /** Bị đè khi chân người / vật phẩm thấp hơn mặt dưới ô + khoảng này. */
+  PLATE_TRIGGER_H: 0.25,
 } as const;
 
 /** Khối than đốt được bao nhiêu món (cùng bảng FURNACE.FUEL). */

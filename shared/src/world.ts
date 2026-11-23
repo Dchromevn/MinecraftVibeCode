@@ -62,6 +62,15 @@ export class World {
     return Math.max(v >> 4, v & 15);
   }
 
+  /** Byte ánh sáng thô tại ô (4 bit cao = trời, 4 bit thấp = block); -1 nếu chưa có. Trên trời: trời 15. (7a) */
+  lightRaw(x: number, y: number, z: number): number {
+    if (y >= CHUNK_HEIGHT) return 0xf0;
+    if (y < 0) return 0;
+    const c = this.chunks.get(chunkKey(x >> 4, z >> 4));
+    if (!c?.light) return -1;
+    return c.light[blockIndex(x & 15, y, z & 15)]!;
+  }
+
   isLoaded(x: number, z: number): boolean {
     return this.chunks.has(chunkKey(x >> 4, z >> 4));
   }

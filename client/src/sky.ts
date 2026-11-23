@@ -34,8 +34,8 @@ export function createSky(radius: number): Sky {
   const geo = new THREE.SphereGeometry(radius, 24, 12);
   const mat = new THREE.ShaderMaterial({
     uniforms: {
-      zenith: { value: SKY_ZENITH },
-      horizon: { value: SKY_HORIZON },
+      zenith: { value: SKY_ZENITH.clone() }, // bản sao: DayNight đổi màu theo giờ (7a)
+      horizon: { value: SKY_HORIZON.clone() },
     },
     vertexShader,
     fragmentShader,

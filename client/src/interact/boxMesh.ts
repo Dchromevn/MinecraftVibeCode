@@ -23,6 +23,7 @@ export function shapeBoxes(blockId: number): readonly BlockBox[] {
   if (r === "stairs") return stairBoxes(stairsMeta(1, false)); // phía cao ở −X
   if (r === "slab") return [slabBox(0)];
   if (r === "carpet") return [[0, 0, 0, 1, 1 / 16, 1]];
+  if (r === "plate") return [[1 / 16, 0, 1 / 16, 15 / 16, 2 / 16, 15 / 16]];
   if (r === "button") return [[3 / 16, 0, 4 / 16, 13 / 16, 4 / 16, 12 / 16]]; // to hơn nút thật cho dễ nhìn
   return [[4 / 16, 0, 4 / 16, 12 / 16, 1, 12 / 16], [5 / 16, 0, 0, 11 / 16, 14 / 16, 1]]; // tường
 }

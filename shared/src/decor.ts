@@ -13,6 +13,9 @@ const render = (id: number): string | undefined => BLOCKS[id]?.render;
 export const isPane = (id: number): boolean => render(id) === "pane";
 export const isSwitch = (id: number): boolean => render(id) === "button" || render(id) === "lever";
 export const isButton = (id: number): boolean => render(id) === "button";
+export const isPlate = (id: number): boolean => render(id) === "plate";
+/** Nguồn mở cửa sắt: nút, cần gạt, tấm áp lực (bit 3 = đang bật / bị đè). */
+export const isPowerSource = (id: number): boolean => isSwitch(id) || isPlate(id);
 
 function rotBox(b: BlockBox, d: number): BlockBox {
   const [ax, az] = rotXZ(b[0], b[2], d);
@@ -20,6 +23,9 @@ function rotBox(b: BlockBox, d: number): BlockBox {
   return [Math.min(ax, bx), b[1], Math.min(az, bz), Math.max(ax, bx), b[4], Math.max(az, bz)];
 }
 const px = (n: number): number => n / 16;
+
+/** Tấm áp lực: tấm 14x14 dày 1/16, bị đè thì lún còn nửa. */
+export const plateBox = (meta: number): BlockBox => [px(1), 0, px(1), px(15), (meta & 8) !== 0 ? px(0.5) : px(1), px(15)];
 
 // ---- tấm kính, song sắt: cột mỏng giữa + tay nối tới tấm / song sắt / tường / khối đặc kề ----
 export const paneJoins = (id: number): boolean => isPane(id) || isWall(id) || (BLOCKS[id]?.opaque ?? false);
@@ -75,7 +81,7 @@ function powered(cellAt: CellAt, x: number, y: number, z: number): boolean {
       for (let dx = -r; dx <= r; dx++) {
         if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > r) continue;
         const c = cellAt(x + dx, y + dy, z + dz);
-        if (c > 0 && isSwitch(c & 255) && switchOn(c >> 8)) return true;
+        if (c > 0 && isPowerSource(c & 255) && switchOn(c >> 8)) return true;
       }
   return false;
 }

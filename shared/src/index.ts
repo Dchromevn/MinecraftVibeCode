@@ -26,6 +26,8 @@ export * from "./crafting.js";
 export * from "./inventoryOps.js";
 export * from "./drops.js";
 export * from "./survival.js";
+export * from "./combat.js";
+export * from "./archery.js";
 export * from "./itemEntity.js";
 export * from "./smelting.js";
 export * from "./blockEntities.js";
@@ -36,5 +38,31 @@ export * from "./light.js";
 export * from "./spawn.js";
 export * from "./invActions.js";
 export * from "./protocol.js";
+export * from "./netCodec.js";
+export * from "./mobCodec.js";
+export * from "./mobTypes.js";
+export * from "./mobPhysics.js";
+export * from "./dayTime.js";
+export * from "./explosion.js";
 export * from "./containers.js";
 export * from "./worldgen/index.js";
+export * from "./structures.js";
+export * from "./ride.js";
+export * from "./structureConstants.js";
+export * from "./structureLoot.js";
+export * from "./villageConstants.js";
+export * from "./villageCustom.js";
+export * from "./villageLoot.js";
+export * from "./trades.js";
+export * from "./structureSave.js";
+export * from "./illagerConstants.js";
+export * from "./netherConstants.js";
+export * from "./netherBiomeConstants.js"; // (10b)
+export * from "./netherMobConstants.js";
+export * from "./portal.js";
+export * from "./enchantments.js";
+export * from "./xp.js";
+export * from "./anvil.js";
+export * from "./fortressConstants.js"; // (10c)
+export * from "./piglinConstants.js"; // (10d1)
+export * from "./smithing.js"; // (10d2)

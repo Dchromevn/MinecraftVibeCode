@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 
-/** Ảnh của game: nhập từ client.jar của Minecraft (npm run import-textures, không commit) vào public_mc. */
+/** Ảnh của game + mẫu công trình (7e): nhập từ client.jar của Minecraft (npm run import-textures, không commit) vào public_mc. */
 const MC_DIR = fileURLToPath(new URL("./public_mc", import.meta.url));
 
 function mcOverride(): Plugin {
@@ -13,8 +13,9 @@ function mcOverride(): Plugin {
       server.middlewares.use((req, res, next) => {
         const path = decodeURIComponent((req.url ?? "").split("?")[0]!);
         const file = join(MC_DIR, path);
-        if (path.endsWith(".png") && file.startsWith(MC_DIR) && existsSync(file) && statSync(file).isFile()) {
-          res.setHeader("Content-Type", "image/png");
+        const json = path === "/structures.json"; // (7e) mẫu công trình nhập từ client.jar
+        if ((path.endsWith(".png") || json) && file.startsWith(MC_DIR) && existsSync(file) && statSync(file).isFile()) {
+          res.setHeader("Content-Type", json ? "application/json" : "image/png");
           res.setHeader("Cache-Control", "no-cache");
           createReadStream(file).pipe(res);
           return;
@@ -33,7 +34,10 @@ export default defineConfig({
   server: {
     port: 5173,
     // chạy dev: client gọi /ws cùng địa chỉ trang, Vite chuyển sang server (cổng 8080)
-    proxy: { "/ws": { target: process.env.WS_TARGET ?? "ws://localhost:8080", ws: true } },
+    proxy: {
+      "/ws": { target: process.env.WS_TARGET ?? "http://127.0.0.1:8080", ws: true },
+      "/status": { target: process.env.WS_TARGET ?? "http://127.0.0.1:8080" }, // (9a) trạng thái server cho menu chính
+    },
     fs: {
       // cho phép Vite đọc mã nguồn trong /shared
       allow: [".."],

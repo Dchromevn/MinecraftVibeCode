@@ -8,9 +8,17 @@ import { WebSocketServer } from "ws";
 import { NET } from "../../shared/src/index.js";
 import { findPath, loadConfig } from "./config.js";
 import { Game } from "./game.js";
+import { GenPool } from "./genPool.js";
 
 const cfg = loadConfig();
+// giả lập mạng (5c, F3): FAKE_LAG_MS = ping tăng thêm (mỗi chiều trễ một nửa); FAKE_LOSS_PCT = % gói nhị phân bị mất
+const LAG = Math.max(0, Number(process.env.FAKE_LAG_MS ?? 0)) / 2;
+const LOSS = Math.min(90, Math.max(0, Number(process.env.FAKE_LOSS_PCT ?? 0))) / 100;
+if (LAG || LOSS) console.log(`[server] giả lập mạng: ping +${LAG * 2} ms, mất ${LOSS * 100}% gói nhị phân`);
 const game = new Game(cfg);
+const pool = new GenPool(game.seed, NET.GEN_WORKERS); // sinh chunk / ánh sáng ở luồng phụ: luồng chính không đứng hình (ping ổn định)
+for (const r of game.realms) r.w.pool = pool; // (10a) dùng chung cho cả hai cõi (việc sinh mang theo cõi)
+game.customs.syncWorkers(); // (8a) nhà tự lưu cho luồng sinh chunk
 // chạy bằng tsx (server/src) hoặc bản build (server/dist/server/src)
 const dist = findPath("../../client/dist", "../../../../client/dist");
 
@@ -20,6 +28,12 @@ const TYPES: Record<string, string> = {
 };
 
 const http = createServer((req, res) => {
+  if ((req.url ?? "").split("?")[0] === NET.STATUS_PATH) {
+    // (9a) trạng thái cho danh sách server ở menu chính (trang ở địa chỉ khác cũng đọc được)
+    res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" });
+    res.end(JSON.stringify({ version: NET.PROTOCOL_VERSION, players: game.online().length }));
+    return;
+  }
   if (!dist) {
     res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
     res.end("Server đang chạy. Chưa có bản build của client: chạy npm run host (hoặc dùng npm run dev rồi mở cổng 5173).");
@@ -36,15 +50,49 @@ const wss = new WebSocketServer({ noServer: true });
 http.on("upgrade", (req, socket, head) => {
   if (!(req.url ?? "").startsWith(NET.WS_PATH)) return socket.destroy();
   wss.handleUpgrade(req, socket, head, (ws) => {
-    const conn = { send: (d: string) => ws.readyState === ws.OPEN && ws.send(d), close: () => ws.close() };
-    ws.on("message", (data) => game.message(conn, data.toString()));
+    const out = (d: string | ArrayBuffer): void => void (ws.readyState === ws.OPEN && ws.send(d));
+    const conn = {
+      send: (d: string | ArrayBuffer): void => {
+        if (typeof d !== "string" && LOSS > 0 && Math.random() < LOSS) return; // giả lập mất gói (chỉ gói nhị phân thường xuyên)
+        if (LAG > 0) setTimeout(() => out(d), LAG);
+        else out(d);
+      },
+      close: () => ws.close(),
+    };
+    ws.on("message", (data, isBinary) => {
+      const buf = data as Buffer;
+      const msg: string | ArrayBuffer = isBinary ? buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer : buf.toString();
+      if (typeof msg !== "string" && LOSS > 0 && Math.random() < LOSS) return;
+      if (LAG > 0) setTimeout(() => game.message(conn, msg), LAG);
+      else game.message(conn, msg);
+    });
     ws.on("close", () => game.disconnect(conn));
     ws.on("error", (err) => console.error("[server] lỗi kết nối:", err.message));
   });
 });
 
 http.listen(cfg.port, () => {
-  console.log(`[server] seed "${cfg.seed}", cổng ${cfg.port}${dist ? `, phục vụ ${dist}` : " (chưa có client/dist)"}`);
+  console.log(`[server] thế giới "${cfg.world}", seed "${game.seedText}", cổng ${cfg.port}${dist ? `, phục vụ ${dist}` : " (chưa có client/dist)"}`);
   console.log(`[server] điểm hồi sinh ${game.spawn.x.toFixed(0)}, ${game.spawn.y}, ${game.spawn.z.toFixed(0)}${cfg.debug ? " · chế độ thử: bật" : ""}`);
+  console.log(`[server] lưu tại ${game.storage.dir ?? "(không lưu)"} · bật sẵn chế độ quản trị: ${cfg.admins.length ? cfg.admins.join(", ") : "không ai"} (ai cũng gõ /admin được)`);
 });
 game.start();
+
+// tắt server (Ctrl+C, npm run dev khởi động lại khi sửa code): lưu hết rồi mới thoát
+let stopping = false;
+function stop(): void {
+  if (stopping) return;
+  stopping = true;
+  try {
+    game.saveAll();
+    console.log("[server] đã lưu thế giới, tắt server");
+  } catch (err) {
+    console.error("[server] lỗi khi lưu:", err);
+  }
+  process.exit(0);
+}
+for (const sig of ["SIGINT", "SIGTERM", "SIGBREAK"] as const) process.on(sig, stop);
+// app desktop: tắt qua kênh IPC (Windows không có tín hiệu tắt êm cho tiến trình con)
+process.on("message", (m) => {
+  if (m === "shutdown") stop();
+});

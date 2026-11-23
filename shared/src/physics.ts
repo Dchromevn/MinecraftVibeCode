@@ -2,12 +2,15 @@
 // định, bước cố định 1/PHYSICS_HZ giây — client chạy để dự đoán, server (Giai đoạn 5)
 // chạy lại để kiểm tra. Sinh tồn (đói, hồi máu, giáp, chết) trong survival.ts.
 import { B } from "./blocks.js";
-import { CACTUS, FIRE, MOVE, PLAYER } from "./constants.js";
+import { ARCHERY, CACTUS, FIRE, MOVE, PLAYER, SHIELD } from "./constants.js";
 import { boxBlocked, moveBox, type CellReader } from "./collide.js";
-import { HUNGER } from "./survivalConstants.js";
-import { createSurvival, hurt, tickSurvival, type SurvivalState } from "./survival.js";
+import { createRide, stepRide, type RideState } from "./ride.js";
+import { EFFECTS, HUNGER } from "./survivalConstants.js";
+import { NETHER } from "./netherConstants.js";
+import { SOUL_SPEED } from "./piglinConstants.js";
+import { createSurvival, hurt, slowFactor, tickSurvival, type SurvivalState } from "./survival.js";
 
-export interface PlayerState extends SurvivalState {
+export interface PlayerState extends SurvivalState, RideState {
   x: number; // giữa chân
   y: number;
   z: number;
@@ -20,6 +23,8 @@ export interface PlayerState extends SurvivalState {
   inLava: boolean;
   onLadder: boolean;
   inWeb: boolean;
+  inSoul: boolean; // (10a) đứng trong cát linh hồn: đi chậm
+  onSoul: boolean; // (10d1) đứng trên cát / đất linh hồn (Tốc độ linh hồn)
   inCactus: boolean; // chạm xương rồng (hộp người chạm vào ô xương rồng)
   inFire: boolean; // đứng trong ô lửa (Giai đoạn 4f)
   headInWater: boolean;
@@ -40,6 +45,8 @@ export interface PlayerInput {
   sneak: boolean;
   sprint: boolean;
   yaw: number; // như camera: yaw = 0 nhìn về −Z
+  block?: boolean; // (6a) đang giơ khiên: đi chậm, không chạy nhanh
+  draw?: boolean; // (6b) đang kéo cung: đi chậm, không chạy nhanh
 }
 
 export const PHYSICS_DT = 1 / PLAYER.PHYSICS_HZ;
@@ -50,10 +57,11 @@ export const JUMP_VELOCITY = Math.sqrt(2 * PLAYER.GRAVITY * PLAYER.JUMP_HEIGHT);
 export function createPlayer(x: number, y: number, z: number): PlayerState {
   return {
     x, y, z, vx: 0, vy: 0, vz: 0,
-    onGround: false, sneaking: false, inWater: false, inLava: false, onLadder: false, inWeb: false, inCactus: false, inFire: false,
+    onGround: false, sneaking: false, inWater: false, inLava: false, onLadder: false, inWeb: false, inCactus: false, inFire: false, inSoul: false, onSoul: false,
     headInWater: false, collidedH: false, frozen: false,
     air: PLAYER.AIR_S, fallDist: 0, landFall: 0, burnS: 0, fireTimer: 0, drownTimer: 0,
     ...createSurvival(),
+    ...createRide(), // (7d)
   };
 }
 
@@ -67,8 +75,8 @@ export function playerBox(s: { x: number; y: number; z: number; sneaking?: boole
 
 
 /** Người chơi đang chạm block gì (nước, dung nham, thang, mạng nhện). */
-function scanEnvironment(s: PlayerState, cell: CellReader): void {
-  s.inWater = s.inLava = s.onLadder = s.inWeb = s.inCactus = s.inFire = false;
+export function scanEnvironment(s: PlayerState, cell: CellReader): void {
+  s.inWater = s.inLava = s.onLadder = s.inWeb = s.inCactus = s.inFire = s.inSoul = false;
   const a = playerBox(s);
   for (let y = Math.floor(a[1]!); y <= Math.floor(a[4]! - 1e-6); y++)
     for (let z = Math.floor(a[2]!); z <= Math.floor(a[5]! - 1e-6); z++)
@@ -78,11 +86,14 @@ function scanEnvironment(s: PlayerState, cell: CellReader): void {
         const id = c & 255;
         if (id === B.WATER) s.inWater = true;
         else if (id === B.LAVA) s.inLava = true;
-        else if (id === B.LADDER) s.onLadder = true;
+        else if (id === B.LADDER || id === B.VINE || id === B.WEEPING_VINES || id === B.TWISTING_VINES) s.onLadder = true; // (7b, 10b) dây leo
         else if (id === B.COBWEB) s.inWeb = true;
         else if (id === B.CACTUS) s.inCactus = true;
-        else if (id === B.FIRE) s.inFire = true;
+        else if (id === B.FIRE || id === B.SOUL_FIRE) s.inFire = true;
+        else if (id === B.SOUL_SAND) s.inSoul = true; // (10a) lún trong cát linh hồn
       }
+  const under = cell(Math.floor(s.x), Math.floor(s.y - 0.05), Math.floor(s.z)) & 255; // (10d1)
+  s.onSoul = s.inSoul || under === B.SOUL_SAND || under === B.SOUL_SOIL;
   const eye = cell(Math.floor(s.x), Math.floor(s.y + eyeHeight(s)), Math.floor(s.z));
   s.headInWater = eye >= 0 && (eye & 255) === B.WATER;
 }
@@ -95,10 +106,15 @@ function horizontal(s: PlayerState, inp: PlayerInput, liquid: boolean, dt: numbe
     f /= len;
     st /= len;
   }
-  const sprint = inp.sprint && f > 0 && !s.sneaking && s.hunger >= PLAYER.SPRINT_HUNGER_MIN;
+  const sprint = inp.sprint && f > 0 && !s.sneaking && !inp.block && !inp.draw && s.hunger >= PLAYER.SPRINT_HUNGER_MIN;
   let speed = s.sneaking ? PLAYER.SNEAK_SPEED : sprint ? PLAYER.SPRINT_SPEED : PLAYER.WALK_SPEED;
-  if (s.inWater) speed *= PLAYER.WATER_SPEED_FACTOR;
+  speed *= slowFactor(s); // (7b) hiệu ứng chậm
+  if (inp.block) speed *= SHIELD.MOVE_FACTOR;
+  else if (inp.draw) speed *= ARCHERY.MOVE_FACTOR;
+  if (s.inWater) speed *= s.fxGraceS > 0 ? EFFECTS.GRACE_SWIM : PLAYER.WATER_SPEED_FACTOR + (1 - PLAYER.WATER_SPEED_FACTOR) * (s.encDepth / 3); // (7c) cá heo; (8b2) Sải chân dưới nước
   if (s.inLava) speed *= PLAYER.LAVA_SPEED_FACTOR;
+  if (s.encSoul > 0 && s.onSoul && s.onGround) speed *= 1 + (SOUL_SPEED.BONUS[s.encSoul] ?? 0); // (10d1) Tốc độ linh hồn: nhanh, không lún
+  else if (s.inSoul && s.onGround) speed *= NETHER.SOUL_SAND_SPEED; // (10a)
   if (!s.onGround && !liquid && !s.onLadder) speed *= PLAYER.AIR_SPEED_FACTOR; // trên không điều khiển kém hơn
   const sin = Math.sin(inp.yaw), cos = Math.cos(inp.yaw);
   const tvx = (-sin * f + cos * st) * speed;
@@ -117,7 +133,7 @@ function horizontal(s: PlayerState, inp: PlayerInput, liquid: boolean, dt: numbe
 
 /** Dung nham, cháy, chết đuối (MECHANICS.md 5.5), xương rồng (DESIGN.md 2.13). */
 function environmentDamage(s: PlayerState, dt: number): void {
-  if (s.inCactus) hurt(s, CACTUS.DAMAGE, "other");
+  if (s.inCactus) hurt(s, CACTUS.DAMAGE, "cactus");
   if (s.inFire && !s.inWater) {
     hurt(s, FIRE.DAMAGE, "fire");
     s.burnS = Math.max(s.burnS, FIRE.BURN_S);
@@ -138,7 +154,7 @@ function environmentDamage(s: PlayerState, dt: number): void {
   } else if (s.burnS === 0) s.fireTimer = 0;
 
   if (s.headInWater) {
-    s.air = Math.max(0, s.air - dt);
+    s.air = Math.max(0, s.air - dt / (1 + s.encResp)); // (8b2) Hô hấp: hết dưỡng khí chậm hơn
     if (s.air === 0) {
       s.drownTimer += dt;
       if (s.drownTimer >= 1) {
@@ -165,6 +181,7 @@ export function stepPlayer(s: PlayerState, inp: PlayerInput, cell: CellReader): 
     return;
   }
   s.frozen = false;
+  if (s.rideId) return stepRide(s, inp, cell); // (7d) đang cưỡi: bước của con thú
   // tư thế: ngồi ngay khi giữ Shift; thả ra thì chỉ đứng dậy khi đủ chỗ
   if (inp.sneak) s.sneaking = true;
   else if (s.sneaking && !boxBlocked(cell, playerBox(s, PLAYER.HEIGHT))) s.sneaking = false;

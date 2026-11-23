@@ -8,6 +8,7 @@ import {
 } from "../shared/src/index.js";
 import { Game } from "../server/src/game.js";
 import { check } from "./harness.js";
+import { flyPacket, standAt } from "./netHelpers.js";
 
 const g3 = (cells: (string | null)[]) => matchGrid(cells, 3)?.out;
 const g2 = (cells: (string | null)[]) => matchGrid(cells, 2)?.out;
@@ -110,13 +111,13 @@ const floor = (x: number, z: number): PlaceHit => ({ x, y: 9, z, nx: 0, ny: 1, n
 }
 
 { // 6. server: bật lửa, lửa tự tắt; nút / cần gạt mở cửa sắt; cửa sắt không mở bằng tay
-  const game = new Game({ seed: "decor", port: 0, spawn: "fixed", debug: true });
+  const game = new Game({ seed: "decor", port: 0, spawn: "fixed", debug: true, world: "t", admins: [], adminAll: true, dataDir: null });
   const msgs: ServerMsg[] = [];
-  const conn = { send: (d: string) => void msgs.push(JSON.parse(d) as ServerMsg), close: () => undefined };
+  const conn = { send: (d: string | ArrayBuffer) => void (typeof d === "string" && msgs.push(JSON.parse(d) as ServerMsg)), close: () => undefined };
   const send = (m: object): void => game.message(conn, JSON.stringify(m));
-  send({ t: "hello", name: "Tho", version: NET.PROTOCOL_VERSION });
+  send({ t: "hello", name: "Tho", password: "test", version: NET.PROTOCOL_VERSION });
   const sp = game.spawn, X = Math.floor(sp.x), Y = 110, Z = Math.floor(sp.z);
-  send({ t: "move", x: X + 0.5, y: Y + 1, z: Z + 3.5, yaw: 0, pitch: 0, flying: true, sneaking: false, swing: 0, health: 20, dead: false });
+  game.message(conn, flyPacket(X + 0.5, Y + 1, Z + 3.5));
   for (let i = 0; i < 160; i++) game.tick();
   let seq = 1;
   const use = (item: string | null, hit: object, yaw = 0): void => {
@@ -154,4 +155,47 @@ const floor = (x: number, z: number): PlaceHit => ({ x, y: 9, z, nx: 0, ny: 1, n
   const pressed = (door() & 4) !== 0;
   for (let i = 0; i < 1.2 * NET.SERVER_TICK_RATE; i++) game.tick();
   check("nút đá: bấm thì cửa sắt mở, sau 1 giây tự đóng", pressed && (door() & 4) === 0);
+}
+
+{ // 7. tấm áp lực: công thức; người đứng lên thì cửa sắt mở, rời đi 1 giây thì đóng; vật phẩm chỉ đè được tấm gỗ
+  check("2 đá → tấm áp lực đá; 2 ván → tấm áp lực gỗ",
+    g2(["stone", "stone", null, null])?.item === "stone_pressure_plate" && g2(["birch_planks", "planks", null, null])?.item === "oak_pressure_plate");
+  const game = new Game({ seed: "plate", port: 0, spawn: "fixed", debug: true, world: "t", admins: [], adminAll: true, dataDir: null });
+  const conn = { send: () => undefined, close: () => undefined };
+  const send = (m: object): void => game.message(conn, JSON.stringify(m));
+  send({ t: "hello", name: "Dam", password: "test", version: NET.PROTOCOL_VERSION });
+  const sp = game.spawn, X = Math.floor(sp.x), Y = 110, Z = Math.floor(sp.z);
+  const move = (x: number, y: number, z: number, flying = true): void => {
+    if (flying) game.message(conn, flyPacket(x, y, z));
+    else standAt(game.online()[0]!, x, y, z);
+  };
+  move(X + 0.5, Y + 3, Z + 3.5);
+  for (let i = 0; i < 160; i++) game.tick();
+  let seq = 1;
+  const use = (item: string, hit: object): void => {
+    send({ t: "inv", seq: seq++, a: { t: "select", n: 0 } });
+    send({ t: "inv", seq: seq++, a: { t: "throwHeld", all: true } });
+    send({ t: "give", item, count: 64 });
+    send({ t: "use", hit, src: null, sneaking: false, yaw: 0 });
+  };
+  for (let x = -2; x <= 2; x++) for (let z = -2; z <= 3; z++) use("stone", { x: X + x, y: Y, z: Z + z, nx: 0, ny: 1, nz: 0 });
+  use("iron_door", { x: X, y: Y, z: Z, nx: 0, ny: 1, nz: 0 });
+  use("stone_pressure_plate", { x: X, y: Y, z: Z + 1, nx: 0, ny: 1, nz: 0 }); // trước cửa
+  use("oak_pressure_plate", { x: X + 2, y: Y, z: Z + 2, nx: 0, ny: 1, nz: 0 });
+  game.tick();
+  const open = (): boolean => (game.w.getCell(X, Y + 1, Z) >> 8 & 4) !== 0;
+  const placed = (game.w.getCell(X, Y + 1, Z + 1) & 255) === B.STONE_PRESSURE_PLATE;
+  move(X + 0.5, Y + 1, Z + 1.5, false); // đứng lên tấm đá
+  for (let i = 0; i < 3; i++) game.tick();
+  const onPlate = open() && switchOn(game.w.getCell(X, Y + 1, Z + 1) >> 8);
+  move(X + 0.5, Y + 3, Z + 3.5); // rời đi
+  for (let i = 0; i < 0.5 * NET.SERVER_TICK_RATE; i++) game.tick();
+  const stillOpen = open();
+  for (let i = 0; i < 0.7 * NET.SERVER_TICK_RATE; i++) game.tick();
+  check("tấm đá: đứng lên thì cửa sắt mở; rời đi vẫn mở thêm ~1 giây rồi đóng", placed && onPlate && stillOpen && !open(),
+    `đặt ${placed}, đứng ${onPlate}, 0.5 s ${stillOpen}, cuối ${open()}`);
+  const items = [{ x: X + 2.5, y: Y + 1, z: Z + 2.5 }, { x: X + 0.5, y: Y + 1, z: Z + 1.5 }];
+  game.ticker.stepPlates([], items);
+  check("vật phẩm rơi đè được tấm gỗ, không đè được tấm đá",
+    switchOn(game.w.getCell(X + 2, Y + 1, Z + 2) >> 8) && !switchOn(game.w.getCell(X, Y + 1, Z + 1) >> 8));
 }

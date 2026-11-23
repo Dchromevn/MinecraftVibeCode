@@ -13,9 +13,11 @@ export const BIOME = {
   SNOWY: 3,
   MOUNTAINS: 4,
   OCEAN: 5,
+  SWAMP: 6, // 7b
+  DARK_FOREST: 7, // 8c: rừng sồi tối (phần rừng có trường "tối" cao)
 } as const;
 export type BiomeId = (typeof BIOME)[keyof typeof BIOME];
-export const BIOME_KEYS = ["plains", "forest", "desert", "snowy", "mountains", "ocean"] as const;
+export const BIOME_KEYS = ["plains", "forest", "desert", "snowy", "mountains", "ocean", "swamp", "dark_forest"] as const;
 
 export interface Column {
   height: number; // y của block mặt đất cao nhất
@@ -48,6 +50,7 @@ export class TerrainSampler {
   private readonly humid: SimplexNoise2D;
   private readonly riverN: SimplexNoise2D;
   private readonly riverWidth: SimplexNoise2D;
+  private readonly dark: SimplexNoise2D; // (8c) rừng sồi tối
   readonly patch: SimplexNoise2D; // vệt sỏi đáy nước
   private readonly lakes: LakePlanner;
 
@@ -62,6 +65,7 @@ export class TerrainSampler {
     this.patch = noise(seed, 107);
     this.riverN = noise(seed, 108);
     this.riverWidth = noise(seed, 109);
+    this.dark = noise(seed, 110);
     this.lakes = new LakePlanner(this);
   }
 
@@ -95,6 +99,14 @@ export class TerrainSampler {
     const oceanH = T.OCEAN_FLOOR + 3 * d;
     const landH = T.LAND_BASE + 4 * d + 4 * hills;
     let raw = oceanH + (landH - oceanH) * land + mountain * (T.MOUNTAIN_LIFT + T.MOUNTAIN_RIDGE * ridge);
+    // (7b) đầm lầy: kéo mặt đất về sát mực nước, mượt dần ở rìa (không có vách ở ranh giới biome)
+    const t = this.temp.fbm(x * T.TEMP_FREQ, z * T.TEMP_FREQ, 2);
+    const h = this.humid.fbm(x * T.HUMID_FREQ, z * T.HUMID_FREQ, 2);
+    const swamp = smoothstep(BIOMES.SWAMP_HUMID, BIOMES.SWAMP_HUMID + BIOMES.SWAMP_SPAN, h) *
+      smoothstep(BIOMES.SNOWY_TEMP + 0.05, BIOMES.SNOWY_TEMP + 0.2, t) * (1 - smoothstep(BIOMES.DESERT_TEMP - 0.05, BIOMES.DESERT_TEMP + 0.1, t)) *
+      (1 - smoothstep(0.05, 0.25, mountain)) * smoothstep(0.6, 0.85, land); // (2026-11-14, thế giới làm lại) có ở mọi khoảng cách
+    // mặt đầm lầy: noise chi tiết (vệt sỏi đáy nước, tần số cao) → nhiều vũng nông xen gò đất thấp
+    if (swamp > 0) raw += (SEA + 0.2 + BIOMES.SWAMP_DEPTH * this.patch.noise(x * 0.06 + 500, z * 0.06) - raw) * swamp;
 
     // sông: thung lũng hình chữ U khoét xuống dưới mực biển, bờ thoải, tắt dần ở núi cao
     let river = false;
@@ -116,14 +128,14 @@ export class TerrainSampler {
     const height = Math.max(2, Math.min(T.MAX_HEIGHT, Math.round(raw)));
 
     let biome: BiomeId;
-    const t = this.temp.fbm(x * T.TEMP_FREQ, z * T.TEMP_FREQ, 2);
-    const h = this.humid.fbm(x * T.HUMID_FREQ, z * T.HUMID_FREQ, 2);
     if (height < SEA && land < 0.5) biome = BIOME.OCEAN;
     else if (mountain > BIOMES.MOUNTAIN_FACTOR || height > T.MOUNTAIN_FROM_Y) biome = BIOME.MOUNTAINS;
     else {
-      if (t < BIOMES.SNOWY_TEMP) biome = BIOME.SNOWY;
+      if (swamp > 0.5) biome = BIOME.SWAMP;
+      else if (t < BIOMES.SNOWY_TEMP) biome = BIOME.SNOWY;
       else if (t > BIOMES.DESERT_TEMP && h < BIOMES.DESERT_HUMID) biome = BIOME.DESERT;
-      else if (h > BIOMES.FOREST_HUMID) biome = BIOME.FOREST;
+      else if (h > BIOMES.FOREST_HUMID)
+        biome = this.dark.fbm(x * BIOMES.DARK_FOREST_FREQ, z * BIOMES.DARK_FOREST_FREQ, 2) > BIOMES.DARK_FOREST_MIN ? BIOME.DARK_FOREST : BIOME.FOREST;
       else biome = BIOME.PLAINS;
     }
     return { height, waterTop: SEA, biome, land, mountain, river, lake: false, temp: t, humid: h };
@@ -131,7 +143,14 @@ export class TerrainSampler {
 }
 
 /** Mặt trên của cột có phải là cỏ không (để trồng cây, cỏ cao). */
+/** (7e) Đồng bằng tuyết: phần lạnh nhất của biome tuyết — phẳng, không cây (lều tuyết sinh ở đây). */
+export const isSnowyPlains = (col: Column): boolean => col.biome === BIOME.SNOWY && col.temp < BIOMES.SNOWY_PLAINS_TEMP;
+
+/** (8c) Rừng thường hoặc rừng sồi tối (cùng bảng động vật, trại bỏ hoang...). */
+export const isForest = (col: Column): boolean => col.biome === BIOME.FOREST || col.biome === BIOME.DARK_FOREST;
+
 export function hasGrassSurface(col: Column): boolean {
+  if (col.biome === BIOME.SWAMP) return col.height >= col.waterTop; // đầm lầy: cỏ sát mép nước, không có bãi cát
   if (col.height <= col.waterTop + 1) return false; // bờ / đáy nước: cát
   if (col.biome === BIOME.DESERT || col.biome === BIOME.OCEAN) return false;
   if (col.biome === BIOME.MOUNTAINS && col.height > TERRAIN.STONE_PEAK_Y) return false;

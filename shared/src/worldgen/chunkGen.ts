@@ -13,7 +13,11 @@ import { EntrancePlanner } from "./entrances.js";
 import { carveChunk } from "./caves.js";
 import { MineshaftPlanner } from "./mineshaft.js";
 import { placeCaveSprings } from "./caveSprings.js";
-import { placeEmeralds, placeOres } from "./ores.js";
+import { placeEmeralds, placeInfested, placeLapis, placeOres } from "./ores.js";
+import { placeDungeons } from "./dungeons.js";
+import { placeWitchHuts } from "./witchHuts.js";
+import { placeStructures } from "./structPlace.js";
+import { placeLilyPads, placeSugarCane } from "./flora.js";
 
 export class ChunkGenerator {
   readonly sampler: TerrainSampler;
@@ -42,12 +46,19 @@ export class ChunkGenerator {
       }
     placeOres(this.seed, data, cx, cz); // trước khi đục hang để quặng lộ ra trên vách
     placeEmeralds(this.sampler, data, cx, cz);
+    placeLapis(this.seed, data, cx, cz); // 8b2
+    placeInfested(this.sampler, data, cx, cz); // 7b
     carveChunk(this, data, cx, cz, cols);
     this.mineshafts.apply(data, meta, cx, cz); // ray, đuốc ghi dữ liệu phụ ngay khi sinh
-    placeTrees(this, data, cx, cz);
+    placeDungeons(this.sampler, data, meta, cx, cz); // 7b: hầm quái
+    placeTrees(this, data, meta, cx, cz);
     placeFlowers(this.sampler, data, cx, cz, cols);
     placeCacti(this.sampler, data, cx, cz, cols);
     placeTallGrass(this, data, cx, cz, cols);
+    placeLilyPads(this.sampler, data, cx, cz, cols); // 7b: lá súng trên vũng đầm lầy
+    placeSugarCane(this.sampler, data, cx, cz, cols); // 8b2: mía cạnh nước
+    placeWitchHuts(this.sampler, data, meta, cx, cz); // 7b: nhà phù thủy (sau cây, cỏ: dọn chỗ)
+    placeStructures(this.sampler, data, meta, cx, cz); // 7e: lều tuyết, cổng đổ nát, kim tự tháp sa mạc, trại bỏ hoang
     placeSprings(this.sampler, data, cx, cz, cols);
     placeCaveSprings(this.seed, data, cx, cz, cols);
     return { data, meta };
@@ -59,7 +70,9 @@ export class ChunkGenerator {
     const beach = !underwater && h <= col.waterTop + 1;
     let surface: BlockId = B.GRASS;
     let sub: BlockId = B.DIRT;
-    if (underwater || beach) {
+    if (col.biome === BIOME.SWAMP) {
+      if (underwater) surface = B.DIRT; // đáy vũng đầm lầy: đất (không cát, sỏi)
+    } else if (underwater || beach) {
       surface = B.SAND;
       sub = B.SAND;
       if (underwater && this.sampler.patch.noise(wx * 0.07, wz * 0.07) > 0.35) surface = B.GRAVEL;

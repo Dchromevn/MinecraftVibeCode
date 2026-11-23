@@ -5,17 +5,20 @@ import { DIGGING, SHEARS, TOOL_TIERS, type ToolTier } from "./constants.js";
 import { isLeaves } from "./woods.js";
 
 /** Kéo (Giai đoạn 4f): lá, mạng nhện, cỏ cao rơi ra chính nó. */
-export const shearsTakes = (id: number): boolean => isLeaves(id) || id === B.COBWEB || id === B.TALLGRASS;
+export const shearsTakes = (id: number): boolean => isLeaves(id) || id === B.COBWEB || id === B.TALLGRASS || id === B.VINE ||
+  id === B.NETHER_SPROUTS || id === B.WEEPING_VINES || id === B.TWISTING_VINES; // (10b)
 
 export interface HeldTool {
   kind: ToolKind;
   tier: ToolTier;
+  ench?: Readonly<Record<string, number>>; // (8b2) phù phép của công cụ
 }
 
 export interface DigContext {
   tool: HeldTool | null; // null = tay không
   headInWater: boolean;
   onGround: boolean;
+  aqua?: boolean; // (8b2) mũ có Thích nghi nước: đào dưới nước không chậm
 }
 
 /** Đào block này bằng công cụ đang cầm có rơi ra đồ không. */
@@ -39,8 +42,10 @@ export function digRate(id: number, ctx: DigContext): number {
   else if (t?.kind === "shears" && (isLeaves(id) || id === B.COBWEB)) speed = SHEARS.LEAVES_SPEED;
   else if (t?.kind === "shears" && id === B.WOOL) speed = SHEARS.WOOL_SPEED;
   else if (t && t.kind === d.tool) speed = TOOL_TIERS[t.tier].speed;
+  const eff = t?.ench?.efficiency ?? 0; // (8b2) Hiệu suất: + cấp² + 1 khi đúng công cụ
+  if (eff > 0 && speed > 1) speed += eff * eff + 1;
   if (speed / d.hardness >= DIGGING.INSTANT_RATIO) return Infinity;
-  if (ctx.headInWater) speed /= DIGGING.UNDERWATER_DIVISOR;
+  if (ctx.headInWater && !ctx.aqua) speed /= DIGGING.UNDERWATER_DIVISOR;
   if (!ctx.onGround) speed /= DIGGING.AIRBORNE_DIVISOR;
   const div = canHarvest(id, t) ? DIGGING.HARVEST_DIVISOR : DIGGING.NO_HARVEST_DIVISOR;
   return (DIGGING.TICKS_PER_S * speed) / d.hardness / div;

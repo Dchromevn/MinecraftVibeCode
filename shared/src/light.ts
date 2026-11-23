@@ -74,7 +74,7 @@ export function computeRegionLight({ blocks, meta }: Region): Uint8Array {
         const id = blocks[i]!;
         const op = OPACITY[id]!;
         level = op >= 15 ? 0 : Math.max(0, level - op);
-        const emit = id === B.FURNACE ? lightEmitOf(id, meta[i]!) : EMIT[id]!; // lò chỉ sáng khi cháy
+        const emit = id === B.FURNACE || id === B.RESPAWN_ANCHOR ? lightEmitOf(id, meta[i]!) : EMIT[id]!; // lò chỉ sáng khi cháy; (10d2) mỏ neo theo số lần nạp
         light[i] = (level << 4) | emit;
         if (emit > 1) blockQ.push(i);
       }

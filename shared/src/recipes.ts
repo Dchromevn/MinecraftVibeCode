@@ -8,7 +8,7 @@ import { COLORS } from "./colors.js";
 
 /** Nhóm nguyên liệu (Giai đoạn 4d): ô lưới nhận bất kỳ vật phẩm nào trong nhóm, có thể trộn loài. */
 export const ITEM_TAGS: Readonly<Record<string, readonly string[]>> = {
-  "#planks": PLANK_ITEMS, "#log": LOG_ITEMS,
+  "#planks": [...PLANK_ITEMS, "crimson_planks", "warped_planks"], "#log": LOG_ITEMS, // (10b) ván nấm làm đồ gỗ được (không đốt được)
   "#wool": COLORS.map((c) => `${c}_wool`), "#bed": COLORS.map((c) => `${c}_bed`), // Giai đoạn 4f
 };
 
@@ -70,6 +70,7 @@ const ARMOR_SHAPE = [["XXX", "X X"], ["X X", "XXX", "XXX"], ["XXX", "X X", "X X"
 for (const [tier, mat] of ARMOR_MAT) ARMOR_PIECES.forEach((p, i) => shaped(`${tier}_${p}`, 1, ARMOR_SHAPE[i]!, { X: mat }));
 
 shaped("bow", 1, [" |T", "| T", " |T"], { "|": "stick", T: "string" });
+shaped("shield", 1, ["PIP", "PPP", " P "], { P: "#planks", I: "iron_ingot" });
 shaped("arrow", 4, ["F", "|", "E"], { F: "flint", "|": "stick", E: "feather" });
 shaped("chest", 1, ["PPP", "P P", "PPP"], { P: "#planks" });
 shaped("furnace", 1, ["CCC", "C C", "CCC"], { C: "cobble" });
@@ -87,9 +88,64 @@ for (const [m, src] of SHAPE_MATERIALS) {
   shaped(`${m}_stairs`, 4, ["X  ", "XX ", "XXX"], { X: mat });
   shaped(`${m}_slab`, 6, ["XXX"], { X: mat });
 }
+for (const m of ["dark_oak"]) { // (8c) sồi tối: bậc, tấm (không nằm trong SHAPE_MATERIALS để giữ id cũ)
+  shaped(`${m}_stairs`, 4, ["X  ", "XX ", "XXX"], { X: `${m}_planks` });
+  shaped(`${m}_slab`, 6, ["XXX"], { X: `${m}_planks` });
+}
 for (const m of WALL_MATERIALS) shaped(`${m}_wall`, 6, ["XXX", "XXX"], { X: BLOCKS[SHAPE_MATERIALS.find((x) => x[0] === m)![1]]!.key });
 shaped("rail", 16, ["I I", "I|I", "I I"], { I: "iron_ingot", "|": "stick" });
 shaped("bread", 1, ["WWW"], { W: "wheat" });
+shaped("glowstone", 1, ["DD", "DD"], { D: "glowstone_dust" }, "hand"); // 10a
+shaped("quartz_block", 1, ["QQ", "QQ"], { Q: "quartz" }, "hand");
+// (10b) gỗ nấm Vực Lửa, bazan, đá đen, khối xương, đuốc linh hồn, cần câu nấm
+for (const w of ["crimson", "warped"]) {
+  const P = `${w}_planks`;
+  shapeless(P, 4, [`${w}_stem`]);
+  shaped(`${w}_stairs`, 4, ["X  ", "XX ", "XXX"], { X: P });
+  shaped(`${w}_slab`, 6, ["XXX"], { X: P });
+  shaped(`${w}_door`, 3, ["PP", "PP", "PP"], { P });
+  shaped(`${w}_fence`, 3, ["P|P", "P|P"], { P, "|": "stick" });
+}
+shaped("polished_basalt", 4, ["BB", "BB"], { B: "basalt" }, "hand");
+shaped("polished_blackstone", 4, ["BB", "BB"], { B: "blackstone" }, "hand");
+shaped("polished_blackstone_bricks", 4, ["BB", "BB"], { B: "polished_blackstone" }, "hand");
+shaped("bone_block", 1, ["MMM", "MMM", "MMM"], { M: "bone_meal" });
+shapeless("bone_meal", 9, ["bone_block"]);
+shaped("nether_wart_block", 1, ["WWW", "WWW", "WWW"], { W: "nether_wart" });
+shaped("magma_block", 1, ["CC", "CC"], { C: "magma_cream" }, "hand");
+for (const s of ["soul_sand", "soul_soil"]) shaped("soul_torch", 4, ["C", "|", "S"], { C: "coal", "|": "stick", S: s }, "hand");
+shaped("warped_fungus_on_a_stick", 1, ["  |", " |S", "|FS"], { "|": "stick", S: "string", F: "warped_fungus" }); // cần câu + nấm cong vênh
+// (10c) gạch Vực Lửa (viên gạch: nung đá lửa ngục), gạch đỏ (mụn cóc + viên gạch), bậc / tấm / tường, hàng rào; bột / cầu lửa nhỏ;
+// khối tuyết ↔ bóng tuyết, lớp tuyết
+shaped("nether_bricks", 1, ["NN", "NN"], { N: "nether_brick" }, "hand");
+shaped("red_nether_bricks", 1, ["WN", "NW"], { W: "nether_wart", N: "nether_brick" }, "hand");
+for (const [m, src] of [["nether_brick", "nether_bricks"], ["red_nether_brick", "red_nether_bricks"]] as const) {
+  shaped(`${m}_stairs`, 4, ["X  ", "XX ", "XXX"], { X: src });
+  shaped(`${m}_slab`, 6, ["XXX"], { X: src });
+  shaped(`${m}_wall`, 6, ["XXX", "XXX"], { X: src });
+}
+shaped("chiseled_nether_bricks", 1, ["S", "S"], { S: "nether_brick_slab" }, "hand");
+shaped("nether_brick_fence", 6, ["BNB", "BNB"], { B: "nether_bricks", N: "nether_brick" });
+shapeless("blaze_powder", 2, ["blaze_rod"]);
+shapeless("fire_charge", 3, ["blaze_powder", "coal", "gunpowder"]);
+shaped("glass_bottle", 3, ["G G", " G "], { G: "glass" }); // (10d1)
+shaped("spectral_arrow", 2, [" D ", "DAD", " D "], { D: "glowstone_dust", A: "arrow" });
+// (10d2) netherite, đá đen, xích, đá nam châm, mỏ neo hồi sinh, la bàn (chưa có bụi đá đỏ: giữa là mảnh sắt), nhân bản khuôn nâng cấp
+shapeless("netherite_ingot", 1, ["netherite_scrap", "netherite_scrap", "netherite_scrap", "netherite_scrap", "gold_ingot", "gold_ingot", "gold_ingot", "gold_ingot"]);
+shaped("netherite_block", 1, ["NNN", "NNN", "NNN"], { N: "netherite_ingot" });
+shapeless("netherite_ingot", 9, ["netherite_block"]);
+for (const [m, src] of [["blackstone", "blackstone"], ["polished_blackstone", "polished_blackstone"], ["polished_blackstone_brick", "polished_blackstone_bricks"]])
+  shaped(`${m}_stairs`, 4, ["X  ", "XX ", "XXX"], { X: src! }), shaped(`${m}_slab`, 6, ["XXX"], { X: src! }), shaped(`${m}_wall`, 6, ["XXX", "XXX"], { X: src! });
+shaped("chiseled_polished_blackstone", 1, ["S", "S"], { S: "polished_blackstone_slab" });
+shaped("chain", 1, ["N", "I", "N"], { N: "iron_nugget", I: "iron_ingot" });
+shaped("lodestone", 1, ["SSS", "SNS", "SSS"], { S: "chiseled_stone_bricks", N: "netherite_ingot" });
+shaped("respawn_anchor", 1, ["CCC", "GGG", "CCC"], { C: "crying_obsidian", G: "glowstone" });
+shaped("compass", 1, [" I ", "INI", " I "], { I: "iron_ingot", N: "iron_nugget" });
+shaped("netherite_upgrade_smithing_template", 2, ["DTD", "DND", "DDD"], { D: "diamond", T: "netherite_upgrade_smithing_template", N: "netherrack" });
+shaped("snow_block", 1, ["SS", "SS"], { S: "snowball" }, "hand");
+shaped("snow_layer", 6, ["BBB"], { B: "snow_block" });
+shaped("gold_ingot", 1, ["NNN", "NNN", "NNN"], { N: "gold_nugget" });
+shapeless("gold_nugget", 9, ["gold_ingot"]);
 shaped("sandstone", 1, ["SS", "SS"], { S: "sand" });
 shaped("golden_apple", 1, ["GGG", "GAG", "GGG"], { G: "gold_ingot", A: "apple" });
 shaped("bowl", 4, ["P P", " P "], { P: "#planks" });
@@ -103,6 +159,20 @@ shapeless("red_dye", 1, ["poppy"]);
 shapeless("red_dye", 1, ["beetroot"]);
 shapeless("blue_dye", 1, ["cornflower"]);
 shapeless("white_dye", 1, ["lily_of_the_valley"]);
+shapeless("bone_meal", 3, ["bone"]); // 7a
+shaped("leather", 1, ["HH", "HH"], { H: "rabbit_hide" }, "hand"); // 7c
+shapeless("black_dye", 1, ["ink_sac"]);
+shaped("wolf_armor", 1, ["S  ", "SSS", "S S"], { S: "armadillo_scute" }); // 7c (người dùng chọn có giáp sói)
+// 7d: yên (DESIGN: 3 da + 1 thỏi sắt), dây dắt (4 sợi tơ + 1 viên nhầy → 2)
+shaped("saddle", 1, ["LLL", " I "], { L: "leather", I: "iron_ingot" });
+shaped("lead", 2, ["SS ", "SB ", "  S"], { S: "string", B: "slime_ball" });
+// 7e: block công trình chế được
+shaped("chiseled_stone_bricks", 1, ["S", "S"], { S: "stone_brick_slab" }, "hand");
+shapeless("mossy_stone_bricks", 1, ["stone_bricks", "vine"]);
+shaped("cut_sandstone", 4, ["SS", "SS"], { S: "sandstone" }, "hand");
+shaped("chiseled_sandstone", 1, ["S", "S"], { S: "sandstone_slab" }, "hand");
+shaped("tnt", 1, ["GSG", "SGS", "GSG"], { G: "gunpowder", S: "sand" }); // 7b (người dùng chọn có TNT)
+shapeless("white_dye", 1, ["bone_meal"]);
 
 // ---- Giai đoạn 4f: thuốc nhuộm còn lại (đen từ than, nâu = đỏ + xanh lá: game tự đặt), trộn màu ----
 shapeless("black_dye", 1, ["coal"]);
@@ -129,11 +199,18 @@ for (const c of COLORS) {
 shaped("shears", 1, [" I", "I "], { I: "iron_ingot" }, "hand");
 shapeless("flint_and_steel", 1, ["iron_ingot", "flint"]);
 for (const [block, item] of [["coal_block", "coal"], ["iron_block", "iron_ingot"], ["gold_block", "gold_ingot"], ["diamond_block", "diamond"],
-  ["emerald_block", "emerald"], ["raw_iron_block", "raw_iron"], ["raw_gold_block", "raw_gold"]] as const) {
+  ["emerald_block", "emerald"], ["raw_iron_block", "raw_iron"], ["raw_gold_block", "raw_gold"], ["lapis_block", "lapis_lazuli"]] as const) {
   shaped(block, 1, ["XXX", "XXX", "XXX"], { X: item });
   shapeless(item, 9, [block]);
 }
 shapeless("iron_nugget", 9, ["iron_ingot"]);
+// 8b2: giấy, sách, giá sách, bàn phù phép
+shaped("paper", 3, ["SSS"], { S: "sugar_cane" });
+shapeless("book", 1, ["paper", "paper", "paper", "leather"]);
+shaped("bookshelf", 1, ["PPP", "BBB", "PPP"], { P: "#planks", B: "book" });
+shaped("enchanting_table", 1, [" B ", "DOD", "OOO"], { B: "book", D: "diamond", O: "obsidian" });
+shaped("anvil", 1, ["BBB", " I ", "III"], { B: "iron_block", I: "iron_ingot" }); // 8b3
+shaped("grindstone", 1, ["SLS", "P P"], { S: "stick", L: "stone_slab", P: "#planks" });
 shaped("iron_ingot", 1, ["NNN", "NNN", "NNN"], { N: "iron_nugget" });
 shaped("lantern", 1, ["NNN", "NTN", "NNN"], { N: "iron_nugget", T: "torch" });
 shaped("iron_bars", 16, ["III", "III"], { I: "iron_ingot" });
@@ -141,6 +218,8 @@ shaped("iron_door", 3, ["II", "II", "II"], { I: "iron_ingot" });
 shapeless("stone_button", 1, ["stone"]);
 shapeless("oak_button", 1, ["#planks"]);
 shaped("lever", 1, ["S", "C"], { S: "stick", C: "cobble" }, "hand");
+shaped("stone_pressure_plate", 1, ["SS"], { S: "stone" }, "hand");
+shaped("oak_pressure_plate", 1, ["PP"], { P: "#planks" }, "hand");
 
 export const RECIPES: readonly Recipe[] = R;
 

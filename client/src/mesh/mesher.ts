@@ -49,16 +49,21 @@ export const CROP_TEX: Readonly<Record<number, readonly string[]>> = {
   [B.CARROTS]: STAGE4.map((k) => `carrots_${k}`),
   [B.POTATOES]: STAGE4.map((k) => `potatoes_${k}`),
   [B.BEETROOTS]: [0, 1, 2, 3].map((k) => `beetroots_${k}`),
+  [B.NETHER_WART]: [0, 1, 1, 2].map((k) => `nether_wart_stage${k}`), // (10b) tuổi 0..3
 };
 export const STEM_ATTACHED_TEX: Readonly<Record<number, string>> = {
   [B.MELON_STEM]: "melon_stem_attached",
   [B.PUMPKIN_STEM]: "pumpkin_stem_attached",
 };
 
+/** (10d2) Ảnh mỏ neo hồi sinh: mặt trên tắt / sáng, mặt bên nạp 0..4. */
+export const ANCHOR_TEX = ["respawn_anchor_top_off", "respawn_anchor_top", ...[0, 1, 2, 3, 4].map((i) => `respawn_anchor_side${i}`)];
+
 export interface UvTable extends SpecialUv {
   snowSide: TileUV;
   furnaceOn: TileUV;
   chestFront: [TileUV, TileUV]; // mặt trước rương đôi theo nửa A, nửa B (khóa ở giữa)
+  anchor: TileUV[]; // (10d2) mỏ neo hồi sinh: mặt trên tắt / sáng, mặt bên theo số lần nạp 0..4
 }
 
 export function buildUvTable(uv: (name: string) => TileUV): UvTable {
@@ -73,6 +78,7 @@ export function buildUvTable(uv: (name: string) => TileUV): UvTable {
     bedFootEnd: uv("bed_foot_end"),
     furnaceOn: uv("furnace_front_on"),
     chestFront: [uv("chest_front_b"), uv("chest_front_a")], // nửa A nằm bên phải khi nhìn mặt trước
+    anchor: ANCHOR_TEX.map(uv),
     farmlandWet: uv("farmland_wet"),
     crops: BLOCKS.map((b) => CROP_TEX[b.id]?.map(uv)),
     // block có màu (Giai đoạn 4f): [id][màu][trên, dưới, bên, trước]
@@ -183,6 +189,7 @@ export function meshRegion(region: Region, light: Uint8Array, uvt: UvTable): Sec
             let uv = def.colorTex ? uvt.colored[id]![meta & 15]![slot]! : uvt.blocks[id]![slot]!;
             if (fi === frontFace && id === B.FURNACE && furnaceLit(meta)) uv = uvt.furnaceOn;
             if (fi === frontFace && id === B.CHEST && chestHalf(meta) > 0) uv = uvt.chestFront[chestHalf(meta) - 1]!;
+            if (id === B.RESPAWN_ANCHOR && f.n[1] >= 0) uv = uvt.anchor[f.n[1] === 1 ? (meta & 7 ? 1 : 0) : 2 + Math.min(4, meta & 7)]!; // (10d2)
             if (snowAbove && f.n[1] === 0) uv = uvt.snowSide;
             const vTop = f.n[1] === 0 ? uv.v0 + (uv.v1 - uv.v0) * top : uv.v1;
             const nSky = sky(nx, ny, nz), nBlk = blk(nx, ny, nz);

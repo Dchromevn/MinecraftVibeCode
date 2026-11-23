@@ -2,15 +2,28 @@
 // gộp chồng, hút về người chơi gần nhất còn chỗ trong túi, nhặt vào túi. Gửi cho từng người chơi
 // chỉ những vật phẩm mới / đã đổi chỗ trong tầm nhìn.
 import {
-  DROPPED, INVENTORY, NET, canMerge, canPickup, createItemEntity, distToPlayer, itemDef, popFromBlock, stepItem, tryMergeItems,
+  DROPPED, INVENTORY, NET, XP, canMerge, canPickup, createItemEntity, distToPlayer, itemDef, popFromBlock, stepItem, tryMergeItems,
   type Inventory, type ItemEntity, type ItemStack, type NetItem, type Rng,
 } from "../../shared/src/index.js";
 import type { ServerPlayer } from "./player.js";
 import type { ServerWorld } from "./serverWorld.js";
 
 function hasRoom(inv: Inventory, s: ItemStack): boolean {
+  if (s.item === XP.ORB_KEY) return true; // (8b2) quả cầu kinh nghiệm: luôn nhặt được
   const max = itemDef(s.item)?.maxStack ?? INVENTORY.MAX_STACK;
   return inv.main.some((m) => !m || (canMerge(m, s) && m.count < max));
+}
+
+/** (8b3) Vá: điểm kinh nghiệm sửa đồ có Vá đang cầm / mặc (2 độ bền mỗi điểm); trả về phần còn lại cộng vào XP. */
+function mend(inv: Inventory, xp: number): number {
+  const items = [inv.held, inv.offhand[0], ...inv.armor].filter((s): s is ItemStack => !!s && (s.ench?.mending ?? 0) > 0 && s.damage > 0);
+  for (const s of items) {
+    if (xp <= 0) break;
+    const fix = Math.min(s.damage, xp * 2);
+    s.damage -= fix;
+    xp -= Math.ceil(fix / 2);
+  }
+  return xp;
 }
 
 const round = (v: number): number => Math.round(v * 100) / 100;
@@ -19,6 +32,15 @@ export class ServerItems {
   readonly list: ItemEntity[] = [];
 
   constructor(private readonly w: ServerWorld, private readonly rng: Rng) {}
+
+  /** (8b2) Rơi n điểm kinh nghiệm ở (x, y, z) (thành vài quả cầu như Minecraft). */
+  xp(n: number, x: number, y: number, z: number): void {
+    for (let left = Math.floor(n); left > 0; ) {
+      const v = left >= 17 ? 17 : left >= 7 ? 7 : left >= 3 ? 3 : 1;
+      this.pop({ item: XP.ORB_KEY, count: v, damage: 0 }, Math.floor(x), Math.floor(y), Math.floor(z));
+      left -= v;
+    }
+  }
 
   /** Văng ra từ block bị phá ở ô (x, y, z). */
   pop(s: ItemStack, x: number, y: number, z: number): void {
@@ -53,7 +75,18 @@ export class ServerItems {
           target = p;
         }
       }
+      if (target && e.stack.item === XP.ORB_KEY && best < XP.ATTRACT_R) { // (8b2) quả cầu kinh nghiệm bay về người chơi
+        const dx = target.x - e.x, dy = target.y + 0.6 - e.y, dz = target.z - e.z, d = Math.hypot(dx, dy, dz) || 1;
+        Object.assign(e, { vx: (dx / d) * XP.ATTRACT_SPEED, vy: (dy / d) * XP.ATTRACT_SPEED, vz: (dz / d) * XP.ATTRACT_SPEED });
+      }
       if (!stepItem(e, dt, cell, target)) {
+        this.list.splice(i, 1);
+        continue;
+      }
+      if (target && canPickup(e, target) && e.stack.item === XP.ORB_KEY) { // (8b2) nhặt quả cầu: cộng kinh nghiệm
+        target.state.xp += mend(target.inv, e.stack.count);
+        target.stateDirty = true;
+        target.invDirty = true;
         this.list.splice(i, 1);
         continue;
       }

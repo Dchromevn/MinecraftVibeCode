@@ -54,6 +54,7 @@ function genCorridor(ctx: Ctx, p: Piece): void {
   }
   const ex = p.x + DX[p.dir]! * len, ez = p.z + DZ[p.dir]! * len;
   const lastX = ex - DX[p.dir]!, lastZ = ez - DZ[p.dir]!;
+  spawnerRoom(ctx, p, len);
   if (p.depth >= 10 || ctx.pieces >= M.MAX_PIECES) return deadEnd(ctx, lastX, p.y, lastZ);
   const r = rng();
   const next = (kind: Piece["kind"]): void => {
@@ -63,6 +64,32 @@ function genCorridor(ctx: Ctx, p: Piece): void {
   else if (r < 0.65) next("stairs");
   else if (r < 0.8) next("corridor");
   else deadEnd(ctx, lastX, p.y, lastZ);
+}
+
+/**
+ * (7b) Lồng nhện hang giữa hành lang, mạng nhện dày xung quanh. Quyết định bằng băm tọa độ (không dùng chuỗi ngẫu nhiên
+ * chung) nên hầm mỏ ở vùng đã khám phá không đổi hình.
+ */
+function spawnerRoom(ctx: Ctx, p: Piece, len: number): void {
+  if ((ctx.spawners ?? 0) >= M.SPAWNER_MAX || len < 6) return;
+  const r = mulberry32(hashInts(p.x, p.y, p.z, 31));
+  if (r() >= M.SPAWNER_CHANCE) return;
+  ctx.spawners = (ctx.spawners ?? 0) + 1;
+  const mid = len >> 1, x = p.x + DX[p.dir]! * mid, z = p.z + DZ[p.dir]! * mid;
+  const px = DZ[p.dir]!, pz = DX[p.dir]!;
+  for (let t = -2; t <= 2; t++)
+    for (let s = -1; s <= 1; s++)
+      for (let h = 0; h < 3; h++) {
+        const wx = x + DX[p.dir]! * t + px * s, wz = z + DZ[p.dir]! * t + pz * s;
+        if (ctx.get(wx, p.y + h, wz) === B.AIR && r() < M.SPAWNER_WEB_CHANCE) ctx.set(wx, p.y + h, wz, B.COBWEB);
+      }
+  ctx.set(x, p.y, z, B.SPAWNER);
+}
+
+/** (7b) Loài quái của lồng trong hầm mỏ ở ô (x, y, z): nhện hang / xác sống / bộ xương (dữ liệu phụ 0 / 1 / 2). */
+function spawnerKind(x: number, y: number, z: number): number {
+  const r = mulberry32(hashInts(x, y, z, 33))();
+  return r < M.SPAWNER_ZOMBIE ? 1 : r < M.SPAWNER_ZOMBIE + M.SPAWNER_SKELETON ? 2 : 0;
 }
 
 function genCrossing(ctx: Ctx, p: Piece): void {
@@ -186,7 +213,7 @@ export class MineshaftPlanner {
       const ck = chunkKey(x >> 4, z >> 4);
       let list = plan.get(ck);
       if (!list) plan.set(ck, (list = []));
-      const meta = id === B.RAIL ? railMetaFromNeighbors((dx, dz) => isRail(x + dx, y, z + dz)) : 0;
+      const meta = id === B.RAIL ? railMetaFromNeighbors((dx, dz) => isRail(x + dx, y, z + dz)) : id === B.SPAWNER ? spawnerKind(x, y, z) : 0;
       list.push((blockIndex(x & 15, y, z & 15) << 16) | (meta << 8) | id);
     }
     return plan;

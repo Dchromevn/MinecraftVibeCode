@@ -22,6 +22,7 @@ export interface Ctx {
   cz: number;
   pieces: number;
   queue: Piece[];
+  spawners?: number; // (7b) số lồng sinh quái đã đặt
   /** Block hiện tại (lớp phủ của kế hoạch, nếu chưa có thì là block tự nhiên). */
   get(x: number, y: number, z: number): number;
   set(x: number, y: number, z: number, id: number): void;

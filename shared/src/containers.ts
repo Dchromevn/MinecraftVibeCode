@@ -2,6 +2,7 @@
 import { CONTAINERS } from "./constants.js";
 import type { ExtRules, ItemStack, Slot } from "./inventory.js";
 import { fuelValue, smeltResult } from "./smelting.js";
+import { enchSlot, isEnchanted } from "./enchantments.js";
 
 /** Rương đơn (27 ô) hoặc rương đôi (54 ô): ô nào cũng nhận, Shift chuyển vào theo thứ tự. */
 export function chestRules(size: number): ExtRules {
@@ -26,3 +27,17 @@ export function splitChest(all: Slot[], a: Slot[], b: Slot[]): void {
     b[i] = all[CONTAINERS.CHEST_SLOTS + i] ?? null;
   }
 }
+
+/** (8b2) Bàn phù phép: 0 món phù phép được (chưa phù phép), 1 lưu ly. */
+export const ENCHANT_RULES: ExtRules = {
+  accepts: (i: number, s: ItemStack) => (i === 0 ? enchSlot(s.item) !== null && !isEnchanted(s) : i === 1 && s.item === "lapis_lazuli"),
+  quickTargets: (s: ItemStack) => (s.item === "lapis_lazuli" ? [1] : enchSlot(s.item) !== null && !isEnchanted(s) ? [0] : []),
+};
+
+/** (8b3) Đe: hai ô nhận mọi thứ (kết quả tính ở anvil.ts). */
+export const ANVIL_RULES: ExtRules = { accepts: () => true, quickTargets: () => [0, 1] };
+/** (8b3) Đá mài: đồ phù phép được / sách phù phép. */
+export const GRIND_RULES: ExtRules = {
+  accepts: (_i: number, s: ItemStack) => enchSlot(s.item) !== null || s.item === "enchanted_book",
+  quickTargets: (s: ItemStack) => (enchSlot(s.item) !== null || s.item === "enchanted_book" ? [0, 1] : []),
+};

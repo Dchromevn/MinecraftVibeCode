@@ -49,3 +49,9 @@ export const CONTAINERS = {
   FURNACE_SLOTS: 3, // nguyên liệu, nhiên liệu, thành phẩm
   LOOT_SALT: 99, // muối số ngẫu nhiên đồ rương hầm mỏ (seed + vị trí)
 } as const;
+
+/** (8b2) Mía: mọc tự nhiên cạnh nước (mép bờ: ô đất / cát / cỏ có nước ngay cạnh), cao 1–4; tự mọc (random tick, đủ 15 tuổi thêm
+ *  một khúc) tới 3 khúc. Cụm theo ô lưới CELL × CELL, CHANCE mỗi ô. */
+export const SUGAR_CANE = { GROW_AGE: 15, HEIGHT_MAX: 3, CELL: 4, CHANCE: 0.6, NATURAL: [1, 4] as readonly [number, number] };
+/** (8b2) Lưu ly: cụm 4–7 viên, 3 lần mỗi chunk, y 1–40 (đá sâu: bản đá sâu); 4–9 viên mỗi quặng. */
+export const LAPIS = { CLUSTER: [4, 7] as readonly [number, number], ATTEMPTS: 3, MAX_Y: 40, DROPS: [4, 9] as readonly [number, number] };

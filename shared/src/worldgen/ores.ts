@@ -4,6 +4,7 @@ import { WORLD } from "../constants.js";
 import { B, type BlockId } from "../blocks.js";
 import { CHUNK_HEIGHT, blockIndex } from "../chunk.js";
 import { hashInts, mulberry32, randInt } from "../rng.js";
+import { LAPIS } from "../tickConstants.js";
 import { BIOME, type TerrainSampler } from "./terrainSampler.js";
 
 interface OreSpec {
@@ -63,6 +64,56 @@ export function placeOres(seed: number, data: Uint8Array, cx: number, cz: number
       }
     }
   }
+}
+
+/** (8b2) Lưu ly: chuỗi số riêng (muối 13) để quặng cũ không đổi chỗ; trong đá sâu thì thành bản đá sâu. */
+export function placeLapis(seed: number, data: Uint8Array, cx: number, cz: number): void {
+  for (let ncz = cz - 1; ncz <= cz + 1; ncz++)
+    for (let ncx = cx - 1; ncx <= cx + 1; ncx++) {
+      const rng = mulberry32(hashInts(seed, ncx, ncz, 13));
+      for (let a = 0; a < LAPIS.ATTEMPTS; a++) {
+        let x = ncx * 16 + randInt(rng, 0, 15), z = ncz * 16 + randInt(rng, 0, 15), y = randInt(rng, 1, LAPIS.MAX_Y - 1);
+        for (let i = randInt(rng, LAPIS.CLUSTER[0], LAPIS.CLUSTER[1]); i > 0; i--) {
+          const lx = x - cx * 16, lz = z - cz * 16;
+          if (lx >= 0 && lz >= 0 && lx <= 15 && lz <= 15) {
+            const k = blockIndex(lx, y, lz);
+            if (data[k] === B.STONE) data[k] = B.ORE_LAPIS;
+            else if (data[k] === B.DEEPSLATE) data[k] = B.ORE_LAPIS_DEEP;
+          }
+          const axis = randInt(rng, 0, 2), dir = rng() < 0.5 ? -1 : 1;
+          if (axis === 0) x += dir;
+          else if (axis === 1) y = Math.max(1, Math.min(LAPIS.MAX_Y - 1, y + dir));
+          else z += dir;
+        }
+      }
+    }
+}
+
+/**
+ * Đá nhiễm (7b): cụm trong ô đá thường ở cột biome núi, y < 64. Chuỗi số ngẫu nhiên riêng (muối 9) nên quặng / sỏi đã có
+ * không đổi chỗ; xét cả 8 chunk kề như quặng để cụm vắt qua ranh giới vẫn liền.
+ */
+export function placeInfested(sampler: TerrainSampler, data: Uint8Array, cx: number, cz: number): void {
+  const s = WORLD.INFESTED, x0 = cx * 16, z0 = cz * 16;
+  for (let ncz = cz - 1; ncz <= cz + 1; ncz++)
+    for (let ncx = cx - 1; ncx <= cx + 1; ncx++) {
+      const rng = mulberry32(hashInts(sampler.seed, ncx, ncz, 9));
+      for (let a = 0; a < s.attempts; a++) {
+        let x = ncx * 16 + randInt(rng, 0, 15), z = ncz * 16 + randInt(rng, 0, 15), y = randInt(rng, 1, s.maxY - 1);
+        if (sampler.column(x, z).biome !== BIOME.MOUNTAINS) continue;
+        for (let i = 0; i < s.cluster; i++) {
+          const lx = x - x0, lz = z - z0;
+          if (lx >= 0 && lz >= 0 && lx < 16 && lz < 16 && y >= 1) {
+            const k = blockIndex(lx, y, lz);
+            if (data[k] === B.STONE) data[k] = B.INFESTED_STONE;
+          }
+          const axis = randInt(rng, 0, 2), dir = rng() < 0.5 ? -1 : 1;
+          if (axis === 0) x += dir;
+          else if (axis === 1) y = Math.max(1, Math.min(s.maxY - 1, y + dir));
+          else z += dir;
+        }
+      }
+    }
 }
 
 /** Ngọc lục bảo: khối lẻ nên chỉ cần xét chunk của chính nó. */

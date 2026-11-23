@@ -97,15 +97,25 @@ export async function preloadIcons(): Promise<void> {
   await Promise.all(allItems().map(async (d) => urls.set(d.key, await render(d.key))));
 }
 
+/** (10d2) La bàn: vị trí / hướng nhìn của mình, cõi, điểm hồi sinh của thế giới (tâm vùng an toàn) — main / session cập nhật. */
+export const compassState = { x: 0, z: 0, yaw: 0, dim: 0, spawn: null as { x: number; z: number } | null };
+
+/** Ảnh kim la bàn (compass_00..31 như Minecraft: 16 = thẳng phía trước) cho chồng s; null = không phải la bàn. Không có đích: kim quay. */
+export function compassIcon(s: { item: string; lode?: readonly number[] }): string | null {
+  if (s.item !== "compass" && s.item !== "lodestone_compass") return null;
+  const c = compassState, t = s.item === "lodestone_compass" ? (s.lode && s.lode[3] === c.dim ? { x: s.lode[0]! + 0.5, z: s.lode[2]! + 0.5 } : null)
+    : c.dim === 0 ? c.spawn : null;
+  let f = Math.floor(performance.now() / 60) % 32;
+  if (t) {
+    const rel = Math.atan2(-(t.x - c.x), -(t.z - c.z)) - c.yaw; // dương: đích ở bên trái
+    f = (((Math.round(16 - (rel / (2 * Math.PI)) * 32) % 32) + 32) % 32);
+  }
+  return `/icons/compass_${String(f).padStart(2, "0")}.png`;
+}
+
 export function iconUrl(key: string): string {
   return urls.get(key) ?? "";
 }
 
-/** Tên tiếng Việt của vật phẩm. */
-export function itemName(key: string): string {
-  const d = itemDef(key);
-  if (STR.items[key]) return STR.items[key]!; // tên riêng (kéo...) trước tên ghép theo công cụ
-  if (d?.tool) return `${STR.toolKinds[d.tool.kind] ?? d.tool.kind} ${STR.tiers[d.tool.tier] ?? d.tool.tier}`;
-  if (d?.armor) return `${STR.armorPieces[d.armor.piece] ?? d.armor.piece} ${STR.tiers[d.armor.tier] ?? d.armor.tier}`;
-  return STR.items[key] ?? STR.blocks[key] ?? key;
-}
+/** Tên tiếng Việt của vật phẩm (itemNames.ts — không phụ thuộc trình duyệt, script tạo ITEMS.md dùng chung). */
+export { itemName } from "./itemNames.js";

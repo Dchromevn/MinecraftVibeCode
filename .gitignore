@@ -6,7 +6,10 @@ assets-src/
 .DS_Store
 Thumbs.db
 server/data/
-# texture gốc Minecraft nhập từ client.jar (© Mojang): chỉ dùng trên máy, không commit
-client/public_mc/
+# client/public_mc (texture + mẫu công trình nhập từ client.jar, © Mojang) ĐƯỢC commit: repo riêng tư (2026-11-23)
 # cloudflared tải tay (npm run share) — không commit
 cloudflared.exe
+
+# app desktop (npm run desktop / dist-desktop): file gom tạm và bản .exe — không commit (.exe đăng ở Releases)
+desktop/stage/
+desktop/release/

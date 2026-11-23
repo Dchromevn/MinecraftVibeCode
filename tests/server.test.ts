@@ -3,6 +3,7 @@
 import { B, NET, chunkKey, type ServerMsg } from "../shared/src/index.js";
 import { Game } from "../server/src/game.js";
 import { check } from "./harness.js";
+import { flyPacket, standAt } from "./netHelpers.js";
 
 interface Fake {
   msgs: ServerMsg[];
@@ -10,18 +11,21 @@ interface Fake {
   conn: { send(d: string): void; close(): void };
 }
 function fake(): Fake {
-  const f: Fake = { msgs: [], closed: false, conn: { send: (d) => void f.msgs.push(JSON.parse(d) as ServerMsg), close: () => void (f.closed = true) } };
+  const f: Fake = {
+    msgs: [], closed: false,
+    conn: { send: (d) => void (typeof d === "string" && f.msgs.push(JSON.parse(d) as ServerMsg)), close: () => void (f.closed = true) },
+  };
   return f;
 }
 const of = <T extends ServerMsg["t"]>(f: Fake, t: T): Extract<ServerMsg, { t: T }>[] =>
   f.msgs.filter((m) => m.t === t) as Extract<ServerMsg, { t: T }>[];
 
-const game = new Game({ seed: "voxel", port: 0, spawn: "fixed", debug: true });
+const game = new Game({ seed: "voxel", port: 0, spawn: "fixed", debug: true, world: "t", admins: [], adminAll: true, dataDir: null });
 const send = (f: Fake, m: object): void => game.message(f.conn, JSON.stringify(m));
 const a = fake(), b = fake(), c = fake();
-send(a, { t: "hello", name: "An", version: NET.PROTOCOL_VERSION });
-send(b, { t: "hello", name: "Binh", version: NET.PROTOCOL_VERSION });
-send(c, { t: "hello", name: "an", version: NET.PROTOCOL_VERSION });
+send(a, { t: "hello", name: "An", password: "test", version: NET.PROTOCOL_VERSION });
+send(b, { t: "hello", name: "Binh", password: "test", version: NET.PROTOCOL_VERSION });
+send(c, { t: "hello", name: "an", password: "test", version: NET.PROTOCOL_VERSION });
 const w = of(a, "welcome")[0];
 check("vào game bằng tên; trùng tên (không phân biệt hoa thường) bị từ chối",
   !!w && w.seed === game.seed && !!of(b, "welcome")[0] && of(c, "reject")[0]?.reason === "taken" && c.closed);
@@ -29,7 +33,7 @@ check("người vào sau thấy người trước và ngược lại", of(a, "jo
 
 // đứng ở điểm hồi sinh, cho server tải chunk xung quanh
 const sp = game.spawn;
-for (const f of [a, b]) send(f, { t: "move", x: sp.x, y: sp.y, z: sp.z, yaw: 0, pitch: -1.2, flying: false, sneaking: false, swing: 0, health: 20, dead: false });
+for (const f of [a, b]) game.message(f.conn, flyPacket(sp.x, sp.y, sp.z)); // (5c) quản trị viên báo vị trí khi bay
 for (let i = 0; i < 120; i++) game.tick();
 const cx = Math.floor(sp.x / 16), cz = Math.floor(sp.z / 16);
 send(b, { t: "sub", add: [cx, cz], remove: [] });
@@ -87,7 +91,7 @@ check("đóng rương: đồ nằm lại trong rương", !!ent?.slots.some((s) =
   for (let y = py; y <= py + 4; y++) game.w.setCell(px, y, pz, B.AIR, 0); // cột trống (chỗ thử có thể nằm trong đồi)
   pp.inv.main[6] = { item: "cobble", count: 5, damage: 0 };
   send(b, { t: "inv", seq: 2, a: { t: "select", n: 6 } });
-  const mv = (y: number): void => send(b, { t: "move", x: px + 0.5, y, z: pz + 0.5, yaw: 0, pitch: -1.5, flying: false, sneaking: false, swing: 0, health: 20, dead: false });
+  const mv = (y: number): void => standAt(pp, px + 0.5, y, pz + 0.5); // (5c) vị trí do server tính
   const place = (): void => send(b, { t: "use", hit: { x: px, y: py - 1, z: pz, nx: 0, ny: 1, nz: 0 }, src: null, sneaking: false, yaw: 0 });
   mv(py);
   place(); // server còn thấy đứng trong ô → từ chối (đúng: không đặt block vào người)
@@ -104,7 +108,7 @@ const count = pa.inv.count("planks");
 game.disconnect(a.conn);
 check("người kia nhận tin rời game", of(b, "leave").length > 0);
 const a2 = fake();
-send(a2, { t: "hello", name: "An", version: NET.PROTOCOL_VERSION });
+send(a2, { t: "hello", name: "An", password: "test", version: NET.PROTOCOL_VERSION });
 const back = game.online().find((p) => p.name === "An")!;
 check("thoát rồi vào lại (server còn chạy): túi đồ còn nguyên", back.inv.count("planks") === count && count > 0);
 void chunkKey;

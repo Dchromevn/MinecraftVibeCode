@@ -75,6 +75,7 @@ export const bedHead = (m: number): boolean => (m & 4) !== 0;
 /** Ánh sáng phát ra theo id + dữ liệu phụ (lò nung chỉ sáng khi đang cháy). */
 export function lightEmitOf(id: number, meta: number): number {
   if (id === B.FURNACE) return furnaceLit(meta) ? FURNACE.LIGHT_WHEN_LIT : 0;
+  if (id === B.RESPAWN_ANCHOR) return [0, 3, 7, 11, 15][Math.min(4, meta & 7)]!; // (10d2) theo số lần nạp
   return BLOCKS[id]?.lightEmit ?? 0;
 }
 

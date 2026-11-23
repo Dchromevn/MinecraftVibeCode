@@ -1,11 +1,15 @@
 // Bảng dữ liệu block. Thứ tự phải khớp id trong B (blocks.ts).
-// Đủ id 0–45 theo bảng 2.2, 46–62 (4d), 63–94 (4e) và 95–113 (4f) theo mục 2.13.
+// Đủ id 0–45 theo bảng 2.2, 46–62 (4d), 63–94 (4e), 95–115 (4f) theo mục 2.13 và 116–118 (7b).
 import { FIRE, LANTERN_LIGHT, LEAF_DROPS, LIGHT, MOVE } from "./constants.js";
 import type { BlockDef, BlockDrop, BlockId, BlockTextures, ToolKind } from "./blocks.js";
+import { villageBlocks } from "./blockTable8a.js";
+import { darkOakShapes } from "./blockTable8c.js";
+import { netherBlocks } from "./blockTable10.js";
+import { netherBiomeBlocks, netherWoodShapes } from "./blockTable10b.js";
+import { fortressBlocks, fortressShapes } from "./blockTable10c.js";
+import { bastionBlocks } from "./blockTable10d.js";
 
-const same = (t: string): BlockTextures => ({ top: t, bottom: t, side: t });
-const drop = (item: string, chance = 1): BlockDrop => ({ item, chance });
-
+const same = (t: string): BlockTextures => ({ top: t, bottom: t, side: t }), drop = (item: string, chance = 1): BlockDrop => ({ item, chance });
 const BASE: Omit<BlockDef, "id" | "key" | "hardness" | "tool" | "drops" | "tex"> = {
   toolRequired: false,
   minTier: null,
@@ -182,7 +186,6 @@ function woodDefs(id: number, w: string): BlockDef[] {
   ];
 }
 
-
 // Giai đoạn 4e (mục 2.13): gạch đá; bậc, tấm theo 10 vật liệu; tường theo 5; hàng rào, cửa theo loài gỗ.
 // Bậc / tấm / tường lấy độ cứng, công cụ, texture của vật liệu gốc; không chặn sáng (vẽ bằng ánh sáng của
 // chính ô, như đất cày) và không che khuất khối bên cạnh.
@@ -242,8 +245,50 @@ TABLE.push(
   def(113, "lever", 0.5, "none", [drop("lever")], { top: "cobble", bottom: "cobble", side: "cobble", front: "lever" }, {
     ...OPEN, render: "lever", meta: "switch",
   }),
+  def(114, "stone_pressure_plate", 0.5, "pickaxe", [drop("stone_pressure_plate")], same("stone"), { ...OPEN, render: "plate", meta: "switch" }),
+  def(115, "oak_pressure_plate", 0.5, "axe", [drop("oak_pressure_plate")], same("planks"), { ...OPEN, render: "plate", meta: "switch" }),
 );
 
+// Giai đoạn 7b: TNT, đá nhiễm (độ cứng bằng nửa đá, không rơi gì — ra mọt đá), lồng sinh quái
+TABLE.push(
+  def(116, "tnt", 0, "none", [drop("tnt")], { top: "tnt_top", bottom: "tnt_bottom", side: "tnt_side" }),
+  def(117, "infested_stone", 0.75, "pickaxe", [], same("stone")),
+  def(118, "spawner", 5, "pickaxe", [], same("spawner"), { ...PICK_ONLY, transparent: true, opaque: false, lightOpacity: 0, meta: "spawner" }),
+  // 7b: đầm lầy
+  def(119, "vine", 0.2, "none", [], same("vine"), { ...OPEN, render: "ladder", meta: "ladder" }),
+  def(120, "lily_pad", 0, "none", [drop("lily_pad")], same("lily_pad"), { ...SEE, box: [0, 0, 0, 1, 1.5 / 16, 1], render: "carpet" }),
+);
+
+// Giai đoạn 7e: block của công trình
+const top = (t: string, side: string): BlockTextures => ({ top: t, bottom: t, side });
+TABLE.push(
+  def(121, "snow_block", 0.2, "shovel", [drop("snow_block")], same("snow")),
+  def(122, "ice", 0.5, "pickaxe", [], same("ice"), { ...SEE, translucent: true, lightOpacity: 2 }),
+  def(123, "chiseled_stone_bricks", 1.5, "pickaxe", [drop("chiseled_stone_bricks")], same("chiseled_stone_bricks"), PICK_ONLY),
+  def(124, "cracked_stone_bricks", 1.5, "pickaxe", [drop("cracked_stone_bricks")], same("cracked_stone_bricks"), PICK_ONLY),
+  def(125, "mossy_stone_bricks", 1.5, "pickaxe", [drop("mossy_stone_bricks")], same("mossy_stone_bricks"), PICK_ONLY),
+  def(126, "netherrack", 0.4, "pickaxe", [drop("netherrack")], same("netherrack"), PICK_ONLY),
+  def(127, "magma_block", 0.5, "pickaxe", [drop("magma_block")], same("magma"), { ...PICK_ONLY, lightEmit: 3 }),
+  def(128, "crying_obsidian", 50, "pickaxe", [drop("crying_obsidian")], same("crying_obsidian"), { ...PICK_ONLY, minTier: "diamond", lightEmit: 10 }),
+  def(129, "chiseled_sandstone", 0.8, "pickaxe", [drop("chiseled_sandstone")], top("sandstone_top", "chiseled_sandstone"), PICK_ONLY),
+  def(130, "cut_sandstone", 0.8, "pickaxe", [drop("cut_sandstone")], top("sandstone_top", "cut_sandstone"), PICK_ONLY),
+  def(131, "orange_terracotta", 1.25, "pickaxe", [drop("orange_terracotta")], same("orange_terracotta"), PICK_ONLY),
+  def(132, "blue_terracotta", 1.25, "pickaxe", [drop("blue_terracotta")], same("blue_terracotta"), PICK_ONLY),
+  // (8a) cao 15/16 như Minecraft (ảnh cạnh có hàng trên cùng trong suốt — khối đầy sẽ hở kẽ); vẽ như đất cày
+  def(133, "dirt_path", 0.65, "shovel", [drop("dirt")], { top: "dirt_path_top", bottom: "dirt", side: "dirt_path_side" }, {
+    transparent: true, opaque: false, lightOpacity: 0, box: [0, 0, 0, 1, 15 / 16, 1], render: "farmland",
+  }),
+  { ...shapedDef(134, "white_wool_stairs", 95, { render: "stairs", meta: "stairs" }), colorTex: undefined, colorItem: undefined },
+);
+
+// Giai đoạn 8a: block của làng (blockTable8a.ts)
+TABLE.push(...villageBlocks(def, drop));
+// Giai đoạn 8c: bộ gỗ sồi tối — thân, lá, ván, cây non (như các loài khác) rồi bậc, tấm, hàng rào, cửa (blockTable8c.ts)
+TABLE.push(...woodDefs(162, "dark_oak")); TABLE.push(...darkOakShapes(TABLE, shapedDef, drop));
+TABLE.push(...netherBlocks(def, drop)); // Giai đoạn 10a: Vực Lửa
+TABLE.push(...netherBiomeBlocks(TABLE, def, drop)); TABLE.push(...netherWoodShapes(TABLE, shapedDef, drop)); // 10b: 4 biome Vực Lửa
+TABLE.push(...fortressBlocks(TABLE, def, drop)); TABLE.push(...fortressShapes(def, shapedDef, drop)); // 10c: pháo đài (bậc / tấm / tường cần gạch đã vào bảng)
+TABLE.push(...bastionBlocks(def, shapedDef, drop)); // 10d2: đá đen, xích, phế tích cổ, netherite, đá nam châm, mỏ neo hồi sinh
 // giường 16 màu: rơi ra giường đúng màu (bit 3–6 dữ liệu phụ)
 TABLE[33] = { ...TABLE[33]!, drops: [], colorItem: "{c}_bed" };
 

@@ -2,7 +2,7 @@
 // thân, lá, ván, cây non với id riêng; mọi chỗ kiểm "là thân gỗ / lá / cây non" dùng các hàm ở đây.
 import { B, BLOCKS, type BlockId } from "./blocks.js";
 
-export type WoodKind = "oak" | "spruce" | "birch" | "acacia";
+export type WoodKind = "oak" | "spruce" | "birch" | "acacia" | "dark_oak"; // (8c) sồi tối
 
 export interface Wood {
   kind: WoodKind;
@@ -17,6 +17,7 @@ export const WOODS: readonly Wood[] = [
   { kind: "spruce", log: B.SPRUCE_LOG, leaves: B.SPRUCE_LEAVES, planks: B.SPRUCE_PLANKS, sapling: B.SPRUCE_SAPLING },
   { kind: "birch", log: B.BIRCH_LOG, leaves: B.BIRCH_LEAVES, planks: B.BIRCH_PLANKS, sapling: B.BIRCH_SAPLING },
   { kind: "acacia", log: B.ACACIA_LOG, leaves: B.ACACIA_LEAVES, planks: B.ACACIA_PLANKS, sapling: B.ACACIA_SAPLING },
+  { kind: "dark_oak", log: B.DARK_OAK_LOG, leaves: B.DARK_OAK_LEAVES, planks: B.DARK_OAK_PLANKS, sapling: B.DARK_OAK_SAPLING }, // 8c
 ];
 
 const BY_KIND = new Map<WoodKind, Wood>(WOODS.map((w) => [w.kind, w]));

@@ -21,9 +21,11 @@ export type InvAction =
   | { t: "craftSize"; n: number } // mở túi đồ (2) / bàn chế tạo (3)
   | { t: "close" } // đóng giao diện: trả con trỏ + lưới chế tạo về túi
   | { t: "select"; n: number } // chọn ô hotbar
-  | { t: "throwHeld"; all: boolean }; // Q khi đang chơi
+  | { t: "throwHeld"; all: boolean } // Q khi đang chơi
+  | { t: "swapHands" } // (6a) F khi đang chơi: đổi đồ tay phải ↔ tay trái
+  | { t: "offhand"; area: SlotArea; i: number }; // (6a) trỏ + F trong túi đồ: đổi ô đó với tay trái
 
-const AREAS: readonly SlotArea[] = ["main", "armor", "craft", "ext"];
+const AREAS: readonly SlotArea[] = ["main", "armor", "craft", "ext", "offhand"];
 const okRef = (inv: Inventory, area: unknown, i: unknown): boolean =>
   AREAS.includes(area as SlotArea) && Number.isInteger(i) && (i as number) >= 0 && (i as number) < inv.slots(area as SlotArea).length;
 
@@ -73,6 +75,18 @@ export function applyInvAction(inv: Inventory, a: InvAction): ItemStack[] {
     case "throwHeld":
       push(inv.takeHeld(a.all ? (inv.held?.count ?? 1) : 1));
       break;
+    case "swapHands":
+      inv.swapHands();
+      break;
+    case "offhand":
+      if (okRef(inv, a.area, a.i) && a.area !== "offhand") {
+        const s = inv.slots(a.area)[a.i] ?? null, o = inv.offhand[0] ?? null;
+        if ((!o || inv.accepts(a.area, a.i, o)) && (!s || a.area !== "armor" || !o)) {
+          inv.slots(a.area)[a.i] = o;
+          inv.offhand[0] = s;
+        }
+      }
+      break;
   }
   return out;
 }
@@ -81,6 +95,7 @@ export function applyInvAction(inv: Inventory, a: InvAction): ItemStack[] {
 export interface InvSnapshot {
   main: Slot[];
   armor: Slot[];
+  offhand?: Slot[]; // (6a) tay trái — file lưu cũ không có thì coi như trống
   craft: Slot[];
   craftSize: number;
   cursor: Slot;
@@ -92,7 +107,7 @@ const copy = (s: Slot): Slot => (s ? { ...s } : null);
 
 export function snapshotInv(inv: Inventory, ack: number): InvSnapshot {
   return {
-    main: inv.main.map(copy), armor: inv.armor.map(copy), craft: inv.craft.map(copy), craftSize: inv.craftSize,
+    main: inv.main.map(copy), armor: inv.armor.map(copy), offhand: inv.offhand.map(copy), craft: inv.craft.map(copy), craftSize: inv.craftSize,
     cursor: copy(inv.cursor), ext: inv.ext.map(copy), ack,
   };
 }
@@ -101,6 +116,7 @@ export function snapshotInv(inv: Inventory, ack: number): InvSnapshot {
 export function restoreInv(inv: Inventory, s: InvSnapshot): void {
   s.main.forEach((v, i) => (inv.main[i] = copy(v)));
   s.armor.forEach((v, i) => (inv.armor[i] = copy(v)));
+  inv.offhand[0] = copy(s.offhand?.[0] ?? null);
   inv.craft = s.craft.map(copy);
   inv.craftSize = s.craftSize;
   inv.cursor = copy(s.cursor);

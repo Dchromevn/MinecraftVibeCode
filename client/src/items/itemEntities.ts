@@ -83,7 +83,7 @@ export class ItemEntities {
     }
   }
 
-  /** Mất kết nối / vào lại: xóa hết. */
+  /** Mất kết nối / vào lại / (10a) đổi cõi: xóa hết. */
   clear(): void {
     for (const e of [...this.map.values()]) this.remove(e);
   }

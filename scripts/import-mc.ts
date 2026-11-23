@@ -13,10 +13,12 @@ interface Entry {
   dest: string;
   src: string | string[]; // đường dẫn trong assets/minecraft/textures (không .png); mảng = thử lần lượt
   tint?: string; // nhân màu (ảnh xám: cỏ, lá, nước, thân dưa)
-  overlay?: string; // ghép đè ảnh này (đã nhân overlayTint) lên src
+  overlay?: string | (string | { src: string; tint: string })[]; // ghép đè (các) ảnh lên src — (8a) dân làng: vùng + nghề + cấp; (8b) cờ: hoa văn tô màu
   overlayTint?: string;
+  underlay?: string; // (8a) lót ảnh này bên dưới (lấp chỗ trong suốt: vạc, thùng ủ phân, đá mài... vẽ thành khối đầy)
   crop?: [number, number, number, number]; // x, y, rộng, cao
   regions?: [number, number, number, number, number, number][]; // chép vùng [x, y, rộng, cao, tới x, tới y] sang ảnh trống cùng cỡ
+  size?: [number, number]; // (10c) cỡ ảnh trống của regions (mặc định = cỡ ảnh gốc) — mặt sọ 8 × 8 đặt vào ô 16 × 16
   rotate?: number; // xoay 90° theo chiều kim đồng hồ n lần
   compose?: Compose; // ghép nhiều mảnh (ảnh thực thể rương, ray ngã ba / ngã tư)
   tiers?: Record<string, string>; // tên đích → tên trong jar ({tier} / {mcTier})
@@ -30,7 +32,7 @@ const PREFIX = "assets/minecraft/textures/";
 
 const jarName = existsSync(jarDir) ? readdirSync(jarDir).find((f) => f.toLowerCase().endsWith(".jar")) : undefined;
 if (!jarName) {
-  console.log("[import-mc] Chưa thấy file .jar trong assets-src/minecraft. Xem cách tải trong PROGRESS.md (mục Texture gốc Minecraft).");
+  console.log("[import-mc] Chưa thấy file .jar trong assets-src/minecraft. Xem cách lấy file trong README.md (mục Texture).");
   process.exit(0);
 }
 
@@ -107,14 +109,19 @@ for (const raw of map.entries)
     if (e.rotate) png = rotateCW(png, e.rotate);
     if (e.crop) png = cropPng(png, ...e.crop);
     if (e.regions) {
-      const out = new PNG({ width: png.width, height: png.height });
+      const out = new PNG({ width: e.size?.[0] ?? png.width, height: e.size?.[1] ?? png.height });
       for (const [x, y, w, h, dx, dy] of e.regions) PNG.bitblt(png, out, x, y, w, h, dx, dy);
       png = out;
     }
     if (e.tint) png = tint(png, e.tint);
-    if (e.overlay) {
-      const o = load(e.overlay);
-      if (o && o.width === png.width && o.height === png.height) blitOver(png, e.overlayTint ? tint(o, e.overlayTint) : o, 0, 0);
+    const under = e.underlay ? load(e.underlay) : null;
+    if (under && under.width === png.width && under.height === png.height) {
+      blitOver(under, png, 0, 0);
+      png = under;
+    }
+    for (const ov of e.overlay ? [e.overlay].flat() : []) {
+      const o = load(typeof ov === "string" ? ov : ov.src), t = typeof ov === "string" ? e.overlayTint : ov.tint;
+      if (o && o.width === png.width && o.height === png.height) blitOver(png, t ? tint(o, t) : o, 0, 0);
     }
     const dest = join(outRoot, e.dest + ".png");
     mkdirSync(dirname(dest), { recursive: true });

@@ -2,9 +2,9 @@
 // khung viền). Đơn vị block, tọa độ trong ô [x0, y0, z0, x1, y1, z1]; có thể cao quá 1
 // (hàng rào va chạm cao 1.5).
 import { B, BLOCKS, type BlockBox } from "./blocks.js";
-import { HDX, HDZ, cellId, cellMeta, doorSide, rotXZ, torchWall } from "./blockMeta.js";
+import { HDX, HDZ, cellId, cellMeta, doorSide, facingDir, rotXZ, torchWall } from "./blockMeta.js";
 import { isFence, slabBox, stairBoxes, wallBoxes } from "./building.js";
-import { buttonBoxes, lanternBoxes, leverBoxes, paneBoxes } from "./decor.js";
+import { buttonBoxes, lanternBoxes, leverBoxes, paneBoxes, plateBox } from "./decor.js";
 
 export type Box = BlockBox;
 /** Đọc id block tại tọa độ thế giới (dùng cho hàng rào nối nhau). */
@@ -39,6 +39,16 @@ function fenceBoxes(x: number, y: number, z: number, idAt: IdAt, h: number): Box
   return out;
 }
 
+// (8b3) Đe như model Minecraft: đế, thân dưới, cổ, mặt đe (mặt đe dài theo Z ở bảng gốc). Người đặt nhìn dọc trục Z
+// (hướng 0 / 2) thì đe nằm ngang trục X — sừng đe chỉ sang trái / phải.
+const ANVIL_Z: readonly Box[] = ([[2, 0, 2, 14, 4, 14], [4, 4, 3, 12, 5, 13], [6, 5, 4, 10, 10, 12], [3, 10, 0, 13, 16, 16]] as const)
+  .map((b) => b.map(px) as unknown as Box);
+const ANVIL_X: readonly Box[] = ANVIL_Z.map((b) => [b[2], b[1], b[0], b[5], b[4], b[3]] as Box);
+/** Đe nằm dọc trục X (mặt trên cần xoay texture 90°). */
+export const anvilAlongX = (meta: number): boolean => (facingDir(meta) & 1) === 0;
+/** 4 hộp của đe (hộp cuối là mặt đe). */
+export const anvilBoxes = (meta: number): readonly Box[] => (anvilAlongX(meta) ? ANVIL_X : ANVIL_Z);
+
 const COLLISION_CACHE = new Map<number, Box[]>();
 
 /** Hộp va chạm của ô (x, y, z) có giá trị cell (id | meta << 8). Rỗng = đi xuyên được. */
@@ -50,6 +60,7 @@ export function collisionBoxes(cell: number, x: number, y: number, z: number, id
   if (def.render === "wall") return wallBoxes(x, y, z, idAt, 1.5, 1.5);
   if (def.render === "pane") return paneBoxes(x, y, z, idAt);
   if (def.render === "lantern") return lanternBoxes(cellMeta(cell));
+  if (def.render === "anvil") return anvilBoxes(cellMeta(cell));
   if (def.render === "stairs" || def.render === "slab") {
     let hit = COLLISION_CACHE.get(cell);
     if (!hit) COLLISION_CACHE.set(cell, (hit = def.render === "stairs" ? stairBoxes(cellMeta(cell)) : [slabBox(cellMeta(cell))]));
@@ -79,8 +90,12 @@ export function selectionBoxes(cell: number, x: number, y: number, z: number, id
       return paneBoxes(x, y, z, idAt);
     case "lantern":
       return lanternBoxes(meta);
+    case "anvil":
+      return [...anvilBoxes(meta)];
     case "button":
       return buttonBoxes(meta);
+    case "plate":
+      return [plateBox(meta)];
     case "lever": {
       const l = leverBoxes(meta);
       return [l.base, l.handle];

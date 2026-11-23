@@ -1,8 +1,9 @@
 // Tick thế giới trên server (20 lần / giây): random tick quanh người chơi, chất lỏng chảy, lò nung,
 // cát / sỏi rơi, giẫm đất cày. Chuyển từ client (Giai đoạn 4b–4c) lên server ở Giai đoạn 5a.
 import {
-  B, CROPS, FIRE, LIQUIDS, LiquidSim, NET, RANDOM_TICK, SWITCHES, blockDrops, createFalling, furnaceLit, isButton, isFarmPlant,
-  randomTick, refreshIronDoors, settle, switchMeta, switchFace, switchOn,
+  B, CROPS, FIRE, LIQUIDS, LiquidSim, NET, PLAYER, RANDOM_TICK, SWITCHES, applyBoneMeal, blockDrops, createFalling, furnaceLit, isButton, isFarmPlant,
+  isPlate,
+  eternalFire, randomTick, refreshIronDoors, settle, switchMeta, switchFace, switchOn,
   stepFalling, type BlockAccess, type BlockEntities, type Dropped, type FallingBlock, type Rng, type TickWorld,
 } from "../../shared/src/index.js";
 import type { ServerItems } from "./serverItems.js";
@@ -21,6 +22,10 @@ export class ServerTicker {
   /** Hẹn giờ (Giai đoạn 4f): lửa tự tắt, nút tự nhả. at = số tick. */
   private readonly timers: { at: number; kind: "fire" | "button"; x: number; y: number; z: number }[] = [];
   private tickNo = 0;
+  /** Tấm áp lực đang bị đè: khóa ô → tick sẽ tắt nếu không còn gì đè. */
+  private readonly plates = new Map<string, { x: number; y: number; z: number; until: number }>();
+  /** (7e) Tấm áp lực vừa bật (bẫy TNT của kim tự tháp sa mạc). */
+  onPlate: (x: number, y: number, z: number) => void = () => undefined;
 
   constructor(
     private readonly w: ServerWorld,
@@ -67,6 +72,22 @@ export class ServerTicker {
     this.acc.setCell(x, y, z, B.DIRT, 0);
   }
 
+  /** Chunk vừa tải (có thể từ file lưu): nút / tấm áp lực còn "đang bật" thì nhả ra (hẹn giờ không được lưu). */
+  private releaseSwitches(cx: number, cz: number, data: Uint8Array, meta: Uint8Array): void {
+    for (let i = 0; i < data.length; i++) {
+      const id = data[i]!;
+      if ((!isButton(id) && !isPlate(id)) || !switchOn(meta[i]!)) continue;
+      const x = cx * 16 + (i & 15), y = i >> 8, z = cz * 16 + ((i >> 4) & 15);
+      this.acc.setCell(x, y, z, id, switchMeta(switchFace(meta[i]!), false));
+      refreshIronDoors((a, b, d) => this.w.getCell(a, b, d), this.acc.setCell, x, y, z);
+    }
+  }
+
+  /** (7a) Bột xương lên ô (x, y, z); true nếu có tác dụng. */
+  boneMeal(x: number, y: number, z: number): boolean {
+    return applyBoneMeal(this.tw, x, y, z, this.rng);
+  }
+
   /** Lửa vừa đốt: tự tắt sau FIRE.MIN_S..MAX_S giây. */
   scheduleFire(x: number, y: number, z: number): void {
     const s = FIRE.MIN_S + this.rng() * (FIRE.MAX_S - FIRE.MIN_S);
@@ -85,6 +106,39 @@ export class ServerTicker {
     refreshIronDoors((a, b, d) => this.w.getCell(a, b, d), this.acc.setCell, x, y, z);
   }
 
+  /**
+   * Tấm áp lực: người chơi (mọi tấm) và vật phẩm rơi (chỉ tấm gỗ) đứng trên tấm thì bật; không còn gì đè
+   * SWITCHES.PLATE_RELEASE_S giây thì tắt. Cửa sắt quanh tấm cập nhật theo.
+   */
+  stepPlates(players: readonly { x: number; y: number; z: number }[], items: readonly { x: number; y: number; z: number }[]): void {
+    const press = (px: number, py: number, pz: number, half: number, isPlayer: boolean): void => {
+      const y = Math.floor(py);
+      if (py - y >= SWITCHES.PLATE_TRIGGER_H) return;
+      for (let x = Math.floor(px - half); x <= Math.floor(px + half); x++)
+        for (let z = Math.floor(pz - half); z <= Math.floor(pz + half); z++) {
+          const c = this.w.getCell(x, y, z), id = c & 255;
+          if (c < 0 || !isPlate(id) || (!isPlayer && id !== B.OAK_PRESSURE_PLATE)) continue;
+          if (px + half <= x + 1 / 16 || px - half >= x + 15 / 16 || pz + half <= z + 1 / 16 || pz - half >= z + 15 / 16) continue;
+          if (!switchOn(c >> 8)) {
+            this.acc.setCell(x, y, z, id, switchMeta(0, true));
+            refreshIronDoors((a, b, d) => this.w.getCell(a, b, d), this.acc.setCell, x, y, z);
+            this.onPlate(x, y, z);
+          }
+          this.plates.set(x + "," + y + "," + z, { x, y, z, until: this.tickNo + Math.round(SWITCHES.PLATE_RELEASE_S / DT) });
+        }
+    };
+    for (const p of players) press(p.x, p.y, p.z, PLAYER.WIDTH / 2, true);
+    for (const it of items) press(it.x, it.y, it.z, 0.125, false);
+    for (const [k, p] of this.plates) {
+      if (p.until > this.tickNo) continue;
+      this.plates.delete(k);
+      const c = this.w.getCell(p.x, p.y, p.z);
+      if (c < 0 || !isPlate(c & 255) || !switchOn(c >> 8)) continue;
+      this.acc.setCell(p.x, p.y, p.z, c & 255, switchMeta(0, false));
+      refreshIronDoors((a, b, d) => this.w.getCell(a, b, d), this.acc.setCell, p.x, p.y, p.z);
+    }
+  }
+
   private runTimers(): void {
     for (let i = 0; i < this.timers.length; i++) {
       const t = this.timers[i]!;
@@ -92,7 +146,7 @@ export class ServerTicker {
       this.timers.splice(i--, 1);
       const c = this.w.getCell(t.x, t.y, t.z);
       if (c < 0) continue;
-      if (t.kind === "fire" && (c & 255) === B.FIRE) this.acc.setCell(t.x, t.y, t.z, B.AIR, 0);
+      if (t.kind === "fire" && (c & 255) === B.FIRE && !eternalFire(this.w.getCell(t.x, t.y - 1, t.z) & 255)) this.acc.setCell(t.x, t.y, t.z, B.AIR, 0);
       if (t.kind === "button" && isButton(c & 255) && switchOn(c >> 8)) {
         this.acc.setCell(t.x, t.y, t.z, c & 255, switchMeta(switchFace(c >> 8), false));
         refreshIronDoors((a, b, d) => this.w.getCell(a, b, d), this.acc.setCell, t.x, t.y, t.z);
@@ -104,7 +158,10 @@ export class ServerTicker {
   tick(centers: readonly { cx: number; cz: number }[]): void {
     this.tickNo++;
     this.runTimers();
-    for (const c of this.w.fresh.splice(0)) this.liquids.scanChunk(c.cx, c.cz, c.data);
+    for (const c of this.w.fresh.splice(0)) {
+      this.liquids.scanChunk(c.cx, c.cz, c.data);
+      this.releaseSwitches(c.cx, c.cz, c.data, c.meta);
+    }
     this.entities.tickFurnaces(DT, (e, lit) => {
       const cell = this.w.getCell(e.x, e.y, e.z), m = cell >> 8;
       if ((cell & 255) !== B.FURNACE || furnaceLit(m) === lit) return;

@@ -76,6 +76,7 @@ export function placementCells(
     return one(switchMeta(ny > 0 ? 0 : ny < 0 ? 1 : 2 + (wall ?? 0), false));
   }
   if (id === B.LANTERN) return one(ny < 0 ? 1 : 0); // bấm mặt dưới trần: treo
+  if (id === B.STONE_PRESSURE_PLATE || id === B.OAK_PRESSURE_PLATE) return ny > 0 ? one(0) : null; // chỉ đặt lên mặt trên
   if (isDoor(id)) // tấm cửa nằm ở cạnh xa người chơi; hai nửa cùng hướng
     return [{ x, y, z, id, meta: doorMeta(look, false, false) }, { x, y: y + 1, z, id, meta: doorMeta(look, false, true) }];
   switch (id) {
@@ -84,6 +85,7 @@ export function placementCells(
       if (ny > 0) return one(torchMeta(null));
       return one(torchMeta(dirOf(-nx, -nz))); // tường nằm ngược pháp tuyến
     }
+    case B.VINE: // (7b) đặt như thang: bám mặt bên được nhắm
     case B.LADDER: {
       const wall = dirOf(-nx, -nz);
       return wall === null ? null : one(wall);

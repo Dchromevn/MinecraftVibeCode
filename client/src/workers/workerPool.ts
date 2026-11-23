@@ -35,8 +35,13 @@ export class WorkerPool {
     return this.callbacks.size;
   }
 
+  /** (8a) Gửi cho mọi worker (không chờ trả lời). */
+  broadcast(msg: Extract<ToWorker, { type: "customs" | "dim" }>): void {
+    for (const s of this.slots) s.worker.postMessage(msg);
+  }
+
   /** Gửi việc; job.id được gán tự động. */
-  run(job: DistributiveOmit<Exclude<ToWorker, { type: "init" }>, "id">, cb: Callback, transfer: Transferable[] = []): void {
+  run(job: DistributiveOmit<Exclude<ToWorker, { type: "init" | "customs" | "dim" }>, "id">, cb: Callback, transfer: Transferable[] = []): void {
     const id = this.nextId++;
     let slot = this.slots[0]!;
     for (const s of this.slots) if (s.busy < slot.busy) slot = s;

@@ -13,6 +13,8 @@ export class WorldSync {
   private readonly synced = new Set<number>();
   private add: number[] = [];
   private remove: number[] = [];
+  /** (10a) Cõi đang ở: gửi kèm đăng ký để server bỏ gói của cõi cũ. */
+  dim = 0;
 
   constructor(
     private readonly world: World,
@@ -20,6 +22,14 @@ export class WorldSync {
     /** light = thay đổi có thể làm đổi ánh sáng xung quanh. */
     private readonly onChange: (x: number, y: number, z: number, light: boolean) => void,
   ) {}
+
+  /** (10a) Đổi cõi: quên mọi chunk (server đã hủy đăng ký). */
+  reset(dim: number): void {
+    this.dim = dim;
+    for (const s of [this.pending, this.generating, this.synced]) s.clear();
+    this.add = [];
+    this.remove = [];
+  }
 
   genStart(cx: number, cz: number): void {
     this.generating.add(chunkKey(cx, cz));
@@ -95,7 +105,7 @@ export class WorldSync {
   /** Gửi đăng ký / hủy đăng ký gom lại (gọi mỗi khung hình). */
   flush(): void {
     if (!this.add.length && !this.remove.length) return;
-    this.conn.send({ t: "sub", add: this.add, remove: this.remove });
+    this.conn.send({ t: "sub", add: this.add, remove: this.remove, d: this.dim });
     this.add = [];
     this.remove = [];
   }

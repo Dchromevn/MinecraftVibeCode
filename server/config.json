@@ -1,6 +1,9 @@
 {
-  "seed": "voxel",
+  "seed": "random",
   "port": 8080,
   "spawn": "random",
-  "debug": true
+  "debug": false,
+  "world": "world1",
+  "admins": [],
+  "pvp": true
 }

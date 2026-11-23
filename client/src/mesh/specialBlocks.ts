@@ -2,8 +2,8 @@
 // cửa (hướng, mở, nửa trên/dưới), ray (dạng + góc xoay), giường (đầu/chân), cây trồng theo
 // giai đoạn, thân dưa / bí (cao theo tuổi, đã ra quả thì cong về phía quả). Riêng hàng rào nối theo ô kề (giống hộp va chạm trong /shared).
 import {
-  BED_PARTS, BLOCKS, STEM_RIPE, bedColor, bedDir, bedHead, buttonBoxes, doorSide, doorUpper, isFence, lanternBoxes, leverBoxes,
-  paneBoxes, railKind, railRot, slabBox, stairBoxes, stemAttachedDir, torchWall, wallBoxes, type BlockBox,
+  B, BED_PARTS, BLOCKS, STEM_RIPE, anvilAlongX, facingDir, anvilBoxes, bedColor, bedDir, bedHead, buttonBoxes, doorSide, doorUpper, isFence, lanternBoxes, leverBoxes,
+  paneBoxes, plateBox, railKind, railRot, slabBox, stairBoxes, stemAttachedDir, torchWall, wallBoxes, type BlockBox,
 } from "../../../shared/src/index.js";
 import { LANTERN_UV, addBoxRegion } from "./decorShapes.js";
 import type { TileUV } from "../atlas.js";
@@ -40,7 +40,7 @@ const PANEL: readonly (readonly [number, number, number, number])[] = [
 ];
 
 /** Hộp (0..1) → điểm ảnh; bỏ mặt nằm sát mép ô mà ô bên kia là khối che khuất. */
-function addBoxes(b: GeomBuilder, x: number, y: number, z: number, boxes: readonly BlockBox[], tex: BoxTex, light: readonly number[], at: At): void {
+function addBoxes(b: GeomBuilder, x: number, y: number, z: number, boxes: readonly BlockBox[], tex: BoxTex, light: readonly number[], at: At, topRot = false): void {
   const covered = (dx: number, dy: number, dz: number): boolean => OPAQUE[at(x + dx, y + dy, z + dz)] === 1;
   for (const bx of boxes) {
     let faces = 63;
@@ -50,11 +50,13 @@ function addBoxes(b: GeomBuilder, x: number, y: number, z: number, boxes: readon
     if (bx[0] <= 0 && covered(-1, 0, 0)) faces &= ~8;
     if (bx[5] >= 1 && covered(0, 0, 1)) faces &= ~16;
     if (bx[2] <= 0 && covered(0, 0, -1)) faces &= ~32;
-    if (faces) addBox(b, x, y, z, bx[0] * 16, bx[3] * 16, bx[1] * 16, bx[4] * 16, bx[2] * 16, bx[5] * 16, tex, light, faces);
+    if (faces) addBox(b, x, y, z, bx[0] * 16, bx[3] * 16, bx[1] * 16, bx[4] * 16, bx[2] * 16, bx[5] * 16, tex, light, faces, topRot);
   }
 }
 
 /** Vẽ block đặc biệt tại (x, y, z) trong chunk; at() đọc block theo tọa độ trong chunk (cho phép -1..16). */
+const B_FARMLAND = B.FARMLAND;
+
 export function addSpecial(
   b: GeomBuilder, id: number, meta: number, x: number, y: number, z: number, at: At, uv: SpecialUv,
   light: readonly number[],
@@ -119,12 +121,30 @@ export function addSpecial(
     case "fire":
       addCross(b, x, y, z, t[2]!, light);
       return true;
+    case "portal": { // (10a) tấm cổng Vực Lửa dày 4/16 theo trục; bỏ mặt sát khối cổng khác / khối che khuất
+      const ax = (meta & 1) === 0, n = (dx: number, dy: number, dz: number): boolean => {
+        const v = at(x + dx, y + dy, z + dz);
+        return v === B.NETHER_PORTAL || OPAQUE[v] === 1;
+      };
+      let faces = 63;
+      if (n(0, 1, 0)) faces &= ~1;
+      if (n(0, -1, 0)) faces &= ~2;
+      if (ax && n(1, 0, 0)) faces &= ~4;
+      if (ax && n(-1, 0, 0)) faces &= ~8;
+      if (!ax && n(0, 0, 1)) faces &= ~16;
+      if (!ax && n(0, 0, -1)) faces &= ~32;
+      addBox(b, x, y, z, ax ? 0 : 6, ax ? 16 : 10, 0, 16, ax ? 6 : 0, ax ? 10 : 16, { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, faces);
+      return true;
+    }
     case "lantern": {
       const [body, cap] = lanternBoxes(meta);
       addBoxRegion(b, x, y, z, body!, t[2]!, LANTERN_UV.body.side, LANTERN_UV.body.top, light);
       addBoxRegion(b, x, y, z, cap!, t[2]!, LANTERN_UV.cap.side, LANTERN_UV.cap.top, light);
       return true;
     }
+    case "plate":
+      addBoxes(b, x, y, z, [plateBox(meta)], { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
+      return true;
     case "button":
       addBoxes(b, x, y, z, buttonBoxes(meta), { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
       return true;
@@ -132,6 +152,18 @@ export function addSpecial(
       const l = leverBoxes(meta);
       addBoxes(b, x, y, z, [l.base], { top: t[0]!, bottom: t[1]!, side: t[2]! }, light, at);
       addBoxes(b, x, y, z, [l.handle], { top: t[3]!, bottom: t[3]!, side: t[3]! }, light, at);
+      return true;
+    }
+    case "anvil": { // (8b3) như Minecraft: chỉ mặt trên của mặt đe dùng texture mặt trên, còn lại texture thân đe
+      const boxes = anvilBoxes(meta), body: BoxTex = { top: t[1]!, bottom: t[1]!, side: t[2]! };
+      addBoxes(b, x, y, z, boxes.slice(0, 3), body, light, at);
+      addBoxes(b, x, y, z, boxes.slice(3), { ...body, top: t[0]! }, light, at, anvilAlongX(meta));
+      return true;
+    }
+    case "skull": { // (10c) sọ: hộp 8 × 8 × 8 giữa ô; mặt trước (mặt sọ) theo hướng — bit mặt: 4 +X, 8 −X, 16 +Z, 32 −Z
+      const front = [16, 8, 32, 4][facingDir(meta)]!, body: BoxTex = { top: t[0]!, bottom: t[1]!, side: t[2]! };
+      addBox(b, x, y, z, 4, 12, 0, 8, 4, 12, body, light, 63 & ~front);
+      addBox(b, x, y, z, 4, 12, 0, 8, 4, 12, { ...body, side: t[3] ?? t[2]! }, light, front);
       return true;
     }
     case "stairs":
@@ -148,7 +180,8 @@ export function addSpecial(
       return true;
     case "farmland": {
       const up = OPAQUE[at(x, y + 1, z)] === 1;
-      addBox(b, x, y, z, 0, 16, 0, 15, 0, 16, { top: meta & 1 ? uv.farmlandWet : t[0]!, side: t[2]!, bottom: t[1]! }, light, up ? 62 : 63);
+      const h = Math.round((def.box?.[4] ?? 15 / 16) * 16); // (8a) khối thấp dùng chung: đất cày, đường đất 15/16, máy cắt đá 9/16
+      addBox(b, x, y, z, 0, 16, 0, h, 0, 16, { top: id === B_FARMLAND && meta & 1 ? uv.farmlandWet : t[0]!, side: t[2]!, bottom: t[1]! }, light, up ? 62 : 63);
       return true;
     }
     default:

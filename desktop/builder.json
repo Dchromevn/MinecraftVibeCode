@@ -1,0 +1,27 @@
+{
+  "appId": "local.voxelsurvival.game",
+  "productName": "Voxel Survival",
+  "directories": {
+    "app": "desktop/stage/app",
+    "output": "desktop/release",
+    "buildResources": "desktop/resources"
+  },
+  "npmRebuild": false,
+  "extraResources": [
+    { "from": "desktop/stage/game", "to": "game", "filter": ["**/*"] },
+    { "from": "desktop/stage/game/node_modules", "to": "game/node_modules", "filter": ["**/*"] }
+  ],
+  "win": {
+    "target": ["nsis", "portable"]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "artifactName": "VoxelSurvival-Setup-${version}.${ext}"
+  },
+  "portable": {
+    "artifactName": "VoxelSurvival-Portable-${version}.${ext}"
+  },
+  "linux": { "target": ["AppImage"], "category": "Game" },
+  "mac": { "target": ["dmg"], "category": "public.app-category.games" }
+}

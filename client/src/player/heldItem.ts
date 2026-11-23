@@ -1,10 +1,11 @@
 // Mô hình vật phẩm cầm trên tay: block khối đầy là khối nhỏ (texture atlas); vật phẩm khác là
 // hình "nổi khối" dựng từ từng điểm ảnh của icon 16x16 (mặt trước/sau + cạnh nơi giáp ô trống).
 import * as THREE from "three";
-import { itemDef } from "../../../shared/src/index.js";
+import { SHIELD_KEY, itemDef } from "../../../shared/src/index.js";
 import type { Atlas } from "../atlas.js";
 import { blockTiles, setBoxTiles, shapeObject } from "../interact/boxMesh.js";
 import { loadImage } from "../util/loadImage.js";
+import { createShield } from "./shieldModel.js";
 
 const RES = 16;
 const cache = new Map<string, Promise<THREE.Object3D>>();
@@ -57,7 +58,19 @@ export function heldModel(key: string, atlas: Atlas): Promise<THREE.Object3D> {
   let p = cache.get(key);
   if (p) return p;
   p = (async () => {
-    const icon = itemDef(key)?.icon;
+    if (key === SHIELD_KEY) return createShield(); // khiên: mô hình 3D riêng (kind = "shield")
+    if (key.endsWith("*")) { // (8b2) đồ đã phù phép: ánh tím
+      const base = await heldModel(key.slice(0, -1), atlas), c = base.clone(true);
+      c.traverse((o) => {
+        if (!(o instanceof THREE.Mesh)) return;
+        o.material = (o.material as THREE.MeshBasicMaterial).clone();
+        (o.material as THREE.MeshBasicMaterial).color.multiply(new THREE.Color(0xd9a6ff));
+      });
+      c.userData.kind = base.userData.kind;
+      return c;
+    }
+    // "icon:<tên>": hình nổi khối từ /icons/<tên>.png (cung đang kéo: icon:bow_pull_0..2 — 6b)
+    const icon = key.startsWith("icon:") ? { type: "icon" as const, name: key.slice(5) } : itemDef(key)?.icon;
     if (icon?.type === "cube") {
       const geo = new THREE.BoxGeometry(1, 1, 1);
       setBoxTiles(geo, blockTiles(atlas, icon.block, icon.tex));

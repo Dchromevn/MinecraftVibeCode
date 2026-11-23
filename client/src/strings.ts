@@ -1,27 +1,36 @@
 // Toàn bộ văn bản hiển thị trong game gom ở đây để dễ dịch.
+import { STR_MORE } from "./stringsMore.js";
+import { STR_NETHER } from "./stringsNether.js";
 export const STR = {
   title: "Voxel Survival",
-  stage: "Giai đoạn 4f — 16 màu, đồ sắt",
+  stage: "Giai đoạn 9a — menu, chế độ quản trị",
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
-    "WASD đi · Space nhảy / bơi lên / leo thang · C ngồi (khi bay: xuống) · Shift hoặc nhấn đúp W chạy nhanh (khi bay: bay nhanh)\n" +
-    "F bật/tắt bay · Esc thả chuột · [ ] tầm nhìn · N nhìn đêm\n" +
-    "Giữ chuột trái đào · chuột phải đặt / giữ để ăn / cuốc đất / mở bàn, rương, lò, cửa (C: đặt) · 1–9 / lăn chuột chọn ô\n" +
-    "E túi đồ · Q vứt (Shift+Q cả chồng)",
+    "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · nhấn đúp W chạy nhanh (khi bay: bay nhanh)\n" +
+    "F đổi tay trái / phải · Esc thả chuột / menu · [ ] tầm nhìn · (chế độ quản trị /admin: nhấn đúp Space bay, N nhìn đêm, F3, F4)\n" +
+    "Chuột trái đánh người / sinh vật, giữ để đào · chuột phải giữ: giơ khiên / kéo cung · đặt / giữ để ăn / cuốc đất / mở bàn, rương, lò, cửa / ngủ (Shift: đặt lên) · 1–9 / lăn chuột chọn ô\n" +
+    "Chuột phải vào động vật: cho ăn (lúa mì, cà rốt, hạt...) · kéo: tỉa lông cừu · xô: vắt sữa bò · bột xương: bón cây · trứng: ném\n" +
+    "E túi đồ · Q vứt (Shift+Q cả chồng) · T chat · / lệnh",
   loadingTextures: "Đang nạp texture...",
   loadingWorld: "Đang tải thế giới...",
   joinName: "Tên người chơi",
   joinButton: "Vào game",
-  joinHint: "Chữ cái không dấu, số, dấu _ (tối đa 16 ký tự). Thoát rồi vào lại cùng tên thì giữ nguyên túi đồ.",
+  joinPassword: "Mật khẩu",
+  joinHint: "Tên: chữ cái không dấu, số, dấu _ (tối đa 16 ký tự). Lần đầu dùng tên nào thì mật khẩu vừa nhập thành mật khẩu của tên đó; thế giới và túi đồ được lưu trên server.",
   joinConnecting: "Đang kết nối...",
   joinErrors: {
     name: "Tên chỉ gồm chữ cái không dấu, số, dấu _.",
     taken: "Tên này đang có người chơi.",
+    password: "Sai mật khẩu cho tên này.",
+    pwshort: "Mật khẩu cần ít nhất 3 ký tự.",
     version: "Phiên bản game khác server — tải lại trang.",
     connect: "Không kết nối được server (đã chạy npm run dev / npm run host chưa?).",
   } as Record<string, string>,
   disconnected: "Mất kết nối tới server. Tải lại trang để vào lại.",
   hudPlayers: "Người chơi",
+  netHint: "F3: thông tin mạng",
+  netPing: "Ping", netIn: "Nhận", netOut: "Gửi", netPackets: "gói", netCorrections: "Bị sửa vị trí",
+  netPending: "Bước chờ xác nhận", netClient: "client", netTick: "Tick server",
   hudFps: "FPS",
   hudPos: "Vị trí",
   hudChunk: "Chunk",
@@ -66,26 +75,119 @@ export const STR = {
   needWorkbench: "cần bàn chế tạo",
   craftHint: "Sổ công thức: bấm để xếp nguyên liệu vào lưới (Shift: nhiều bộ)\nÔ kết quả: bấm để lấy (Shift: làm liên tục)",
   youDied: "Bạn đã chết",
+  offhand: "Tay trái (F: đổi tay)",
+  // ---- Giai đoạn 6a: chat, thông báo ----
+  chatPlaceholder: "Nhập tin nhắn, Enter để gửi, Esc để đóng (/help: danh sách lệnh)",
+  chat: {
+    dieOther: "{0} đã chết",
+    dieFall: "{0} rơi từ trên cao xuống",
+    dieDrown: "{0} chết đuối",
+    dieStarve: "{0} chết đói",
+    dieLava: "{0} cố bơi trong dung nham",
+    dieFire: "{0} bị thiêu cháy",
+    dieCactus: "{0} bị xương rồng đâm chết",
+    diePlayer: "{0} bị {1} hạ gục",
+    dieFallBy: "{0} bị {1} đánh rơi xuống chết",
+    dieOtherBy: "{0} chết khi đang đánh nhau với {1}",
+    dieArrow: "{0} bị {1} bắn chết",
+    dieMob: "{0} bị {1} giết",
+    spawnSet: "Đã đặt điểm hồi sinh ở giường",
+    noSleepDay: "Chỉ ngủ được vào ban đêm",
+    noSleepMobs: "Không ngủ được: có quái vật ở gần",
+    bedMissing: "Giường của bạn đã mất — hồi sinh ở điểm của thế giới",
+    sleeping: "{0}/{1} người đang ngủ",
+    timeIs: "Giờ trong ngày: {0} (0 bình minh · 6000 trưa · 13000 đêm · 18000 nửa đêm)",
+    timeSet: "{0} đã đặt giờ: {1}",
+    itemsAll: "Có {0} vật phẩm. Gõ /items <từ khóa> để tìm (theo khóa hoặc tên, không cần dấu), danh sách đủ ở docs/ITEMS.md",
+    itemsNone: "Không có vật phẩm nào khớp \"{0}\"",
+    itemsMore: "... còn {0} vật phẩm nữa — gõ từ khóa cụ thể hơn",
+    dieExplosion: "{0} nổ tung",
+    dieExplosionBy: "{0} bị {1} làm nổ tung",
+    dieMagic: "{0} bị {1} giết bằng phép thuật",
+    join: "{0} vào game",
+    leave: "{0} rời game",
+    pvpOn: "{0} đã bật PvP: người chơi đánh nhau được",
+    pvpOff: "{0} đã tắt PvP: người chơi không đánh nhau được",
+    tpDone: "Đã dịch chuyển tới {0}",
+    kicked: "{0} bị {1} đuổi khỏi server",
+    gave: "Đã đưa {0} {1} cho {2}",
+    xpSet: "{0} giờ có cấp kinh nghiệm {1} ({2} điểm)",
+    help: "Lệnh: /help · /items [từ khóa] (tìm khóa vật phẩm). Quản trị viên mới dùng được /tp, /kick, /pvp, /give, /xp, /time, /summon",
+    helpAdmin: "Lệnh: /items [từ khóa] (tìm khóa vật phẩm cho /give) · /tp <tên> | x y z | x z · /kick <tên> · /pvp on|off · /give <tên> <vật phẩm> [số] · /xp <tên> <số> (cộng điểm) | <số>L (cộng cấp) | set <số>[L] (đặt; số âm = bớt) ·/time [set day|noon|night|midnight|<tick> · add <tick>] · /structure save <tên> x1 y1 z1 x2 y2 z2 (lưu nhà cho làng, ~ = vị trí mình) · /tp x y z hoặc /tp x z (dịch chuyển tới tọa độ, ~ = vị trí mình) · /nether (sang Vực Lửa / về thế giới chính) · /locate <công trình> (gần nhất: fortress, bastion, village, outpost, witch_hut, mansion, desert_pyramid / pyramid, igloo, camp, shipwreck, ocean_ruin, ruined_portal) · /summon patrol (đội tuần tra kẻ cướp) · /summon <loài> [số] (zombie, skeleton, spider, creeper, enderman, slime, husk, drowned, stray, cave_spider, phantom, witch, silverfish, endermite, pig, cow, sheep, chicken, rabbit, wolf, fox, goat, polar_bear, llama, armadillo, bat, squid, glow_squid, cod, salmon, pufferfish, tropical_fish, dolphin, horse, donkey, mule, villager, iron_golem, cat, zombie_villager, wandering_trader, camel, pillager, allay, vindicator, evoker, vex, ghast, zombified_piglin, magma_cube, strider, hoglin, blaze, wither_skeleton, piglin, piglin_brute, zoglin)",
+    notAdmin: "Chỉ quản trị viên dùng được lệnh này",
+    unknownCmd: "Không có lệnh /{0} (gõ /help)",
+    noPlayer: "Không có ai tên {0} đang online",
+    usage: "Cách dùng: {0}",
+    badItem: "Không có vật phẩm \"{0}\"",
+    pvpDisabled: "PvP đang tắt: không đánh người khác được",
+    safeZone: "Vùng an toàn quanh điểm hồi sinh: không đánh nhau, không đào / đặt block",
+    slowDown: "Gửi chậm lại một chút",
+    structSaved: "{0} đã lưu nhà \"{1}\" — sẽ xuất hiện trong các làng mới sinh",
+    structFail: "Không lưu được ({0}): tên chỉ gồm a-z 0-9 _ -, chưa trùng; mỗi chiều 3–48 block (cao ≤ 32); vùng phải đã tải",
+
+  } as Record<string, string>,
   respawn: "Hồi sinh",
+  // ---- Giai đoạn 7a ----
+  sleepingText: "Đang ngủ...",
+  leaveBed: "Rời giường (Shift)",
+  hudTime: "Giờ",
+  hudMobs: "Sinh vật quanh đây",
+  mobs: {
+    zombie: "Xác sống", skeleton: "Bộ xương", spider: "Nhện", pig: "Lợn", cow: "Bò", sheep: "Cừu", chicken: "Gà",
+    creeper: "Quái nổ", enderman: "Kẻ hư không", endermite: "Mọt hư không", slime: "Khối nhầy", husk: "Xác khô", drowned: "Xác đuối",
+    stray: "Bộ xương băng", cave_spider: "Nhện hang", phantom: "Bóng ma đêm", witch: "Phù thủy", silverfish: "Mọt đá",
+    rabbit: "Thỏ", wolf: "Sói", fox: "Cáo", goat: "Dê", polar_bear: "Gấu trắng", llama: "Lạc đà không bướu", armadillo: "Tatu",
+    bat: "Dơi", squid: "Mực", glow_squid: "Mực phát sáng", cod: "Cá tuyết", salmon: "Cá hồi", pufferfish: "Cá nóc",
+    tropical_fish: "Cá nhiệt đới", dolphin: "Cá heo", horse: "Ngựa", donkey: "Lừa", mule: "La",
+    villager: "Dân làng", iron_golem: "Người sắt", cat: "Mèo", zombie_villager: "Dân làng xác sống", wandering_trader: "Thương nhân lang thang",
+    trader_llama: "Lạc đà của thương nhân", camel: "Lạc đà", pillager: "Kẻ cướp", allay: "Tiểu linh", ...STR_MORE.mobs,
+  } as Record<string, string>,
+  // ---- Giai đoạn 8a: nghề dân làng, bảng đổi đồ ----
+  professions: {
+    none: "Dân làng thất nghiệp", nitwit: "Dân làng ngốc", farmer: "Nông dân", fisherman: "Ngư dân", shepherd: "Người chăn cừu",
+    fletcher: "Thợ làm tên", librarian: "Thủ thư", cartographer: "Người vẽ bản đồ", cleric: "Tu sĩ", armorer: "Thợ rèn giáp",
+    weaponsmith: "Thợ rèn vũ khí", toolsmith: "Thợ rèn công cụ", butcher: "Người bán thịt", leatherworker: "Thợ da", mason: "Thợ đá",
+  } as Record<string, string>,
+  tradeOut: "hết hàng",
+  ench: STR_MORE.ench, enchantHint: STR_MORE.enchantHint, xpLevel: STR_MORE.xpLevel, // 8b2 (stringsMore.ts)
+  anvilName: STR_MORE.anvilName, anvilCost: STR_MORE.anvilCost, anvilTooExpensive: STR_MORE.anvilTooExpensive, grindXp: STR_MORE.grindXp, // 8b3
+  rideHint: "Shift: xuống · giữ Space rồi thả: nhảy · cầm thức ăn + chuột phải: cho thú ăn",
+  rideHintCamel: "Shift: xuống · Space: lướt · cầm xương rồng + chuột phải: cho ăn",
+  rideHintNoSaddle: "Shift: xuống · cần yên (và thuần) mới điều khiển được · cầm thức ăn + chuột phải: cho ăn",
+  rideHintBack: "Shift: xuống (đang ngồi sau)",
+  tradeHint: "Bấm để đổi 1 lần · Shift + bấm: đổi tới khi hết đồ / hết hàng · E / Esc: đóng",
+  effects: { poison: "Độc", slowness: "Chậm", weakness: "Yếu", hunger: "Đói", nausea: "Buồn nôn", grace: "Bơi cùng cá heo", absorption: "Hấp thụ", regeneration: "Hồi phục", ...STR_MORE.effects } as Record<string, string>,
   durability: "Độ bền",
   items: {
     stick: "Que", coal: "Than", raw_iron: "Sắt thô", iron_ingot: "Thỏi sắt", raw_gold: "Vàng thô",
     gold_ingot: "Thỏi vàng", diamond: "Kim cương", emerald: "Ngọc lục bảo", flint: "Đá lửa", string: "Sợi tơ",
-    feather: "Lông gà", leather: "Da", wheat: "Lúa mì", arrow: "Mũi tên", bow: "Cung",
+    feather: "Lông gà", leather: "Da", wheat: "Lúa mì", arrow: "Mũi tên", bow: "Cung", shield: "Khiên",
     seeds: "Hạt lúa", door: "Cửa gỗ sồi", apple: "Táo", bread: "Bánh mì", golden_apple: "Táo vàng",
     carrot: "Cà rốt", potato: "Khoai tây", baked_potato: "Khoai tây nướng", beetroot: "Củ cải đường",
     beetroot_seeds: "Hạt củ cải đường", beetroot_soup: "Súp củ cải đường", melon_slice: "Lát dưa hấu",
     melon_seeds: "Hạt dưa hấu", pumpkin_seeds: "Hạt bí ngô", bowl: "Bát gỗ",
     bucket: "Xô", water_bucket: "Xô nước", lava_bucket: "Xô dung nham",
     iron_nugget: "Mảnh sắt", shears: "Kéo", flint_and_steel: "Bật lửa",
+    beef: "Thịt bò sống", cooked_beef: "Bít tết", porkchop: "Thịt lợn sống", cooked_porkchop: "Thịt lợn nướng",
+    chicken: "Thịt gà sống", cooked_chicken: "Thịt gà nướng", mutton: "Thịt cừu sống", cooked_mutton: "Thịt cừu nướng",
+    rotten_flesh: "Thịt thối", bone: "Xương", bone_meal: "Bột xương", spider_eye: "Mắt nhện", egg: "Trứng", milk_bucket: "Xô sữa",
+    gunpowder: "Thuốc súng", ender_pearl: "Ngọc hư không", slime_ball: "Viên nhầy", phantom_membrane: "Màng bóng ma",
+    rabbit: "Thịt thỏ sống", cooked_rabbit: "Thịt thỏ nướng", cod: "Cá tuyết sống", cooked_cod: "Cá tuyết nướng",
+    salmon: "Cá hồi sống", cooked_salmon: "Cá hồi nướng", pufferfish: "Cá nóc", tropical_fish: "Cá nhiệt đới",
+    rabbit_hide: "Da thỏ", rabbit_foot: "Chân thỏ", ink_sac: "Túi mực", glow_ink_sac: "Túi mực phát sáng",
+    armadillo_scute: "Vảy tatu", wolf_armor: "Giáp sói", cod_bucket: "Xô cá tuyết", salmon_bucket: "Xô cá hồi",
+    pufferfish_bucket: "Xô cá nóc", tropical_fish_bucket: "Xô cá nhiệt đới",
+    saddle: "Yên", lead: "Dây dắt",
     "#planks": "Ván gỗ (loại nào cũng được)", "#log": "Thân gỗ (loại nào cũng được)",
     "#wool": "Len (màu nào cũng được)", "#bed": "Giường (màu nào cũng được)",
   } as Record<string, string>,
   toolKinds: { pickaxe: "Cuốc", axe: "Rìu", shovel: "Xẻng", sword: "Kiếm", hoe: "Cuốc đất" } as Record<string, string>,
   armorPieces: { helmet: "Mũ", chestplate: "Áo giáp", leggings: "Quần giáp", boots: "Giày" } as Record<string, string>,
-  tiers: { wood: "gỗ", stone: "đá", iron: "sắt", gold: "vàng", diamond: "kim cương", leather: "da" } as Record<string, string>,
+  tiers: { wood: "gỗ", stone: "đá", iron: "sắt", gold: "vàng", diamond: "kim cương", leather: "da", netherite: "netherite" } as Record<string, string>,
   hudMissingTextures: "Texture vẽ tạm",
-  biomes: ["Đồng cỏ", "Rừng", "Sa mạc", "Đồng tuyết", "Núi", "Đại dương"],
+  biomes: ["Đồng cỏ", "Rừng", "Sa mạc", "Đồng tuyết", "Núi", "Đại dương", "Đầm lầy", STR_MORE.darkForest],
+  snowyPlains: "Đồng bằng tuyết", // (7e) phần đồng tuyết không cây
+  netherWastes: STR_MORE.netherWastes, // (10a)
   blocks: {
     stone: "Đá",
     dirt: "Đất",
@@ -142,7 +244,12 @@ export const STR = {
     iron_bars: "Song sắt", fire: "Lửa", coal_block: "Khối than", iron_block: "Khối sắt", gold_block: "Khối vàng",
     diamond_block: "Khối kim cương", emerald_block: "Khối ngọc lục bảo", raw_iron_block: "Khối sắt thô",
     raw_gold_block: "Khối vàng thô", lantern: "Lồng đèn", iron_door: "Cửa sắt", stone_button: "Nút đá",
-    oak_button: "Nút gỗ", lever: "Cần gạt",
+    oak_button: "Nút gỗ", lever: "Cần gạt", stone_pressure_plate: "Tấm áp lực đá", oak_pressure_plate: "Tấm áp lực gỗ",
+    tnt: "Thuốc nổ TNT", infested_stone: "Đá nhiễm", spawner: "Lồng sinh quái", vine: "Dây leo", lily_pad: "Lá súng",
+    snow_block: "Khối tuyết", ice: "Băng", chiseled_stone_bricks: "Gạch đá khắc", cracked_stone_bricks: "Gạch đá nứt",
+    mossy_stone_bricks: "Gạch đá rêu", netherrack: "Đá lửa ngục", magma_block: "Khối magma", crying_obsidian: "Đá vỏ chai khóc",
+    chiseled_sandstone: "Đá cát khắc", cut_sandstone: "Đá cát cắt", orange_terracotta: "Đất nung cam", blue_terracotta: "Đất nung xanh dương",
+    dirt_path: "Đường đất", white_wool_stairs: "Bậc len trắng",
   } as Record<string, string>,
   serverConnecting: "Server: đang kết nối...",
   serverConnected: "Server: đã kết nối",
@@ -152,14 +259,14 @@ export const STR = {
 // Giai đoạn 4e: tên bậc / tấm / tường ghép theo vật liệu; hàng rào, cửa theo loài gỗ.
 const MATERIAL_NAMES: Record<string, string> = {
   stone: "đá", cobble: "đá cuội", mossy_cobble: "đá cuội rêu", sandstone: "sa thạch", deepslate: "đá sâu",
-  stone_brick: "gạch đá", oak: "gỗ sồi", spruce: "gỗ thông", birch: "gỗ bạch dương", acacia: "gỗ keo",
+  stone_brick: "gạch đá", oak: "gỗ sồi", spruce: "gỗ thông", birch: "gỗ bạch dương", acacia: "gỗ keo", dark_oak: "gỗ sồi tối",
 };
 for (const [m, n] of Object.entries(MATERIAL_NAMES)) {
   STR.blocks[`${m}_stairs`] = `Bậc ${n}`;
   STR.blocks[`${m}_slab`] = `Tấm ${n}`;
   STR.blocks[`${m}_wall`] = `Tường ${n}`;
 }
-for (const w of ["spruce", "birch", "acacia"]) {
+for (const w of ["spruce", "birch", "acacia", "dark_oak"]) {
   STR.blocks[`${w}_fence`] = `Hàng rào ${MATERIAL_NAMES[w]}`;
   STR.blocks[`${w}_door`] = `Cửa ${MATERIAL_NAMES[w]}`;
 }
@@ -177,4 +284,17 @@ for (const [c, n] of Object.entries(COLOR_NAMES)) {
   STR.items[`${c}_stained_glass`] = `Kính màu ${n}`;
   STR.items[`${c}_stained_glass_pane`] = `Tấm kính màu ${n}`;
   STR.items[`${c}_bed`] = `Giường ${n}`;
+  STR.items[`${c}_terracotta`] = `Đất nung ${n}`; // 8a
+  STR.items[`${c}_glazed_terracotta`] = `Đất nung tráng men ${n}`;
 }
+// Giai đoạn 8a: block của làng
+Object.assign(STR.items, { crossbow: "Nỏ", crossbow_loaded: "Nỏ (đã lên dây)" }, STR_MORE.items, STR_MORE.netherItems); // 8b, 8b2, 10a
+Object.assign(STR.blocks, STR_MORE.blocks, STR_MORE.netherBlocks, STR_NETHER.blocks);
+Object.assign(STR.items, STR_NETHER.items), Object.assign(STR.mobs, STR_NETHER.mobs); // 10b
+Object.assign(STR.chat, STR_NETHER.chat), Object.assign(STR.effects, STR_NETHER.effects); // 10c
+Object.assign(STR.blocks, {
+  smooth_sandstone: "Đá cát mịn", terracotta: "Đất nung", hay_block: "Khối rơm", bookshelf: "Giá sách", composter: "Thùng ủ phân",
+  barrel: "Thùng gỗ", loom: "Khung dệt", smoker: "Lò hun khói", blast_furnace: "Lò luyện", cartography_table: "Bàn bản đồ",
+  fletching_table: "Bàn làm tên", smithing_table: "Bàn rèn", lectern: "Bục đọc sách", stonecutter: "Máy cắt đá", grindstone: "Đá mài",
+  cauldron: "Vạc", brewing_stand: "Giá pha chế", stained_terracotta: "Đất nung màu", glazed_terracotta: "Đất nung tráng men",
+});

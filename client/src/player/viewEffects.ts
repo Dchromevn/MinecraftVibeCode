@@ -1,7 +1,7 @@
 // Hiệu ứng góc nhìn: FOV rộng ra khi chạy nhanh, ám màu + sương dày khi mắt ở trong
 // nước / dung nham.
 import * as THREE from "three";
-import { B, PLAYER, type World } from "../../../shared/src/index.js";
+import { ARCHERY, B, PLAYER, PORTAL, type World } from "../../../shared/src/index.js";
 
 const WATER_TINT = "rgba(24, 64, 150, 0.38)";
 const LAVA_TINT = "rgba(210, 80, 10, 0.7)";
@@ -13,6 +13,8 @@ export class ViewEffects {
   private fov = PLAYER.FOV;
   private readonly normalFog = { color: new THREE.Color(), near: 0, far: 0 };
   private wasInside = false;
+  private t = 0;
+  private portalT = 0; // (10a) đã đứng trong cổng bao lâu: màn hình tím dần
 
   constructor(
     private readonly scene: THREE.Scene,
@@ -34,8 +36,11 @@ export class ViewEffects {
     return id === B.WATER ? "water" : id === B.LAVA ? "lava" : null;
   }
 
-  update(dt: number, sprinting: boolean): void {
-    const target = PLAYER.FOV * (sprinting ? PLAYER.SPRINT_FOV_FACTOR : 1);
+  /** zoom: lực kéo cung (0..1) — góc nhìn hẹp lại như Minecraft (6b). */
+  update(dt: number, sprinting: boolean, zoom = 0, nausea = false): void {
+    this.t += dt;
+    const wobble = nausea ? 1 + Math.sin(this.t * 2.5) * 0.15 : 1; // (7b) buồn nôn: góc nhìn co giãn
+    const target = PLAYER.FOV * (sprinting ? PLAYER.SPRINT_FOV_FACTOR : 1) * (1 - ARCHERY.ZOOM * zoom * zoom) * wobble;
     this.fov += (target - this.fov) * Math.min(1, dt * 10);
     if (Math.abs(this.camera.fov - this.fov) > 0.01) {
       this.camera.fov = this.fov;
@@ -52,7 +57,10 @@ export class ViewEffects {
         fog.far = this.normalFog.far;
       }
       this.wasInside = false;
-      this.overlay.style.display = "none";
+      const p = this.camera.position, inPortal = [0, -1].some((dy) => this.world.getBlock(Math.floor(p.x), Math.floor(p.y) + dy, Math.floor(p.z)) === B.NETHER_PORTAL);
+      this.portalT = inPortal ? this.portalT + dt : 0;
+      this.overlay.style.display = inPortal ? "block" : "none";
+      if (inPortal) this.overlay.style.background = `rgba(110, 30, 200, ${Math.min(0.45, 0.1 + (this.portalT / PORTAL.WAIT_S) * 0.35).toFixed(2)})`;
       return;
     }
     if (!this.wasInside) {

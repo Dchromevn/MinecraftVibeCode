@@ -1,6 +1,7 @@
 // Hoa theo đám và xương rồng (DESIGN.md 2.13, Giai đoạn 4d). Xác định theo seed + tọa độ: mỗi cột tự
 // tính đám hoa / cây xương rồng nào chứa nó, nên chunk sinh độc lập vẫn liền mạch.
-import { CACTUS, FLOWERS } from "../constants.js";
+import { BIOMES, CACTUS, FLOWERS } from "../constants.js";
+import { SUGAR_CANE } from "../tickConstants.js";
 import { B, BLOCKS, type BlockId } from "../blocks.js";
 import { CHUNK_HEIGHT, blockIndex } from "../chunk.js";
 import { BIOME, BIOME_KEYS, hasGrassSurface, hash01, type Column, type TerrainSampler } from "./terrainSampler.js";
@@ -81,5 +82,42 @@ export function placeCacti(sampler: TerrainSampler, data: Uint8Array, cx: number
         if (data[i] !== B.AIR) break;
         data[i] = B.CACTUS;
       }
+    }
+}
+
+/** (8b2) Mía: cụm trên mép bờ (đất / cát / cỏ có nước cùng độ cao ngay cạnh), cao 1–4. */
+export function placeSugarCane(sampler: TerrainSampler, data: Uint8Array, cx: number, cz: number, cols: Column[]): void {
+  const S = SUGAR_CANE, seed = sampler.seed;
+  for (let lz = 0; lz < 16; lz++)
+    for (let lx = 0; lx < 16; lx++) {
+      const wx = cx * 16 + lx, wz = cz * 16 + lz, gx = Math.floor(wx / S.CELL), gz = Math.floor(wz / S.CELL);
+      if (hash01(seed, gx, gz, 61) >= S.CHANCE || hash01(seed, wx, wz, 62) >= 0.5) continue;
+      const col = cols[lz * 16 + lx]!, h = col.height;
+      if (col.waterTop > h || h + 4 >= CHUNK_HEIGHT) continue; // dưới nước: bỏ
+      const top = data[blockIndex(lx, h, lz)];
+      if (top !== B.GRASS && top !== B.SAND && top !== B.DIRT) continue;
+      const wet = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dz]) => {
+        const n = sampler.column(wx + dx!, wz + dz!);
+        return n.waterTop >= h && n.height < h;
+      });
+      if (!wet) continue;
+      const tall = S.NATURAL[0] + Math.floor(hash01(seed, wx, wz, 63) * (S.NATURAL[1] - S.NATURAL[0] + 1));
+      for (let y = h + 1; y <= h + tall; y++) {
+        const i = blockIndex(lx, y, lz);
+        if (data[i] !== B.AIR) break;
+        data[i] = B.SUGAR_CANE;
+      }
+    }
+}
+
+/** (7b) Lá súng: trên ô nước nông (sâu 1–2) của đầm lầy. */
+export function placeLilyPads(sampler: TerrainSampler, data: Uint8Array, cx: number, cz: number, cols: Column[]): void {
+  for (let lz = 0; lz < 16; lz++)
+    for (let lx = 0; lx < 16; lx++) {
+      const col = cols[lz * 16 + lx]!, depth = col.waterTop - col.height;
+      if (col.biome !== BIOME.SWAMP || depth < 1 || depth > 2 || col.waterTop + 1 >= CHUNK_HEIGHT) continue;
+      if (hash01(sampler.seed, cx * 16 + lx, cz * 16 + lz, 63) >= BIOMES.LILY_CHANCE) continue;
+      const i = blockIndex(lx, col.waterTop + 1, lz);
+      if (data[i] === B.AIR && data[blockIndex(lx, col.waterTop, lz)] === B.WATER) data[i] = B.LILY_PAD;
     }
 }

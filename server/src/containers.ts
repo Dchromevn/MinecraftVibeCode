@@ -10,12 +10,14 @@ import type { ServerWorld } from "./serverWorld.js";
 
 export interface ContainerSession {
   key: string;
-  kind: "chest" | "furnace";
+  kind: "chest" | "furnace" | "enchant" | "anvil" | "grindstone" | "smithing";
   slots: Slot[];
   positions: { x: number; y: number; z: number }[];
   viewers: Set<ServerPlayer>;
   furnace?: FurnaceEntity;
   finish: () => void; // người cuối cùng đóng
+  /** (7d) Rương trên lưng thú: vị trí hiện tại của thú (đi xa thì đóng). */
+  follow?: () => { x: number; y: number; z: number } | null;
 }
 
 const keyOf = (x: number, y: number, z: number): string => `${x},${y},${z}`;
@@ -64,6 +66,29 @@ export class Containers {
     if (s.furnace) this.sendFurnace(s);
   }
 
+  /** (7d) Mở rương trên lưng thú (lừa, la, lạc đà) cho p; key riêng theo con thú. */
+  openMob(p: ServerPlayer, key: string, slots: Slot[], where: () => { x: number; y: number; z: number } | null): void {
+    this.close(p);
+    let s = this.sessions.get(key);
+    if (!s) s = { key, kind: "chest", slots, positions: [], viewers: new Set(), finish: () => undefined, follow: where };
+    this.sessions.set(key, s);
+    s.viewers.add(p);
+    p.container = s;
+    p.inv.ext = s.slots;
+    p.inv.extRules = chestRules(s.slots.length);
+    p.invDirty = true;
+    p.send({ t: "open", kind: "chest", size: s.slots.length });
+  }
+
+  /** (8b2) Gắn phiên dựng sẵn (bàn phù phép) cho p. */
+  adopt(p: ServerPlayer, s: ContainerSession, rules: NonNullable<ServerPlayer["inv"]["extRules"]>): void {
+    this.sessions.set(s.key, s);
+    p.container = s;
+    p.inv.ext = s.slots;
+    p.inv.extRules = rules;
+    p.invDirty = true;
+  }
+
   /** p đóng giao diện (hoặc rời game / chết). */
   close(p: ServerPlayer): void {
     const s = p.container;
@@ -98,7 +123,8 @@ export class Containers {
   tick(tickNo: number): void {
     for (const s of [...this.sessions.values()]) {
       for (const v of [...s.viewers]) {
-        const far = s.positions.every((q) => v.distTo(q.x, q.y, q.z) > NET.CONTAINER_RANGE);
+        const at = s.follow?.();
+        const far = s.follow ? !at || v.distTo(at.x, at.y, at.z) > NET.CONTAINER_RANGE : s.positions.every((q) => v.distTo(q.x, q.y, q.z) > NET.CONTAINER_RANGE);
         if (far || v.dead) {
           this.close(v);
           v.send({ t: "close" });

@@ -10,18 +10,26 @@
   ],
   "scripts": {
     "dev": "concurrently -n client,server -c cyan,magenta \"npm run dev -w client\" \"npm run dev -w server\"",
-    "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json --noEmit && tsc -p client/tsconfig.json && tsc -p scripts/tsconfig.json && tsc -p tests/tsconfig.json",
+    "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json --noEmit && tsc -p client/tsconfig.json && tsc -p scripts/tsconfig.json && tsc -p tests/tsconfig.json && tsc -p desktop/tsconfig.json --noEmit",
     "build": "npm run build -w client && npm run build -w server",
-    "import-textures": "tsx scripts/import-mc.ts",
-    "import-mc": "tsx scripts/import-mc.ts",
+    "import-textures": "tsx scripts/import-mc.ts && tsx scripts/import-structures.ts",
+    "import-mc": "tsx scripts/import-mc.ts && tsx scripts/import-structures.ts",
     "test": "tsx tests/run.ts",
     "host": "npm run build && npm run start -w server",
-    "share": "cloudflared tunnel --url http://localhost:8080"
+    "share": "cloudflared tunnel --url http://localhost:8080",
+    "list-items": "tsx scripts/list-items.ts",
+    "list-places": "tsx scripts/list-places.ts",
+    "desktop": "npm run build && npm run desktop-stage && tsx scripts/run-desktop.ts",
+    "make-icon": "tsx scripts/make-icon.ts",
+    "desktop-stage": "tsx scripts/stage-desktop.ts && tsc -p desktop/tsconfig.json",
+    "dist-desktop": "npm run build && npm run desktop-stage && electron-builder --config desktop/builder.json"
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
     "@types/pngjs": "^6.0.5",
     "concurrently": "^9.1.0",
+    "electron": "45.2.3",
+    "electron-builder": "26.18.1",
     "pngjs": "^7.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"

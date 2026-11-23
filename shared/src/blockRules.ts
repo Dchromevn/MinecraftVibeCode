@@ -6,9 +6,20 @@ import { collisionBoxes } from "./blockShapes.js";
 import { chestPartner, linkedCell, pairDoors, updateRailsAround, type PlacedCell } from "./placement.js";
 import { chestMeta, facingDir } from "./blockMeta.js";
 import { isFarmPlant, stemDetach } from "./crops.js";
-import { isFlower, isSapling } from "./woods.js";
+import { isFlower, isLeaves, isSapling } from "./woods.js";
 import { SLAB_DOUBLE, isDoor, isFence, isSlab, isStairs, isWall, updateStairsAround } from "./building.js";
-import { isSwitch, lanternHanging, refreshIronDoors, switchAnchor } from "./decor.js";
+import { isPlate, isPowerSource, isSwitch, lanternHanging, refreshIronDoors, switchAnchor } from "./decor.js";
+
+/**
+ * Chuột phải vào block này (không ngồi) thì dùng block thay vì đặt / ăn: bàn chế tạo, rương, lò, cửa gỗ mọi loài (cửa sắt
+ * chỉ mở bằng nút / cần gạt), nút, cần gạt, giường (7a: ngủ). Client và server dùng chung.
+ */
+/** (8b3) Đe (cả bản sứt). */
+export const isAnvil = (id: number): boolean => id === B.ANVIL || id === B.CHIPPED_ANVIL || id === B.DAMAGED_ANVIL;
+
+export function isUsableBlock(id: number): boolean {
+  return id === B.WORKBENCH || id === B.CHEST || id === B.FURNACE || id === B.BED || id === B.ENCHANTING_TABLE || isAnvil(id) || id === B.GRINDSTONE || id === B.SMITHING_TABLE || id === B.RESPAWN_ANCHOR || (isDoor(id) && id !== B.IRON_DOOR) || isSwitch(id);
+}
 
 export interface BlockAccess {
   /** id | dữ liệu phụ << 8; âm = chunk chưa tải. */
@@ -38,8 +49,13 @@ export function isFullSolid(id: number): boolean {
 /** Có thể đặt đè lên (không khí, chất lỏng, cỏ cao, tuyết phủ). */
 export function isReplaceable(id: number): boolean {
   const d = BLOCKS[id];
-  return !d || d.render === "none" || d.liquid || id === B.TALLGRASS || id === B.SNOW_LAYER || id === B.FIRE;
+  return !d || d.render === "none" || d.liquid || id === B.TALLGRASS || id === B.SNOW_LAYER || id === B.FIRE || NETHER_REPLACEABLE.has(id);
 }
+
+/** (10b) Cây nhỏ Vực Lửa và lửa linh hồn: đặt đè lên được như cỏ cao. */
+const NETHER_REPLACEABLE = new Set<number>([B.SOUL_FIRE, B.CRIMSON_ROOTS, B.WARPED_ROOTS, B.NETHER_SPROUTS]);
+/** (10b) Nấm nhỏ, rễ, mầm Vực Lửa mọc trên nylium, đất linh hồn, đất / cỏ / đất cày. */
+const FUNGUS_SOIL = new Set<number>([B.CRIMSON_NYLIUM, B.WARPED_NYLIUM, B.SOUL_SOIL, B.GRASS, B.DIRT, B.FARMLAND]);
 
 /** Xương rồng: 4 ô ngang bên cạnh không có block va chạm / dung nham (DESIGN.md 2.13). */
 export function cactusSidesFree(idAt: IdAt, x: number, y: number, z: number): boolean {
@@ -56,6 +72,7 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
   const below = idAt(x, y - 1, z);
   if (isSapling(id) || isFlower(id)) return below === B.GRASS || below === B.DIRT || below === B.FARMLAND;
   if (isSwitch(id)) return isFullSolid(idAt(...switchAnchor(m, x, y, z)));
+  if (isPlate(id)) return isFullSolid(below) || isFence(below) || isWall(below);
   if (isDoor(id)) {
     if (doorUpper(m)) return below === id;
     return isFullSolid(below) && idAt(x, y + 1, z) === id;
@@ -63,6 +80,18 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
   switch (id) {
     case B.FIRE:
       return isFullSolid(below);
+    case B.SOUL_FIRE: // (10b) chỉ cháy trên cát / đất linh hồn
+      return below === B.SOUL_SAND || below === B.SOUL_SOIL;
+    case B.CRIMSON_FUNGUS: case B.WARPED_FUNGUS: case B.CRIMSON_ROOTS: case B.WARPED_ROOTS: case B.NETHER_SPROUTS:
+      return FUNGUS_SOIL.has(below);
+    case B.NETHER_WART:
+      return below === B.SOUL_SAND;
+    case B.WEEPING_VINES: { // rủ dưới khối đặc / dây khác; xoắn: mọc trên khối đặc / dây khác
+      const up = idAt(x, y + 1, z);
+      return up === B.WEEPING_VINES || isFullSolid(up);
+    }
+    case B.TWISTING_VINES:
+      return below === B.TWISTING_VINES || isFullSolid(below);
     case B.CARPET:
       return below !== B.AIR && !BLOCKS[below]!.liquid;
     case B.LANTERN: {
@@ -71,7 +100,7 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
     }
     case B.CACTUS:
       return (below === B.SAND || below === B.CACTUS) && cactusSidesFree(idAt, x, y, z);
-    case B.TORCH: {
+    case B.TORCH: case B.SOUL_TORCH: {
       const wall = torchWall(m);
       // đuốc trên sàn: khối đầy, hoặc đầu cột rào (như đuốc trong hầm mỏ)
       if (wall === null) return isFullSolid(below) || isFence(below) || isWall(below);
@@ -79,6 +108,20 @@ export function hasSupport(cell: number, x: number, y: number, z: number, idAt: 
     }
     case B.LADDER:
       return isFullSolid(idAt(x + HDX[m & 3]!, y, z + HDZ[m & 3]!));
+    case B.VINE: { // (7b) bám khối đặc / lá bên cạnh, hoặc treo dưới dây leo khác
+      const side = idAt(x + HDX[m & 3]!, y, z + HDZ[m & 3]!);
+      return isFullSolid(side) || isLeaves(side) || idAt(x, y + 1, z) === B.VINE;
+    }
+    case B.NETHER_PORTAL: { // (10a) hai bên (theo trục cổng) và trên dưới phải là cổng hoặc đá vỏ chai — khung vỡ thì cổng tắt dần
+      const ok = (n: number): boolean => n === B.NETHER_PORTAL || n === B.OBSIDIAN;
+      const [dx, dz] = (m & 1) === 0 ? [1, 0] : [0, 1];
+      return ok(below) && ok(idAt(x, y + 1, z)) && ok(idAt(x + dx, y, z + dz)) && ok(idAt(x - dx, y, z - dz));
+    }
+    case B.LILY_PAD: // (7b) nằm trên mặt nước
+      return below === B.WATER;
+    case B.SUGAR_CANE: // (8b2) trên mía, hoặc trên đất / cát / cỏ có nước ngay cạnh ô đó
+      return below === B.SUGAR_CANE || ((below === B.GRASS || below === B.DIRT || below === B.SAND) &&
+        [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dz]) => idAt(x + dx!, y - 1, z + dz!) === B.WATER || idAt(x + dx!, y - 1, z + dz!) === B.ICE));
     case B.RAIL:
     case B.SNOW_LAYER:
       return isFullSolid(below);
@@ -193,7 +236,7 @@ export function breakAt(
   const idAt: IdAt = (a, b, c) => Math.max(0, acc.getCell(a, b, c)) & 255;
   if (id === B.RAIL) updateRailsAround(x, y, z, idAt, (px, py, pz, m) => acc.setCell(px, py, pz, B.RAIL, m));
   updateStairsAround(x, y, z, (a, b, c) => acc.getCell(a, b, c), (a, b, c, i, m) => acc.setCell(a, b, c, i, m));
-  if (isSwitch(id) || id === B.IRON_DOOR) refreshIronDoors((a, b, c) => acc.getCell(a, b, c), (a, b, c, i, m) => acc.setCell(a, b, c, i, m), x, y, z);
+  if (isPowerSource(id) || id === B.IRON_DOOR) refreshIronDoors((a, b, c) => acc.getCell(a, b, c), (a, b, c, i, m) => acc.setCell(a, b, c, i, m), x, y, z);
   // phá một nửa rương đôi: nửa kia trở lại rương đơn (giữ đồ của nó)
   const p = chestPartner(cell, x, y, z);
   if (p && idAt(p.x, p.y, p.z) === B.CHEST) acc.setCell(p.x, p.y, p.z, B.CHEST, chestMeta(facingDir(cell >> 8), 0));
@@ -211,7 +254,7 @@ export function placeCells(
   for (const c of cells)
     if (isDoor(c.id)) pairDoors(c.x, c.y, c.z, (a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m));
   for (const c of cells)
-    if (isSwitch(c.id) || c.id === B.IRON_DOOR) refreshIronDoors((a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m), c.x, c.y, c.z);
+    if (isPowerSource(c.id) || c.id === B.IRON_DOOR) refreshIronDoors((a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m), c.x, c.y, c.z);
   for (const c of cells)
     if (isStairs(c.id)) updateStairsAround(c.x, c.y, c.z, (a, b, d) => acc.getCell(a, b, d), (a, b, d, i, m) => acc.setCell(a, b, d, i, m));
   return settle(acc, cells, startFalling);

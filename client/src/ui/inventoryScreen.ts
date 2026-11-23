@@ -12,7 +12,7 @@ import { PlayerPreview } from "./playerPreview.js";
 import { RecipeBook } from "./recipeBook.js";
 import { renderSlot } from "./survivalHud.js";
 
-export type ScreenMode = "inventory" | "workbench" | "chest" | "furnace";
+export type ScreenMode = "inventory" | "workbench" | "chest" | "furnace" | "enchant" | "anvil" | "grindstone" | "smithing";
 
 /** Khi mở rương / lò: tiêu đề, số ô, lò (để vẽ thanh lửa / tiến độ), việc cần làm khi đóng. */
 export interface ContainerOpts {
@@ -20,6 +20,8 @@ export interface ContainerOpts {
   size: number;
   furnace?: FurnaceEntity;
   onClose: () => void;
+  /** (8b2) Phần trên tự dựng (bàn phù phép). */
+  view?: (slot: (i: number) => HTMLDivElement) => ContainerView;
 }
 const ARMOR_BG = ["helmet", "chestplate", "leggings", "boots"];
 const div = (cls: string, text = ""): HTMLDivElement => {
@@ -57,6 +59,10 @@ export class InventoryScreen {
     this.book = new RecipeBook(inv, act, () => this.refresh());
     const panel = div("panel");
     ARMOR_BG.forEach((p, i) => this.armorCol.appendChild(this.slot("armor", i, `/ui/empty_${p}.png`)));
+    const off = this.slot("offhand", 0, "/ui/slot_shield.png"); // tay trái (6a)
+    off.classList.add("offhand");
+    off.title = STR.offhand;
+    this.armorCol.appendChild(off);
     this.bookBtn.className = "bookbtn";
     this.bookBtn.innerHTML = `<img src="/ui/book.png">`;
     this.bookBtn.title = STR.recipeBook;
@@ -162,7 +168,7 @@ export class InventoryScreen {
     const n = Number(e.key);
     const h = this.hover;
     if (Number.isInteger(n) && n >= 1 && n <= 9) this.act({ t: "hotbar", area: h.area, i: h.i, n: n - 1 });
-    else if (e.code === "KeyF" && !this.inv.cursor) this.act({ t: "click", area: h.area, i: h.i, button: "left", shift: true }); // như Shift + bấm
+    else if (e.code === "KeyF" && !this.inv.cursor && h.area !== "offhand") this.act({ t: "offhand", area: h.area, i: h.i }); // đổi với tay trái
     else if (e.code === "KeyQ") this.act({ t: "dropSlot", area: h.area, i: h.i, all: e.shiftKey });
     else return;
     e.preventDefault();
@@ -170,11 +176,11 @@ export class InventoryScreen {
   }
 
   /** Mở rương / lò nung (ô của nó đã gắn vào inv.ext trước khi gọi). */
-  showContainer(mode: "chest" | "furnace", o: ContainerOpts): void {
+  showContainer(mode: "chest" | "furnace" | "enchant" | "anvil" | "grindstone" | "smithing", o: ContainerOpts): void {
     this.mode = mode;
     for (let k = this.slotEls.length - 1; k >= 0; k--) if (this.slotEls[k]!.area === "ext") this.slotEls.splice(k, 1);
     const slot = (i: number): HTMLDivElement => this.slot("ext", i);
-    this.container = mode === "furnace" && o.furnace ? furnaceView(o.title, o.furnace, slot) : chestView(o.title, o.size, slot);
+    this.container = o.view ? o.view(slot) : mode === "furnace" && o.furnace ? furnaceView(o.title, o.furnace, slot) : chestView(o.title, o.size, slot);
     this.containerClose = o.onClose;
     this.top.innerHTML = "";
     this.top.append(this.container.el);
