@@ -1,10 +1,10 @@
-// App desktop (Electron): khởi động server game trong máy rồi mở cửa sổ chơi trỏ tới server đó.
-// Bạn bè vẫn vào được qua mạng LAN / npm run share như bản web (server nghe mọi địa chỉ).
-import { app, BrowserWindow, dialog, Menu, shell } from "electron";
+// App desktop (Electron): chạy server game trong máy (gameHost.ts — thế giới đang chọn) rồi mở cửa sổ chơi trỏ tới server đó.
+// Trang game nói chuyện với app qua preload.cjs: danh sách thế giới, tạo / xóa / chơi, mở cho mạng LAN ("Tạo server").
+import { app, BrowserWindow, Menu, shell } from "electron";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { startServer, type RunningServer } from "./serverProcess.js";
+import { GameHost } from "./gameHost.js";
 import { S, waitPage } from "./strings.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -12,14 +12,16 @@ const here = dirname(fileURLToPath(import.meta.url));
 const gameDir = app.isPackaged ? join(process.resourcesPath, "game") : join(here, "..", "game");
 
 let win: BrowserWindow | null = null;
-let server: RunningServer | null = null;
 let quitting = false;
+let host: GameHost | null = null;
 
 function guardKeysAndLinks(w: BrowserWindow): void {
   w.webContents.on("before-input-event", (e, input) => {
     if (input.type !== "keyDown") return;
     if (input.key === "F11") {
-      w.setFullScreen(!w.isFullScreen());
+      // toàn màn hình kiểu trang web: khớp nút "Toàn màn hình" trong Cài đặt của game
+      const js = "document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()";
+      void w.webContents.executeJavaScript(js, true).catch(() => w.setFullScreen(!w.isFullScreen()));
       e.preventDefault();
     } else if (input.key === "F12") {
       w.webContents.toggleDevTools();
@@ -32,7 +34,8 @@ function guardKeysAndLinks(w: BrowserWindow): void {
     return { action: "deny" };
   });
   w.webContents.on("will-navigate", (e, url) => {
-    if (!server || new URL(url).port === String(server.port)) return;
+    const s = host?.server;
+    if (!s || new URL(url).port === String(s.port)) return;
     e.preventDefault();
     if (/^https?:/i.test(url)) void shell.openExternal(url);
   });
@@ -44,7 +47,7 @@ async function shutdown(): Promise<void> {
   quitting = true;
   if (win && !win.isDestroyed()) void win.loadURL(waitPage(S.saving));
   try {
-    await server?.stop();
+    await host?.server?.stop();
   } finally {
     app.exit(0);
   }
@@ -58,7 +61,7 @@ async function boot(): Promise<void> {
     title: S.title,
     ...(existsSync(join(here, "icon.png")) ? { icon: join(here, "icon.png") } : {}), // logo khối cỏ
     backgroundColor: "#1b1b1b",
-    webPreferences: { contextIsolation: true, sandbox: true, backgroundThrottling: false },
+    webPreferences: { contextIsolation: true, sandbox: true, backgroundThrottling: false, preload: join(here, "preload.cjs") },
   });
   guardKeysAndLinks(win);
   win.on("close", (e) => {
@@ -68,21 +71,16 @@ async function boot(): Promise<void> {
   });
   void win.loadURL(waitPage(S.starting));
 
-  const userDir = app.getPath("userData");
-  try {
-    server = await startServer({ gameDir, userDir, echo: !app.isPackaged });
-  } catch (err) {
-    dialog.showErrorBox(S.failTitle, S.failBody(err instanceof Error ? err.message : String(err), join(userDir, "server.log")));
-    app.exit(1);
-    return;
-  }
-  const s = server;
-  s.onExit((code) => {
-    dialog.showErrorBox(S.crashTitle, S.crashBody(code, s.logFile));
-    quitting = true;
-    app.exit(1);
+  host = new GameHost({
+    gameDir, userDir: app.getPath("userData"), echo: !app.isPackaged, win: () => win,
+    onFatal: () => {
+      quitting = true;
+      app.exit(1);
+    },
   });
-  if (!win.isDestroyed()) await win.loadURL(`http://localhost:${s.port}/`);
+  host.registerIpc();
+  await host.start(host.worlds.last()?.id ?? null); // mở sẵn thế giới chơi gần nhất (chưa có: server không lưu)
+  if (host.server && !win.isDestroyed()) await win.loadURL(`http://localhost:${host.server.port}/`);
 }
 
 // chỉ một cửa sổ app: hai server cùng ghi một thế giới sẽ hỏng dữ liệu

@@ -1,4 +1,4 @@
-import { cpSync, createReadStream, existsSync, statSync } from "node:fs";
+import { cpSync, createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
@@ -29,8 +29,12 @@ function mcOverride(): Plugin {
   };
 }
 
+/** Phiên bản game (package.json gốc) — hiện ở góc màn hình mở đầu. */
+const VERSION = (JSON.parse(readFileSync(fileURLToPath(new URL("../package.json", import.meta.url)), "utf8")) as { version: string }).version;
+
 export default defineConfig({
   plugins: [mcOverride()],
+  define: { __APP_VERSION__: JSON.stringify(VERSION) },
   server: {
     port: 5173,
     // chạy dev: client gọi /ws cùng địa chỉ trang, Vite chuyển sang server (cổng 8080)

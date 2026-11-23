@@ -24,6 +24,10 @@ export interface ServerConfig {
   pvp?: boolean;
   sleepPercent?: number;
   mobGriefing?: boolean;
+  /** App desktop: mã bí mật của chủ máy (OWNER_TOKEN) — gửi mã này thay mật khẩu thì vào không cần tài khoản. */
+  ownerToken?: string;
+  /** App desktop (ACCESS=local): lúc đầu chỉ máy này vào được; app mở cho LAN khi người chơi chọn "Tạo server". */
+  localOnly?: boolean;
   /** Thư mục lưu (server/data); null = không lưu xuống đĩa (bộ kiểm tra). */
   dataDir: string | null;
 }
@@ -51,7 +55,10 @@ export function loadConfig(): ServerConfig {
   if (process.env.SEED) cfg.seed = process.env.SEED;
   if (process.env.WORLD) cfg.world = process.env.WORLD;
   if (process.env.DATA_DIR) cfg.dataDir = process.env.DATA_DIR;
+  if (process.env.NO_SAVE === "1") cfg.dataDir = null; // app desktop: chưa chọn thế giới (màn hình mở đầu) — không ghi gì xuống đĩa
   if (process.env.PVP) cfg.pvp = process.env.PVP.toLowerCase() !== "off";
+  if (process.env.OWNER_TOKEN) cfg.ownerToken = process.env.OWNER_TOKEN;
+  if (process.env.ACCESS === "local") cfg.localOnly = true;
   if (process.env.MOB_GRIEFING) cfg.mobGriefing = process.env.MOB_GRIEFING.toLowerCase() !== "off";
   return cfg;
 }

@@ -1,4 +1,6 @@
 // CSS cho giao diện vật phẩm (hotbar, thanh sinh tồn, túi đồ, màn hình chết).
+import { MENU_CSS } from "./menuStyles.js";
+
 const CSS = `
 .slot { width: 40px; height: 40px; position: relative; box-sizing: border-box; background: url(/ui/slot.png) center / 100% 100%;
   image-rendering: pixelated; border: 1px solid #00000055; }
@@ -66,46 +68,10 @@ const CSS = `
 #inv .rec .ing { color: #e0e0e0; font-size: 11px; }
 #inv .tip { color: #404040; font-size: 11px; margin-top: 6px; white-space: pre-line; }
 #cursor { position: fixed; pointer-events: none; z-index: 6; width: 40px; height: 40px; background: none; border: none; }
-#death { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
-  background: #7a0000aa; z-index: 7; color: #fff; font: bold 32px monospace; gap: 24px; }
-#death button { font: 18px monospace; padding: 8px 28px; cursor: pointer; }
-#join { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #1d2a3a; z-index: 20;
-  font: 15px monospace; color: #404040; }
-#join .panel { background: #c6c6c6; padding: 18px 22px; border: 3px solid; border-color: #fff #555 #555 #fff; width: 340px;
-  box-shadow: 0 0 0 2px #000; display: flex; flex-direction: column; gap: 8px; }
-#join h2 { margin: 0 0 6px; font-size: 20px; }
-#join input { font: 16px monospace; padding: 6px; }
-#join button { font: 16px monospace; padding: 6px; cursor: pointer; }
-#join .err { color: #a00; min-height: 1.2em; }
-#join .tip { font-size: 12px; color: #555; }
-#join .menu { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto; box-sizing: border-box; }
-#join .sub { font-weight: bold; }
-#join .list { display: flex; flex-direction: column; gap: 4px; background: #8b8b8b; padding: 4px; max-height: 240px; overflow-y: auto; }
-#join .srv { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; background: #a9a9a9; padding: 5px 8px; cursor: pointer;
-  border: 2px solid transparent; }
-#join .srv.sel { border-color: #fff; background: #bdbdbd; }
-#join .srv span { grid-column: 1; font-size: 12px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#join .srv i { grid-column: 2; grid-row: 1 / 3; align-self: center; font-style: normal; font-size: 12px; text-align: right; }
-#join .srv i.ok { color: #1a6b1a; }
-#join .srv i.bad { color: #a00; }
-#join .row { display: flex; gap: 6px; flex-wrap: wrap; }
-#join .row button { flex: 1; font-size: 14px; }
-#join .editor { display: flex; flex-direction: column; gap: 6px; border-top: 2px solid #888; padding-top: 6px; }
-#join .editor[hidden] { display: none; }
-#pause { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #0008; z-index: 8;
-  font: 15px monospace; color: #404040; }
-#pause .panel { background: #c6c6c6; padding: 18px 22px; border: 3px solid; border-color: #fff #555 #555 #fff; box-shadow: 0 0 0 2px #000;
-  display: flex; flex-direction: column; gap: 10px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto; }
-#pause h2 { margin: 0; font-size: 20px; text-align: center; }
-#pause button { font: 16px monospace; padding: 8px; cursor: pointer; }
-#pause pre { margin: 6px 0 0; font: 12px/1.5 monospace; white-space: pre-wrap; color: #333; max-width: 900px; }
-#disconnected { position: fixed; left: 50%; top: 40%; transform: translateX(-50%); background: #000c; color: #fff; z-index: 30;
-  font: 18px monospace; padding: 14px 22px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
-#disconnected button { font: 16px monospace; padding: 6px 18px; cursor: pointer; }
 `;
 
 export function injectStyles(): void {
   const el = document.createElement("style");
-  el.textContent = CSS;
+  el.textContent = CSS + MENU_CSS; // menu: menuStyles.ts
   document.head.appendChild(el);
 }

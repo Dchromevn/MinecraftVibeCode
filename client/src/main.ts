@@ -3,7 +3,7 @@
 // Tham số URL: ?name= (vào luôn) ?pos=x,y,z (bắt đầu ở chế độ bay) ?look=yaw,pitch ?walk=1 ?fly=1
 // ?vd=8 ?nomsg=1 ?debug=1 ?nv=1 ?nocull=1
 import * as THREE from "three";
-import { PLAYER, World, WORLD, allBlockTextureNames, inSafeZone, isRideFood, NetherBiomes, TerrainSampler, netherSeed } from "../../shared/src/index.js";
+import { DIM, PLAYER, World, WORLD, allBlockTextureNames, inSafeZone, isRideFood, NetherBiomes, TerrainSampler, netherSeed } from "../../shared/src/index.js";
 import { STR } from "./strings.js";
 import { buildAtlas, loadTileTexture } from "./atlas.js";
 import { FlyCamera, lockPointer } from "./flyCamera.js";
@@ -27,12 +27,17 @@ import { PlayerController } from "./player/playerController.js";
 import { NetDebug } from "./ui/netDebug.js";
 import { ViewEffects } from "./player/viewEffects.js";
 import { Session } from "./game/session.js";
+import { desktopApi } from "./net/desktop.js";
 import { joinGame } from "./net/joinScreen.js";
+import { startDesktop } from "./net/startScreen.js";
 import { NetClient } from "./net/netClient.js";
 import { compassState, preloadIcons } from "./ui/itemIcons.js";
 import { injectStyles } from "./ui/styles.js";
 import { debugLines } from "./ui/debugHud.js";
 import { PauseMenu, backToMenu } from "./ui/pauseMenu.js";
+import { MenuShot } from "./ui/menuBackground.js";
+import { ThirdPerson } from "./player/thirdPerson.js";
+import { BRIGHTNESS_MAX_LIGHT, onSettingsChange, saveSettings, settings, showFpsLabel } from "./settings.js";
 const EXTRA_TEXTURES = [
   "crack_0", "crack_1", "crack_2", "crack_3", "crack_4", "snow_side", "rail_curved", "rail_t", "rail_cross", "bed_foot_side", "furnace_front_on",
   "chest_front_a", "chest_front_b", "farmland_wet", "bed_head_end", "bed_foot_end",
@@ -50,7 +55,8 @@ async function main(): Promise<void> {
   const params = new URLSearchParams(location.search);
   const hideMsg = params.get("nomsg") === "1";
   injectStyles();
-  const { conn, welcome, early } = await joinGame(params);
+  const desk = desktopApi(); // app desktop: màn hình Chơi một mình / Chơi nhiều người (?name= kiểm tra tự động: menu cũ)
+  const { conn, welcome, early } = await (desk && !params.get("name") ? startDesktop(desk, params) : joinGame(params));
   const seed = welcome.seed;
 
   hud.setCenter(STR.loadingTextures);
@@ -65,7 +71,7 @@ async function main(): Promise<void> {
   document.body.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(PLAYER.FOV, window.innerWidth / window.innerHeight, 0.1, 2000);
+  const camera = new THREE.PerspectiveCamera(settings.fov, window.innerWidth / window.innerHeight, 0.1, 2000);
   const sky = createSky(1000);
   scene.add(sky.mesh);
 
@@ -77,16 +83,15 @@ async function main(): Promise<void> {
   const pool = new WorkerPool(workers, { type: "init", seed, dim: welcome.dim, uvt: buildUvTable((n) => atlas.uv(n)), structures, customs: welcome.customs });
   const meshes = new ChunkMeshes(scene, atlas.texture, await loadTileTexture("water"));
   const chunks = new ChunkManager(world, pool, meshes);
-  const vd = Number(params.get("vd"));
-  if (Number.isFinite(vd) && vd > 0) {
-    chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, vd));
-  }
+  const vd = Number(params.get("vd")) || settings.viewDistance; // ?vd= (kiểm tra) hoặc Cài đặt
+  chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, vd));
   const effects = new ViewEffects(scene, camera, world);
   const applyViewDistance = (): void => {
     scene.fog = createFog(chunks.viewDistance * 16);
     effects.fogChanged();
   };
   applyViewDistance();
+  onSettingsChange(() => (chunks.viewDistance = settings.viewDistance, applyViewDistance())); // Cài đặt ở menu Esc
 
   // xuất phát ở điểm server chọn; ?pos= bắt đầu ở chế độ bay (để chụp / kiểm tra)
   const spawn = welcome.spawn;
@@ -107,7 +112,7 @@ async function main(): Promise<void> {
   Object.assign(player.state, { health: welcome.health, hunger: welcome.hunger, saturation: welcome.saturation });
   fly.applyRotation();
 
-  const arm = new FirstPersonArm(PLAYER.FOV, window.innerWidth / window.innerHeight);
+  const arm = new FirstPersonArm(settings.fov, window.innerWidth / window.innerHeight);
   const net = new NetClient(conn, { world, chunks, scene, atlas, camera, player, yaw: () => fly.yaw, pitch: () => fly.pitch, selfId: welcome.id });
   net.onCustoms = (list, cuts) => pool.broadcast({ type: "customs", list, cuts }); // (8a) nhà tự lưu mới
   const session = new Session(scene, atlas, world, player, fly, renderer.domElement, welcome.respawn, conn);
@@ -198,8 +203,8 @@ async function main(): Promise<void> {
     }
     if (e.code !== "BracketLeft" && e.code !== "BracketRight") return;
     const d = e.code === "BracketLeft" ? -1 : 1;
-    chunks.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, chunks.viewDistance + d));
-    applyViewDistance();
+    settings.viewDistance = Math.max(WORLD.VIEW_DISTANCE_MIN, Math.min(WORLD.VIEW_DISTANCE_MAX, chunks.viewDistance + d));
+    saveSettings(); // lưu + áp dụng (onSettingsChange)
   });
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -217,6 +222,9 @@ async function main(): Promise<void> {
     if (!on) [nv, meshes.culling] = [false, true];
   };
   // (9a) menu Esc: thả chuột mà không mở giao diện nào khác
+  const shot = new MenuShot(); // ảnh nền menu mở đầu
+  const tp = new ThirdPerson({ eye: camera, player, world, remote: net.remote, inv: session.inv, yaw: () => fly.yaw, pitch: () => fly.pitch, // F5 góc nhìn
+    swings: () => net.swings, blocking: () => interact.blocking, drawing: () => interact.bow.drawing, sleeping: () => sleep.open });
   const pause = new PauseMenu(() => lockPointer(renderer.domElement), () => (conn.close(), backToMenu()));
   const hudDeps = { camera, renderer, fps, sampler, day, netherBiome: nb, world, meshes, chunks, pool, seed, net, myName: welcome.name, mobs, player, netDebug, atlas };
   let prev = performance.now();
@@ -240,18 +248,20 @@ async function main(): Promise<void> {
     arrows.update(dt);
     day.update(dt, camera, effects.eyeIn() !== null);
     meshes.uniforms.uDaylight.value = mobs.daylight = day.daylight;
-    mobs.minLight = meshes.uniforms.uMinLight.value = Math.max(nv ? NIGHT_VISION : 0, day.minLight); // (10a) Vực Lửa: ánh sáng nền
+    mobs.minLight = meshes.uniforms.uMinLight.value = Math.max(nv ? NIGHT_VISION : 0, day.minLight, settings.brightness * BRIGHTNESS_MAX_LIGHT); // (10a) Vực Lửa: ánh sáng nền
     mobs.update(dt, camera.position, net.mobView());
     tnt.update(dt);
     particles.update(dt);
     session.update(dt);
+    const view = tp.frame(); // camera để vẽ (góc nhìn thứ 3: lùi ra sau / trước mặt); logic vẫn theo camera mắt
     net.update(dt);
-    sky.follow(camera);
-    meshes.update(now / 1000, camera, chunks.viewDistance, world);
+    sky.follow(view);
+    meshes.update(now / 1000, view, chunks.viewDistance, world);
     renderer.info.reset();
     renderer.clear();
-    renderer.render(scene, camera);
-    arm.visible = !player.flying;
+    renderer.render(scene, view);
+    shot.tick(now, renderer.domElement, day.dim === DIM.OVERWORLD && day.daylight > 0.8 && !effects.eyeIn() && !player.state.dead);
+    arm.visible = !player.flying && view === camera;
     arm.setHeld(interact.bow.drawing ? `icon:${session.inv.held?.item === "crossbow" ? "crossbow_pulling" : "bow_pull"}_${interact.bow.stage}` : (session.inv.held ? session.inv.held.item + (session.inv.held.ench || session.inv.held.item === "enchanted_book" ? "*" : "") : null), atlas);
     arm.drawing = interact.bow.drawing;
     arm.setOffhand(session.inv.offhand[0]?.item ?? null, atlas);
@@ -263,6 +273,7 @@ async function main(): Promise<void> {
       !player.state.dead && !document.getElementById("disconnected"));
     if (fps.tick(now) || firstFrame) {
       firstFrame = false;
+      showFpsLabel(fps.fps);
       hud.setInfo(admin.on ? debugLines(hudDeps, nv) : []); // (9a) người chơi thường: ẩn bảng thông số
       hud.setCenter(null);
     }

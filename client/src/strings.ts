@@ -7,7 +7,7 @@ export const STR = {
   clickToControl:
     "Bấm vào màn hình để điều khiển\n" +
     "WASD đi · Space nhảy / bơi lên / leo thang · Shift ngồi (khi bay: xuống) · nhấn đúp W chạy nhanh (khi bay: bay nhanh)\n" +
-    "F đổi tay trái / phải · Esc thả chuột / menu · [ ] tầm nhìn · (chế độ quản trị /admin: nhấn đúp Space bay, N nhìn đêm, F3, F4)\n" +
+    "F đổi tay trái / phải · Esc thả chuột / menu · [ ] tầm nhìn · F5 góc nhìn · (chế độ quản trị /admin: nhấn đúp Space bay, N nhìn đêm, F3, F4)\n" +
     "Chuột trái đánh người / sinh vật, giữ để đào · chuột phải giữ: giơ khiên / kéo cung · đặt / giữ để ăn / cuốc đất / mở bàn, rương, lò, cửa / ngủ (Shift: đặt lên) · 1–9 / lăn chuột chọn ô\n" +
     "Chuột phải vào động vật: cho ăn (lúa mì, cà rốt, hạt...) · kéo: tỉa lông cừu · xô: vắt sữa bò · bột xương: bón cây · trứng: ném\n" +
     "E túi đồ · Q vứt (Shift+Q cả chồng) · T chat · / lệnh",

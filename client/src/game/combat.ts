@@ -5,6 +5,7 @@
 import * as THREE from "three";
 import { COMBAT, HUNGER, attackStrength, raycast, weaponStats, type World } from "../../../shared/src/index.js";
 import type { ClientMobs } from "../mobs/clientMobs.js";
+import { settings } from "../settings.js";
 import type { RemotePlayers } from "../net/remotePlayers.js";
 import type { PlayerController } from "../player/playerController.js";
 
@@ -104,6 +105,6 @@ export class CombatClient {
     this.flashT = Math.max(0, this.flashT - dt);
     this.shakeT = Math.max(0, this.shakeT - dt);
     this.flash.style.opacity = String(this.flashT / FLASH_S);
-    if (this.shakeT > 0) this.d.camera.rotation.z = Math.sin((SHAKE_S - this.shakeT) * 40) * SHAKE_ROLL * (this.shakeT / SHAKE_S);
+    if (this.shakeT > 0 && settings.shake) this.d.camera.rotation.z = Math.sin((SHAKE_S - this.shakeT) * 40) * SHAKE_ROLL * (this.shakeT / SHAKE_S);
   }
 }

@@ -3,6 +3,7 @@ export const S = {
   title: "Voxel Survival",
   starting: "Đang khởi động thế giới…",
   saving: "Đang lưu thế giới…",
+  opening: "Đang mở thế giới…",
   failTitle: "Không khởi động được server",
   failBody: (err: string, log: string): string => `${err}\n\nNhật ký server: ${log}`,
   crashTitle: "Server đã dừng đột ngột",

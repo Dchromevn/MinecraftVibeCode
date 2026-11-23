@@ -22,6 +22,8 @@ const SHIELD_GRIP = 3; // đẩy khiên ra trước nắm tay 3 điểm ảnh (g
 const SHIELD_FRONT = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI); // mặt khiên (−Z) quay ra trước (+Z)
 const HURT_TINT = new THREE.Color(1, 0.45, 0.45);
 const WHITE = new THREE.Color(1, 1, 1);
+/** Mô hình chính mình (góc nhìn thứ 3): id riêng, không trùng id người chơi của server. */
+export const SELF_ID = -1;
 
 interface Remote {
   name: string;
@@ -41,6 +43,8 @@ interface Remote {
   at: { x: number; y: number; z: number; sneaking: boolean; dead: boolean } | null;
   skinMat: THREE.MeshBasicMaterial;
   hurtT: number;
+  /** Vẽ trễ bao lâu (ms): người khác NET.INTERP_DELAY_MS để nội suy; chính mình 0. */
+  delay: number;
 }
 
 function nameTag(name: string): THREE.Sprite {
@@ -80,11 +84,21 @@ export class RemotePlayers {
   constructor(private readonly scene: THREE.Scene, private readonly atlas: Atlas) {}
 
   get count(): number {
-    return this.map.size;
+    return this.map.size - (this.map.has(SELF_ID) ? 1 : 0);
   }
 
   names(): string[] {
-    return [...this.map.values()].map((r) => r.name);
+    return [...this.map].filter(([id]) => id !== SELF_ID).map(([, r]) => r.name);
+  }
+
+  /** (góc nhìn thứ 3) Mô hình chính mình theo trạng thái trên máy, mỗi khung một lần; null = ẩn (góc nhìn thứ nhất). */
+  setSelf(v: PlayerView | null): void {
+    if (!v) return this.leave(SELF_ID);
+    const r = this.ensure(SELF_ID);
+    r.tag.visible = false;
+    r.delay = 0;
+    r.buf.push({ t: performance.now(), v });
+    if (r.buf.length > 3) r.buf.shift();
   }
 
   private ensure(id: number, name = "?"): Remote {
@@ -97,7 +111,7 @@ export class RemotePlayers {
       model.root.add(tag);
       this.scene.add(model.root);
       const skinMat = (model.head.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial;
-      r = { name, model, tag, buf: [], heldKey: null, held: null, heldKind: "", offKey: null, off: null, offKind: "", swing: 0, swingT: 0, phase: 0, at: null, skinMat, hurtT: 0 };
+      r = { name, model, tag, buf: [], heldKey: null, held: null, heldKind: "", offKey: null, off: null, offKind: "", swing: 0, swingT: 0, phase: 0, at: null, skinMat, hurtT: 0, delay: NET.INTERP_DELAY_MS };
       this.map.set(id, r);
     }
     return r;
@@ -126,7 +140,7 @@ export class RemotePlayers {
   pick(o: readonly number[], d: readonly number[], max: number): { id: number; dist: number } | null {
     let best: { id: number; dist: number } | null = null;
     for (const [id, r] of this.map) {
-      if (!r.at || r.at.dead) continue;
+      if (!r.at || r.at.dead || id === SELF_ID) continue;
       const t = rayBox(o, d, playerHitBox(r.at.x, r.at.y, r.at.z, r.at.sneaking));
       if (t !== null && t <= max && (!best || t < best.dist)) best = { id, dist: t };
     }
@@ -214,10 +228,11 @@ export class RemotePlayers {
   }
 
   update(dt: number): void {
-    const at = performance.now() - NET.INTERP_DELAY_MS;
+    const now = performance.now();
     this.rides.clear();
     for (const r of this.map.values()) {
       if (!r.buf.length) continue;
+      const at = now - r.delay;
       // hai gói bao quanh thời điểm vẽ (không có thì dùng gói mới nhất)
       while (r.buf.length > 2 && r.buf[1]!.t <= at) r.buf.shift();
       const a = r.buf[0]!, b = r.buf[1] ?? a;

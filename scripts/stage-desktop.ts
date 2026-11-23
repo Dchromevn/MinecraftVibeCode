@@ -38,6 +38,7 @@ cpSync(dirname(clientDist), join(game, "client", "dist"), { recursive: true });
 cpSync(dirname(ws), join(game, "node_modules", "ws"), { recursive: true });
 const icon = join(root, "desktop", "resources", "icon.png"); // logo (npm run make-icon) cho cửa sổ app
 if (existsSync(icon)) cpSync(icon, join(appDir, "icon.png"));
+cpSync(join(root, "desktop", "src", "preload.cjs"), join(appDir, "preload.cjs")); // cầu nối trang game ↔ app (không qua tsc)
 
 const rootPkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { version: string };
 writeFileSync(join(appDir, "package.json"), JSON.stringify({

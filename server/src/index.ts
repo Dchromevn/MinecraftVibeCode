@@ -6,6 +6,7 @@ import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { WebSocketServer } from "ws";
 import { NET } from "../../shared/src/index.js";
+import { Access, lanMessage } from "./access.js";
 import { findPath, loadConfig } from "./config.js";
 import { Game } from "./game.js";
 import { GenPool } from "./genPool.js";
@@ -27,7 +28,14 @@ const TYPES: Record<string, string> = {
   ".json": "application/json", ".svg": "image/svg+xml", ".ico": "image/x-icon", ".wasm": "application/wasm",
 };
 
+const access = new Access(!!cfg.localOnly);
+
 const http = createServer((req, res) => {
+  if (!access.allowed(req.socket.remoteAddress)) {
+    res.writeHead(403);
+    res.end();
+    return;
+  }
   if ((req.url ?? "").split("?")[0] === NET.STATUS_PATH) {
     // (9a) trạng thái cho danh sách server ở menu chính (trang ở địa chỉ khác cũng đọc được)
     res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Cache-Control": "no-store" });
@@ -48,8 +56,9 @@ const http = createServer((req, res) => {
 
 const wss = new WebSocketServer({ noServer: true });
 http.on("upgrade", (req, socket, head) => {
-  if (!(req.url ?? "").startsWith(NET.WS_PATH)) return socket.destroy();
+  if (!(req.url ?? "").startsWith(NET.WS_PATH) || !access.allowed(req.socket.remoteAddress)) return socket.destroy();
   wss.handleUpgrade(req, socket, head, (ws) => {
+    access.track(ws, req.socket.remoteAddress);
     const out = (d: string | ArrayBuffer): void => void (ws.readyState === ws.OPEN && ws.send(d));
     const conn = {
       send: (d: string | ArrayBuffer): void => {
@@ -92,7 +101,9 @@ function stop(): void {
   process.exit(0);
 }
 for (const sig of ["SIGINT", "SIGTERM", "SIGBREAK"] as const) process.on(sig, stop);
-// app desktop: tắt qua kênh IPC (Windows không có tín hiệu tắt êm cho tiến trình con)
+// app desktop qua kênh IPC: tắt (Windows không có tín hiệu tắt êm cho tiến trình con); mở / đóng cho máy khác
 process.on("message", (m) => {
-  if (m === "shutdown") stop();
+  if (m === "shutdown") return stop();
+  const lan = lanMessage(m);
+  if (lan !== null) access.setOpen(lan);
 });

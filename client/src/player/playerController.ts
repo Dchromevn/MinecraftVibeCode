@@ -8,6 +8,7 @@ import {
   type CellReader, type FoodDef, type PlayerInput, type PlayerState, type World,
 } from "../../../shared/src/index.js";
 import type { FlyCamera } from "../flyCamera.js";
+import { settings } from "../settings.js";
 import { Prediction } from "./prediction.js";
 
 const MAX_STEPS_PER_FRAME = 8; // khung hình bị treo lâu thì bỏ bớt, không tua nhanh
@@ -24,6 +25,8 @@ export class PlayerController {
   private acc = 0;
   private walkDist = 0;
   private bobAmount = 0; // 0..1, mờ dần khi đứng yên / trên không
+  /** Vị trí chân đã nội suy (không lắc) — góc nhìn thứ 3 vẽ mô hình chính mình ở đây. */
+  readonly feet = new THREE.Vector3();
   private eye: number = PLAYER.EYE_HEIGHT; // hạ dần khi ngồi
   private needsSpawnFix = true; // khi chunk tải xong: đẩy lên nếu đang kẹt trong block
   private lastW = -1; // lúc nhấn W gần nhất (giây), để nhận nhấn đúp
@@ -201,10 +204,11 @@ export class PlayerController {
     const y = this.prev.y + (cur.y - this.prev.y) * a + this.smooth.y;
     const z = this.prev.z + (cur.z - this.prev.z) * a + this.smooth.z;
     const phase = this.walkDist * BOB_RATE;
-    const bob = PLAYER.VIEW_BOB * this.bobAmount;
+    const bob = settings.shake ? PLAYER.VIEW_BOB * this.bobAmount : 0; // Cài đặt: tắt rung / lắc màn hình
     const side = Math.sin(phase) * bob * 0.5; // lắc ngang theo hướng phải của camera
     const up = Math.abs(Math.cos(phase)) * bob;
     const yaw = this.fly.yaw;
+    this.feet.set(x, y, z);
     this.camera.position.set(x + Math.cos(yaw) * side, y + this.eye + up - bob * 0.5, z - Math.sin(yaw) * side);
   }
 }

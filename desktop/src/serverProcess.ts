@@ -18,6 +18,12 @@ export interface ServerPaths {
   userDir: string;
   /** In log server ra terminal (chạy thử bằng npm run desktop). */
   echo: boolean;
+  /** Mã bí mật của chủ máy: trang game gửi thay mật khẩu (vào thế giới của mình không cần tài khoản). */
+  ownerToken: string;
+  /** Thế giới cần mở (thư mục data/<id>, seed lúc tạo — "" = ngẫu nhiên); null = chưa chọn: server không lưu. */
+  world: { id: string; seed: string } | null;
+  /** Cổng muốn dùng (đổi thế giới: giữ cổng cũ để trang game cùng địa chỉ); bận thì thử cổng kế tiếp. */
+  port?: number;
 }
 
 export interface RunningServer {
@@ -27,6 +33,8 @@ export interface RunningServer {
   onExit: (cb: (code: number | null) => void) => void;
   /** Lưu thế giới rồi tắt. */
   stop: () => Promise<void>;
+  /** Mở (Tạo server) / đóng (Chơi một mình) cho máy khác vào. */
+  setLan: (open: boolean) => void;
 }
 
 function portFree(port: number): Promise<boolean> {
@@ -76,7 +84,7 @@ async function waitReady(port: number, child: ChildProcess): Promise<void> {
 export async function startServer(paths: ServerPaths): Promise<RunningServer> {
   mkdirSync(paths.userDir, { recursive: true });
   const cfg = userConfig(paths);
-  const port = await pickPort(cfg.port);
+  const port = await pickPort(paths.port ?? cfg.port);
   const logFile = join(paths.userDir, "server.log");
   const log = createWriteStream(logFile, { flags: "w" });
   const child = spawn(process.execPath, [join(paths.gameDir, "server", "dist", "server", "src", "index.js")], {
@@ -87,6 +95,9 @@ export async function startServer(paths: ServerPaths): Promise<RunningServer> {
       PORT: String(port),
       DATA_DIR: join(paths.userDir, "data"),
       CONFIG_FILE: cfg.file,
+      OWNER_TOKEN: paths.ownerToken,
+      ...(paths.world ? { WORLD: paths.world.id, ...(paths.world.seed ? { SEED: paths.world.seed } : {}) } : { NO_SAVE: "1" }),
+      ACCESS: "local", // lúc đầu chỉ máy này vào được
     },
     stdio: ["ignore", "pipe", "pipe", "ipc"],
     windowsHide: true,
@@ -110,6 +121,7 @@ export async function startServer(paths: ServerPaths): Promise<RunningServer> {
     port,
     logFile,
     onExit: (cb) => void exited.then((code) => !stopping && cb(code)),
+    setLan: (open) => void (child.connected && child.send({ t: "lan", open })),
     stop: async () => {
       if (child.exitCode !== null) return;
       stopping = true;

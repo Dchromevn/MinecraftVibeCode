@@ -1789,3 +1789,95 @@ Màu cỏ theo texture trong game (xanh đậm hơn ảnh mẫu một chút).
 - README.md mới: chơi bằng .exe, chạy từ mã nguồn, chơi cùng bạn bè, build .exe, lệnh, cấu hình, texture, cấu trúc thư mục.
 - CREDITS.md: thêm Electron / electron-builder, logo, texture được commit (repo riêng tư).
 - Code không di chuyển (client / server / shared / scripts / tests / tools / desktop đã đúng quy ước).
+
+### Màn hình đầu app desktop: Chơi một mình / Chơi nhiều người (2026-11-23) — chờ người dùng test
+
+Người dùng: menu cũ chỉ có danh sách server (phải dán link), không rõ cách tự tạo server và chia sẻ. Bản 0.0.2.
+- App desktop mở ra: **Chơi một mình** (chỉ máy này vào được) · **Chơi nhiều người** → **Tạo server** (mở cho máy khác, hiện
+  địa chỉ IP:cổng của mọi card mạng kèm nút Chép, có cả IP VPN ảo) / **Vào server của người khác** (danh sách server cũ, ẩn
+  "Server này", có nút Quay lại, chưa có server thì mở sẵn ô thêm). Hai lựa chọn đầu dùng chung thế giới trên máy.
+- Chủ máy vào không cần mật khẩu: app tạo mã chủ máy ngẫu nhiên mỗi lần mở (OWNER_TOKEN), chỉ trang game của app lấy được
+  (IPC kiểm tra trang gọi là http://localhost:<cổng>); server nhận mã này thay mật khẩu. Bạn bè vẫn tên + mật khẩu như cũ.
+- Server (ACCESS=local khi chạy trong app): mặc định chỉ nhận kết nối loopback (máy khác: HTTP 403, WebSocket bị cắt); app gửi
+  IPC {t:"lan", open} để mở / đóng; đóng thì ngắt luôn kết nối từ máy khác. npm run dev / host không đổi (luôn mở).
+- Menu Esc hiện "Bạn bè vào bằng: …" khi đang Tạo server. Bản web (trình duyệt) giữ menu cũ.
+- File mới: `server/src/access.ts`, `desktop/src/preload.cjs`, `desktop/src/lan.ts`, `client/src/net/desktop.ts`,
+  `client/src/net/startScreen.ts`. File sửa: `server/src/{config,game,index}.ts`, `desktop/src/{main,serverProcess}.ts`,
+  `scripts/stage-desktop.ts`, `client/src/{main,stringsMenu}.ts`, `client/src/net/joinScreen.ts`, `client/src/ui/{pauseMenu,styles}.ts`,
+  README.md, package.json (0.0.2).
+- Đã kiểm (điều khiển app thật qua CDP, thư mục dữ liệu riêng, cổng 8081 vì bản cài của người dùng đang chạy 8080): màn hình đầu
+  đúng; Chơi một mình → địa chỉ LAN bị 403, localhost 200; Tạo server → hiện 192.168.1.5:8081, LAN 200; Quay lại → 403;
+  chủ máy vào không mật khẩu; bạn bè vào qua địa chỉ LAN được; menu Esc hiện địa chỉ; đóng cửa sổ vẫn lưu. typecheck, build, test 669 đạt.
+- Chưa kiểm: hai máy thật khác nhau; Windows Firewall trên máy chủ (nếu lần đầu đã bấm Cancel thì phải tự cho phép trong
+  Windows Defender Firewall); bản 0.0.1 vào server 0.0.2 vẫn được (cùng PROTOCOL_VERSION) nhưng không có màn hình mới.
+- Chơi qua Internet chưa tích hợp vào app (hướng dẫn VPN ảo / cloudflared trong màn hình Tạo server và README).
+
+### Màn hình mở đầu kiểu menu game + Cài đặt (2026-11-23) — chờ người dùng test
+
+Người dùng gửi ảnh menu mở đầu của Minecraft, muốn giao diện mở đầu như vậy + có Cài đặt. Làm theo bố cục (logo, dòng chữ
+vàng, nút xếp dọc, nền mờ, phiên bản ở góc) nhưng logo / chữ của game này, không chép logo / dòng bản quyền Mojang, không có
+Mods / Realms. Người dùng chọn: nền là ảnh mờ tĩnh; Cài đặt gồm tầm nhìn, FOV, độ nhạy chuột, độ sáng, hiện FPS, toàn màn hình, rung.
+- Màn hình mở đầu (app desktop): logo "VOXEL SURVIVAL" chữ khối 5×7 tô texture đá (vẽ canvas), dòng chữ vàng ngẫu nhiên
+  (`STR_MENU.splashes`), nút Chơi một mình / Chơi nhiều người / Cài đặt / Thoát game, "Voxel Survival <bản>" góc dưới
+  (`__APP_VERSION__` từ package.json qua Vite define). Bản web giữ menu server cũ (cũng có nền mờ).
+- Nền: mỗi phiên chơi, sau 20 giây, lúc ban ngày ở thế giới thường, không ở dưới nước, còn sống → chụp khung hình, thu 960 px,
+  làm mờ 4 px, lưu localStorage (`voxel.menuBg`, ~40 KB JPEG). Chưa có ảnh: nền trời chuyển màu.
+- Cài đặt (`client/src/settings.ts`, lưu localStorage `voxel.settings`; màn hình `ui/settingsScreen.ts`, mở từ màn hình mở đầu
+  và nút mới "Cài đặt" trong menu Esc): tầm nhìn 2–16 (phím [ ] cũng lưu vào đây), FOV 50–110 (chạy nhanh / kéo cung vẫn
+  đổi theo tỉ lệ), độ nhạy chuột 10–200%, độ sáng 0–100% (nâng ánh sáng tối thiểu tới 0.25), hiện FPS (góc trên phải), rung /
+  lắc màn hình (lắc khi đi + rung khi trúng đòn), toàn màn hình (F11 trong app cũng dùng cách này để khớp nút).
+- File mới: `client/src/settings.ts`, `client/src/ui/settingsScreen.ts`, `client/src/ui/menuBackground.ts`, `client/src/globals.d.ts`.
+  File sửa: `client/src/{main,flyCamera,stringsMenu}.ts`, `client/src/net/{startScreen,joinScreen}.ts`, `client/src/player/{viewEffects,
+  playerController}.ts`, `client/src/game/combat.ts`, `client/src/ui/{pauseMenu,styles}.ts`, `client/vite.config.ts`, `desktop/src/main.ts`.
+- Đã kiểm (app thật qua CDP, chụp ảnh màn hình): màn hình mở đầu, Cài đặt, menu Esc có nút Cài đặt; vào thế giới 26 giây → ảnh
+  nền lưu được, về menu thấy nền mờ thế giới vừa chơi. typecheck, build, test 669 đạt.
+- Chưa kiểm bằng tay: cảm giác kéo FOV / độ nhạy / độ sáng khi chơi; tắt rung; FPS; toàn màn hình. Cài đặt và ảnh nền lưu theo
+  địa chỉ trang (cổng) — app phải đổi cổng (8080 bận) thì dùng bộ cài đặt riêng.
+
+### Các menu sau màn hình mở đầu cùng kiểu (2026-11-23) — chờ người dùng test
+
+Người dùng: các menu / giao diện sau màn hình mở đầu cũng làm giống kiểu đó.
+- CSS menu chuyển sang `client/src/ui/menuStyles.ts` (styles.ts gọn lại): chữ trắng đổ bóng; nút xám kiểu khối (rê chuột sáng
+  xanh, nút tắt xám tối) cho mọi nút ở #join / #settings / #pause / #disconnected / #death; ô nhập nền đen viền xám; khung danh
+  sách server / ô địa chỉ / ô thêm server nền tối trong suốt, server đang chọn viền trắng, trạng thái xanh / đỏ; khung menu
+  (Chơi nhiều người, Tạo server, Chơi một mình, danh sách server) có lớp tối mờ phía sau cho dễ đọc trên nền ảnh.
+- Cài đặt: thanh kéo kiểu nút dài (chữ nằm giữa, khối kéo nhỏ); nút Xong ở giữa. Menu Esc: nút rộng 400 px, địa chỉ cho bạn bè
+  màu vàng, bảng phím trong khung tối. Màn hình chết / mất kết nối: nút cùng kiểu.
+- Danh sách server trong app: tiêu đề "Vào server của người khác" (bản web vẫn "Voxel Survival").
+- Đã kiểm: chụp màn hình qua CDP — Chơi nhiều người, Tạo server, danh sách server (trống + có server), Cài đặt, menu Esc.
+  Màn hình chết / mất kết nối chưa chụp (chỉ đổi CSS). typecheck, build, test 669 đạt.
+
+### Góc nhìn thứ 3 — F5 (2026-11-23) — chờ người dùng test
+
+Người dùng: chưa có góc nhìn thứ 3 (sau lưng + nhìn chính diện từ trước mặt) như game gốc.
+- F5 đổi vòng: góc nhìn thứ nhất → sau lưng → trước mặt (`client/src/player/thirdPerson.ts`). Camera mắt giữ nguyên cho mọi
+  logic (tia ngắm đào / đặt / đánh, nạp chunk, mắt trong nước, gửi vị trí); góc nhìn thứ 3 chỉ thêm camera để VẼ: lùi / tiến
+  theo hướng nhìn tối đa 4 block, dò 5 tia (giữa + 4 góc lệch 0.1) dừng trước block có va chạm (cách 0.2), trước mặt thì quay
+  lại nhìn nhân vật. Ẩn tay góc nhìn thứ nhất và tâm ngắm khi ở góc nhìn thứ 3. F5 không tải lại trang (chặn mặc định).
+- Mô hình chính mình: `RemotePlayers.setSelf()` (id −1, không trễ nội suy, không bảng tên, không bị chọn khi đánh) — cùng mô hình
+  người chơi khác: đồ trên hai tay, giáp, ngồi, giơ khiên, kéo cung, vung tay, nằm giường, cưỡi thú. Vị trí chân lấy từ
+  `PlayerController.feet` (nội suy, không lắc); đang bay thì theo camera.
+- main.ts: sky / meshes.update (culling) / renderer.render dùng camera vẽ. Hướng dẫn phím (menu Esc) thêm "F5 góc nhìn".
+- Đã kiểm (app thật qua CDP): nhấn F5 → sau lưng thấy nhân vật từ phía sau, F5 lần nữa → thấy mặt nhân vật; trang không tải lại;
+  về góc nhìn thứ nhất tâm ngắm hiện lại. typecheck, build, test đạt.
+- Chưa kiểm bằng tay: camera chạm tường / trong hang hẹp, đang cưỡi thú, nằm giường, kéo cung / giơ khiên nhìn từ ngoài.
+
+### Nhiều thế giới + server riêng (2026-11-23) — chờ người dùng test
+
+Người dùng báo lỗi: "Tạo server" vẫn mở thế giới đang chơi một mình; muốn Tạo server luôn là server mới, và Chơi một mình
+tạo được nhiều thế giới (trước chỉ có một).
+- App giữ danh sách thế giới `worlds.json` (thư mục dữ liệu người dùng), mỗi thế giới một thư mục `data/<id>`; hai loại tách
+  riêng: "solo" (Chơi một mình) và "server" (Tạo server). Thư mục cũ chưa có trong danh sách (data/world1 của bản trước) được
+  nhận làm thế giới chơi một mình, giữ nguyên thư mục (không di chuyển / ghi đè).
+- Chơi một mình → danh sách thế giới (tên, chơi lần cuối, seed) + ô tên người chơi: Chơi / Tạo thế giới mới (tên mặc định
+  "Thế giới N", seed tùy chọn, tạo xong vào luôn) / Xóa (hỏi lại; thư mục vào Thùng rác qua shell.trashItem) / Quay lại.
+  Chơi nhiều người → Tạo server → danh sách server của bạn (trống thì vào thẳng Tạo server mới) → mở → màn hình "Server đang
+  mở" (địa chỉ + Vào thế giới / Đóng server).
+- Một server mỗi lúc: chọn thế giới khác thế giới đang chạy → app lưu + tắt server, chạy lại với WORLD=<id> (SEED nếu có)
+  trên cùng cổng, tải lại trang với ?play=solo|host để trang vào tiếp; xóa thế giới đang chạy → tắt, xóa, chạy server
+  "chưa chọn" (NO_SAVE=1: không ghi đĩa), trang về ?screen=. Mở app: chạy sẵn thế giới chơi gần nhất (chưa có: NO_SAVE).
+- File mới: `desktop/src/{worlds,gameHost}.ts`, `client/src/net/worldList.ts`. File sửa: `desktop/src/{main,serverProcess,
+  strings,preload.cjs}`, `server/src/config.ts` (NO_SAVE), `client/src/net/{startScreen,desktop}.ts`, `client/src/stringsMenu.ts`, README.
+- Đã kiểm (app thật qua CDP, thư mục dữ liệu riêng): danh sách một mình có world1; tạo "Thế giới 2" seed hello → server đổi
+  sang thế giới mới seed hello, tự vào game; Tạo server → danh sách trống → "Server 1" (thế giới mới) → hiện địa chỉ; danh sách
+  một mình không có Server 1; xóa Thế giới 2 → khỏi danh sách, thư mục vào Thùng rác. typecheck, build đạt.

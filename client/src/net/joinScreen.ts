@@ -5,12 +5,14 @@
 import { NET, SAVE } from "../../../shared/src/index.js";
 import { STR } from "../strings.js";
 import { STR_MENU as M } from "../stringsMenu.js";
+import { applyMenuBackground } from "../ui/menuBackground.js";
 import { Connection } from "./connection.js";
 import { fetchStatus, loadSelected, loadServers, mixedBlocked, normalizeUrl, saveSelected, saveServers, wsUrl, type ServerEntry, type ServerStatus } from "./serverList.js";
 
 const NAME_KEY = "voxel.name";
 
-function store(name: string): void {
+/** Nhớ tên người chơi lần trước (màn hình đầu của app desktop dùng chung). */
+export function storeName(name: string): void {
   try {
     localStorage.setItem(NAME_KEY, name);
   } catch {
@@ -18,7 +20,7 @@ function store(name: string): void {
   }
 }
 
-function remembered(): string {
+export function rememberedName(): string {
   try {
     return localStorage.getItem(NAME_KEY) ?? "";
   } catch {
@@ -34,19 +36,23 @@ function statusText(s: ServerStatus | undefined): string {
   return s.state === "version" ? M.statusVersion : s.state === "mixed" ? M.statusMixed : M.statusDown;
 }
 
-export function joinGame(params: URLSearchParams): ReturnType<typeof Connection.open> {
-  const auto = params.get("name");
+/** showThis = có dòng "Server này" (bản web; app desktop ẩn vì đã có "Chơi một mình" / "Tạo server"); onBack = nút Quay lại. */
+export interface JoinOptions { showThis?: boolean; onBack?: () => void }
+
+export function joinGame(params: URLSearchParams, opts: JoinOptions = {}): ReturnType<typeof Connection.open> {
+  const auto = params.get("name"), showThis = opts.showThis ?? true;
   const box = document.createElement("div");
   box.id = "join";
-  box.innerHTML = `<div class="panel menu"><h2>${STR.title}</h2><div class="sub">${M.servers}</div><div class="list"></div>
+  box.innerHTML = `<div class="panel menu"><h2>${showThis ? STR.title : M.joinOther}</h2><div class="sub">${M.servers}</div><div class="list"></div>
     <div class="row"><button data-a="add">${M.add}</button><button data-a="edit">${M.edit}</button><button data-a="remove">${M.remove}</button>
-    <button data-a="refresh">${M.refresh}</button></div>
+    <button data-a="refresh">${M.refresh}</button>${opts.onBack ? `<button data-a="back">${M.back}</button>` : ""}</div>
     <div class="editor" hidden><label>${M.serverName}</label><input class="sname" maxlength="32"><label>${M.serverUrl}</label>
     <input class="surl" maxlength="200" spellcheck="false"><div class="row"><button data-a="save">${M.save}</button>
     <button data-a="cancel">${M.cancel}</button></div></div>
     <label>${STR.joinName}</label><input class="pname" maxlength="${NET.NAME_MAX}" spellcheck="false"><label>${STR.joinPassword}</label>
     <input class="ppass" type="password" maxlength="${SAVE.PASSWORD_MAX}"><button class="go">${M.join}</button><div class="err"></div>
     <div class="tip">${STR.joinHint}<br>${M.menuTip}</div></div>`;
+  applyMenuBackground(box);
   document.body.appendChild(box);
   const q = <T extends HTMLElement>(s: string): T => box.querySelector<T>(s)!;
   const list = q<HTMLDivElement>(".list"), editor = q<HTMLDivElement>(".editor"), err = q<HTMLDivElement>(".err");
@@ -54,10 +60,11 @@ export function joinGame(params: URLSearchParams): ReturnType<typeof Connection.
   const input = q<HTMLInputElement>(".pname"), pass = q<HTMLInputElement>(".ppass"), btn = q<HTMLButtonElement>(".go");
 
   let servers = loadServers();
-  const all = (): ServerEntry[] => [{ name: M.thisServer, url: "" }, ...servers];
+  const all = (): ServerEntry[] => (showThis ? [{ name: M.thisServer, url: "" }, ...servers] : servers);
+  const fallback = (): string => (showThis ? "" : servers[0]?.url ?? "");
   const fromParam = normalizeUrl(params.get("server") ?? "");
   let selected = fromParam ?? (auto ? "" : loadSelected()); // ?name= (kiểm tra tự động): vào "Server này" trừ khi có ?server=
-  if (!all().some((e) => e.url === selected)) selected = "";
+  if (!all().some((e) => e.url === selected)) selected = fallback();
   const status = new Map<string, ServerStatus>();
   let editing: number | null = null; // chỉ số trong servers; -1 = đang thêm mới
 
@@ -125,11 +132,15 @@ export function joinGame(params: URLSearchParams): ReturnType<typeof Connection.
       if (i < 0 || !confirm(fmt(M.confirmRemove, servers[i]!.name))) return;
       servers = servers.filter((_, j) => j !== i);
       saveServers(servers);
-      selected = "";
+      selected = fallback();
       saveSelected(selected);
       render();
     },
     refresh,
+    back: () => {
+      box.remove();
+      opts.onBack?.();
+    },
     save: saveEditor,
     cancel: () => {
       editor.hidden = true;
@@ -140,7 +151,7 @@ export function joinGame(params: URLSearchParams): ReturnType<typeof Connection.
   box.querySelectorAll<HTMLButtonElement>("[data-a]").forEach((b) => b.addEventListener("click", () => actions[b.dataset.a!]?.()));
   for (const el of [sname, surl]) el.addEventListener("keydown", (e) => e.key === "Enter" && saveEditor());
 
-  input.value = auto ?? remembered();
+  input.value = auto ?? rememberedName();
   if (auto) pass.value = params.get("pass") ?? "test";
   let go: () => void = () => undefined;
   const result: ReturnType<typeof Connection.open> = new Promise((resolve) => {
@@ -148,13 +159,14 @@ export function joinGame(params: URLSearchParams): ReturnType<typeof Connection.
       if (btn.disabled) return;
       const name = input.value.trim();
       if (!/^[A-Za-z0-9_]+$/.test(name)) return void (err.textContent = STR.joinErrors.name ?? "");
+      if (!showThis && !selected) return void (err.textContent = M.errPickServer);
       if (pass.value.length < SAVE.PASSWORD_MIN) return void (err.textContent = STR.joinErrors.pwshort ?? "");
       if (mixedBlocked(selected)) return void (err.textContent = M.statusMixed);
       btn.disabled = true;
       err.textContent = STR.joinConnecting;
       Connection.open(wsUrl(selected), name, pass.value).then(
         (r) => {
-          store(name);
+          storeName(name);
           box.remove();
           resolve(r);
         },
@@ -169,6 +181,7 @@ export function joinGame(params: URLSearchParams): ReturnType<typeof Connection.
   btn.addEventListener("click", () => go());
   for (const el of [input, pass]) el.addEventListener("keydown", (e) => e.key === "Enter" && go());
   refresh();
+  if (!showThis && !servers.length) openEditor(-1); // app desktop, chưa có server nào: mở luôn ô thêm server
   if (auto) go();
   else (input.value ? pass : input).focus();
   return result;

@@ -2,8 +2,8 @@
 // Cũng giữ chuột nhìn (pointer lock) và trạng thái phím cho bộ điều khiển người chơi.
 import * as THREE from "three";
 import { PLAYER } from "../../shared/src/index.js";
+import { BASE_SENSITIVITY, settings } from "./settings.js";
 
-const SENSITIVITY = 0.002;
 const SPEED = PLAYER.FLY_SPEED; // block/giây
 const FAST_MULT = 3; // giữ Shift
 
@@ -34,8 +34,9 @@ export class FlyCamera {
     });
     document.addEventListener("mousemove", (e) => {
       if (!this.locked) return;
-      this.yaw -= e.movementX * SENSITIVITY;
-      this.pitch -= e.movementY * SENSITIVITY;
+      const k = BASE_SENSITIVITY * settings.sensitivity; // Cài đặt: độ nhạy chuột
+      this.yaw -= e.movementX * k;
+      this.pitch -= e.movementY * k;
       const lim = Math.PI / 2 - 0.001;
       this.pitch = Math.max(-lim, Math.min(lim, this.pitch));
     });

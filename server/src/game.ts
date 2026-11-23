@@ -238,7 +238,8 @@ export class Game {
     if (typeof name !== "string" || !NAME_RE.test(name)) return reject("name");
     if (typeof password !== "string" || password.length < SAVE.PASSWORD_MIN || password.length > SAVE.PASSWORD_MAX) return reject("pwshort");
     if (this.online().some((o) => o.name.toLowerCase() === name.toLowerCase())) return reject("taken");
-    if (this.storage.login(name, password) === "wrong") return reject("password");
+    const owner = !!this.cfg.ownerToken && password === this.cfg.ownerToken; // app desktop: chủ máy vào thế giới của mình
+    if (!owner && this.storage.login(name, password) === "wrong") return reject("password");
     const p = new ServerPlayer(this.nextId++, name, conn, this.isAdmin(name));
     const back = this.storage.loadPlayer(name);
     if (back) {

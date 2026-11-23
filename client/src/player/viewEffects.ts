@@ -2,6 +2,7 @@
 // nước / dung nham.
 import * as THREE from "three";
 import { ARCHERY, B, PLAYER, PORTAL, type World } from "../../../shared/src/index.js";
+import { settings } from "../settings.js";
 
 const WATER_TINT = "rgba(24, 64, 150, 0.38)";
 const LAVA_TINT = "rgba(210, 80, 10, 0.7)";
@@ -10,7 +11,7 @@ const LAVA_FOG = { color: new THREE.Color(0xc04008), near: 0.1, far: 2.5 };
 
 export class ViewEffects {
   private readonly overlay: HTMLDivElement;
-  private fov = PLAYER.FOV;
+  private fov = settings.fov;
   private readonly normalFog = { color: new THREE.Color(), near: 0, far: 0 };
   private wasInside = false;
   private t = 0;
@@ -40,7 +41,7 @@ export class ViewEffects {
   update(dt: number, sprinting: boolean, zoom = 0, nausea = false): void {
     this.t += dt;
     const wobble = nausea ? 1 + Math.sin(this.t * 2.5) * 0.15 : 1; // (7b) buồn nôn: góc nhìn co giãn
-    const target = PLAYER.FOV * (sprinting ? PLAYER.SPRINT_FOV_FACTOR : 1) * (1 - ARCHERY.ZOOM * zoom * zoom) * wobble;
+    const target = settings.fov * (sprinting ? PLAYER.SPRINT_FOV_FACTOR : 1) * (1 - ARCHERY.ZOOM * zoom * zoom) * wobble;
     this.fov += (target - this.fov) * Math.min(1, dt * 10);
     if (Math.abs(this.camera.fov - this.fov) > 0.01) {
       this.camera.fov = this.fov;

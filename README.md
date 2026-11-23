@@ -17,7 +17,7 @@ Tải ở mục **Releases** của repo:
 
 - Lần đầu chạy, Windows SmartScreen có thể báo "Unknown publisher" (app chưa ký số): bấm **More info → Run anyway**.
 - Windows Firewall hỏi quyền mạng: cho phép thì bạn bè trong mạng LAN mới vào được.
-- Thế giới, `config.json`, `server.log` nằm ở `%APPDATA%\Voxel Survival\`.
+- Thế giới (`data\<id>`, danh sách trong `worlds.json`), `config.json`, `server.log` nằm ở `%APPDATA%\Voxel Survival\`.
 - Phím của app: **F11** toàn màn hình, **F12** công cụ dò lỗi.
 
 ## Chạy từ mã nguồn
@@ -34,9 +34,25 @@ npm run host         # build rồi chạy server: mở http://localhost:8080
 
 ### Chơi cùng bạn bè
 
-- Cùng mạng LAN: người làm chủ mở game (app hoặc `npm run host`); người khác mở `http://<IP-máy-chủ>:8080`
-  hoặc thêm địa chỉ đó vào danh sách server ở menu chính.
-- Qua Internet: `npm run share` (cần `cloudflared.exe` đặt ở thư mục gốc) tạo đường link tạm để gửi cho bạn bè.
+App desktop mở ra có hai lựa chọn:
+
+- **Chơi một mình**: danh sách thế giới trên máy bạn (tạo mới với tên + seed tùy chọn, chơi, xóa — xóa thì thư mục vào
+  Thùng rác); chỉ máy bạn vào được.
+- **Chơi nhiều người**:
+  - **Tạo server**: danh sách server của bạn — tách riêng khỏi thế giới chơi một mình; **Tạo server mới** là một thế giới
+    mới. Mở server thì màn hình hiện địa chỉ (ví dụ `192.168.1.5:8080`, có nút Chép)
+    để gửi bạn bè. Menu Esc trong game cũng hiện lại địa chỉ này. Chủ máy không cần mật khẩu.
+  - **Vào server của người khác**: bấm **Thêm server**, dán địa chỉ bạn bè gửi, rồi vào bằng tên + mật khẩu tự đặt
+    (lần đầu vào là tạo tài khoản trên server đó).
+
+Đổi sang thế giới khác thì app lưu thế giới cũ rồi khởi động lại server (vài giây). Mọi người phải cùng phiên bản game.
+
+- Cùng Wi-Fi / mạng LAN: dùng địa chỉ `192.168…`. Lần đầu Windows Firewall hỏi quyền mạng thì bấm **Allow**.
+- Khác mạng: cả nhóm cài cùng một VPN ảo (Radmin VPN, Tailscale, ZeroTier…) rồi dùng địa chỉ của VPN đó
+  (màn hình Tạo server liệt kê cả địa chỉ VPN); hoặc chạy `cloudflared tunnel --url http://localhost:8080` rồi gửi link
+  `https://….trycloudflare.com`.
+- Bản web (`npm run host`): người khác mở `http://<IP-máy-chủ>:8080` hoặc thêm địa chỉ đó vào danh sách server;
+  `npm run share` (cần `cloudflared.exe` ở thư mục gốc) tạo link tạm qua Internet.
 
 ### Build file .exe
 
